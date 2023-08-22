@@ -1,0 +1,3 @@
+class TwoNowExtractor extends VideoExtractor {
+  
+}
