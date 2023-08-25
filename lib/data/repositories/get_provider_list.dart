@@ -18,7 +18,8 @@ class GetProviderListRepositoryImpl implements GetProviderListRepository {
       case ProviderType.anime:
         return AnimeProviders().providers;
       case ProviderType.movie:
-        return MovieProviders().providers;
+        return  
+        MovieProviders().providers;
 
       default:
         return {};

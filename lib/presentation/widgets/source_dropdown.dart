@@ -61,6 +61,7 @@ class SourceDropDown extends StatelessWidget {
                   onChanged: (value) {
                     if (value != null && value != state.provider) {
                       bloc.add(SourceDropDownOnSelected(provider: value));
+                      
                     }
                   },
                   iconSize: 35,

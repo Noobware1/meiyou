@@ -1,13 +1,747 @@
-import 'dart:convert';
-import 'dart:io';
 import 'package:meiyou/data/models/media_details.dart';
 import 'package:meiyou/domain/entities/media_details.dart';
 
-MediaDetailsEntity readMedia() {
+MediaDetailsEntity readMedia([int num = 1]) {
   // final File file = File('assets/lol.json');
   // final string = await file.readAsString();
-  return MediaDetails.fromAnilist(json);
+  return num == 1
+      ? MediaDetails.fromAnilist(json)
+      : MediaDetails.fromTMDB(json2, 'tv');
 }
+
+const json2 = {
+	"adult": false,
+	"backdrop_path": "/70YdbMELM4b8x8VXjlubymb2bQ0.jpg",
+	"created_by": [
+		{
+			"id": 1223198,
+			"credit_id": "58e43eb492514127f6026873",
+			"name": "Moira Walley-Beckett",
+			"gender": 1,
+			"profile_path": "/1sRNcxMZVsVcY6NFNQzASJuR8By.jpg"
+		}
+	],
+	"episode_run_time": [
+		47
+	],
+	"first_air_date": "2017-03-19",
+	"genres": [
+		{
+			"id": 18,
+			"name": "Drama"
+		},
+		{
+			"id": 10751,
+			"name": "Family"
+		}
+	],
+	"homepage": "http://www.cbc.ca/anne/",
+	"id": 70785,
+	"in_production": false,
+	"languages": [
+		"en"
+	],
+	"last_air_date": "2019-11-24",
+	"last_episode_to_air": {
+		"id": 1985358,
+		"name": "The Better Feeling of My Heart",
+		"overview": "As the students prepare to depart for Queen’s College, Gilbert takes a final chance. Marilla intervenes on Diana’s behalf. Anne embraces her future but finds that change also brings loss. Elijah returns to Avonlea. Anne has a fateful encounter in Charlottetown. Series finale.",
+		"vote_average": 8.2,
+		"vote_count": 8,
+		"air_date": "2019-11-24",
+		"episode_number": 10,
+		"episode_type": "finale",
+		"production_code": "",
+		"runtime": 45,
+		"season_number": 3,
+		"show_id": 70785,
+		"still_path": "/vD9TdKbzOZTFbqrlEu2JZZVtvDD.jpg"
+	},
+	"name": "Anne with an E",
+	"next_episode_to_air": null,
+	"networks": [
+		{
+			"id": 23,
+			"logo_path": "/cw5WW6cc9UANam4A6o1BDua9njN.png",
+			"name": "CBC Television",
+			"origin_country": "CA"
+		}
+	],
+	"number_of_episodes": 27,
+	"number_of_seasons": 3,
+	"origin_country": [
+		"CA"
+	],
+	"original_language": "en",
+	"original_name": "Anne with an E",
+	"overview": "A coming-of-age story about an outsider who, against all odds and numerous challenges, fights for love and acceptance and for her place in the world. The series centers on a young orphaned girl in the late 1890’s, who, after an abusive childhood spent in orphanages and the homes of strangers, is mistakenly sent to live with an elderly woman and her aging brother. Over time, 13-year-old Anne will transform their lives and eventually the small town in which they live with her unique spirit, fierce intellect and brilliant imagination.",
+	"popularity": 117.618,
+	"poster_path": "/6P6tXhjT5tK3qOXzxF9OMLlG7iz.jpg",
+	"production_companies": [
+		{
+			"id": 88009,
+			"logo_path": null,
+			"name": "Northwood Entertainment",
+			"origin_country": ""
+		},
+		{
+			"id": 152825,
+			"logo_path": null,
+			"name": "Northwood Pictures",
+			"origin_country": ""
+		}
+	],
+	"production_countries": [
+		{
+			"iso_3166_1": "CA",
+			"name": "Canada"
+		}
+	],
+	"seasons": [
+		{
+			"air_date": "2017-03-19",
+			"episode_count": 7,
+			"id": 86320,
+			"name": "Season 1",
+			"overview": "A young orphan's arrival in Avonlea affects the hearts and minds of everyone she meets, beginning with the pair of aging siblings who take her in.",
+			"poster_path": "/lqoGVD3FCahM9faB2SWdpae9Ejt.jpg",
+			"season_number": 1,
+			"vote_average": 8.5
+		},
+		{
+			"air_date": "2018-07-06",
+			"episode_count": 10,
+			"id": 104920,
+			"name": "Season 2",
+			"overview": "Anne's beloved world of Green Gables becomes a much bigger place, with new faces and heartfelt lessons about love, loss and growing up.",
+			"poster_path": "/7bjv63bF07F2SiN6PoJHYqmYRoR.jpg",
+			"season_number": 2,
+			"vote_average": 8.9
+		},
+		{
+			"air_date": "2019-09-22",
+			"episode_count": 10,
+			"id": 131544,
+			"name": "Season 3",
+			"overview": "",
+			"poster_path": "/hSjv6QkGknuJrB8LTjYFv5SPjrr.jpg",
+			"season_number": 3,
+			"vote_average": 8.9
+		}
+	],
+	"spoken_languages": [
+		{
+			"english_name": "English",
+			"iso_639_1": "en",
+			"name": "English"
+		}
+	],
+	"status": "Canceled",
+	"tagline": "Welcome back to Green Gables.",
+	"type": "Scripted",
+	"vote_average": 8.701,
+	"vote_count": 4356,
+	"credits": {
+		"cast": [
+			{
+				"adult": false,
+				"gender": 1,
+				"id": 1780007,
+				"known_for_department": "Acting",
+				"name": "Amybeth McNulty",
+				"original_name": "Amybeth McNulty",
+				"popularity": 25.274,
+				"profile_path": "/4fXgRoQhCWUe79U1J6uEcxpxPgj.jpg",
+				"character": "Anne Shirley",
+				"credit_id": "58ced80f9251415a45027327",
+				"order": 0
+			},
+			{
+				"adult": false,
+				"gender": 1,
+				"id": 11855,
+				"known_for_department": "Acting",
+				"name": "Geraldine James",
+				"original_name": "Geraldine James",
+				"popularity": 24.605,
+				"profile_path": "/wnqmn77oKtHiZFZuwxU2HWSAILF.jpg",
+				"character": "Marilla Cuthbert",
+				"credit_id": "58d885e19251411f9006336e",
+				"order": 1
+			},
+			{
+				"adult": false,
+				"gender": 2,
+				"id": 91600,
+				"known_for_department": "Acting",
+				"name": "R. H. Thomson",
+				"original_name": "R. H. Thomson",
+				"popularity": 16.133,
+				"profile_path": "/j9RIw8mC5CpMRToDfUCzFgPGDhK.jpg",
+				"character": "Matthew Cuthbert",
+				"credit_id": "58d885fcc3a36812670599ea",
+				"order": 2
+			},
+			{
+				"adult": false,
+				"gender": 2,
+				"id": 1485770,
+				"known_for_department": "Acting",
+				"name": "Lucas Jade Zumann",
+				"original_name": "Lucas Jade Zumann",
+				"popularity": 24.77,
+				"profile_path": "/7ocQJdexgzKx4Yqk0qs9fChIniV.jpg",
+				"character": "Gilbert Blythe",
+				"credit_id": "58d88658c3a368128906300f",
+				"order": 5
+			},
+			{
+				"adult": false,
+				"gender": 1,
+				"id": 2718335,
+				"known_for_department": "Acting",
+				"name": "Kiawentiio",
+				"original_name": "Kiawentiio",
+				"popularity": 5.119,
+				"profile_path": "/zxYR9GZQ9H8cMOgoopBUtb8zrfi.jpg",
+				"character": "Ka'kwet",
+				"credit_id": "63b873b543250f0082e96d16",
+				"order": 7
+			}
+		],
+		"crew": [
+			{
+				"adult": false,
+				"gender": 1,
+				"id": 1223198,
+				"known_for_department": "Writing",
+				"name": "Moira Walley-Beckett",
+				"original_name": "Moira Walley-Beckett",
+				"popularity": 4.761,
+				"profile_path": "/1sRNcxMZVsVcY6NFNQzASJuR8By.jpg",
+				"credit_id": "5ca76c920e0a266cf733bfb9",
+				"department": "Production",
+				"job": "Executive Producer"
+			},
+			{
+				"adult": false,
+				"gender": 1,
+				"id": 236605,
+				"known_for_department": "Production",
+				"name": "Miranda de Pencier",
+				"original_name": "Miranda de Pencier",
+				"popularity": 2.625,
+				"profile_path": "/78Nuks6NhRFpnmAyetAHqElFNKz.jpg",
+				"credit_id": "5ca76c7e0e0a261f4133e9de",
+				"department": "Production",
+				"job": "Executive Producer"
+			}
+		]
+	},
+	"external_ids": {
+		"imdb_id": "tt5421602",
+		"freebase_mid": "322971",
+		"freebase_id": "322971",
+		"tvdb_id": 322971,
+		"tvrage_id": null,
+		"wikidata_id": null,
+		"facebook_id": "annewithanenetflix",
+		"instagram_id": "annetheseries",
+		"twitter_id": "annewithane"
+	},
+	"videos": {
+		"results": [
+			{
+				"iso_639_1": "en",
+				"iso_3166_1": "US",
+				"name": "loose adaptation",
+				"key": "S5qJXYNNINo",
+				"published_at": "2017-04-04T16:00:02.000Z",
+				"site": "YouTube",
+				"size": 360,
+				"type": "Clip",
+				"official": true,
+				"id": "5b1a9316c3a36848fb012c38"
+			}
+		]
+	},
+	"recommendations": {
+		"page": 1,
+		"results": [
+			{
+				"adult": false,
+				"backdrop_path": "/56v2KjBlU4XaOv9rVYEQypROD7P.jpg",
+				"id": 66732,
+				"name": "Stranger Things",
+				"original_language": "en",
+				"original_name": "Stranger Things",
+				"overview": "When a young boy vanishes, a small town uncovers a mystery involving secret experiments, terrifying supernatural forces, and one strange little girl.",
+				"poster_path": "/49WJfeN0moxb9IPfGn8AIqMGskD.jpg",
+				"media_type": "tv",
+				"genre_ids": [
+					18,
+					10765,
+					9648
+				],
+				"popularity": 270.804,
+				"first_air_date": "2016-07-15",
+				"vote_average": 8.627,
+				"vote_count": 15994,
+				"origin_country": [
+					"US"
+				]
+			},
+			{
+				"adult": false,
+				"backdrop_path": "/7sqFEDDmK1hG5m92upolcfQxy7R.jpg",
+				"id": 75006,
+				"name": "The Umbrella Academy",
+				"original_language": "en",
+				"original_name": "The Umbrella Academy",
+				"overview": "A dysfunctional family of superheroes comes together to solve the mystery of their father's death, the threat of the apocalypse and more.",
+				"poster_path": "/qhcwrnnCnN8NE1N6XXKHFmveJR9.jpg",
+				"media_type": "tv",
+				"genre_ids": [
+					10759,
+					10765,
+					18
+				],
+				"popularity": 83.214,
+				"first_air_date": "2019-02-15",
+				"vote_average": 8.609,
+				"vote_count": 8830,
+				"origin_country": [
+					"US"
+				]
+			},
+			{
+				"adult": false,
+				"backdrop_path": "/oKt4J3TFjWirVwBqoHyIvv5IImd.jpg",
+				"id": 85552,
+				"name": "Euphoria",
+				"original_language": "en",
+				"original_name": "Euphoria",
+				"overview": "A group of high school students navigate love and friendships in a world of drugs, sex, trauma, and social media.",
+				"poster_path": "/3Q0hd3heuWwDWpwcDkhQOA6TYWI.jpg",
+				"media_type": "tv",
+				"genre_ids": [
+					18,
+					80
+				],
+				"popularity": 257.451,
+				"first_air_date": "2019-06-16",
+				"vote_average": 8.358,
+				"vote_count": 8942,
+				"origin_country": [
+					"US"
+				]
+			},
+			{
+				"adult": false,
+				"backdrop_path": "/soQgquPkLmUu9eKLJJzuA4KZDyi.jpg",
+				"id": 69050,
+				"name": "Riverdale",
+				"original_language": "en",
+				"original_name": "Riverdale",
+				"overview": "Set in the present, the series offers a bold, subversive take on Archie, Betty, Veronica and their friends, exploring the surreality of small-town life, the darkness and weirdness bubbling beneath Riverdale’s wholesome facade.",
+				"poster_path": "/c1ROxK1Afo6YuGi3j6ClXmrNcHi.jpg",
+				"media_type": "tv",
+				"genre_ids": [
+					80,
+					18,
+					9648
+				],
+				"popularity": 414.434,
+				"first_air_date": "2017-01-26",
+				"vote_average": 8.482,
+				"vote_count": 13143,
+				"origin_country": [
+					"US"
+				]
+			},
+			{
+				"adult": false,
+				"backdrop_path": "/nOpary3p4f9cazyj1bCGkBNoaIS.jpg",
+				"id": 70523,
+				"name": "Dark",
+				"original_language": "de",
+				"original_name": "Dark",
+				"overview": "A missing child causes four families to help each other for answers. What they could not imagine is that this mystery would be connected to innumerable other secrets of the small town.",
+				"poster_path": "/iSZAmDQHLRv0xXmpNRkizcPLanW.jpg",
+				"media_type": "tv",
+				"genre_ids": [
+					18,
+					10765,
+					9648
+				],
+				"popularity": 107.719,
+				"first_air_date": "2017-12-01",
+				"vote_average": 8.43,
+				"vote_count": 5992,
+				"origin_country": [
+					"DE"
+				]
+			},
+			{
+				"adult": false,
+				"backdrop_path": "/85HCFXyCmvADwd3gJFyCz34CTAO.jpg",
+				"id": 100883,
+				"name": "Never Have I Ever",
+				"original_language": "en",
+				"original_name": "Never Have I Ever",
+				"overview": "After a traumatic year, all an Indian-American teen wants is to go from pariah to popular -- but friends, family and feeling won't make it easy on her.",
+				"poster_path": "/hd5fnBixab6IzfUwjC5wfdbX3eM.jpg",
+				"media_type": "tv",
+				"genre_ids": [
+					35,
+					18
+				],
+				"popularity": 265.349,
+				"first_air_date": "2020-04-27",
+				"vote_average": 8.162,
+				"vote_count": 1545,
+				"origin_country": [
+					"US"
+				]
+			},
+			{
+				"adult": false,
+				"backdrop_path": "/34OGjFEbHj0E3lE2w0iTUVq0CBz.jpg",
+				"id": 87739,
+				"name": "The Queen's Gambit",
+				"original_language": "en",
+				"original_name": "The Queen's Gambit",
+				"overview": "In a Kentucky orphanage in the 1950s, a young girl discovers an astonishing talent for chess while struggling with addiction.",
+				"poster_path": "/zU0htwkhNvBQdVSIKB9s6hgVeFK.jpg",
+				"media_type": "tv",
+				"genre_ids": [
+					18
+				],
+				"popularity": 83.117,
+				"first_air_date": "2020-10-23",
+				"vote_average": 8.528,
+				"vote_count": 3728,
+				"origin_country": [
+					"US"
+				]
+			},
+			{
+				"adult": false,
+				"backdrop_path": "/cUZLe4VgacGQzgZB4oTDHiZFNTj.jpg",
+				"id": 90260,
+				"name": "I Am Not Okay with This",
+				"original_language": "en",
+				"original_name": "I Am Not Okay with This",
+				"overview": "A teen navigates the complexities of high school, family and her sexuality while dealing with new superpowers. Based on Charles Forsman's graphic novel.",
+				"poster_path": "/kf3yX0ILNlLJ42X3lX2iYJ3QRp6.jpg",
+				"media_type": "tv",
+				"genre_ids": [
+					18,
+					35,
+					10765
+				],
+				"popularity": 32.13,
+				"first_air_date": "2020-02-26",
+				"vote_average": 8.109,
+				"vote_count": 1654,
+				"origin_country": [
+					"US"
+				]
+			},
+			{
+				"adult": false,
+				"backdrop_path": "/eDCDAXdY6so6xgGX4fuBDjLnoN6.jpg",
+				"id": 81356,
+				"name": "Sex Education",
+				"original_language": "en",
+				"original_name": "Sex Education",
+				"overview": "Inexperienced Otis channels his sex therapist mom when he teams up with rebellious Maeve to set up an underground sex therapy clinic at school.",
+				"poster_path": "/8j12tohv1NBZNmpU93f47sAKBbw.jpg",
+				"media_type": "tv",
+				"genre_ids": [
+					35,
+					18
+				],
+				"popularity": 151.762,
+				"first_air_date": "2019-01-11",
+				"vote_average": 8.309,
+				"vote_count": 6524,
+				"origin_country": [
+					"GB"
+				]
+			},
+			{
+				"adult": false,
+				"backdrop_path": "/gFFedWBZ7s5sPiR9A1IpileWuFf.jpg",
+				"id": 102903,
+				"name": "Control Z",
+				"original_language": "es",
+				"original_name": "Control Z",
+				"overview": "When a hacker begins releasing students' secrets to the entire high school, the socially isolated but observant Sofía works to uncover his/her identity.",
+				"poster_path": "/8VNA0RdrPk8Ec7XVjpeT0Rnui79.jpg",
+				"media_type": "tv",
+				"genre_ids": [
+					18
+				],
+				"popularity": 33.951,
+				"first_air_date": "2020-05-22",
+				"vote_average": 8.233,
+				"vote_count": 2238,
+				"origin_country": [
+					"MX"
+				]
+			},
+			{
+				"adult": false,
+				"backdrop_path": "/ds1n5P0Y92cTh6UpbcA89hxM96a.jpg",
+				"id": 1416,
+				"name": "Grey's Anatomy",
+				"original_language": "en",
+				"original_name": "Grey's Anatomy",
+				"overview": "Follows the personal and professional lives of a group of doctors at Seattle’s Grey Sloan Memorial Hospital.",
+				"poster_path": "/daSFbrt8QCXV2hSwB0hqYjbj681.jpg",
+				"media_type": "tv",
+				"genre_ids": [
+					18
+				],
+				"popularity": 768.782,
+				"first_air_date": "2005-03-27",
+				"vote_average": 8.254,
+				"vote_count": 9428,
+				"origin_country": [
+					"US"
+				]
+			},
+			{
+				"adult": false,
+				"backdrop_path": "/33j33midGw49BBxiqlNZeZ6PZ0O.jpg",
+				"id": 85271,
+				"name": "WandaVision",
+				"original_language": "en",
+				"original_name": "WandaVision",
+				"overview": "Wanda Maximoff and Vision—two super-powered beings living idealized suburban lives—begin to suspect that everything is not as it seems.",
+				"poster_path": "/frobUz2X5Pc8OiVZU8Oo5K3NKMM.jpg",
+				"media_type": "tv",
+				"genre_ids": [
+					10765,
+					9648,
+					18
+				],
+				"popularity": 88.798,
+				"first_air_date": "2021-01-15",
+				"vote_average": 8.265,
+				"vote_count": 11255,
+				"origin_country": [
+					"US"
+				]
+			},
+			{
+				"adult": false,
+				"backdrop_path": "/mAXOCbZzvmDa6PCh5dcIPOB51Qc.jpg",
+				"id": 63174,
+				"name": "Lucifer",
+				"original_language": "en",
+				"original_name": "Lucifer",
+				"overview": "Bored and unhappy as the Lord of Hell, Lucifer Morningstar abandoned his throne and retired to Los Angeles, where he has teamed up with LAPD detective Chloe Decker to take down criminals. But the longer he's away from the underworld, the greater the threat that the worst of humanity could escape.",
+				"poster_path": "/ekZobS8isE6mA53RAiGDG93hBxL.jpg",
+				"media_type": "tv",
+				"genre_ids": [
+					80,
+					10765
+				],
+				"popularity": 533.625,
+				"first_air_date": "2016-01-25",
+				"vote_average": 8.487,
+				"vote_count": 13779,
+				"origin_country": [
+					"US"
+				]
+			},
+			{
+				"adult": false,
+				"backdrop_path": "/nfWhNM5VVd9a5bEGobs83TWTuLM.jpg",
+				"id": 74577,
+				"name": "The End of the F***ing World",
+				"original_language": "en",
+				"original_name": "The End of the F***ing World",
+				"overview": "James is 17 and is pretty sure he is a psychopath. Alyssa, also 17, is the cool and moody new girl at school. The pair make a connection and she persuades him to embark on a darkly comedic road trip in search of her real father.",
+				"poster_path": "/f1OV9xEJCZVYcYSDRr5xOD8NJw3.jpg",
+				"media_type": "tv",
+				"genre_ids": [
+					35,
+					18,
+					80
+				],
+				"popularity": 70.291,
+				"first_air_date": "2017-10-24",
+				"vote_average": 8.103,
+				"vote_count": 2756,
+				"origin_country": [
+					"GB"
+				]
+			},
+			{
+				"adult": false,
+				"backdrop_path": "/vctELFdxJdQBtgPlJFiF6aNnUcQ.jpg",
+				"id": 31356,
+				"name": "Big Time Rush",
+				"original_language": "en",
+				"original_name": "Big Time Rush",
+				"overview": "Four teenage friends move from Minneapolis to Los Angeles to form a potential chart-topping boy band after Kendall is inadvertently discovered by an eccentric record executive, Gustavo Rocque. As they seize this opportunity of a lifetime, these friends embark on an exciting comedy and music-filled journey to prove to themselves and their record label that they are serious about their new career choice.",
+				"poster_path": "/5yzb0iWXilLpg3iz1LT3H3UGBYs.jpg",
+				"media_type": "tv",
+				"genre_ids": [
+					10751,
+					35,
+					10762
+				],
+				"popularity": 61.329,
+				"first_air_date": "2009-11-28",
+				"vote_average": 8.634,
+				"vote_count": 1553,
+				"origin_country": [
+					"US"
+				]
+			},
+			{
+				"adult": false,
+				"backdrop_path": "/c4CSgKL6QfkJxsWcGYDyTxpbzpW.jpg",
+				"id": 66788,
+				"name": "13 Reasons Why",
+				"original_language": "en",
+				"original_name": "13 Reasons Why",
+				"overview": "After a teenage girl's perplexing suicide, a classmate receives a series of tapes that unravel the mystery of her tragic choice.",
+				"poster_path": "/nel144y4dIOdFFid6twN5mAX9Yd.jpg",
+				"media_type": "tv",
+				"genre_ids": [
+					18,
+					9648
+				],
+				"popularity": 141.922,
+				"first_air_date": "2017-03-31",
+				"vote_average": 7.658,
+				"vote_count": 3789,
+				"origin_country": [
+					"US"
+				]
+			},
+			{
+				"adult": false,
+				"backdrop_path": "/8AdmUPTyidDebwIuakqkSt6u1II.jpg",
+				"id": 79242,
+				"name": "Chilling Adventures of Sabrina",
+				"original_language": "en",
+				"original_name": "Chilling Adventures of Sabrina",
+				"overview": "As her 16th birthday nears, Sabrina must choose between the witch world of her family and the human world of her friends. Based on the Archie comic.",
+				"poster_path": "/yxMpoHO0CXP5o9gB7IfsciilQS4.jpg",
+				"media_type": "tv",
+				"genre_ids": [
+					9648,
+					10765,
+					18
+				],
+				"popularity": 145.334,
+				"first_air_date": "2018-10-26",
+				"vote_average": 8.245,
+				"vote_count": 3297,
+				"origin_country": [
+					"US"
+				]
+			},
+			{
+				"adult": false,
+				"backdrop_path": "/smSbK5cd8T9XHcxEUcems23BDEF.jpg",
+				"id": 67915,
+				"name": "Goblin",
+				"original_language": "ko",
+				"original_name": "쓸쓸하고 찬란하神-도깨비",
+				"overview": "In his quest for a bride to break his immortal curse, a 939-year-old guardian of souls meets a grim reaper and a sprightly student with a tragic past.",
+				"poster_path": "/t7aUi8jbsIUSCNqA1akAbKjBWjU.jpg",
+				"media_type": "tv",
+				"genre_ids": [
+					18,
+					10765,
+					35
+				],
+				"popularity": 81.495,
+				"first_air_date": "2016-12-02",
+				"vote_average": 8.666,
+				"vote_count": 2529,
+				"origin_country": [
+					"KR"
+				]
+			},
+			{
+				"adult": false,
+				"backdrop_path": "/cJYLon9ejKJV7ua03ab8Tj9u067.jpg",
+				"id": 18165,
+				"name": "The Vampire Diaries",
+				"original_language": "en",
+				"original_name": "The Vampire Diaries",
+				"overview": "The story of two vampire brothers obsessed with the same girl, who bears a striking resemblance to the beautiful but ruthless vampire they knew and loved in 1864.",
+				"poster_path": "/aBkVgChtyyJaHyZh1gfd8DbzQon.jpg",
+				"media_type": "tv",
+				"genre_ids": [
+					18,
+					10765
+				],
+				"popularity": 317.47,
+				"first_air_date": "2009-09-10",
+				"vote_average": 8.34,
+				"vote_count": 8281,
+				"origin_country": [
+					"US"
+				]
+			},
+			{
+				"adult": false,
+				"backdrop_path": "/xXRsKNJHTOGrs5wfYAxkbM2RiyT.jpg",
+				"id": 71712,
+				"name": "The Good Doctor",
+				"original_language": "en",
+				"original_name": "The Good Doctor",
+				"overview": "Shaun Murphy, a young surgeon with autism and savant syndrome, relocates from a quiet country life to join a prestigious hospital's surgical unit. Unable to personally connect with those around him, Shaun uses his extraordinary medical gifts to save lives and challenge the skepticism of his colleagues.",
+				"poster_path": "/luhKkdD80qe62fwop6sdrXK9jUT.jpg",
+				"media_type": "tv",
+				"genre_ids": [
+					18
+				],
+				"popularity": 829.114,
+				"first_air_date": "2017-09-25",
+				"vote_average": 8.507,
+				"vote_count": 11683,
+				"origin_country": [
+					"US"
+				]
+			},
+			{
+				"adult": false,
+				"backdrop_path": "/hTExot1sfn7dHZjGrk0Aiwpntxt.jpg",
+				"id": 48866,
+				"name": "The 100",
+				"original_language": "en",
+				"original_name": "The 100",
+				"overview": "100 years in the future, when the Earth has been abandoned due to radioactivity, the last surviving humans live on an ark orbiting the planet — but the ark won't last forever. So the repressive regime picks 100 expendable juvenile delinquents to send down to Earth to see if the planet is still habitable.",
+				"poster_path": "/wcaDIAG1QdXQLRaj4vC1EFdBT2.jpg",
+				"media_type": "tv",
+				"genre_ids": [
+					10765,
+					18,
+					10759
+				],
+				"popularity": 260.815,
+				"first_air_date": "2014-03-19",
+				"vote_average": 7.915,
+				"vote_count": 7611,
+				"origin_country": [
+					"US"
+				]
+			}
+		],
+		"total_pages": 2,
+		"total_results": 40
+	}
+};
 
 const json = {
   "data": {

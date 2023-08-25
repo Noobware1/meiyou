@@ -1,16 +1,15 @@
-import 'dart:io';
-
 import 'package:meiyou/core/resources/client.dart';
 import 'package:meiyou/core/resources/extractors/video_extractor.dart';
 import 'package:meiyou/core/resources/media_type.dart';
 import 'package:meiyou/core/resources/providers/anime_provider.dart';
-import 'package:meiyou/core/utils/extenstion.dart';
+import 'package:meiyou/core/utils/encode.dart';
+import 'package:meiyou/core/utils/extenstions/iterable.dart';
+import 'package:meiyou/core/utils/extenstions/string.dart';
+import 'package:meiyou/core/utils/httpify.dart';
 import 'package:meiyou/data/models/episode.dart';
 import 'package:meiyou/data/models/search_response.dart';
 import 'package:meiyou/data/models/video_server.dart';
 import 'package:ok_http_dart/ok_http_dart.dart';
-// import 'package:streamify/helpers/match_helper.dart';
-// import 'package:streamify/providers/base_parser.dart';
 
 class Gogo extends AnimeProvider {
   @override
@@ -62,48 +61,36 @@ class Gogo extends AnimeProvider {
         'https://ajax.gogo-load.com/ajax/load-list-episode?ep_start=0&ep_end=$ep_end&id=$id&alias=$alias');
 
     final episodeList = ajaxRequest.document;
-    final episodes = episodeList.select('#episode_related > li > a').map((it) {
-      final num = it.selectFirst('div.name').text.replaceFirst('EP ', '');
-      return Episode(
-          number: num.toInt(), url: hostUrl + it.attr('href').trim());
-    }).toList();
-    return episodes.reversed.toList();
+    final episodes = episodeList
+        .select('#episode_related > li > a')
+        .mapAsList((it) {
+          final num = it.selectFirst('div.name').text.replaceFirst('EP ', '');
+          return Episode(
+              number: num.toNum(), url: hostUrl + it.attr('href').trim());
+        })
+        .reversed
+        .toList();
+
+    return episodes;
   }
 
   @override
-  VideoExtractor loadVideoExtractor(VideoServer videoServer) {
-    // TODO: implement loadVideoExtractor
-    throw UnimplementedError();
+  VideoExtractor? loadVideoExtractor(VideoServer videoServer) {
+    return null;
   }
 
   @override
-  Future<List<VideoServer>> loadVideoServer(String url) {
-    // TODO: implement loadVideoServer
-    throw UnimplementedError();
+  Future<List<VideoServer>> loadVideoServers(String url) async {
+    final page = await client.get(url);
+    final episodePage = page.document;
+    return episodePage.select('.anime_muti_link > ul > li > a').mapAsList((it) {
+      final name = it.text.replaceFirst('Choose this server', '').trim();
+      final url = httpify(it.attr('data-video'));
+      return VideoServer(url: url, name: name);
+    });
   }
 }
 
-// @override
-// Future<List<VideoServer>?> loadVideoServers(String url) async {
-//   final page = await client.get(url);
-//   if (page.text.startsWith(vaildString)) {
-//     final episodePage = page.document;
-//     final name = episodePage
-//         .select('.anime_muti_link > ul > li > a')
-//         .text()
-//         .map((name) => name.replaceFirst('Choose this server', '').trim())
-//         .toList();
-//     final serverUrl = episodePage
-//         .select('.anime_muti_link > ul > li > a')
-//         .attr('data-video')
-//         .map((url) => _https(url))
-//         .toList();
-
-//     return VideoServer.toBuildVideoServer(name, serverUrl);
-//   } else {
-//     return null;
-//   }
-// }
 
 // @override
 // VideoExtractor? loadVideoExtractor(VideoServer server) {

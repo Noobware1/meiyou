@@ -7,13 +7,15 @@ class VideoEntity extends Equatable {
   final String url;
   final Quality quality;
   final VideoFormat fromat;
+  final bool backup;
   final Map<String, dynamic>? extra;
 
   const VideoEntity({
     required this.url,
+    this.backup = false,
     required this.quality,
     required this.fromat,
-     this.extra,
+    this.extra,
     this.title,
   });
 

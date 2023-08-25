@@ -1,5 +1,5 @@
 import 'package:meiyou/core/resources/meta_provider.dart';
-import 'package:meiyou/core/utils/extenstion.dart';
+import 'package:meiyou/core/utils/extenstions/episode.dart';
 import 'package:meiyou/data/data_source/providers/meta_providers/tmdb.dart';
 import 'package:meiyou/data/models/episode.dart';
 import 'package:meiyou/data/models/media_details.dart';

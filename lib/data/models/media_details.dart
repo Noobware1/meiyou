@@ -1,6 +1,7 @@
 import 'package:meiyou/core/resources/meta_provider.dart';
 import 'package:meiyou/core/utils/date_time.dart';
-import 'package:meiyou/core/utils/extenstion.dart';
+import 'package:meiyou/core/utils/extenstions/iterable.dart';
+import 'package:meiyou/core/utils/extenstions/string.dart';
 import 'package:meiyou/core/utils/fix_anilist_description.dart';
 import 'package:meiyou/core/utils/fix_tmdb_image.dart';
 import 'package:meiyou/data/models/cast.dart';
@@ -9,6 +10,16 @@ import 'package:meiyou/data/models/season.dart';
 import 'package:meiyou/domain/entities/media_details.dart';
 
 class MediaDetails extends MediaDetailsEntity {
+  @override
+  List<Season>? get seasons => super.seasons as List<Season>;
+
+  @override
+  List<Recommendations>? get recommendations =>
+      super.recommendations as List<Recommendations>;
+
+  @override
+  List<Cast>? get cast => super.cast as List<Cast>;
+
   const MediaDetails({
     required super.id,
     required super.mediaProvider,
@@ -23,17 +34,17 @@ class MediaDetails extends MediaDetailsEntity {
     super.bannerImage,
     required super.genres,
     super.originalLanguage,
-    super.cast,
     super.description,
-    super.recommendations,
     super.runtime,
     super.totalSeason,
     super.currentNumberEpisode,
     super.averageScore,
     super.extrenalIds,
-    super.seasons,
     super.totalEpisode,
-  });
+    List<Season>? seasons,
+    List<Cast>? cast,
+    List<Recommendations>? recommendations,
+  }) : super(seasons: seasons, cast: cast, recommendations: recommendations);
 
   factory MediaDetails.fromTMDB(Map<String, dynamic> media, String type,
       [Map<String, dynamic>? episodes]) {
@@ -168,8 +179,7 @@ class MediaDetails extends MediaDetailsEntity {
         .map((key, value) => MapEntry(key.toString(), value.toString()));
   }
 
-  factory MediaDetails.fromMediaDetailsEntity(
-      MediaDetailsEntity mediaDetailsEntity) {
+  factory MediaDetails.fromEntity(MediaDetailsEntity mediaDetailsEntity) {
     return MediaDetails(
       id: mediaDetailsEntity.id,
       mediaProvider: mediaDetailsEntity.mediaProvider,
@@ -184,15 +194,17 @@ class MediaDetails extends MediaDetailsEntity {
       bannerImage: mediaDetailsEntity.bannerImage,
       genres: mediaDetailsEntity.genres,
       originalLanguage: mediaDetailsEntity.originalLanguage,
-      cast: mediaDetailsEntity.cast,
+      cast: mediaDetailsEntity.cast?.mapAsList((it) => Cast.fromEntity(it)),
       description: mediaDetailsEntity.description,
-      recommendations: mediaDetailsEntity.recommendations,
+      recommendations: mediaDetailsEntity.recommendations
+          ?.mapAsList((it) => Recommendations.fromEntity(it)),
       runtime: mediaDetailsEntity.runtime,
       totalSeason: mediaDetailsEntity.totalSeason,
       currentNumberEpisode: mediaDetailsEntity.currentNumberEpisode,
       averageScore: mediaDetailsEntity.averageScore,
       extrenalIds: mediaDetailsEntity.extrenalIds,
-      seasons: mediaDetailsEntity.seasons,
+      seasons:
+          mediaDetailsEntity.seasons?.mapAsList((it) => Season.fromEntity(it)),
       totalEpisode: mediaDetailsEntity.totalEpisode,
     );
   }

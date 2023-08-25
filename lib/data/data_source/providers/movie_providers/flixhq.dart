@@ -3,7 +3,9 @@ import 'package:meiyou/core/resources/client.dart';
 import 'package:meiyou/core/resources/extractors/video_extractor.dart';
 import 'package:meiyou/core/resources/media_type.dart';
 import 'package:meiyou/core/resources/providers/movie_provider.dart';
-import 'package:meiyou/core/utils/extenstion.dart';
+import 'package:meiyou/core/utils/encode.dart';
+import 'package:meiyou/core/utils/extenstions/iterable.dart';
+import 'package:meiyou/core/utils/extenstions/string.dart';
 import 'package:meiyou/data/models/episode.dart';
 import 'package:meiyou/data/models/movie.dart';
 import 'package:meiyou/data/models/search_response.dart';
@@ -125,18 +127,12 @@ class Flixhq extends MovieProvider {
   @override
   Future<List<SearchResponse>> search(String query) async {
     final doc = await client.get('$hostUrl/search/${encode(query)}', headers: {
-      // "User-Agent":
-      //     "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:101.0) Gecko/20100101 Firefox/101.0",
-      // "Accept":
-      //     "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-      // "Connection": "keep-alive",
       "Referer": "$hostUrl/home",
-      // "Cookie": "show_share=true",
     });
-    // if (doc == null) return null;s
-    final search = doc.document
+
+    return doc.document
         .select('.film_list-wrap > div > div.film-poster')
-        .map((it) {
+        .mapAsList((it) {
       final url = it.selectFirst('a').attr('href');
       return SearchResponse(
           title: it.selectFirst('a').attr('title'),
@@ -144,17 +140,17 @@ class Flixhq extends MovieProvider {
           url: '$hostUrl$url',
           type: (url.contains('tv') ? MediaType.tvShow : MediaType.movie));
     });
-    return search.toList();
   }
 
   static Future<OkHttpResponse?> retryOnHandshakeException(String url,
       {Map<String, String>? headers}) async {
     OkHttpResponse? res;
+    final session = client.session();
     final stopwatch = Stopwatch()..start();
     for (var i = 0; i < 10; i++) {
       if (stopwatch.elapsedMilliseconds > 15000) break;
       try {
-        res = await client.get(url, headers: headers);
+        res = await session.get(url, headers: headers);
         if (res.success) {
           break;
         } else {
@@ -164,7 +160,9 @@ class Flixhq extends MovieProvider {
         continue;
       }
     }
+    session.close();
     stopwatch.stop();
+
     return res;
   }
 
@@ -181,8 +179,10 @@ class Flixhq extends MovieProvider {
   }
 
   @override
-  Future<List<VideoServer>> loadVideoServer(String url) {
+  Future<List<VideoServer>> loadVideoServers(String url) {
     // TODO: implement loadVideoServer
     throw UnimplementedError();
   }
 }
+
+

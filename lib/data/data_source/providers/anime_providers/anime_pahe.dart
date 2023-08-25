@@ -3,6 +3,7 @@ import 'package:meiyou/core/resources/client.dart';
 import 'package:meiyou/core/resources/extractors/video_extractor.dart';
 import 'package:meiyou/core/resources/media_type.dart';
 import 'package:meiyou/core/resources/providers/anime_provider.dart';
+import 'package:meiyou/core/utils/encode.dart';
 import 'package:meiyou/data/models/episode.dart';
 import 'package:meiyou/data/models/search_response.dart';
 import 'package:meiyou/data/models/video_server.dart';
@@ -115,7 +116,7 @@ class AnimePahe extends AnimeProvider {
   }
 
   @override
-  Future<List<VideoServer>> loadVideoServer(String url) {
+  Future<List<VideoServer>> loadVideoServers(String url) {
     // TODO: implement loadVideoServer
     throw UnimplementedError();
   }

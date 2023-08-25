@@ -1,39 +1,19 @@
 part of 'search_response_bloc.dart';
 
 sealed class SearchResponseEvent extends Equatable {
-  final String title;
-  final List<SearchResponseEntity>? searchResponses;
-  // final SearchResponseEntity? searchResponse;
-  const SearchResponseEvent({
-    this.searchResponses,
-    required this.title,
+  final BaseProvider provider;
+  final String? query;
 
-    //  this.searchResponse
-  });
+  final List<SearchResponseEntity>? responses;
+  // const ProviderSearchParams({});
+  const SearchResponseEvent(
+      {this.responses, this.query, required this.provider});
 
   @override
-  List<Object> get props => [
-        searchResponses!, title,
-        // searchResponse!
-      ];
+  List<Object> get props => [provider, responses!];
 }
 
-class SearchResponseSearching extends SearchResponseEvent {
-  const SearchResponseSearching(String title) : super(title: title);
-}
-
-class SearchResponseSearchSuccess extends SearchResponseEvent {
-  const SearchResponseSearchSuccess(
-      List<SearchResponseEntity> searchResponses,
-
-      // SearchResponseEntity searchResponse,
-      String title)
-      : super(
-            searchResponses: searchResponses,
-            // searchResponse: searchResponse,
-            title: title);
-}
-
-class SearchResponseFailed extends SearchResponseEvent {
-  const SearchResponseFailed(String title) : super(title: title);
+final class SearchResponseSearch extends SearchResponseEvent {
+  const SearchResponseSearch(
+      {required super.provider, super.query});
 }

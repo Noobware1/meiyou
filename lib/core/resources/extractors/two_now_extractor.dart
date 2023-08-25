@@ -1,3 +1,3 @@
-class TwoNowExtractor extends VideoExtractor {
+// class TwoNowExtractor extends VideoExtractor {
   
-}
+// }

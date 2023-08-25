@@ -1,33 +1,25 @@
 part of 'search_response_bloc.dart';
 
 sealed class SearchResponseState extends Equatable {
-  final String title;
+  final SearchResponseEntity? selected;
   final List<SearchResponseEntity>? searchResponses;
-  final SearchResponseEntity? searchResponse;
-  const SearchResponseState(
-      {this.searchResponse, this.searchResponses, required this.title});
+  final MeiyouException? error;
+  const SearchResponseState({this.searchResponses, this.selected, this.error});
 
   @override
-  List<Object> get props => [title];
+  List<Object> get props => [selected!, searchResponses!];
 }
 
-final class SearchResponseStateWithData extends SearchResponseState {
-  const SearchResponseStateWithData(
-      {required SearchResponseEntity searchResponse,
-      required String title,
-      required List<SearchResponseEntity> searchResponses})
-      : super(
-            searchResponse: searchResponse,
-            searchResponses: searchResponses,
-            title: 'Found: $title');
+final class SearchResponseSearching extends SearchResponseState {
+  const SearchResponseSearching();
 }
 
-final class SearchResponseStateWithNoData extends SearchResponseState {
-  const SearchResponseStateWithNoData(String title)
-      : super(title: 'Not Found $title');
+final class SearchResponseFailed extends SearchResponseState {
+  const SearchResponseFailed([MeiyouException? error]) : super(error: error);
 }
 
-final class SearchResponseStateLoading extends SearchResponseState {
-  const SearchResponseStateLoading(String title)
-      : super(title: 'Searching: $title');
+final class SearchResponseSuccess extends SearchResponseState {
+  const SearchResponseSuccess(List<SearchResponseEntity> searchResponses)
+      : super(searchResponses: searchResponses);
 }
+

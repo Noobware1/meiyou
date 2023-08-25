@@ -4,6 +4,7 @@ import 'package:meiyou/data/models/episode.dart';
 import 'package:meiyou/data/models/main_page.dart';
 import 'package:meiyou/data/models/media_details.dart';
 import 'package:meiyou/data/models/results.dart';
+import 'package:meiyou/data/models/season.dart';
 
 abstract class MetaProvider extends BaseProvider {
   @override
@@ -16,5 +17,7 @@ abstract class MetaProvider extends BaseProvider {
 
   Future<MainPage> fetchMainPage();
 
-  Future<List<Episode>> fetchEpisodes(MediaDetails media);
+  Future<List<Episode>> fetchEpisodes(MediaDetails media, [
+    Season? season,
+  ]);
 }

@@ -5,7 +5,7 @@ import 'package:meiyou/core/resources/media_type.dart';
 import 'package:meiyou/core/resources/meta_provider.dart';
 import 'package:meiyou/core/resources/queries.dart';
 import 'package:meiyou/core/resources/providers/meta_provider.dart';
-import 'package:meiyou/core/utils/extenstion.dart';
+import 'package:meiyou/core/utils/extenstions/string.dart';
 import 'package:meiyou/core/utils/mapping/map_episodes.dart';
 import 'package:meiyou/data/data_source/providers/meta_providers/tmdb.dart';
 import 'package:meiyou/data/models/episode.dart';
@@ -15,6 +15,8 @@ import 'package:meiyou/data/models/results.dart';
 import 'package:meiyou/core/resources/client.dart';
 import 'package:meiyou/core/constants/api_constants.dart';
 import 'package:meiyou/data/models/row.dart';
+import 'package:meiyou/data/models/season.dart';
+import 'package:meiyou/domain/entities/season.dart';
 
 class Anilist extends MetaProvider {
   @override
@@ -72,7 +74,9 @@ class Anilist extends MetaProvider {
   }
 
   @override
-  Future<List<Episode>> fetchEpisodes(MediaDetails media) async {
+  Future<List<Episode>> fetchEpisodes(MediaDetails media, [
+    Season? season,
+  ]) async {
     final tmdbId = media.extrenalIds?['tmdb'];
 
     if (media.mediaProvider != MediaProvider.tmdb &&

@@ -1,4 +1,5 @@
 import 'package:meiyou/core/resources/watch_qualites.dart';
+import 'package:meiyou/core/utils/extenstions/string.dart';
 
 class Quality {
   final int pixel;
@@ -20,9 +21,9 @@ class Quality {
 
   static Quality getQuailtyFromString(String str) {
     const defaultQuality = 720;
-    if (str.contains('p') && !str.contains('x')) {
+    if (str.contains('p')) {
       final quaility =
-          int.tryParse(str.substring(0, str.length - 1)) ?? defaultQuality;
+          (str.substring(0, str.length - 1)).toIntOrNull() ?? defaultQuality;
       if (quaility == 1080) {
         return WatchQualites.quaility1080;
       } else if (quaility == 480) {
@@ -32,11 +33,16 @@ class Quality {
       } else {
         return WatchQualites.quaility720;
       }
-    } else {
+    } else if (str.toIntOrNull() != null) {
+      final quailty = str.toInt();
+      return Quality(pixel: (quailty * (16 / 9)).ceil(), quaility: quailty);
+    } else if (str.contains('x')) {
       final list = str.split('x');
-      final pixel = int.tryParse(list.first) ?? 1280;
-      final quality = int.tryParse(list.last) ?? defaultQuality;
+      final pixel = list.first.toIntOrNull() ?? 1280;
+      final quality = list.last.toIntOrNull() ?? defaultQuality;
       return Quality(pixel: pixel, quaility: quality);
+    } else {
+      return WatchQualites.quaility720;
     }
   }
 }

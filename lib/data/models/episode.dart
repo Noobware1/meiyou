@@ -1,4 +1,4 @@
-import 'package:meiyou/core/utils/extenstion.dart';
+import 'package:meiyou/core/utils/extenstions/string.dart';
 import 'package:meiyou/domain/entities/episode.dart';
 
 class Episode extends EpisodeEntity {
@@ -10,6 +10,17 @@ class Episode extends EpisodeEntity {
       super.isFiller,
       super.rated,
       super.thumbnail});
+
+  factory Episode.fromEntity(EpisodeEntity episodeEntity) {
+    return Episode(
+        number: episodeEntity.number,
+        desc: episodeEntity.desc,
+        isFiller: episodeEntity.isFiller,
+        rated: episodeEntity.rated,
+        thumbnail: episodeEntity.thumbnail,
+        title: episodeEntity.title,
+        url: episodeEntity.url);
+  }
 
   factory Episode.fromTMDB(dynamic json) {
     return Episode(
@@ -24,17 +35,17 @@ class Episode extends EpisodeEntity {
     );
   }
 
-  static List<Map<String, dynamic>> toJson(List<Episode> episodes) {
-    return episodes
-        .map((episode) => {
-              'name': episode.title,
-              'overview': episode.desc,
-              'still_path': episode.thumbnail,
-              'vote_average': episode.rated,
-              'episode_number': episode.number
-            })
-        .toList();
-  }
+  // List<Map<String, dynamic>> toJson(List<Episode> episodes) {
+  //   return episodes
+  //       .map((episode) => {
+  //             'name': episode.title,
+  //             'overview': episode.desc,
+  //             'still_path': episode.thumbnail,
+  //             'vote_average': episode.rated,
+  //             'episode_number': episode.number
+  //           })
+  //       .toList();
+  // }
 
   Episode copyWith({
     num? number,
@@ -54,4 +65,8 @@ class Episode extends EpisodeEntity {
         rated: rated ?? this.rated,
         thumbnail: thumbnail ?? this.thumbnail);
   }
+
+  @override
+  String toString() =>
+      'number: $number,\ndesc: $desc,\nisFiller: $isFiller,\nrated: $rated,\nthumbnail: $thumbnail,\ntitle: $title,\nurl: $url\n';
 }

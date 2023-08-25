@@ -10,9 +10,9 @@ abstract class WatchProvider extends BaseProvider {
 
   // Future<List<Episode>> loadEpisodes(String url);
 
-  Future<List<VideoServer>> loadVideoServer(String url);
+  Future<List<VideoServer>> loadVideoServers(String url);
 
-  VideoExtractor loadVideoExtractor(VideoServer videoServer);
+  VideoExtractor? loadVideoExtractor(VideoServer videoServer);
   // Future<List<VideoServer>> loadVideoServer(String url);
 
   // Future<List<VideoExtractor>> loadVideoExtractor(VideoServer videoServer);

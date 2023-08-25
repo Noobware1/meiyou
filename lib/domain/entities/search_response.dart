@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:meiyou/core/resources/media_type.dart';
 
 class SearchResponseEntity extends Equatable {
   final String title;
@@ -15,4 +14,10 @@ class SearchResponseEntity extends Equatable {
 
   @override
   List<Object?> get props => [title, url, cover, type];
+
+  static const empty =
+      SearchResponseEntity(title: '', url: '', cover: '', type: '');
+
+  bool get isEmpty =>
+      title.isEmpty && url.isEmpty && cover.isEmpty && type.isEmpty;
 }

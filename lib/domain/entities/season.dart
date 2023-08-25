@@ -21,4 +21,15 @@ class SeasonEntity extends Equatable {
 
   @override
   List<Object?> get props => [number, id, title, url, airDate, isOnGoing];
+
+  static const empty = SeasonEntity(number: 0);
+
+  bool get isEmpty =>
+      number == 0 &&
+      id == null &&
+      title == null &&
+      url == null &&
+      airDate == null &&
+      totalEpisode == null &&
+      isOnGoing == null;
 }

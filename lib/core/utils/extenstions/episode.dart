@@ -2,6 +2,11 @@ import 'package:meiyou/data/models/episode.dart';
 import 'package:meiyou/data/models/media_details.dart';
 
 extension EpisodeUtils on List<Episode> {
+  bool isInRange(int index) {
+    if ((length - 1) <= index) return true;
+    return false;
+  }
+
   void fill(int len, MediaDetails media) {
     if (isEmpty) {
       add(Episode(
@@ -9,7 +14,7 @@ extension EpisodeUtils on List<Episode> {
           thumbnail: media.bannerImage ?? media.poster,
           title: 'Episode 1'));
     }
-    var lastEpisodeNumber = last.number.toInt();
+    var lastEpisodeNumber = last.number;
     while (length < len) {
       lastEpisodeNumber++;
       add(Episode(

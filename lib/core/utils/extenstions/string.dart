@@ -1,7 +1,12 @@
+// import 'dart:convert';
 import 'dart:convert';
+import 'dart:typed_data';
 
 extension StringUtils on String {
-  String decodeBase64() => utf8.decode(base64.decode(this));
+  Uint8List decodeBase64() => base64Decode(this);
+
+
+  
 
   num toNum() => num.parse(this);
 
@@ -19,12 +24,16 @@ extension StringUtils on String {
     return replaceAll('\n', '').trim();
   }
 
-  List<int> decodeHex() {
-    assert(length % 2 == 0, "Must have an even length");
-    return RegExp('.{1,2}').allMatches(this).map((match) {
-      return int.parse(match.group(0)!, radix: 16);
-    }).toList();
-  }
+  // Uint8List decodeBase64() => base64.decode(this);
+
+  Uint8List toUint8List() => Uint8List.fromList(codeUnits);
+
+  // List<int> decodeHex() {
+  //   assert(length % 2 == 0, "Must have an even length");
+  //   return RegExp('.{1,2}').allMatches(this).map((match) {
+  //     return int.parse(match.group(0)!, radix: 16);
+  //   }).toList();
+  // }
 
   String substringBefore(String pattern) {
     int i;
@@ -71,5 +80,13 @@ extension StringUtils on String {
   String toUpperCaseFirst() {
     final upper = split('')[0].toUpperCase();
     return upper + substring(1, length);
+  }
+
+  String substringSafe(int start, [int? end]) {
+    try {
+      return substring(start, end);
+    } catch (_) {
+      return '';
+    }
   }
 }

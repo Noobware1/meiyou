@@ -1,5 +1,5 @@
 import 'package:meiyou/core/resources/subtitle_format.dart';
-import 'package:meiyou/core/utils/extenstion.dart';
+import 'package:meiyou/core/utils/extenstions/string.dart';
 import 'package:meiyou/domain/entities/subtitle.dart';
 
 class Subtitle extends SubtitleEntity {
@@ -16,4 +16,12 @@ class Subtitle extends SubtitleEntity {
         return SubtitleFormat.srt;
     }
   }
+
+  factory Subtitle.withSubtitleFromatFromUrl(String url, String lang) {
+    return Subtitle(
+        url: url, format: Subtitle.getFromatFromUrl(url), lang: lang);
+  }
+
+  @override
+  String toString() => 'url: $url,\nlang: $lang,\nformat: $format';
 }

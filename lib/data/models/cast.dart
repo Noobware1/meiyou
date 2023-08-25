@@ -25,6 +25,14 @@ class Cast extends CastEnitity {
       image: node['image']?['large'] ?? node['image']?['medium'] ?? '',
       name: node['name']?['userPreferred'] ?? node['name']?['full'] ?? '',
     );
-    // : ?.toString())
+  }
+
+  factory Cast.fromEntity(CastEnitity castEnitity) {
+    return Cast(
+      link: castEnitity.link,
+      characterName: castEnitity.characterName,
+      image: castEnitity.image,
+      name: castEnitity.name,
+    );
   }
 }

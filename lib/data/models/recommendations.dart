@@ -1,8 +1,7 @@
-
 import 'package:meiyou/data/models/meta_response.dart';
 import 'package:meiyou/domain/entities/recommedations.dart';
 
-class Recommendations extends RecommendationsEnitiy {
+class Recommendations extends RecommendationsEntity {
   const Recommendations(
       {required super.id,
       required super.mediaProvider,
@@ -39,8 +38,6 @@ class Recommendations extends RecommendationsEnitiy {
     );
   }
 
- 
-
   factory Recommendations.fromAnilist(dynamic json) {
     final response =
         MetaResponse.fromAnilist(json['node']['mediaRecommendation']);
@@ -58,6 +55,23 @@ class Recommendations extends RecommendationsEnitiy {
       romanji: response.romanji,
       title: response.title,
       totalEpisodes: response.totalEpisodes,
+    );
+  }
+
+  factory Recommendations.fromEntity(RecommendationsEntity recommendationsEntity) {
+    return Recommendations(
+      id: recommendationsEntity.id,
+      mediaProvider: recommendationsEntity.mediaProvider,
+      genres: recommendationsEntity.genres,
+      averageScore: recommendationsEntity.averageScore,
+      description: recommendationsEntity.description,
+      mediaType: recommendationsEntity.mediaType,
+      native: recommendationsEntity.native,
+      originalLanguage: recommendationsEntity.originalLanguage,
+      poster: recommendationsEntity.poster,
+      romanji: recommendationsEntity.romanji,
+      title: recommendationsEntity.title,
+      totalEpisodes: recommendationsEntity.totalEpisodes,
     );
   }
 }

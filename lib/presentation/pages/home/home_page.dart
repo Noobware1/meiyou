@@ -5,6 +5,7 @@ import 'package:meiyou/core/constants/plaform_check.dart';
 import 'package:meiyou/data/data_source/providers/meta_providers/anilist.dart';
 import 'package:meiyou/data/data_source/providers/meta_providers/tmdb.dart';
 import 'package:meiyou/domain/entities/results.dart';
+import 'package:meiyou/domain/repositories/meta_provider_repository.dart';
 import 'package:meiyou/presentation/pages/home/bloc/main_page_bloc.dart';
 import 'package:meiyou/presentation/widgets/add_space.dart';
 import 'package:meiyou/presentation/widgets/banner_view/banner_image_holder.dart';
@@ -27,17 +28,16 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    future = Anilist().fetchTrending();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    final MetaProviderRepository repository =
+        RepositoryProvider.of<MetaProviderRepository>(context);
+
     return BlocBuilder(
-        bloc: MainPageBloc(
-            anilist: RepositoryProvider.of<Anilist>(context, listen: false),
-            tmdb: RepositoryProvider.of<TMDB>(context, listen: false))
-          ..add(const GetMainPage()),
+        bloc: MainPageBloc(repository)..add(const GetMainPage()),
         builder: (context, state) {
           if (state is MainPageLoading) {
             return const CircularProgressIndicator();

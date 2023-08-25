@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:streamify/constants/colors.dart';
+import 'package:meiyou/core/constants/colors.dart';
 
 class DefaultGrey extends StatelessWidget {
   final Widget child;

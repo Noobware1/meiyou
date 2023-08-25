@@ -4,7 +4,11 @@ import 'package:meiyou/core/resources/provider_type.dart';
 import 'package:meiyou/core/resources/providers/anime_provider.dart';
 import 'package:meiyou/core/resources/providers/base_provider.dart';
 import 'package:meiyou/core/resources/providers/movie_provider.dart';
+import 'package:meiyou/core/resources/providers/tmdb_provider.dart';
 import 'package:meiyou/core/resources/response_state.dart';
+import 'package:meiyou/core/utils/comparing_strings.dart';
+import 'package:meiyou/core/utils/extenstions/iterable.dart';
+import 'package:meiyou/core/utils/extenstions/string.dart';
 import 'package:meiyou/core/utils/network.dart';
 import 'package:meiyou/data/models/episode.dart';
 import 'package:meiyou/data/models/media_details.dart';
@@ -12,6 +16,7 @@ import 'package:meiyou/data/models/movie.dart';
 import 'package:meiyou/data/models/search_response.dart';
 import 'package:meiyou/data/models/season.dart';
 import 'package:meiyou/data/models/video_server.dart';
+import 'package:meiyou/domain/entities/episode.dart';
 import 'package:meiyou/domain/entities/media_details.dart';
 import 'package:meiyou/domain/entities/search_response.dart';
 import 'package:meiyou/domain/entities/video_server.dart';
@@ -22,29 +27,41 @@ class WatchProviderRepositoryImpl implements WatchProviderRepository {
 
   WatchProviderRepositoryImpl(
     MediaDetailsEntity media,
-  ) : _media = MediaDetails.fromMediaDetailsEntity(media);
+  ) : _media = MediaDetails.fromEntity(media);
 
   MovieProvider _getMovieProvider(BaseProvider provider) =>
       provider as MovieProvider;
   AnimeProvider _getAnimeProvider(BaseProvider provider) =>
       provider as AnimeProvider;
+  TMDBProvider _getTMDBProvider(BaseProvider provider) =>
+      provider as TMDBProvider;
+  bool isTMDBProvider(BaseProvider provider) => provider is TMDBProvider;
+
   bool isAnimeProvider(BaseProvider provider) => provider is AnimeProvider;
   bool isMovieProvider(BaseProvider provider) => provider is MovieProvider;
 
   @override
-  Future<ResponseState<List<Episode>>> loadEpisodes(
-      BaseProvider provider, String url) {
+  Future<ResponseState<List<EpisodeEntity>>> loadEpisodes(
+    BaseProvider provider, String url, int? seasonNumber,
+      List<EpisodeEntity>? episodes  ) {
     return tryWithAsync(() async {
-      final List<Episode> episodes;
+      final List<Episode> getEpisodes;
       if (provider.providerType == ProviderType.meta) {
         throw UnimplementedError();
       } else if (isAnimeProvider(provider)) {
-        episodes = await _getAnimeProvider(provider).loadEpisodes(url);
+        getEpisodes = await _getAnimeProvider(provider).loadEpisodes(url);
+      } else if (isTMDBProvider(provider)) {
+        getEpisodes = await _getTMDBProvider(provider).loadEpisodes(
+            Season(
+              id: url.toInt(),
+              number: seasonNumber ?? 1,
+            ),
+            episodes!.mapAsList((it) => Episode.fromEntity(it)));
       } else {
-        episodes = await _getMovieProvider(provider).loadEpisodes(url);
+        getEpisodes = await _getMovieProvider(provider).loadEpisodes(url);
       }
-      return episodes;
-    });
+      return getEpisodes;
+    }, timeout: const Duration(seconds: 10));
   }
 
   @override
@@ -65,6 +82,13 @@ class WatchProviderRepositoryImpl implements WatchProviderRepository {
     return tryWithAsync(() async {
       if (isMovieProvider(provider)) {
         return _getMovieProvider(provider).loadSeasons(url);
+      } else if (isTMDBProvider(provider)) {
+        if (_media.seasons == null) {
+          throw const MeiyouException(
+              'Seasons is null, either the seasons from the [MediaDetails] is null or the mediaType is not correct');
+        }
+        return _getTMDBProvider(provider)
+            .loadSeasons(url, _media.seasons!.mapAsList(Season.fromEntity));
       } else {
         throw MeiyouException(
             'load Season is not supported on ${provider.providerType}');
@@ -87,17 +111,51 @@ class WatchProviderRepositoryImpl implements WatchProviderRepository {
   }
 
   @override
-  Future<ResponseState<List<VideoServer>>> loadVideoServer(
+  Future<ResponseState<List<VideoServer>>> loadVideoServers(
       BaseProvider provider, String url) {
     return tryWithAsync(() async {
       if (isMovieProvider(provider)) {
-        return _getMovieProvider(provider).loadVideoServer(url);
+        return _getMovieProvider(provider).loadVideoServers(url);
       } else if (isAnimeProvider(provider)) {
-        return _getAnimeProvider(provider).loadVideoServer(url);
+        return _getAnimeProvider(provider).loadVideoServers(url);
       } else {
         throw UnimplementedError();
       }
     });
+  }
+
+  @override
+  SearchResponse findBestSearchResponse(
+      List<SearchResponseEntity> responses, ProviderType type) {
+    final String? title;
+    final titles = responses.map((it) => it.title).toList();
+    if (type == ProviderType.anime) {
+      title = _media.romaji ?? _media.title ?? _media.native;
+    } else {
+      title = _media.title ?? _media.romaji ?? _media.native;
+    }
+
+    final index = findBestMatch(title ?? '', titles).index;
+
+    return SearchResponse.fromEntity(responses[index]);
+  }
+
+  @override
+  String getMediaTitle() =>
+      _media.title ?? _media.romaji ?? _media.native ?? '';
+
+  @override
+  Future<ResponseState<List<SearchResponseEntity>>> search(
+    BaseProvider provider, {
+    String? query,
+  }) {
+    if (isTMDBProvider(provider)) {
+      return tryWithAsync(() => _getTMDBProvider(provider).search(_media));
+    }
+    if (query != null) {
+      return searchWithQuery(provider, query);
+    }
+    return searchUsingMedia(provider);
   }
 
   @override
@@ -107,7 +165,7 @@ class WatchProviderRepositoryImpl implements WatchProviderRepository {
     if (isAnimeProvider(provider)) {
       query = _media.romaji ?? _media.title ?? _media.native ?? '';
     } else {
-      query = _media.title ?? _media.native ?? '';
+      query = getMediaTitle();
     }
     return searchWithQuery(provider, query);
   }

@@ -5,9 +5,5 @@ abstract class BaseProvider {
 
   ProviderType get providerType;
 
-  String encode(String url) =>
-      Uri.encodeQueryComponent(url).replaceAll('+', '%20');
-
-
 
 }

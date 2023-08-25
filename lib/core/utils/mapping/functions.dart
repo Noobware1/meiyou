@@ -7,8 +7,8 @@ MetaResponse? findBestMatchingTitle(
     List<MetaResponse> responses, String target) {
   final titles =
       responses.map((e) => e.title ?? e.romanji ?? e.native!).toList();
-  final index = findBestMatch(target, titles)?.index;
-  if (index == null) return null;
+  final index = findBestMatch(target, titles).index;
+
   return responses[index];
 }
 

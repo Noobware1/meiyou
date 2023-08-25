@@ -2,14 +2,27 @@ import 'package:meiyou/core/utils/date_time.dart';
 import 'package:meiyou/domain/entities/season.dart';
 
 class Season extends SeasonEntity {
-  const Season(
-      {required super.number,
-      super.id,
-      super.title,
-      super.url,
-      super.airDate,
-      super.totalEpisode,
-      super.isOnGoing});
+  const Season({
+    required super.number,
+    super.id,
+    super.title,
+    super.url,
+    super.airDate,
+    super.totalEpisode,
+    super.isOnGoing,
+  });
+
+  factory Season.fromEntity(SeasonEntity seasonEntity) {
+    return Season(
+      number: seasonEntity.number,
+      id: seasonEntity.id,
+      title: seasonEntity.title,
+      url: seasonEntity.url,
+      airDate: seasonEntity.airDate,
+      totalEpisode: seasonEntity.totalEpisode,
+      isOnGoing: seasonEntity.isOnGoing,
+    );
+  }
 
   factory Season.fromTMDB(dynamic json) {
     return Season(
@@ -19,5 +32,30 @@ class Season extends SeasonEntity {
         airDate: DateTimeFormatter.toDateTimeFromTMDBFormat(
             json['air_date'].toString()),
         totalEpisode: json['episode_count'] as int?);
+  }
+
+  Season copyWith({
+    num? number,
+    int? id,
+    String? title,
+    String? url,
+    DateTime? airDate,
+    int? totalEpisode,
+    bool? isOnGoing,
+  }) {
+    return Season(
+      number: number ?? this.number,
+      id: id ?? this.id,
+      title: title ?? this.title,
+      url: url ?? this.url,
+      airDate: airDate ?? this.airDate,
+      totalEpisode: totalEpisode ?? this.totalEpisode,
+      isOnGoing: isOnGoing ?? this.isOnGoing,
+    );
+  }
+
+  @override
+  String toString() {
+    return 'number: $number,\nid: $id,\ntitle: $title,\nurl: $url,\nairDate: $airDate,\ntotalEpisode: $totalEpisode,\nisOnGoing: $isOnGoing';
   }
 }

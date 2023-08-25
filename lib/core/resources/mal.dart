@@ -1,25 +1,16 @@
 import 'dart:async';
 import 'package:meiyou/core/resources/client.dart';
-import 'package:meiyou/core/utils/extenstion.dart';
+import 'package:meiyou/core/utils/extenstions/episode.dart';
+import 'package:meiyou/core/utils/extenstions/iterable.dart';
+import 'package:meiyou/core/utils/extenstions/string.dart';
 import 'package:meiyou/data/models/episode.dart';
 import 'package:meiyou/data/models/media_details.dart';
+import 'package:meiyou/core/utils/async_loop.dart';
 
 class MyAnimeList {
   static const hostUrl = 'https://api.jikan.moe/v4';
 
-  Stream<List<Episode>> _getEpisode(
-      int total, String url, String? thumbnail) async* {
-    for (var i = 2; i < total + 1; i++) {
-      Future.delayed(const Duration(seconds: 2));
-      final res = (await client.get('$url?page=$i')).json();
-      final episodes = _parseEpisodeResponse(res);
-      if (episodes != null) {
-        yield episodes
-            .map((episode) => episode.copyWith(thumbnail: thumbnail))
-            .toList();
-      }
-    }
-  }
+
 
   Future<List<Episode>?> fetchEpisode(MediaDetails media,
       [String? page]) async {
@@ -30,8 +21,7 @@ class MyAnimeList {
     final getEpisode = (await client.get(url)).json();
 
     final episodes = _parseEpisodeResponse(getEpisode)
-        ?.map((episode) => episode.copyWith(thumbnail: image))
-        .toList();
+        .mapAsList((episode) => episode.copyWith(thumbnail: image));
 
     final totalPages = int.parse(
         getEpisode?["pagination"]?["last_visible_page"]?.toString() ?? '0');
@@ -39,42 +29,38 @@ class MyAnimeList {
     final bool isNextPage =
         getEpisode?["pagination"]?["has_next_page"] ?? false;
     if (!isNextPage) return episodes;
-    final Completer<List<Episode>> completer = Completer();
 
-    if (episodes != null) {
-      final list = [...episodes];
-      _getEpisode(totalPages, url, image).listen((event) {
-        list.addAll(event);
-      }, onDone: () {
-        final newList = list.fillMissingEpisode(media);
-        final total = media.totalEpisode ?? media.currentNumberEpisode!;
+    final list = [...episodes];
+    await asyncForLoop(
+      start: 2,
+      end: totalPages,
+      cancelOnError: false,
+      onData: (data) => list.addAll(data),
+      fun: (index) async => (await client.get('$url?page=$index'))
+          .json(_parseEpisodeResponse)
+          .mapAsList((it) => it.copyWith(thumbnail: image)),
+    );
+    list.fillMissingEpisode(media);
+    final total = media.totalEpisode ?? media.currentNumberEpisode;
 
-        if (newList.length != total) newList.fill(total, media);
-
-        completer.complete(newList);
-      });
-
-      return completer.future;
-    } else {
-      return null;
-    }
+    if (total != null && list.length != total) list.fill(total, media);
+    return list;
+  
   }
 
-  List<Episode>? _parseEpisodeResponse(dynamic json) {
-    if (json["data"] != null) {
-      final data =
-          List.from(json["data"]).map((e) => _parseEpisode(e)).toList();
-      return data;
-    } else {
-      return null;
-    }
-  }
 
-  Episode _parseEpisode(dynamic json) {
-    return Episode(
-        number: json['mal_id'] as int,
-        title: json?['title'] ?? json["title_romanji"],
-        isFiller: json['filler'],
-        rated: (json['score']?.toString() ?? '0.0').toDouble());
-  }
+
+List<Episode> _parseEpisodeResponse(dynamic json) =>
+    List.from(json["data"]).mapAsList(_parseEpisode);
+
+Episode _parseEpisode(dynamic json) {
+  return Episode(
+      number: json['mal_id'] as int,
+      title: json?['title'] ?? json["title_romanji"],
+      isFiller: json['filler'],
+      rated: (json['score']?.toString() ?? '0.0').toDouble());
 }
+
+
+}
+

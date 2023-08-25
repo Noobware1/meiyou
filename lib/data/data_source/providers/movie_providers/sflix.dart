@@ -2,7 +2,8 @@ import 'package:meiyou/core/resources/client.dart';
 import 'package:meiyou/core/resources/extractors/video_extractor.dart';
 import 'package:meiyou/core/resources/media_type.dart';
 import 'package:meiyou/core/resources/providers/movie_provider.dart';
-import 'package:meiyou/core/utils/extenstion.dart';
+import 'package:meiyou/core/utils/encode.dart';
+import 'package:meiyou/core/utils/extenstions/string.dart';
 import 'package:meiyou/data/models/episode.dart';
 import 'package:meiyou/data/models/movie.dart';
 import 'package:meiyou/data/models/search_response.dart';
@@ -164,7 +165,7 @@ class Sflix extends MovieProvider {
   }
 
   @override
-  Future<List<VideoServer>> loadVideoServer(String url) {
+  Future<List<VideoServer>> loadVideoServers(String url) {
     // TODO: implement loadVideoServer
     throw UnimplementedError();
   }

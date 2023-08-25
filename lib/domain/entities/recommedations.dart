@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:meiyou/core/resources/meta_provider.dart';
 import 'package:meiyou/domain/entities/meta_response.dart';
 
-class RecommendationsEnitiy extends Equatable {
+class RecommendationsEntity extends Equatable {
   final int id;
   final MediaProvider mediaProvider;
   final String? title;
@@ -18,7 +18,7 @@ class RecommendationsEnitiy extends Equatable {
   final double? averageScore;
   final int? totalEpisodes;
 
-  const RecommendationsEnitiy(
+  const RecommendationsEntity(
       {required this.id,
       // this.bannerImage,
       this.title,

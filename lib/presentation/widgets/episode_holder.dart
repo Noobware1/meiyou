@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:streamify/widgets/add_space.dart';
-import 'package:streamify/widgets/resizeable_text.dart';
+import 'package:meiyou/presentation/widgets/add_space.dart';
+import 'package:meiyou/presentation/widgets/resizeable_text.dart';
 
 class EpisodeHolder extends StatelessWidget {
   final VoidCallback onTap;
@@ -69,9 +69,7 @@ class EpisodeHolder extends StatelessWidget {
           alignment: Alignment.topLeft,
           child: ResizeableTextWidget(
             text: desc!,
-            animate: false,
-            maxlines: 3,
-            paddText: false,
+            maxLines: 3,
             style: const TextStyle(
               fontSize: 12.8,
               color: Colors.grey,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:meiyou/core/resources/meta_provider.dart';
 import 'package:meiyou/data/data_source/providers/meta_providers/anilist.dart';
 import 'package:meiyou/data/data_source/providers/meta_providers/tmdb.dart';
+import 'package:meiyou/data/repositories/meta_provider_repository_impl.dart';
 import 'package:meiyou/domain/entities/meta_response.dart';
 import 'package:meiyou/presentation/pages/home/home_page.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -39,13 +40,13 @@ class Meiyou extends StatelessWidget {
               unselectedIconTheme: IconThemeData(color: Colors.grey)),
           iconTheme:
               const IconThemeData(color: Colors.white, size: 30, weight: 30)),
-      home: MultiRepositoryProvider(
-        providers: [
+      home:
+          // RepositoryProvider(
+          //   create: (context) => Anilist(),
+          // ),
+          // RepositoryProvider(create: (context) => TMDB()),
           RepositoryProvider(
-            create: (context) => Anilist(),
-          ),
-          RepositoryProvider(create: (context) => TMDB())
-        ],
+        create: (context) => MetaProviderRepositoryImpl(TMDB(), Anilist()),
         child: const InfoAndWatchPage(
             response: MetaResponseEntity(
                 id: 1, mediaProvider: MediaProvider.tmdb, genres: [''])),

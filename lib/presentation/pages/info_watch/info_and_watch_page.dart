@@ -2,28 +2,33 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meiyou/core/resources/media_type.dart';
 import 'package:meiyou/core/resources/providers/base_provider.dart';
-import 'package:meiyou/core/utils/determine_title_sequence.dart';
+import 'package:meiyou/core/resources/snackbar.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
 import 'package:meiyou/core/utils/extenstions/date_titme.dart';
+import 'package:meiyou/data/repositories/get_episodes_repository_impl.dart';
 import 'package:meiyou/data/repositories/get_provider_list.dart';
 import 'package:meiyou/data/repositories/watch_provider_repository_impl.dart';
 import 'package:meiyou/domain/entities/media_details.dart';
 import 'package:meiyou/domain/entities/meta_response.dart';
-import 'package:meiyou/domain/entities/recommedations.dart';
-import 'package:meiyou/domain/entities/results.dart';
-import 'package:meiyou/domain/entities/row.dart';
+import 'package:meiyou/domain/repositories/cache_repository.dart';
+import 'package:meiyou/domain/repositories/get_episodes_repository.dart';
+import 'package:meiyou/domain/repositories/meta_provider_repository.dart';
 import 'package:meiyou/domain/repositories/watch_provider_repository.dart';
 import 'package:meiyou/presentation/pages/info_watch/state/read_json.dart';
 import 'package:meiyou/presentation/pages/info_watch/state/search_response_bloc/bloc/search_response_bloc.dart';
+import 'package:meiyou/presentation/pages/info_watch/state/selected_searchResponse_bloc/selected_search_response_bloc.dart';
 import 'package:meiyou/presentation/pages/info_watch/state/source_dropdown_bloc/bloc/source_drop_down_bloc.dart';
 import 'package:meiyou/presentation/widgets/add_space.dart';
 import 'package:meiyou/presentation/widgets/constraints_box_for_large_screen.dart';
 import 'package:meiyou/domain/usecases/provider_use_cases/load_providers_use_case.dart';
-import 'package:meiyou/presentation/widgets/image_view/image_list_view_with_controller.dart';
+import 'package:meiyou/data/repositories/cache_repository_impl.dart';
 import 'package:meiyou/presentation/widgets/info/episode_number_and_buttons.dart';
 import 'package:meiyou/presentation/widgets/info/header.dart';
 import 'package:meiyou/presentation/widgets/layout_builder.dart';
 import 'package:meiyou/presentation/widgets/resizeable_text.dart';
+import 'package:meiyou/presentation/widgets/season_selector/fetch_seasons_bloc/fetch_seasons_bloc_bloc.dart';
+import 'package:meiyou/presentation/widgets/season_selector/season_selector.dart';
+import 'package:meiyou/presentation/widgets/season_selector/seasons_selector_bloc/seasons_selector_bloc.dart';
 import 'package:meiyou/presentation/widgets/source_dropdown.dart';
 import 'package:meiyou/presentation/widgets/watch/search_response_bottom_sheet.dart';
 
@@ -39,9 +44,15 @@ class _InfoAndWatchPageState extends State<InfoAndWatchPage> {
   late final Map<String, BaseProvider> providers;
   late final SourceDropDownBloc _sourceDropDownBloc;
   late final MediaDetailsEntity media;
+  late final MetaProviderRepository _metaProviderRepository;
   late final WatchProviderRepository repository;
+  late final SelectedSearchResponseBloc _selectedSearchResponseBloc;
   late final SearchResponseBloc _searchResponseBloc;
-  late final mediaTitle;
+  late final FetchSeasonsBloc _fetchSeasonsBloc;
+  late final SeasonsSelectorBloc _seasonsSelectorBloc;
+  late final CacheRespository _cacheRespository;
+  late final GetEpisodesRepository _getEpisodesRepository;
+
   static const _textStyleForEntryName =
       TextStyle(color: Colors.grey, fontSize: 16, fontWeight: FontWeight.w600);
 
@@ -50,28 +61,37 @@ class _InfoAndWatchPageState extends State<InfoAndWatchPage> {
 
   @override
   void initState() {
-    providers =
-        LoadProvidersUseCase(GetProviderListRepositoryImpl()).call('TV');
-    media = readMedia();
+    media = readMedia(2);
+    providers = LoadProvidersUseCase(GetProviderListRepositoryImpl())
+        .call(media.mediaType);
+    _metaProviderRepository =
+        RepositoryProvider.of<MetaProviderRepository>(context);
     final defaultProvider = providers.values.first;
-    ;
+    _cacheRespository = CacheRepositoryImpl();
     repository = WatchProviderRepositoryImpl(media);
-    _searchResponseBloc = SearchResponseBloc();
+    _selectedSearchResponseBloc = SelectedSearchResponseBloc(repository);
+    _searchResponseBloc =
+        SearchResponseBloc(repository, _selectedSearchResponseBloc);
     _sourceDropDownBloc = SourceDropDownBloc(
         repository: repository,
-        title: determineTitleSequence(
-            defaultProvider, [media.title, media.romaji, media.native]),
         searchResponseBloc: _searchResponseBloc,
         provider: defaultProvider)
       ..add(SourceDropDownOnSelected(
         provider: defaultProvider,
       ));
+    _seasonsSelectorBloc = SeasonsSelectorBloc();
+    _fetchSeasonsBloc = FetchSeasonsBloc(repository, _seasonsSelectorBloc);
+    _getEpisodesRepository = GetEpisodeRepositoryImpl(
+        metaProviderRepository: _metaProviderRepository,
+        cacheRespository: _cacheRespository,
+        mediaDetails: media);
 
     super.initState();
   }
 
   @override
   void dispose() {
+    _cacheRespository.deleteAllCache();
     super.dispose();
   }
 
@@ -83,97 +103,121 @@ class _InfoAndWatchPageState extends State<InfoAndWatchPage> {
 
     return Scaffold(
         backgroundColor: Colors.black,
-        // body: BlocBuilder<InfoAndWatchBloc, InfoAndWatchState>(
-        //   bloc: InfoAndWatchBloc(
-        //       response: widget.response,
-        //       anilist: RepositoryProvider.of<Anilist>(context),
-        //       tmdb: RepositoryProvider.of<TMDB>(context))
-        //     ..add(const GetMediaDetails()),
-        //   builder: (context, state) {
-        //     return Container();
-        //   },
-        // ),
-        body: RepositoryProvider.value(
-          value: media,
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const InfoHeader(),
-                _episodeNumberAndButtons(media.totalEpisode),
-                addVerticalSpace(10),
-                _buildInfo(media, color),
-                addVerticalSpace(20),
-                BlocBuilder(
-                    bloc: _searchResponseBloc,
-                    builder: (context, state) {
-                      final child = Text(
-                        (state as dynamic).title ?? '',
-                        style: const TextStyle(
-                            color: Colors.white, fontWeight: FontWeight.w600),
-                      );
-                      return ResponsiveBuilder(
-                          forSmallScreen: Padding(
-                            padding: const EdgeInsets.only(left: 30, right: 30),
-                            child: child,
-                          ),
-                          forLagerScreen: ConstarintsForBiggerScreeen(
-                            child: Padding(
-                                padding:
-                                    const EdgeInsets.only(left: 50, right: 20),
-                                child: child),
-                          ));
-                    }),
-                addVerticalSpace(5),
-                BlocProvider.value(
-                  value: _sourceDropDownBloc,
-                  child: ResponsiveBuilder(
-                    forSmallScreen: Padding(
-                      padding: const EdgeInsets.only(left: 20, right: 20),
-                      child: SourceDropDown(providersList: providers),
-                    ),
-                    forLagerScreen: ConstarintsForBiggerScreeen(
-                        child: Padding(
-                      padding: const EdgeInsets.only(left: 50, right: 20),
-                      child: SourceDropDown(providersList: providers),
-                    )),
-                  ),
-                ),
-                addVerticalSpace(5),
-                ResponsiveBuilder(
-                    forSmallScreen: Padding(
-                      padding: const EdgeInsets.only(left: 30, right: 30),
-                      child: _wrongTitle(context, textStyle),
-                    ),
-                    forLagerScreen: Padding(
-                        padding: const EdgeInsets.only(left: 50, right: 30),
-                        child: _wrongTitle(context, textStyle))),
-                addVerticalSpace(20),
-                _synopsis(media.description),
-                addVerticalSpace(20),
+        body: MultiRepositoryProvider(
+            providers: [
+              RepositoryProvider.value(
+                value: media,
+              ),
+              RepositoryProvider.value(value: repository),
+              RepositoryProvider.value(value: _cacheRespository),
+              RepositoryProvider.value(value: _getEpisodesRepository),
+            ],
+            child: MultiBlocProvider(
+              providers: [
+                BlocProvider.value(value: _sourceDropDownBloc),
+                BlocProvider.value(value: _selectedSearchResponseBloc),
+                BlocProvider.value(value: _fetchSeasonsBloc),
+                BlocProvider.value(value: _seasonsSelectorBloc),
               ],
-            ),
-          ),
-        ));
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const InfoHeader(),
+                    _episodeNumberAndButtons(media.totalEpisode),
+                    addVerticalSpace(10),
+                    _buildInfo(media, color),
+                    addVerticalSpace(20),
+                    BlocConsumer<SelectedSearchResponseBloc,
+                            SelectedSearchResponseState>(
+                        bloc: _selectedSearchResponseBloc,
+                        listener: (context, state) {
+                          if (state is SelectedSearchResponseNotFound) {
+                            showSnackBAr(context, text: state.error.toString());
+                          }
+                        },
+                        listenWhen: (a, b) =>
+                            b is SelectedSearchResponseNotFound,
+                        builder: (context, state) {
+                          final child = Text(
+                            state.title,
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600),
+                          );
+                          return ResponsiveBuilder(
+                              forSmallScreen: Padding(
+                                padding:
+                                    const EdgeInsets.only(left: 30, right: 30),
+                                child: child,
+                              ),
+                              forLagerScreen: ConstarintsForBiggerScreeen(
+                                child: Padding(
+                                    padding: const EdgeInsets.only(
+                                        left: 50, right: 20),
+                                    child: child),
+                              ));
+                        }),
+                    addVerticalSpace(5),
+                    BlocProvider.value(
+                      value: _sourceDropDownBloc,
+                      child: ResponsiveBuilder(
+                        forSmallScreen: Padding(
+                          padding: const EdgeInsets.only(left: 20, right: 20),
+                          child: SourceDropDown(providersList: providers),
+                        ),
+                        forLagerScreen: ConstarintsForBiggerScreeen(
+                            child: Padding(
+                          padding: const EdgeInsets.only(left: 50, right: 20),
+                          child: SourceDropDown(providersList: providers),
+                        )),
+                      ),
+                    ),
+                    addVerticalSpace(5),
+                    _buildWrongTitle(context, textStyle),
+                    addVerticalSpace(10),
+                    const SeasonSelector(),
+                    addVerticalSpace(20),
+                    _synopsis(media.description),
+                    addVerticalSpace(20),
+                  ],
+                ),
+              ),
+            )));
   }
 
-  Widget _wrongTitle(BuildContext context, TextStyle textStyle) {
+  Widget _buildWrongTitle(BuildContext context, TextStyle textStyle) {
+    return GestureDetector(
+        onTap: () => showSearchBottomSheet(context),
+        child: ResponsiveBuilder(
+            forSmallScreen: Padding(
+                padding: const EdgeInsets.only(right: 30, left: 20),
+                child: _wrongTitle(textStyle)),
+            forLagerScreen: ConstarintsForBiggerScreeen(
+              child: Padding(
+                  padding: const EdgeInsets.only(right: 30, left: 50),
+                  child: _wrongTitle(textStyle)),
+            )));
+  }
+
+  Widget _wrongTitle(TextStyle textStyle) {
     return Align(
       alignment: Alignment.centerRight,
-      child: GestureDetector(
-          onTap: () => showSearchBottomSheet(context, _searchResponseBloc),
-          child: Text(
-            'Wrong title',
-            style: textStyle,
-          )),
+      child: Text(
+        'Wrong title',
+        style: textStyle,
+      ),
     );
   }
 
-  Future showSearchBottomSheet(BuildContext context, SearchResponseBloc bloc) {
+  Future showSearchBottomSheet(BuildContext context) {
     return showModalBottomSheet(
         context: context,
         backgroundColor: Colors.black,
-        builder: (context) => SearchResponseBottomSheet(bloc: bloc));
+        builder: (context) => SearchResponseBottomSheet(
+              bloc: _searchResponseBloc,
+              selectedSearchResponseBloc: _selectedSearchResponseBloc,
+            ));
   }
 
   Widget _buildInfo(MediaDetailsEntity media, Color primaryColor) {
@@ -246,27 +290,27 @@ class _InfoAndWatchPageState extends State<InfoAndWatchPage> {
     ]);
   }
 
-  Widget _buildRecommended(List<RecommendationsEnitiy> recommendations) {
-    final row = MetaRowEntity(
-        rowTitle: 'Recommend',
-        resultsEntity: MetaResultsEntity(
-            metaResponses:
-                recommendations.map((e) => e.toMetaResponse()).toList(),
-            totalPage: 1));
+  // Widget _buildRecommended(List<RecommendationsEnitiy> recommendations) {
+  //   final row = MetaRowEntity(
+  //       rowTitle: 'Recommend',
+  //       resultsEntity: MetaResultsEntity(
+  //           metaResponses:
+  //               recommendations.map((e) => e.toMetaResponse()).toList(),
+  //           totalPage: 1));
 
-    return ResponsiveBuilder(
-        forSmallScreen: ImageViewWithScrollController(
-            type: ImageListViewType.withLabel, data: row),
-        forLagerScreen: ImageViewWithScrollController(
-            type: ImageListViewType.withButtonAndLabel,
-            height: 250,
-            width: 150,
-            textStyle: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
-            data: row));
-  }
+  //   return ResponsiveBuilder(
+  //       forSmallScreen: ImageViewWithScrollController(
+  //           type: ImageListViewType.withLabel, data: row),
+  //       forLagerScreen: ImageViewWithScrollController(
+  //           type: ImageListViewType.withButtonAndLabel,
+  //           height: 250,
+  //           width: 150,
+  //           textStyle: const TextStyle(
+  //             fontSize: 14,
+  //             fontWeight: FontWeight.w500,
+  //           ),
+  //           data: row));
+  // }
 
   Widget _buildEntries({
     required String entryName,

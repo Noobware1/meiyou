@@ -29,7 +29,7 @@ class MediaDetailsEntity extends Equatable {
   final Map<String, String>? extrenalIds;
   final List<CastEnitity>? cast;
   // final List<Trailer>? videos;
-  final List<RecommendationsEnitiy>? recommendations;
+  final List<RecommendationsEntity>? recommendations;
   // final List<Recommendations>? recommendations;
   final List<SeasonEntity>? seasons;
 

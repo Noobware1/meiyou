@@ -1,7 +1,7 @@
 import 'package:meiyou/core/resources/genres.dart';
 import 'package:meiyou/core/resources/meta_provider.dart';
 import 'package:meiyou/core/utils/date_time.dart';
-import 'package:meiyou/core/utils/extenstion.dart';
+import 'package:meiyou/core/utils/extenstions/string.dart';
 import 'package:meiyou/core/utils/fix_anilist_description.dart';
 import 'package:meiyou/core/utils/fix_tmdb_image.dart';
 import 'package:meiyou/domain/entities/meta_response.dart';
@@ -37,8 +37,7 @@ class MetaResponse extends MetaResponseEntity {
     }
   }
 
-  factory MetaResponse.fromMetaResponsEntity(
-      MetaResponseEntity metaResponseEntity) {
+  factory MetaResponse.fromEntity(MetaResponseEntity metaResponseEntity) {
     return MetaResponse(
       id: metaResponseEntity.id,
       genres: metaResponseEntity.genres,
