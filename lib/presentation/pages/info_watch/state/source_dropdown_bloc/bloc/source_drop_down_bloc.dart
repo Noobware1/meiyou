@@ -11,12 +11,13 @@ part 'source_drop_down_state.dart';
 
 class SourceDropDownBloc
     extends Bloc<SourceDropDownEvent, SourceDropDownState> {
-  final WatchProviderRepository repository;
+  // final WatchProviderRepository repository;
   // final MediaDetailsEntity media;
   final SearchResponseBloc searchResponseBloc;
 
   SourceDropDownBloc(
-      {required this.repository,
+      {
+        // required this.repository,
       required this.searchResponseBloc,
       required BaseProvider provider})
       : super(SourceDropDownSelected(provider)) {

@@ -7,36 +7,40 @@ import 'package:meiyou/core/resources/provider_type.dart';
 import 'package:meiyou/domain/entities/search_response.dart';
 import 'package:meiyou/domain/repositories/watch_provider_repository.dart';
 import 'package:meiyou/domain/usecases/provider_use_cases/find_best_search_response.dart';
+
 part 'selected_search_response_event.dart';
 part 'selected_search_response_state.dart';
 
 class SelectedSearchResponseBloc
     extends Bloc<SelectedSearchResponseEvent, SelectedSearchResponseState> {
-  // final MediaDetailsEntity media;
-  final WatchProviderRepository repository;
+  final FindBestSearchResponseUseCase findBestSearchResponseUseCase;
+  final String _mediaTitle;
 
-  SelectedSearchResponseBloc(this.repository)
-      : super(SelectedSearchResponseFinding(repository.getMediaTitle())) {
+  SelectedSearchResponseBloc(
+      {required this.findBestSearchResponseUseCase, required String mediaTitle})
+      : _mediaTitle = mediaTitle,
+        super(SelectedSearchResponseFinding(mediaTitle)) {
     on<FindBestSearchResponseFromList>(onFindBestSearchResponseFromList);
+
     on<SelectSearchResponseFromUserSelection>(
         onSelectSearchResponseFromUserSelection);
+
     on<SearchResponseWaiting>(onSearchResponseWaiting);
   }
 
   FutureOr<void> onFindBestSearchResponseFromList(
       FindBestSearchResponseFromList event,
       Emitter<SelectedSearchResponseState> emit) {
-    final title = repository.getMediaTitle();
-    emit(SelectedSearchResponseFinding(title));
+    emit(SelectedSearchResponseFinding(_mediaTitle));
     if (event.searchResponses != null && event.searchResponses!.isNotEmpty) {
-      final best = FindBestSearchResponseUseCase(repository).call(
+      final best = findBestSearchResponseUseCase.call(
           FindBestSearchResponseParams(
               responses: event.searchResponses!, type: event.type));
 
       emit(SelectedSearchResponseFound(best.title, best));
     } else {
       emit(SelectedSearchResponseNotFound(
-          title, event.error ?? MeiyouException('Could Not Find $title')));
+          _mediaTitle, event.error ?? MeiyouException('Could Not Find $_mediaTitle')));
     }
   }
 

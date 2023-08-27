@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:meiyou/core/resources/meta_provider.dart';
+import 'package:meiyou/core/usecases_container/meta_provider_repository_container.dart';
+import 'package:meiyou/core/usecases_container/provider_list_container.dart';
 import 'package:meiyou/data/data_source/providers/meta_providers/anilist.dart';
 import 'package:meiyou/data/data_source/providers/meta_providers/tmdb.dart';
+import 'package:meiyou/data/repositories/get_provider_list.dart';
 import 'package:meiyou/data/repositories/meta_provider_repository_impl.dart';
 import 'package:meiyou/domain/entities/meta_response.dart';
+import 'package:meiyou/domain/repositories/meta_provider_repository.dart';
 import 'package:meiyou/presentation/pages/home/home_page.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meiyou/presentation/pages/info_watch/info_and_watch_page.dart';
@@ -18,6 +22,8 @@ class Meiyou extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    final MetaProviderRepository metaProviderRepository =
+        MetaProviderRepositoryImpl(TMDB(), Anilist());
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
@@ -45,8 +51,15 @@ class Meiyou extends StatelessWidget {
           //   create: (context) => Anilist(),
           // ),
           // RepositoryProvider(create: (context) => TMDB()),
-          RepositoryProvider(
-        create: (context) => MetaProviderRepositoryImpl(TMDB(), Anilist()),
+
+          MultiRepositoryProvider(
+        providers: [
+          MetaProviderRepositoryContainer(
+                  MetaProviderRepositoryImpl(TMDB(), Anilist()))
+              .inject(),
+          LoadProviderListRepositoryContainer(ProviderListRepositoryImpl())
+              .inject(),
+        ],
         child: const InfoAndWatchPage(
             response: MetaResponseEntity(
                 id: 1, mediaProvider: MediaProvider.tmdb, genres: [''])),

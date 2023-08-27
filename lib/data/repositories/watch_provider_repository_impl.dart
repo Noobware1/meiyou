@@ -9,6 +9,7 @@ import 'package:meiyou/core/resources/response_state.dart';
 import 'package:meiyou/core/utils/comparing_strings.dart';
 import 'package:meiyou/core/utils/extenstions/iterable.dart';
 import 'package:meiyou/core/utils/extenstions/string.dart';
+import 'package:meiyou/core/utils/generate_episode_chunks.dart';
 import 'package:meiyou/core/utils/network.dart';
 import 'package:meiyou/data/models/episode.dart';
 import 'package:meiyou/data/models/media_details.dart';
@@ -41,9 +42,8 @@ class WatchProviderRepositoryImpl implements WatchProviderRepository {
   bool isMovieProvider(BaseProvider provider) => provider is MovieProvider;
 
   @override
-  Future<ResponseState<List<EpisodeEntity>>> loadEpisodes(
-    BaseProvider provider, String url, int? seasonNumber,
-      List<EpisodeEntity>? episodes  ) {
+  Future<ResponseState<List<EpisodeEntity>>> loadEpisodes(BaseProvider provider,
+      String url, num? seasonNumber, List<EpisodeEntity>? episodes) {
     return tryWithAsync(() async {
       final List<Episode> getEpisodes;
       if (provider.providerType == ProviderType.meta) {
@@ -182,5 +182,12 @@ class WatchProviderRepositoryImpl implements WatchProviderRepository {
         throw UnimplementedError();
       }
     });
+  }
+
+  @override
+  Map<String, List<EpisodeEntity>> getEpisodeChunks(
+      List<EpisodeEntity> episodes) {
+    return GenerateEpisodesChunks.buildEpisodesResponse(
+        episodes.mapAsList((it) => Episode.fromEntity(it)));
   }
 }

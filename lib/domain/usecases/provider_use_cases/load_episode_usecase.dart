@@ -7,7 +7,7 @@ import 'package:meiyou/domain/repositories/watch_provider_repository.dart';
 class LoadEpisodeParams {
   final BaseProvider provider;
   final String url;
-  final int? seasonNumber;
+  final num? seasonNumber;
   final List<EpisodeEntity>? episodes;
 
   const LoadEpisodeParams(
@@ -23,8 +23,7 @@ class LoadEpisodeUseCase
   final WatchProviderRepository _repository;
 
   const LoadEpisodeUseCase(
-    WatchProviderRepository repository,
-  ) : _repository = repository;
+    this._repository ) ;
 
   @override
   Future<ResponseState<List<EpisodeEntity>>> call(LoadEpisodeParams params) {

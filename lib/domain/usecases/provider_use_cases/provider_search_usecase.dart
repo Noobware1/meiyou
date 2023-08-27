@@ -1,11 +1,11 @@
 import 'package:meiyou/core/resources/providers/base_provider.dart';
 import 'package:meiyou/core/resources/response_state.dart';
-import 'package:meiyou/core/usecases/future_use_case.dart';
+import 'package:meiyou/core/usecases/usecase.dart';
 import 'package:meiyou/domain/entities/search_response.dart';
 import 'package:meiyou/domain/repositories/watch_provider_repository.dart';
 
 class ProviderSearchWithQueryUseCase
-    implements FutureUseCase<List<SearchResponseEntity>, String> {
+    implements UseCase<Future<ResponseState<List<SearchResponseEntity>>>, String> {
   final WatchProviderRepository _repository;
   final BaseProvider _provider;
 

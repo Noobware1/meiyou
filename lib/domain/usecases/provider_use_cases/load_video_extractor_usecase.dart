@@ -4,19 +4,21 @@ import 'package:meiyou/core/usecases/usecase.dart';
 import 'package:meiyou/domain/entities/video_server.dart';
 import 'package:meiyou/domain/repositories/watch_provider_repository.dart';
 
-class ProviderLoadVideoExtractorUseCase
-    implements UseCase<VideoExtractor?, VideoSeverEntity> {
-  final WatchProviderRepository _repository;
-  final BaseProvider _provider;
+class LoadVideoExtractorParams {
+  final VideoSeverEntity server;
+  final BaseProvider provider;
 
-  const ProviderLoadVideoExtractorUseCase(
-      {required WatchProviderRepository repository,
-      required BaseProvider provider})
-      : _repository = repository,
-        _provider = provider;
+  LoadVideoExtractorParams({required this.server, required this.provider});
+}
+
+class LoadVideoExtractorUseCase
+    implements UseCase<VideoExtractor?, LoadVideoExtractorParams> {
+  final WatchProviderRepository _repository;
+
+  const LoadVideoExtractorUseCase(this._repository);
 
   @override
-  VideoExtractor? call(VideoSeverEntity params) {
-    return _repository.loadVideoExtractor(_provider, params);
+  VideoExtractor? call(LoadVideoExtractorParams params) {
+    return _repository.loadVideoExtractor(params.provider, params.server);
   }
 }

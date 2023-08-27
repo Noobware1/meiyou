@@ -15,8 +15,7 @@ class FindBestSearchResponseUseCase
     implements UseCase<SearchResponseEntity, FindBestSearchResponseParams> {
   final WatchProviderRepository _repository;
 
-  FindBestSearchResponseUseCase(WatchProviderRepository repository)
-      : _repository = repository;
+  FindBestSearchResponseUseCase(this._repository);
 
   @override
   SearchResponseEntity call(FindBestSearchResponseParams params) {

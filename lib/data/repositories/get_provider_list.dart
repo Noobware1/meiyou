@@ -4,7 +4,7 @@ import 'package:meiyou/core/resources/providers/base_provider.dart';
 import 'package:meiyou/data/data_source/providers/providers.dart';
 import 'package:meiyou/domain/repositories/get_providers_list.dart';
 
-class GetProviderListRepositoryImpl implements GetProviderListRepository {
+class ProviderListRepositoryImpl implements ProviderListRepository {
   @override
   Map<String, BaseProvider> getProviderList(String mediaType) {
     final ProviderType type;
@@ -18,11 +18,10 @@ class GetProviderListRepositoryImpl implements GetProviderListRepository {
       case ProviderType.anime:
         return AnimeProviders().providers;
       case ProviderType.movie:
-        return  
-        MovieProviders().providers;
+        return MovieProviders().providers;
 
       default:
-        return {};
+        return throw 'Unknown ProviderType demanded';
     }
   }
 }

@@ -5,10 +5,10 @@ import 'package:meiyou/presentation/widgets/resizeable_text.dart';
 
 class EpisodeHolder extends StatelessWidget {
   final VoidCallback onTap;
-  final String number;
+  final num number;
   final String? thumbnail;
   final String? desc;
-  final String? rated;
+  final double? rated;
   final String title;
   const EpisodeHolder({
     super.key,

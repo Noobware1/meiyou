@@ -6,6 +6,8 @@ import 'package:meiyou/domain/entities/main_page.dart';
 import 'package:meiyou/domain/entities/episode.dart';
 import 'package:meiyou/domain/entities/season.dart';
 
+import 'cache_repository.dart';
+
 abstract interface class MetaProviderRepository {
   Future<ResponseState<MetaResultsEntity>> fetchSearch(
     String query, {
@@ -23,4 +25,10 @@ abstract interface class MetaProviderRepository {
     MediaDetailsEntity media, [
     SeasonEntity? season,
   ]);
+
+
+  Future<List<EpisodeEntity>> getMappedEpisodes(List<EpisodeEntity> episodes,
+      {SeasonEntity? season,
+      required CacheRespository cacheRepository,
+      required MediaDetailsEntity mediaDetails});
 }

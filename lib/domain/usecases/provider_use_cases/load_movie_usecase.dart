@@ -4,19 +4,21 @@ import 'package:meiyou/core/usecases/usecase.dart';
 import 'package:meiyou/domain/entities/movie.dart';
 import 'package:meiyou/domain/repositories/watch_provider_repository.dart';
 
-class GetProviderLoadMovieUseCase
-    implements UseCase<Future<ResponseState<MovieEntity>>, String> {
-  final WatchProviderRepository _repository;
-  final BaseProvider _provider;
+class LoadMovieParams {
+  final BaseProvider provider;
+  final String url;
 
-  const GetProviderLoadMovieUseCase(
-      {required WatchProviderRepository repository,
-      required BaseProvider provider})
-      : _repository = repository,
-        _provider = provider;
+  LoadMovieParams({required this.provider, required this.url});
+}
+
+class LoadMovieUseCase
+    implements UseCase<Future<ResponseState<MovieEntity>>, LoadMovieParams> {
+  final WatchProviderRepository _repository;
+
+  const LoadMovieUseCase(this._repository);
 
   @override
-  Future<ResponseState<MovieEntity>> call(String params) {
-    return _repository.loadMovie(_provider, params);
+  Future<ResponseState<MovieEntity>> call(LoadMovieParams params) {
+    return _repository.loadMovie(params.provider, params.url);
   }
 }

@@ -4,19 +4,23 @@ import 'package:meiyou/core/usecases/usecase.dart';
 import 'package:meiyou/domain/entities/video_server.dart';
 import 'package:meiyou/domain/repositories/watch_provider_repository.dart';
 
-class ProviderLoadVideoServersUseCase
-    implements UseCase<Future<ResponseState<List<VideoSeverEntity>>>, String> {
-  final WatchProviderRepository _repository;
-  final BaseProvider _provider;
+class LoadVideoServersParams {
+  final String url;
+  final BaseProvider provider;
 
-  const ProviderLoadVideoServersUseCase(
-      {required WatchProviderRepository repository,
-      required BaseProvider provider})
-      : _repository = repository,
-        _provider = provider;
+  LoadVideoServersParams({required this.url, required this.provider});
+}
+
+class LoadVideoServersUseCase
+    implements UseCase<Future<ResponseState<List<VideoSeverEntity>>>, LoadVideoServersParams> {
+  final WatchProviderRepository _repository;
+
+  const LoadVideoServersUseCase(
+    this._repository,
+  );
 
   @override
-  Future<ResponseState<List<VideoSeverEntity>>> call(String params) {
-    return _repository.loadVideoServers(_provider, params);
+  Future<ResponseState<List<VideoSeverEntity>>> call(LoadVideoServersParams params) {
+    return _repository.loadVideoServers(params.provider, params.url);
   }
 }

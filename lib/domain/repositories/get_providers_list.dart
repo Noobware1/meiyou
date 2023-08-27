@@ -1,5 +1,5 @@
 import 'package:meiyou/core/resources/providers/base_provider.dart';
 
-abstract interface class GetProviderListRepository {
+abstract interface class ProviderListRepository {
   Map<String, BaseProvider> getProviderList(String mediaType);
 }

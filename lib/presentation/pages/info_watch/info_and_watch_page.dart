@@ -3,17 +3,20 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meiyou/core/resources/media_type.dart';
 import 'package:meiyou/core/resources/providers/base_provider.dart';
 import 'package:meiyou/core/resources/snackbar.dart';
+import 'package:meiyou/core/usecases_container/meta_provider_repository_container.dart';
+import 'package:meiyou/core/usecases_container/provider_list_container.dart';
+import 'package:meiyou/core/usecases_container/watch_provider_repository_container.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
 import 'package:meiyou/core/utils/extenstions/date_titme.dart';
-import 'package:meiyou/data/repositories/get_episodes_repository_impl.dart';
-import 'package:meiyou/data/repositories/get_provider_list.dart';
 import 'package:meiyou/data/repositories/watch_provider_repository_impl.dart';
 import 'package:meiyou/domain/entities/media_details.dart';
 import 'package:meiyou/domain/entities/meta_response.dart';
 import 'package:meiyou/domain/repositories/cache_repository.dart';
-import 'package:meiyou/domain/repositories/get_episodes_repository.dart';
-import 'package:meiyou/domain/repositories/meta_provider_repository.dart';
-import 'package:meiyou/domain/repositories/watch_provider_repository.dart';
+import 'package:meiyou/domain/usecases/get_mapped_episodes_usecase.dart';
+import 'package:meiyou/domain/usecases/provider_use_cases/find_best_search_response.dart';
+import 'package:meiyou/domain/usecases/provider_use_cases/load_episode_usecase.dart';
+import 'package:meiyou/domain/usecases/provider_use_cases/load_seasons_use_case.dart';
+import 'package:meiyou/domain/usecases/provider_use_cases/search_use_case.dart';
 import 'package:meiyou/presentation/pages/info_watch/state/read_json.dart';
 import 'package:meiyou/presentation/pages/info_watch/state/search_response_bloc/bloc/search_response_bloc.dart';
 import 'package:meiyou/presentation/pages/info_watch/state/selected_searchResponse_bloc/selected_search_response_bloc.dart';
@@ -31,6 +34,7 @@ import 'package:meiyou/presentation/widgets/season_selector/season_selector.dart
 import 'package:meiyou/presentation/widgets/season_selector/seasons_selector_bloc/seasons_selector_bloc.dart';
 import 'package:meiyou/presentation/widgets/source_dropdown.dart';
 import 'package:meiyou/presentation/widgets/watch/search_response_bottom_sheet.dart';
+import 'package:meiyou/presentation/widgets/episode_view/bloc/fetch_episodes/fetch_episodes_bloc.dart';
 
 class InfoAndWatchPage extends StatefulWidget {
   final MetaResponseEntity response;
@@ -41,17 +45,17 @@ class InfoAndWatchPage extends StatefulWidget {
 }
 
 class _InfoAndWatchPageState extends State<InfoAndWatchPage> {
+  late final WatchProviderRepositoryContainer _watchProviderRepositoryContainer;
+  late final MetaProviderRepositoryContainer _metaProviderRepositoryContainer;
   late final Map<String, BaseProvider> providers;
   late final SourceDropDownBloc _sourceDropDownBloc;
   late final MediaDetailsEntity media;
-  late final MetaProviderRepository _metaProviderRepository;
-  late final WatchProviderRepository repository;
+  late final FetchEpisodesBloc _episodeBloc;
   late final SelectedSearchResponseBloc _selectedSearchResponseBloc;
   late final SearchResponseBloc _searchResponseBloc;
   late final FetchSeasonsBloc _fetchSeasonsBloc;
   late final SeasonsSelectorBloc _seasonsSelectorBloc;
   late final CacheRespository _cacheRespository;
-  late final GetEpisodesRepository _getEpisodesRepository;
 
   static const _textStyleForEntryName =
       TextStyle(color: Colors.grey, fontSize: 16, fontWeight: FontWeight.w600);
@@ -62,29 +66,59 @@ class _InfoAndWatchPageState extends State<InfoAndWatchPage> {
   @override
   void initState() {
     media = readMedia(2);
-    providers = LoadProvidersUseCase(GetProviderListRepositoryImpl())
+
+    final providerListContainer =
+        RepositoryProvider.of<LoadProviderListRepositoryContainer>(context);
+    providers = providerListContainer
+        .get<LoadProvidersUseCase>(
+            providerListContainer.loadProviderListUseCase)
         .call(media.mediaType);
-    _metaProviderRepository =
-        RepositoryProvider.of<MetaProviderRepository>(context);
+
+    _metaProviderRepositoryContainer =
+        RepositoryProvider.of<MetaProviderRepositoryContainer>(context);
+
     final defaultProvider = providers.values.first;
+
     _cacheRespository = CacheRepositoryImpl();
-    repository = WatchProviderRepositoryImpl(media);
-    _selectedSearchResponseBloc = SelectedSearchResponseBloc(repository);
-    _searchResponseBloc =
-        SearchResponseBloc(repository, _selectedSearchResponseBloc);
+
+    _watchProviderRepositoryContainer =
+        WatchProviderRepositoryContainer(WatchProviderRepositoryImpl(media));
+
+    _selectedSearchResponseBloc = SelectedSearchResponseBloc(
+        mediaTitle: media.mediaTitle,
+        findBestSearchResponseUseCase: _watchProviderRepositoryContainer.get<
+                FindBestSearchResponseUseCase>(
+            _watchProviderRepositoryContainer.findBestSearchResponseUseCase));
+
+    _searchResponseBloc = SearchResponseBloc(
+        bloc: _selectedSearchResponseBloc,
+        mediaTitle: media.mediaTitle,
+        providerSearchUseCase:
+            _watchProviderRepositoryContainer.get<LoadSearchUseCase>(
+                _watchProviderRepositoryContainer.loadSearchUseCase));
+
     _sourceDropDownBloc = SourceDropDownBloc(
-        repository: repository,
-        searchResponseBloc: _searchResponseBloc,
-        provider: defaultProvider)
+        searchResponseBloc: _searchResponseBloc, provider: defaultProvider)
       ..add(SourceDropDownOnSelected(
         provider: defaultProvider,
       ));
-    _seasonsSelectorBloc = SeasonsSelectorBloc();
-    _fetchSeasonsBloc = FetchSeasonsBloc(repository, _seasonsSelectorBloc);
-    _getEpisodesRepository = GetEpisodeRepositoryImpl(
-        metaProviderRepository: _metaProviderRepository,
+
+    _episodeBloc = FetchEpisodesBloc(
+        getMappedEpisodesUseCase:
+            _metaProviderRepositoryContainer.get<GetMappedEpisodesUseCase>(
+                _metaProviderRepositoryContainer.mappedEpisodeUseCase),
         cacheRespository: _cacheRespository,
-        mediaDetails: media);
+        mediaDetails: media,
+        loadEpisodeUseCase:
+            _watchProviderRepositoryContainer.get<LoadEpisodeUseCase>(
+                _watchProviderRepositoryContainer.loadEpisodesUseCase));
+
+    _seasonsSelectorBloc = SeasonsSelectorBloc(_episodeBloc);
+
+    _fetchSeasonsBloc = FetchSeasonsBloc(
+        _watchProviderRepositoryContainer.get<LoadSeasonsUseCase>(
+            _watchProviderRepositoryContainer.loadSeasonUseCase),
+        _seasonsSelectorBloc);
 
     super.initState();
   }
@@ -108,9 +142,8 @@ class _InfoAndWatchPageState extends State<InfoAndWatchPage> {
               RepositoryProvider.value(
                 value: media,
               ),
-              RepositoryProvider.value(value: repository),
               RepositoryProvider.value(value: _cacheRespository),
-              RepositoryProvider.value(value: _getEpisodesRepository),
+              // RepositoryProvider.value(value: _metaProviderRepository),
             ],
             child: MultiBlocProvider(
               providers: [
@@ -177,6 +210,17 @@ class _InfoAndWatchPageState extends State<InfoAndWatchPage> {
                     _buildWrongTitle(context, textStyle),
                     addVerticalSpace(10),
                     const SeasonSelector(),
+                    // BlocBuilder<SelectedSearchResponseBloc,
+                    //         SelectedSearchResponseState>(
+                    //     bloc: _selectedSearchResponseBloc,
+                    //     builder: (context, state) {
+                    //       if (state is SelectedSearchResponseFound) {
+                    //         return WatchView(
+                    //             searchResponse: state.searchResponse);
+                    //       } else {
+                    //         return CircularProgressIndicator();
+                    //       }
+                    //     }),
                     addVerticalSpace(20),
                     _synopsis(media.description),
                     addVerticalSpace(20),

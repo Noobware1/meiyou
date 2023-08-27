@@ -4,7 +4,7 @@ import 'package:meiyou/domain/repositories/get_providers_list.dart';
 
 class LoadProvidersUseCase
     implements UseCase<Map<String, BaseProvider>, String> {
-  final GetProviderListRepository _repository;
+  final ProviderListRepository _repository;
 
   const LoadProvidersUseCase(this._repository);
 

@@ -26,9 +26,8 @@ abstract interface class WatchProviderRepository {
     BaseProvider provider,
   );
 
-  Future<ResponseState<List<EpisodeEntity>>> loadEpisodes(
-      BaseProvider provider, String url, int? seasonNumber,
-      List<EpisodeEntity>? episodes);
+  Future<ResponseState<List<EpisodeEntity>>> loadEpisodes(BaseProvider provider,
+      String url, num? seasonNumber, List<EpisodeEntity>? episodes);
 
   Future<ResponseState<List<SeasonEntity>>> loadSeason(
       BaseProvider provider, String url);
@@ -41,4 +40,7 @@ abstract interface class WatchProviderRepository {
 
   VideoExtractor? loadVideoExtractor(
       BaseProvider provider, VideoSeverEntity videoServer);
+
+  Map<String, List<EpisodeEntity>> getEpisodeChunks(
+      List<EpisodeEntity> episodes);
 }

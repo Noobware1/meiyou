@@ -3,12 +3,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meiyou/core/constants/animation_duration.dart';
 import 'package:meiyou/core/constants/default_sized_box.dart';
 import 'package:meiyou/core/resources/button_style.dart';
+import 'package:meiyou/core/resources/media_type.dart';
+import 'package:meiyou/core/resources/providers/base_provider.dart';
 import 'package:meiyou/core/resources/snackbar.dart';
 import 'package:meiyou/domain/entities/season.dart';
 import 'package:meiyou/presentation/pages/info_watch/state/selected_searchResponse_bloc/selected_search_response_bloc.dart';
 import 'package:meiyou/presentation/pages/info_watch/state/source_dropdown_bloc/bloc/source_drop_down_bloc.dart';
 import 'package:meiyou/presentation/widgets/add_space.dart';
-import 'package:meiyou/presentation/widgets/constraints_box_for_large_screen.dart';
 import 'package:meiyou/presentation/widgets/layout_builder.dart';
 import 'package:meiyou/presentation/widgets/season_selector/fetch_seasons_bloc/fetch_seasons_bloc_bloc.dart';
 import 'package:meiyou/presentation/widgets/season_selector/seasons_selector_bloc/seasons_selector_bloc.dart';
@@ -49,15 +50,16 @@ class _SeasonSelectorState extends State<SeasonSelector> {
           buildWhen: (a, b) => a.searchResponse.url != b.searchResponse.url,
           bloc: selectedSearchResponseBloc,
           builder: (context, state2) {
-            if (state2.searchResponse.isEmpty) {
+            if (state2.searchResponse.isEmpty ||
+                state2.searchResponse.type != MediaType.tvShow) {
               return defaultSizedBox;
             }
             return BlocConsumer<FetchSeasonsBloc, FetchSeasonsState>(
                 bloc: fetchBloc
                   ..add(FetchSeasons(provider, state2.searchResponse)),
                 builder: (context, state3) {
+        
                   if (state3 is FetchSeasonsSuccess) {
-                    print('rebuild');
                     return BlocBuilder<SeasonsSelectorBloc,
                             SeasonsSelectorState>(
                         bloc: seasonsSelectorBloc,
@@ -81,6 +83,7 @@ class _SeasonSelectorState extends State<SeasonSelector> {
                                   onPressed: () => showSeasonSelector(context,
                                       currentSeason: state4.season,
                                       bloc: seasonsSelectorBloc,
+                                      provider: provider,
                                       seasons: state3.seasons!),
                                   child: Text(text)),
                             ),
@@ -98,6 +101,7 @@ class _SeasonSelectorState extends State<SeasonSelector> {
                                   onPressed: () => showSeasonSelector(context,
                                       currentSeason: state4.season,
                                       bloc: seasonsSelectorBloc,
+                                      provider: provider,
                                       seasons: state3.seasons!),
                                   child: Text(text)),
                             ),
@@ -122,6 +126,7 @@ class _SeasonSelectorState extends State<SeasonSelector> {
   Future showSeasonSelector(BuildContext context,
       {required SeasonEntity currentSeason,
       required SeasonsSelectorBloc bloc,
+      required BaseProvider provider,
       required List<SeasonEntity> seasons}) {
     return showDialog(
         context: context,
@@ -144,7 +149,7 @@ class _SeasonSelectorState extends State<SeasonSelector> {
                       onTap: () {
                         final season = seasons[index];
                         if (currentSeason != season) {
-                          bloc.add(SelectSeason(season));
+                          bloc.add(SelectSeason(season, provider));
                           Navigator.pop(context);
                         }
                       },

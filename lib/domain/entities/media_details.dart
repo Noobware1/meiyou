@@ -86,6 +86,5 @@ class MediaDetailsEntity extends Equatable {
         seasons,
       ];
 
-
-
+  String get mediaTitle => title ?? romaji ?? native ?? 'No Title';
 }

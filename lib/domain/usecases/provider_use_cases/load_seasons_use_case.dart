@@ -1,6 +1,6 @@
 import 'package:meiyou/core/resources/providers/base_provider.dart';
 import 'package:meiyou/core/resources/response_state.dart';
-import 'package:meiyou/core/usecases/future_use_case.dart';
+import 'package:meiyou/core/usecases/usecase.dart';
 import 'package:meiyou/domain/entities/season.dart';
 import 'package:meiyou/domain/repositories/watch_provider_repository.dart';
 
@@ -12,11 +12,11 @@ class LoadSeasonsParams {
 }
 
 class LoadSeasonsUseCase
-    implements FutureUseCase<List<SeasonEntity>, LoadSeasonsParams> {
+    implements
+        UseCase<Future<ResponseState<List<SeasonEntity>>>, LoadSeasonsParams> {
   final WatchProviderRepository _repository;
 
-  const LoadSeasonsUseCase(WatchProviderRepository repository)
-      : _repository = repository;
+  const LoadSeasonsUseCase(this._repository);
 
   @override
   Future<ResponseState<List<SeasonEntity>>> call(LoadSeasonsParams params) {

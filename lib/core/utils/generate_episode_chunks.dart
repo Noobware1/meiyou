@@ -2,7 +2,7 @@ import 'package:meiyou/data/models/episode.dart';
 
 class GenerateEpisodesChunks {
   static Map<String, List<Episode>> buildEpisodesResponse(
-      List<Episode> episodes, int lastEpisode) {
+      List<Episode> episodes) {
     final values = splitList(episodes);
     final keys = getChunksLength(values);
 
