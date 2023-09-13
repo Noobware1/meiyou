@@ -84,8 +84,9 @@ class RapidCloud extends VideoExtractor {
   @override
   String get name => 'RapidCloud';
 
-  String get keyUrl =>
+   String get keyUrl =>
       'https://raw.githubusercontent.com/enimax-anime/key/e6/key.txt';
+
 
   Future<List<List<int>>> _decryptKey() async {
     return (await client.get(keyUrl)).json((json) => (json as List)

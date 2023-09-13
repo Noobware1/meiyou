@@ -1,6 +1,7 @@
 import 'package:meiyou/core/resources/response_state.dart';
 import 'package:meiyou/domain/entities/media_details.dart';
 import 'package:meiyou/domain/entities/meta_response.dart';
+import 'package:meiyou/domain/entities/movie.dart';
 import 'package:meiyou/domain/entities/results.dart';
 import 'package:meiyou/domain/entities/main_page.dart';
 import 'package:meiyou/domain/entities/episode.dart';
@@ -26,9 +27,11 @@ abstract interface class MetaProviderRepository {
     SeasonEntity? season,
   ]);
 
-
   Future<List<EpisodeEntity>> getMappedEpisodes(List<EpisodeEntity> episodes,
       {SeasonEntity? season,
-      required CacheRespository cacheRepository,
+      required CacheRespository cacheRespository,
       required MediaDetailsEntity mediaDetails});
+
+  MovieEntity getMappedMovie(MovieEntity movie,
+      {required MediaDetailsEntity mediaDetails});
 }

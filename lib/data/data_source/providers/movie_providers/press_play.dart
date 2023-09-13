@@ -30,19 +30,30 @@ class PressPlay extends MovieProvider {
 
   @override
   Future<Movie> loadMovie(String url) async {
-    return (await client.get(await _extractIframe(url))).json((json) {
+    final iframe = await _extractIframe(url);
+
+    Future<String> getIframe(String url) async {
+      //why pressplay why
+      return (await _extractIframe(url));
+    }
+
+    final a = (await client.get(await getIframe(iframe)));
+    return a.json((json) {
       final obj = (json['simple-api'] as List)[0];
       return Movie(
           url: _PressPlayVideoServerResponse(
-                  url: obj['iframe'] as String, name: obj['name'] as String)
+                  url: obj['iframe'] as String,
+                  name: obj['name'] as String,
+                  referer: iframe)
               .encode());
     });
   }
 
   @override
   Future<List<Season>> loadSeasons(String url) async {
-    final seasons = (await client.get(await _extractIframe(url))).json((json) =>
-        (json['simple-api'] as List)
+    final iframe = await _extractIframe(url);
+    final seasons = (await client.get(await _extractIframe(iframe))).json(
+        (json) => (json['simple-api'] as List)
             .mapAsList(_PressPlaySeasonResponse.fromJson));
 
     final trueSeasonsNumber = {seasons.first.number};
@@ -59,7 +70,12 @@ class PressPlay extends MovieProvider {
           number: number,
           url: jsonEncode({
             'episodes': seasons.where((it) => it.number == number).mapAsList(
-                (it) => {'number': it.id, 'url': it.url, 'server': it.title!})
+                (it) => {
+                      'number': it.id,
+                      'url': it.url,
+                      'server': it.title!,
+                      'referer': iframe
+                    })
           })));
     }
 
@@ -74,13 +90,12 @@ class PressPlay extends MovieProvider {
   @override
   Future<List<VideoServer>> loadVideoServers(String url) async {
     final decoded = _PressPlayVideoServerResponse.decode(url);
-    final serverUrl = (await client.get(decoded.url))
-        .document
-        .selectFirst('iframe.vidframe')
-        .attr('src');
+    final serverUrl = (await client.get(decoded.url, referer: decoded.referer));
+    print(serverUrl.text);
+    final b = serverUrl.document.selectFirst('iframe.vidframe').attr('src');
     final referer = Uri.parse(decoded.url);
     return [
-      VideoServer(url: serverUrl, name: decoded.name, extra: {
+      VideoServer(url: b, name: decoded.name, extra: {
         'referer': '${referer.scheme}://${referer.host}/'
         // referer.host
       })
@@ -94,9 +109,18 @@ class PressPlay extends MovieProvider {
             .mapAsList(_PressPlaySearchResponse.fromJson));
   }
 
+  String _safeSelect(String Function() fun) {
+    try {
+      return fun.call();
+    } catch (_) {
+      return '';
+    }
+  }
+
   Future<String> _extractIframe(String url) {
     return client.get(url).then((response) async {
       final doc = response.document;
+      print(response.text);
       const playerQueryApi = 'data-cinemaplayer-query-api';
 
       final player = doc.selectFirst('div#cinemaplayer');
@@ -133,20 +157,22 @@ class PressPlay extends MovieProvider {
       final url = (await client.get('$hostUrl$apiUrl', params: params))
           .json((json) => (json['simple-api'] as List)[0]['iframe'] as String);
 
-      if (url.contains('cinema-player')) {
-        return _extractIframe(url);
-      }
       return url;
     });
   }
 }
 
 class _PressPlayVideoServerResponse extends VideoServer {
-  const _PressPlayVideoServerResponse(
-      {required super.url, required super.name});
+  final String referer;
+  const _PressPlayVideoServerResponse({
+    required super.url,
+    required super.name,
+    required this.referer,
+  });
 
   factory _PressPlayVideoServerResponse.fromJson(dynamic json) {
-    return _PressPlayVideoServerResponse(name: json['name'], url: json['url']);
+    return _PressPlayVideoServerResponse(
+        name: json['name'], url: json['url'], referer: json['referer']);
   }
 
   String encode() => json.encode(toJson());
@@ -155,17 +181,22 @@ class _PressPlayVideoServerResponse extends VideoServer {
       _PressPlayVideoServerResponse.fromJson(json.decode(url));
 
   Map<String, dynamic> toJson() {
-    return {'name': name, 'url': url};
+    return {'name': name, 'url': url, 'referer': referer};
   }
 }
 
 class _PressPlayEpisodeResponse extends Episode {
   const _PressPlayEpisodeResponse({required super.number, super.url});
 
-  factory _PressPlayEpisodeResponse.fromJson(dynamic json) {
+  factory _PressPlayEpisodeResponse.fromJson(
+    dynamic json,
+  ) {
     return _PressPlayEpisodeResponse(
-        number: json['number'],
-        url: jsonEncode({'url': json['url'], 'name': json['server']}));
+      number: json['number'],
+      url: _PressPlayVideoServerResponse(
+              url: json['url'], name: json['server'], referer: json['referer'])
+          .encode(),
+    );
   }
 }
 
@@ -200,4 +231,22 @@ class _PressPlaySearchResponse extends SearchResponse {
         cover: json['poster'],
         type: json['type'] == 1 ? MediaType.tvShow : MediaType.movie);
   }
+}
+
+void main(List<String> args) async {
+  final a = PressPlay();
+  // (await a.loadVideoServers(
+  //         '''{"name":"MyCloud","url":"https://moviesapi.club/movie/635910","referer":"https://moviesapi.club/player/cinema-player.php?id=tt1001520"}'''))
+  //     .forEach(print);
+  print((await a
+      .loadVideoExtractor(VideoServer(
+          name: "MyCloud",
+          url: "https://w1.moviesapi.club/v/awVZaNQBwaTR/",
+          extra: {'referer': 'https://moviesapi.club/'}))
+      .extract()));
+  // await a._extractIframe(
+  // 'https://pressplay.top/movie-id413443470-wednesday-online-free');
+  // (await a.loadVideoServers(
+  //         '''{"name":"MyCloud","url":"https://moviesapi.club/tv/119051-1-8","referer":"https://moviesapi.club/player/cinema-player.php?id=tt13443470"}'''))
+  //     .forEach(print);
 }

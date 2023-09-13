@@ -13,6 +13,8 @@ final class FetchingSeasons extends FetchSeasonsState {
   const FetchingSeasons();
 }
 
+
+
 final class FetchSeasonsSuccess extends FetchSeasonsState {
   const FetchSeasonsSuccess(List<SeasonEntity> seasons)
       : super(seasons: seasons);
@@ -21,5 +23,7 @@ final class FetchSeasonsSuccess extends FetchSeasonsState {
 final class FetchSeasonsFailed extends FetchSeasonsState {
   const FetchSeasonsFailed(MeiyouException error) : super(error: error);
 }
+
+
 
 

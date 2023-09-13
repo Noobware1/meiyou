@@ -1,5 +1,3 @@
-
-
 class MeiyouException implements Exception {
   final String message;
   final StackTrace? stackTrace;
@@ -21,6 +19,8 @@ class MeiyouException implements Exception {
     return const MeiyouException('Failed Fetch Data From Anilist',
         type: MeiyouExceptionType.providerException);
   }
+
+  static const empty = MeiyouException('');
 }
 
 enum MeiyouExceptionType { providerException, appException, other }

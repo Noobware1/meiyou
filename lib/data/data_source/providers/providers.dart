@@ -11,8 +11,6 @@ import 'package:meiyou/data/data_source/providers/movie_providers/flixhq.dart';
 import 'package:meiyou/data/data_source/providers/movie_providers/press_play.dart';
 import 'package:meiyou/data/data_source/providers/movie_providers/rewatch.dart';
 import 'package:meiyou/data/data_source/providers/movie_providers/sflix.dart';
-import 'package:meiyou/data/data_source/providers/movie_providers/mock_movie_provider.dart';
-
 
 class MetaProviders extends Providers {
   @override
@@ -25,11 +23,10 @@ class MetaProviders extends Providers {
 class MovieProviders extends Providers {
   @override
   Map<String, MovieProvider> get providers => {
-       'MockProvider': MockMovieProvider(),
-        // 'FlixHQ': Flixhq(),
-        // 'Sflix': Sflix(),
-        // 'Rewatch': Rewatch(),
-        // 'PressPlay': PressPlay()
+        'PressPlay': PressPlay(),
+        'Rewatch': Rewatch(),
+        'FlixHQ': Flixhq(),
+        'Sflix': Sflix(),
       };
 }
 

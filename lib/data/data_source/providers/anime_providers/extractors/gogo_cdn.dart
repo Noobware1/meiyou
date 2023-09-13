@@ -6,8 +6,8 @@ import 'package:meiyou/core/resources/crypto.dart';
 import 'package:meiyou/core/resources/extractors/video_extractor.dart';
 import 'package:meiyou/core/resources/quailty.dart';
 import 'package:meiyou/core/resources/video_format.dart';
+import 'package:meiyou/core/resources/watch_qualites.dart';
 import 'package:meiyou/core/utils/extenstions/iterable.dart';
-import 'package:meiyou/core/utils/m3u8_parser/m3u8_parser.dart';
 import 'package:meiyou/data/models/video.dart';
 import 'package:meiyou/data/models/video_container.dart';
 import 'package:ok_http_dart/ok_http_dart.dart';
@@ -47,7 +47,12 @@ class GogoCDN extends VideoExtractor {
           backup: backup ?? false,
         ));
       } else {
-        list.addAll(await M3u8Parser.generateVideos(url, backup: backup));
+        list.add(Video(
+          url: url,
+          quality: WatchQualites.master,
+          fromat: VideoFormat.hls,
+          backup: backup ?? false,
+        ));
       }
     }
 
@@ -121,4 +126,3 @@ class _Source {
         label: json['label'], file: json['file'], type: json['type']);
   }
 }
-

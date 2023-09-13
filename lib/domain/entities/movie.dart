@@ -5,9 +5,10 @@ class MovieEntity extends Equatable {
   final String? description;
   final String? cover;
   final String? title;
+  final double? rated;
 
   const MovieEntity(
-      {required this.url, this.description, this.cover, this.title});
+      {required this.url, this.description, this.cover, this.title, this.rated});
 
   @override
   List<Object?> get props => [
@@ -15,5 +16,6 @@ class MovieEntity extends Equatable {
         description,
         cover,
         title,
+        rated,
       ];
 }

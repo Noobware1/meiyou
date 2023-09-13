@@ -5,8 +5,11 @@ import 'package:equatable/equatable.dart';
 import 'package:meiyou/core/resources/expections.dart';
 import 'package:meiyou/core/resources/providers/base_provider.dart';
 import 'package:meiyou/core/resources/response_state.dart';
+import 'package:meiyou/core/utils/data_converter/converters.dart';
+import 'package:meiyou/core/utils/network.dart';
 import 'package:meiyou/domain/entities/search_response.dart';
 import 'package:meiyou/domain/entities/season.dart';
+import 'package:meiyou/domain/repositories/cache_repository.dart';
 import 'package:meiyou/domain/usecases/provider_use_cases/load_seasons_use_case.dart';
 import 'package:meiyou/presentation/widgets/season_selector/seasons_selector_bloc/seasons_selector_bloc.dart';
 
@@ -16,24 +19,27 @@ part 'fetch_seasons_bloc_state.dart';
 class FetchSeasonsBloc extends Bloc<FetchSeasonsEvent, FetchSeasonsState> {
   final LoadSeasonsUseCase usecase;
   final SeasonsSelectorBloc bloc;
-
-  FetchSeasonsBloc(this.usecase, this.bloc) : super(const FetchingSeasons()) {
+  final CacheRespository cacheRespository;
+  FetchSeasonsBloc(this.usecase, this.bloc, this.cacheRespository)
+      : super(const FetchingSeasons()) {
     on<FetchSeasons>(onFetchSeasons);
   }
 
   FutureOr<void> onFetchSeasons(
       FetchSeasons event, Emitter<FetchSeasonsState> emit) async {
-  
     emit(const FetchingSeasons());
 
-    final response = await usecase.call(LoadSeasonsParams(
-        provider: event.provider, url: event.searchResponse.url));
-
-    if (response is ResponseSuccess) {
-      bloc.add(SelectSeason(response.data!.first, event.provider));
-      emit(FetchSeasonsSuccess(response.data!));
-    } else {
-      emit(FetchSeasonsFailed(response.error!));
-    }
+    //   final response = await usecase.call(LoadSeasonsParams(
+    //       provider: event.provider,
+    //       url: event.searchResponse.url,
+    //       cacheRespository: cacheRespository));
+    //   if (response is ResponseSuccess) {
+    //     final data = response.data!;
+    //     bloc.add(SelectSeason(data.first, event.provider));
+    //     emit(FetchSeasonsSuccess(data));
+    //   } else {
+    //     emit(FetchSeasonsFailed(response.error!));
+    //   }
+    // }
   }
 }

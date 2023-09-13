@@ -16,7 +16,6 @@ import 'package:meiyou/core/resources/client.dart';
 import 'package:meiyou/core/constants/api_constants.dart';
 import 'package:meiyou/data/models/row.dart';
 import 'package:meiyou/data/models/season.dart';
-import 'package:meiyou/domain/entities/season.dart';
 
 class Anilist extends MetaProvider {
   @override

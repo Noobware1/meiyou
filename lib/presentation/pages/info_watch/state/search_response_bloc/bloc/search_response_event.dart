@@ -14,6 +14,10 @@ sealed class SearchResponseEvent extends Equatable {
 }
 
 final class SearchResponseSearch extends SearchResponseEvent {
-  const SearchResponseSearch(
+  const SearchResponseSearch({required super.provider, super.query});
+}
+
+final class SearchResponseSearchWithoutSelecting extends SearchResponseEvent {
+  const SearchResponseSearchWithoutSelecting(
       {required super.provider, super.query});
 }

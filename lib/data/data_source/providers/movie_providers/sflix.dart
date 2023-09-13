@@ -3,7 +3,9 @@ import 'package:meiyou/core/resources/extractors/video_extractor.dart';
 import 'package:meiyou/core/resources/media_type.dart';
 import 'package:meiyou/core/resources/providers/movie_provider.dart';
 import 'package:meiyou/core/utils/encode.dart';
+import 'package:meiyou/core/utils/extenstions/iterable.dart';
 import 'package:meiyou/core/utils/extenstions/string.dart';
+import 'package:meiyou/data/data_source/providers/movie_providers/extractors/vidcloud.dart';
 import 'package:meiyou/data/models/episode.dart';
 import 'package:meiyou/data/models/movie.dart';
 import 'package:meiyou/data/models/search_response.dart';
@@ -18,155 +20,94 @@ class Sflix extends MovieProvider {
   @override
   String get hostUrl => 'https://sflix.to';
 
-  // Future<LoadResponse?> load(
-  //     {required SearchResponse data,
-  //     List<Season>? seasons,
-  //     Season? season}) async {
-  //   //print(data.title);
-  //   final LoadResponse? response;
-  //   if (data.type == MediaType.movie) {
-  //     final movie = await loadMovie(data.url);
-
-  //     response = movie != null ? LoadResponse.fromMovie(movie: movie) : null;
-  //   } else {
-  //     final List<Episode>? episode;
-  //     if (seasons == null) {
-  //       final allSeasons = await loadSeasons(data.url);
-  //       if (allSeasons == null || allSeasons.isEmpty) {
-  //         episode = await loadEpisodes(data.url);
-  //         response = (episode != null)
-  //             ? LoadResponse.fromTvResponse(episodes: episode, seasons: seasons)
-  //             : null;
-  //       } else {
-  //         episode = await loadEpisodes(
-  //             allSeasons[season!.number.toInt() - 1].seasonUrl);
-  //         response = (episode != null)
-  //             ? LoadResponse.fromTvResponse(
-  //                 episodes: episode, seasons: allSeasons)
-  //             : null;
-  //       }
-  //     } else {
-  //       episode =
-  //           await loadEpisodes(seasons[season!.number.toInt() - 1].seasonUrl);
-  //       response = (episode != null)
-  //           ? LoadResponse.fromTvResponse(episodes: episode, seasons: seasons)
-  //           : null;
-  //     }
-  //   }
-
-  //   return response;
-  // }
-
   @override
   Future<List<Episode>> loadEpisodes(String url) async {
-    final res = await client.get('$hostUrl/ajax/v2/season/episodes/$url');
-    print(res.text);
-
-    final episodes =
-        res.document.select('div.swiper-container > div > div > div').map((it) {
-      final details = it.selectFirst('div.film-detail');
-      final img = it.selectFirst('a > img').attr('src');
-      return Episode(
-        number: RegExp(r'\d+')
-            .firstMatch(details.selectFirst('div.episode-number').text)!
-            .group(0)!
-            .toNum(),
-        title: details.selectFirst('h3.film-name').text.trimNewLines(),
-        thumbnail: img.startsWith('http') ? img : '',
-        url: '$hostUrl/ajax/v2/episode/servers/${it.attr('data-id')}',
-      );
-    }).toList();
-    episodes.removeWhere((episode) => episode.number == 0);
-    return episodes;
-  }
-
-  // @override
-  // Future<Movie> loadMovie(String url) async {
-  //   // final res = await client.get(url);
-  //   // final id = RegExp(r"episodeId:\s'(\d+)'").firstMatch(res.text)!.group(1)!;
-  //   return Movie(url: '$hostUrl/ajax/movie/episodes/$url');
-  //   //   return Future.value(
-  //   //       Movie(movieUrl: '$hostUrl/ajax/movie/episode/servers/$url'));
-  // }
-
-  @override
-  Future<List<Season>> loadSeasons(String url) async {
-    final res = await client.get('$hostUrl/ajax/v2/tv/seasons/$url');
-    final seasons = res.document
-        .select('div.dropdown-menu.dropdown-menu-model > a')
-        .map((it) {
-      return Season(
-          number: it.text.substringAfter('Season ').toNum(),
-          url: it.attr('data-id'));
-    }).toList();
-
-    return seasons;
-  }
-
-  // @override
-  // VideoExtractor? loadVideoExtractor(VideoServer server) {
-  //   final host = Uri.parse(server.serverUrl).host;
-
-  //   if (host.contains('doki')) {
-  //     return VidCloudExtractor(server);
-  //   } else if (host.contains('rabbit')) {
-  //     return VidCloudExtractor(server);
-  //   } else {
-  //     return null;
-  //   }
-  // }
-
-  // @override
-  // Future<List<VideoServer>?> loadVideoServers(String url) async {
-  //   final res = await client.get(url, headers: {
-  //     "X-Requested-With": "XMLHttpRequest",
-  //   });
-
-  //   final futures = res.document.select('ul > li > a').map((it) async {
-  //     final name = it.text.substringAfter('Server').trimNewLines();
-  //     final json =
-  //         (await client.get('$hostUrl/ajax/sources/${it.attr("data-id")}'))
-  //             .json();
-  //     return VideoServer(name: name.trim(), serverUrl: json['link'] ?? '');
-  //   });
-  //   final servers = await Future.wait(futures);
-  //   return servers;
-  // }
-
-  @override
-  Future<List<SearchResponse>> search(String query) async {
-    final doc = await client.get('$hostUrl/search/${encode(query)}', headers: {
-      'User-Agent':
-          'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:101.0) Gecko/20100101 Firefox/101.0',
-      'Referer': '$hostUrl/',
+    return client.get('$hostUrl/ajax/season/episodes/$url').then((response) {
+      return response.document
+          .select('div.swiper-container > div > div > div')
+          .mapAsList((it) {
+        final details = it.selectFirst('div.film-detail');
+        final img = it.selectFirst('a > img').attr('src');
+        return Episode(
+          number: RegExp(r'\d+')
+              .firstMatch(details.selectFirst('div.episode-number').text)!
+              .group(0)!
+              .toNum(),
+          url: '$hostUrl/ajax/episode/servers/${it.attr('data-id')}',
+          title: details.selectFirst('h3.film-name').text.trimNewLines(),
+          thumbnail: img.startsWith('http') ? img : '',
+        );
+      })
+        ..removeWhere((it) => it.number == 0);
     });
-    final search = doc.document.select('.flw-item > div.film-poster').map((it) {
-      final a = it.selectFirst('a');
-      final url = a.attr('href');
-      return SearchResponse(
-          title: a.attr('title'),
-          cover: it.selectFirst('img').attr('data-src'),
-          url: url.substringAfterLast('-'),
-          type: (url.contains('movie') ? MediaType.movie : MediaType.tvShow));
+  }
+
+  @override
+  Future<Movie> loadMovie(String url) async {
+    return Movie(url: '$hostUrl/ajax/episode/list/$url');
+  }
+
+  @override
+  Future<List<Season>> loadSeasons(String url) {
+    return client.get('$hostUrl/ajax/season/list/$url').then((res) {
+      return res.document
+          .select('div.dropdown-menu.dropdown-menu-model > a')
+          .mapAsList((it) {
+        return Season(
+            number: it.text.substringAfter('Season ').toNum(),
+            url: it.attr('data-id'));
+      });
     });
-    return search.toList();
   }
 
   @override
-  Future<Movie> loadMovie(String url) {
-    // TODO: implement loadMovie
-    throw UnimplementedError();
+  Future<List<VideoServer>> loadVideoServers(String url) async {
+    return client.get(url).then((res) async {
+      final servers = <VideoServer?>[];
+
+      for (var it in res.document.select('ul.ulclear.fss-list > li > a')) {
+        servers.add((await client.get(
+                '$hostUrl/ajax/sources/${it.attr("data-id")}',
+                headers: {"X-Requested-With": "XMLHttpRequest"}))
+            .jsonSafe((json) =>
+                VideoServer(url: json['link'] as String, name: it.text)));
+      }
+
+      return servers.nonNulls.toList();
+    });
+  }
+
+  String _encode(
+    String query,
+  ) =>
+      encode(query, '-');
+
+  @override
+  Future<List<SearchResponse>> search(String query) {
+    return client
+        .get('$hostUrl/search/${_encode(query)}', referer: '$hostUrl/')
+        .then((res) {
+      return res.document
+          .select('div.flw-item > div.film-poster')
+          .mapAsList((it) {
+        final a = it.selectFirst('a');
+        final url = a.attr('href');
+        return SearchResponse(
+            title: a.attr('title'),
+            cover: it.selectFirst('img').attr('data-src'),
+            url: url.substringAfterLast('-'),
+            type: (url.contains('movie') ? MediaType.movie : MediaType.tvShow));
+      });
+    });
   }
 
   @override
-  VideoExtractor loadVideoExtractor(VideoServer videoServer) {
-    // TODO: implement loadVideoExtractor
-    throw UnimplementedError();
-  }
+  VideoExtractor? loadVideoExtractor(VideoServer videoServer) {
+    final url = videoServer.url;
 
-  @override
-  Future<List<VideoServer>> loadVideoServers(String url) {
-    // TODO: implement loadVideoServer
-    throw UnimplementedError();
+    if (url.contains('doki') || url.contains('rabbit')) {
+      return VidCloud(videoServer);
+    }
+    return null;
   }
 }

@@ -157,4 +157,3 @@ class TMDB extends MetaProvider {
       (await client.get('$_trending&page=$page'))
           .json((json) => MetaResults.fromTMDB(json, null));
 }
-

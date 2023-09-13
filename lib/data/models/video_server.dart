@@ -4,6 +4,11 @@ class VideoServer extends VideoSeverEntity {
   const VideoServer({
     required super.url,
     required super.name,
-     super.extra,
+    super.extra,
   });
+
+  @override
+  String toString() {
+    return 'VideoServer(name: "$name", url: "$url", extra: $extra)';
+  }
 }

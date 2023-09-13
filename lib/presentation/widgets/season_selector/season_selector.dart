@@ -5,17 +5,18 @@ import 'package:meiyou/core/constants/default_sized_box.dart';
 import 'package:meiyou/core/resources/button_style.dart';
 import 'package:meiyou/core/resources/media_type.dart';
 import 'package:meiyou/core/resources/providers/base_provider.dart';
-import 'package:meiyou/core/resources/snackbar.dart';
-import 'package:meiyou/domain/entities/season.dart';
+import 'package:meiyou/domain/entities/episode.dart';
 import 'package:meiyou/presentation/pages/info_watch/state/selected_searchResponse_bloc/selected_search_response_bloc.dart';
 import 'package:meiyou/presentation/pages/info_watch/state/source_dropdown_bloc/bloc/source_drop_down_bloc.dart';
 import 'package:meiyou/presentation/widgets/add_space.dart';
 import 'package:meiyou/presentation/widgets/layout_builder.dart';
-import 'package:meiyou/presentation/widgets/season_selector/fetch_seasons_bloc/fetch_seasons_bloc_bloc.dart';
 import 'package:meiyou/presentation/widgets/season_selector/seasons_selector_bloc/seasons_selector_bloc.dart';
+import 'package:meiyou/presentation/widgets/watch/state/fetch_seasons_episodes/fetch_seasons_episodes_bloc.dart';
 
 class SeasonSelector extends StatefulWidget {
-  const SeasonSelector({super.key});
+  const SeasonSelector({
+    super.key,
+  });
 
   @override
   State<SeasonSelector> createState() => _SeasonSelectorState();
@@ -23,51 +24,49 @@ class SeasonSelector extends StatefulWidget {
 
 class _SeasonSelectorState extends State<SeasonSelector> {
   late final SourceDropDownBloc sourceDropDownBloc;
-  late final SelectedSearchResponseBloc selectedSearchResponseBloc;
-  late final FetchSeasonsBloc fetchBloc;
+  late final FetchSeasonsEpisodesBloc fetchSeasonsEpisodesBloc;
   late final SeasonsSelectorBloc seasonsSelectorBloc;
+  late final SelectedSearchResponseBloc searchResponseBloc;
 
   @override
   void initState() {
-    sourceDropDownBloc = BlocProvider.of<SourceDropDownBloc>(context);
-    selectedSearchResponseBloc =
-        BlocProvider.of<SelectedSearchResponseBloc>(context);
-    fetchBloc = BlocProvider.of<FetchSeasonsBloc>(context);
-    seasonsSelectorBloc = BlocProvider.of<SeasonsSelectorBloc>(context);
-
     super.initState();
+
+    sourceDropDownBloc = BlocProvider.of<SourceDropDownBloc>(context);
+    fetchSeasonsEpisodesBloc =
+        BlocProvider.of<FetchSeasonsEpisodesBloc>(context);
+    seasonsSelectorBloc = BlocProvider.of<SeasonsSelectorBloc>(context);
+    searchResponseBloc = BlocProvider.of<SelectedSearchResponseBloc>(context);
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<SourceDropDownBloc, SourceDropDownState>(
-      bloc: sourceDropDownBloc,
-      builder: (context, state) {
-        final provider = state.provider;
-
-        return BlocBuilder<SelectedSearchResponseBloc,
-            SelectedSearchResponseState>(
-          buildWhen: (a, b) => a.searchResponse.url != b.searchResponse.url,
-          bloc: selectedSearchResponseBloc,
-          builder: (context, state2) {
-            if (state2.searchResponse.isEmpty ||
-                state2.searchResponse.type != MediaType.tvShow) {
-              return defaultSizedBox;
-            }
-            return BlocConsumer<FetchSeasonsBloc, FetchSeasonsState>(
-                bloc: fetchBloc
-                  ..add(FetchSeasons(provider, state2.searchResponse)),
+        bloc: sourceDropDownBloc,
+        builder: (context, state) {
+          final provider = state.provider;
+          return BlocBuilder<SelectedSearchResponseBloc,
+              SelectedSearchResponseState>(
+            bloc: searchResponseBloc,
+            builder: (context, state) {
+              if (state.searchResponse.type != MediaType.tvShow) {
+                return defaultSizedBox;
+              }
+              return BlocBuilder<FetchSeasonsEpisodesBloc,
+                  FetchSeasonsEpisodesState>(
+                bloc: fetchSeasonsEpisodesBloc,
                 builder: (context, state3) {
-        
-                  if (state3 is FetchSeasonsSuccess) {
+                  if (state3 is FetchSeasonsEpisodesSucess) {
                     return BlocBuilder<SeasonsSelectorBloc,
                             SeasonsSelectorState>(
                         bloc: seasonsSelectorBloc,
                         builder: (context, state4) {
-                          final text = 'Season ${state4.season.number}';
-                          if ((state4 as SeasonSelected).season.isEmpty) {
+                          final text = 'Season ${state4.season}';
+
+                          if (state4.season == -1) {
                             return defaultSizedBox;
                           }
+
                           return ResponsiveBuilder(
                             forSmallScreen: Padding(
                               padding: const EdgeInsets.only(left: 30),
@@ -84,7 +83,7 @@ class _SeasonSelectorState extends State<SeasonSelector> {
                                       currentSeason: state4.season,
                                       bloc: seasonsSelectorBloc,
                                       provider: provider,
-                                      seasons: state3.seasons!),
+                                      data: state3.data!.entries.toList()),
                                   child: Text(text)),
                             ),
                             forLagerScreen: Padding(
@@ -102,7 +101,7 @@ class _SeasonSelectorState extends State<SeasonSelector> {
                                       currentSeason: state4.season,
                                       bloc: seasonsSelectorBloc,
                                       provider: provider,
-                                      seasons: state3.seasons!),
+                                      data: state3.data!.entries.toList()),
                                   child: Text(text)),
                             ),
                           );
@@ -110,24 +109,17 @@ class _SeasonSelectorState extends State<SeasonSelector> {
                   }
                   return defaultSizedBox;
                 },
-                listenWhen: (a, b) => b is FetchSeasonsFailed,
-                listener: (context, state3) {
-                  if (state3 is FetchSeasonsFailed) {
-                    showSnackBAr(context,
-                        text: state3.error?.toString() ?? 'lol');
-                  }
-                });
-          },
-        );
-      },
-    );
+              );
+            },
+          );
+        });
   }
 
   Future showSeasonSelector(BuildContext context,
-      {required SeasonEntity currentSeason,
+      {required num currentSeason,
       required SeasonsSelectorBloc bloc,
       required BaseProvider provider,
-      required List<SeasonEntity> seasons}) {
+      required List<MapEntry<num, List<EpisodeEntity>>> data}) {
     return showDialog(
         context: context,
         builder: (context) {
@@ -137,25 +129,26 @@ class _SeasonSelectorState extends State<SeasonSelector> {
             backgroundColor: Colors.black,
 
             child: Container(
-              constraints: const BoxConstraints(maxWidth: 300, maxHeight: 280),
+              constraints: const BoxConstraints(
+                  maxWidth: 300, maxHeight: 280, minHeight: 20),
               // color: Colors.red,
-              child: ListView.builder(
-                  itemCount: seasons.length,
+              child: ListView(
+                  shrinkWrap: true,
                   // crossAxisAlignment: CrossAxisAlignment.center,
                   // mainAxisAlignment: MainAxisAlignment.start,
-                  itemBuilder: (context, index) {
+                  children: List.generate(data.length, (index) {
                     return SelectedButton(
-                      isSelected: currentSeason == seasons[index],
+                      isSelected: currentSeason == data[index].key,
                       onTap: () {
-                        final season = seasons[index];
+                        final season = data[index].key;
                         if (currentSeason != season) {
-                          bloc.add(SelectSeason(season, provider));
+                          bloc.add(SelectSeason(season, data[index].value));
                           Navigator.pop(context);
                         }
                       },
-                      text: 'Season ${seasons[index].number}',
+                      text: 'Season ${data[index].key}',
                     );
-                  }),
+                  })),
             ),
           );
         });
@@ -195,15 +188,15 @@ class SelectedButton extends StatelessWidget {
                   Visibility(
                     visible: isSelected,
                     replacement: const SizedBox(
-                      height: 25,
-                      width: 25,
+                      height: 30,
+                      width: 30,
                     ),
                     child: const Align(
                       alignment: Alignment.bottomLeft,
                       child: Icon(
                         Icons.done,
                         color: Colors.white,
-                        size: 25,
+                        size: 30,
                       ),
                     ),
                   ),
@@ -212,10 +205,10 @@ class SelectedButton extends StatelessWidget {
                   child: Text(
                     text,
                     // textAlign: TextAlign.start,
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                        fontSize: 16),
+                        color: isSelected ? Colors.white : Colors.grey,
+                        fontSize: 18),
                   ),
                 )
               ],

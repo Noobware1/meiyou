@@ -11,14 +11,14 @@ import 'package:meiyou/domain/entities/media_details.dart';
 
 class MediaDetails extends MediaDetailsEntity {
   @override
-  List<Season>? get seasons => super.seasons as List<Season>;
+  List<Season>? get seasons => super.seasons as List<Season>?;
 
   @override
   List<Recommendations>? get recommendations =>
-      super.recommendations as List<Recommendations>;
+      super.recommendations as List<Recommendations>?;
 
   @override
-  List<Cast>? get cast => super.cast as List<Cast>;
+  List<Cast>? get cast => super.cast as List<Cast>?;
 
   const MediaDetails({
     required super.id,

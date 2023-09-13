@@ -65,23 +65,30 @@ class Rewatch extends MovieProvider {
   }
 
   @override
-  Future<List<Season>> loadSeasons(String url) =>
-      client.get(url).then((response) {
-        final doc = response.document;
-        final token = _getToken(doc);
-        return doc.select('.dropdown.episodes > div').mapAsList((it) {
-          final episodes = it.select('button').mapAsList((it) => {
-                'number': it.attr('id').replaceFirst('E', '').toNum(),
-                'url': _generateUrl(it.attr("data-key"), token),
-                'title': it.text,
-                'referer': url
-              });
+  Future<List<Season>> loadSeasons(String url) {
+    return client.get(url).then((response) {
+      final doc = response.document;
+      final token = _getToken(doc);
+      final seasons = doc
+          .select('.dropdown-menu-left > button')
+          .mapAsList((it) => it.attr('id').replaceFirst('S', ''));
 
-          return Season(
-              number: it.attr('data-season').replaceFirst('S', '').toNum(),
-              url: jsonEncode(episodes));
+      final episodes =
+          doc.select('.dropdown.episodes > div > button').mapAsList((it) {
+        return jsonEncode({
+          'number': it.attr('id').replaceFirst('E', '').toNum(),
+          'url': _generateUrl(it.attr("data-key"), token),
+          'title': it.text,
+          'referer': url
         });
       });
+
+      return List.generate(
+          seasons.length,
+          (index) =>
+              Season(number: seasons[index].toNum(), url: episodes[index]));
+    });
+  }
 
   @override
   VideoExtractor loadVideoExtractor(VideoServer videoServer) {
@@ -108,4 +115,3 @@ class Rewatch extends MovieProvider {
         });
       });
 }
-

@@ -19,6 +19,14 @@ class MoviesClub extends VideoExtractor {
 
   static const _keyV5 = '4VqE3#N7zt&HEP^a';
   static const _keyV2 = "11x&W5UBrcqn\$9Yl";
+  static const _keyV3 = "m4H6D9%0\$N&F6rQ&";
+
+  extractV3(String html) {
+    final masterjs = _MasterJs.fromHtmlV3(html);
+
+    crypto.aes.decrypt(masterjs.ciphertext, _keyV3,
+        iv: masterjs.iv, options: CipherOptions(salt: masterjs.salt, ivEncoding: 'hex'));
+  }
 
   @override
   Future<VideoContainer> extract() async {
@@ -33,7 +41,7 @@ class MoviesClub extends VideoExtractor {
 
     final derivedKey = crypto.pbkdf2(
         digest: crypto.digestNames.SHA512,
-        iterations: masterjs.iterations,
+        iterations: masterjs.iterations!,
         blockLength: 128,
         keylength: 32,
         salt: crypto.enc.hex.parse(salt),
@@ -100,13 +108,13 @@ class _Tracks extends Subtitle {
 
 class _MasterJs {
   final String ciphertext;
-  final int iterations;
+  final int? iterations;
   final String iv;
   final String salt;
 
   _MasterJs(
       {required this.ciphertext,
-      required this.iterations,
+      this.iterations,
       required this.iv,
       required this.salt});
 
@@ -121,5 +129,15 @@ class _MasterJs {
         iterations: json['iterations'] as int,
         iv: json['iv'] as String,
         salt: json['salt'] as String);
+  }
+
+  factory _MasterJs.fromHtmlV3(String html) {
+    final json = jsonDecode(
+        RegExp(r"MasterJS\s*=\s*'([^']*)'").firstMatch(html)!.group(1)!);
+
+    return _MasterJs(
+        ciphertext: json['ct'] as String,
+        iv: json['iv'] as String,
+        salt: json['s'] as String);
   }
 }

@@ -1,65 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:meiyou/core/constants/default_sized_box.dart';
-import 'package:meiyou/core/resources/response_state.dart';
-import 'package:meiyou/core/utils/extenstions/async_snapshot.dart';
-import 'package:meiyou/domain/entities/media_details.dart';
-import 'package:meiyou/domain/entities/search_response.dart';
-import 'package:meiyou/domain/repositories/watch_provider_repository.dart';
-import 'package:meiyou/domain/usecases/provider_use_cases/load_movie_usecase.dart';
-import 'package:meiyou/presentation/pages/info_watch/state/source_dropdown_bloc/bloc/source_drop_down_bloc.dart';
+import 'package:meiyou/core/resources/snackbar.dart';
 import 'package:meiyou/presentation/widgets/episode_holder.dart';
+import 'package:meiyou/presentation/widgets/not_found.dart';
+import 'package:meiyou/presentation/widgets/video_server_view.dart';
+import 'package:meiyou/presentation/widgets/watch/state/movie_view/state/bloc/fetch_movie_bloc.dart';
 
-class MovieView extends StatefulWidget {
-  final SearchResponseEntity searchResponse;
-  const MovieView({super.key, required this.searchResponse});
-
-  @override
-  State<MovieView> createState() => _MovieViewState();
-}
-
-class _MovieViewState extends State<MovieView> {
-  late final MediaDetailsEntity media;
-  // late final LoadMovieUseCase loadMovieUseCase;
-
-  @override
-  void initState() {
-    media = RepositoryProvider.of<MediaDetailsEntity>(context);
-    super.initState();
-  }
+class MovieView extends StatelessWidget {
+  final void Function(SelectedServer server)? onServerSelected;
+  const MovieView({
+    super.key,
+    this.onServerSelected,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<SourceDropDownBloc, SourceDropDownState>(
-        bloc: BlocProvider.of<SourceDropDownBloc>(context),
-        builder: (context, state) {
-          final LoadMovieUseCase loadMovieUseCase = LoadMovieUseCase(
-              repository:
-                  RepositoryProvider.of<WatchProviderRepository>(context),
-              provider: state.provider);
-          return FutureBuilder(
-              future: loadMovieUseCase.call(widget.searchResponse.url),
-              builder: (context, snapshot) {
-                if (snapshot.waiting) {
-                  return const CircularProgressIndicator();
-                } else if (snapshot.done &&
-                    snapshot.hasData &&
-                    snapshot.data is ResponseSuccess) {
-                  return EpisodeHolder(
-                    onTap: () {},
-                    number: 0,
-                    title: media.title ??
-                        media.romaji ??
-                        media.native ??
-                        'No Title',
-                    desc: media.description,
-                    rated: media.averageScore,
-                    thumbnail: media.bannerImage ?? media.poster,
-                  );
-                } else {
-                  return defaultSizedBox;
-                }
-              });
-        });
+    return BlocConsumer<FetchMovieBloc, FetchMovieState>(
+      builder: (context, state) {
+        if (state is FetchMovieSuccess) {
+          return EpisodeHolder(
+            onTap: () {
+              VideoServerListView.showDialog(context, onServerSelected);
+            },
+            number: 0,
+            title: state.movie!.title,
+            desc: state.movie!.description,
+            thumbnail: state.movie!.cover,
+            rated: state.movie!.rated,
+          );
+        } else if (state is FetchMovieFailed) {
+          return const NotFound();
+        } else {
+          return const Center(child: CircularProgressIndicator());
+        }
+      },
+      listener: (a, b) {
+        if (b is FetchMovieFailed) {
+          showSnackBAr(context, text: b.error!.toString());
+        }
+      },
+      listenWhen: (a, b) => b is FetchMovieFailed,
+    );
   }
 }

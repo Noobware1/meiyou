@@ -1,24 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:meiyou/presentation/widgets/add_space.dart';
-import 'package:meiyou/presentation/widgets/season_selector/season_selector.dart';
+import 'package:meiyou/presentation/widgets/video_server_view.dart';
+import 'package:meiyou/presentation/widgets/watch/anime_view.dart';
 
-class TvView extends StatefulWidget {
-  const TvView({super.key});
+class TvView extends StatelessWidget {
+  final void Function(SelectedServer server)? onServerSelected;
+  const TvView({
+    super.key,
+    this.onServerSelected,
+  });
 
-  @override
-  State<TvView> createState() => _TvViewState();
-}
-
-class _TvViewState extends State<TvView> {
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const SeasonSelector(),
-        addVerticalSpace(10),
-        
-      ],
+    return AnimeView(
+      onServerSelected: onServerSelected,
     );
   }
 }
-

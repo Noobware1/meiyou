@@ -1,4 +1,5 @@
 import 'package:meiyou/core/utils/extenstions/string.dart';
+import 'package:meiyou/core/utils/fix_tmdb_image.dart';
 import 'package:meiyou/domain/entities/episode.dart';
 
 class Episode extends EpisodeEntity {
@@ -28,24 +29,36 @@ class Episode extends EpisodeEntity {
       desc: json['overview'],
       rated: json['vote_average'].toString().substring(0, 3).toDoubleOrNull(),
       thumbnail: (json['still_path'] != null)
-          ? 'https://image.tmdb.org/t/p/original${json["still_path"]}'
+          ? getImageUrl(json["still_path"])!
           : null,
       number: json['episode_number'] as num,
       url: '',
     );
   }
 
-  // List<Map<String, dynamic>> toJson(List<Episode> episodes) {
-  //   return episodes
-  //       .map((episode) => {
-  //             'name': episode.title,
-  //             'overview': episode.desc,
-  //             'still_path': episode.thumbnail,
-  //             'vote_average': episode.rated,
-  //             'episode_number': episode.number
-  //           })
-  //       .toList();
-  // }
+  Map<String, dynamic> toJson() {
+    return {
+      'number': number,
+      'url': url,
+      'title': title,
+      'desc': desc,
+      'isFiller': isFiller,
+      'rated': rated,
+      'thumbnail': thumbnail,
+    };
+  }
+
+  factory Episode.fromJson(dynamic json) {
+    return Episode(
+      number: json['number'] as num,
+      url: json['url'] as String,
+      title: json['title'] as String?,
+      desc: json['desc'] as String?,
+      isFiller: json['isFiller'] as bool?,
+      rated: json['rated'] as double?,
+      thumbnail: json['thumbnail'] as String?,
+    );
+  }
 
   Episode copyWith({
     num? number,

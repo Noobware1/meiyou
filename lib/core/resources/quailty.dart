@@ -1,7 +1,8 @@
 import 'package:meiyou/core/resources/watch_qualites.dart';
 import 'package:meiyou/core/utils/extenstions/string.dart';
+import 'package:equatable/equatable.dart';
 
-class Quality {
+class Quality extends Equatable {
   final int pixel;
   final int quaility;
   const Quality({required this.pixel, required this.quaility});
@@ -10,6 +11,9 @@ class Quality {
   String toString() {
     return '${pixel}x$quaility';
   }
+
+  @override
+  List<Object?> get props => [pixel, quaility];
 
   @override
   bool operator ==(Object other) =>

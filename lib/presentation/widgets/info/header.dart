@@ -64,7 +64,7 @@ class _ForSmallerScreens extends StatelessWidget {
                       addHorizontalSpace(10),
                       Expanded(
                         child: Padding(
-                          padding: const EdgeInsets.only(right: 20, top: 30),
+                          padding: const EdgeInsets.only(right: 30, top: 30),
                           // color: Colors.red,
 
                           child: DefaultTextStyle(

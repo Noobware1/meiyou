@@ -1,14 +1,14 @@
 part of 'seasons_selector_bloc.dart';
 
 sealed class SeasonsSelectorEvent extends Equatable {
-  final SeasonEntity season;
-  final BaseProvider provider;
-  const SeasonsSelectorEvent(this.season, this.provider);
+  final num season;
+  final List<EpisodeEntity> epsiodes;
+  const SeasonsSelectorEvent(this.season, this.epsiodes);
 
   @override
-  List<Object> get props => [season, provider];
+  List<Object> get props => [season, epsiodes];
 }
 
 final class SelectSeason extends SeasonsSelectorEvent {
-  const SelectSeason(super.season, super.provider);
+  const SelectSeason(super.season, super.epsiodes);
 }

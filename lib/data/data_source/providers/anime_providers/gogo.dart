@@ -6,6 +6,7 @@ import 'package:meiyou/core/utils/encode.dart';
 import 'package:meiyou/core/utils/extenstions/iterable.dart';
 import 'package:meiyou/core/utils/extenstions/string.dart';
 import 'package:meiyou/core/utils/httpify.dart';
+import 'package:meiyou/data/data_source/providers/anime_providers/extractors/gogo_cdn.dart';
 import 'package:meiyou/data/models/episode.dart';
 import 'package:meiyou/data/models/search_response.dart';
 import 'package:meiyou/data/models/video_server.dart';
@@ -26,7 +27,7 @@ class Gogo extends AnimeProvider {
       final title = it.selectFirst('p.name > a').text;
       final element = it.selectFirst('div.img > a');
       final cover = element.selectFirst('img').attr('src');
-      final url = element.attr('href');
+      final url = hostUrl + element.attr('href');
       return SearchResponse(
           title: title, url: url, cover: cover, type: MediaType.anime);
     }).toList();
@@ -76,6 +77,10 @@ class Gogo extends AnimeProvider {
 
   @override
   VideoExtractor? loadVideoExtractor(VideoServer videoServer) {
+    final url = videoServer.url;
+    if (url.contains('/streaming.php?') || url.contains('/embedplus?')) {
+      return GogoCDN(videoServer);
+    }
     return null;
   }
 

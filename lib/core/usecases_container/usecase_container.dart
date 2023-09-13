@@ -3,10 +3,14 @@ import 'package:flutter_bloc/flutter_bloc.dart' show RepositoryProvider;
 import 'package:meiyou/core/usecases/usecase.dart';
 
 abstract class UseCaseContainer<Container> {
-  Map<String, UseCase> get usecases;
+  Set<UseCase> get usecases;
 
-  T get<T>(String key) {
-    return usecases[key] as T;
+  T get<T>() {
+    try {
+      return usecases.firstWhere((it) => it is T) as T;
+    } catch (_) {
+      throw UseCaseNotFoundException();
+    }
   }
 
   RepositoryProvider<Container> inject() =>
@@ -19,3 +23,5 @@ abstract class UseCaseContainer<Container> {
     );
   }
 }
+
+final class UseCaseNotFoundException implements Exception {}

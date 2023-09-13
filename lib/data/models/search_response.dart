@@ -17,6 +17,24 @@ class SearchResponse extends SearchResponseEntity {
     );
   }
 
+  Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'url': url,
+      'cover': cover,
+      'type': type,
+    };
+  }
+
+  factory SearchResponse.fromJson(dynamic json) {
+    return SearchResponse(
+      title: json['title'] as String,
+      url: json['url'] as String,
+      cover: json['cover'] as String,
+      type: json['type'] as String,
+    );
+  }
+
   @override
   String toString() =>
       'title: $title,\n url: $url,\n cover: $cover,\n type: $type\n';

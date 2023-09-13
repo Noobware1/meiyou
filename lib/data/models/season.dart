@@ -34,6 +34,30 @@ class Season extends SeasonEntity {
         totalEpisode: json['episode_count'] as int?);
   }
 
+  Map<String, dynamic> toJson() {
+    return {
+      'number': number,
+      'id': id,
+      'title': title,
+      'url': url,
+      'airDate': airDate,
+      'totalEpisode': totalEpisode,
+      'isOnGoing': isOnGoing,
+    };
+  }
+
+  factory Season.fromJson(dynamic json) {
+    return Season(
+      number: json['number'] as num,
+      id: json['id'] as int?,
+      title: json['title'] as String?,
+      url: json['url'] as String?,
+      airDate: json['airDate'],
+      totalEpisode: json['totalEpisode'] as int?,
+      isOnGoing: json['isOnGoing'] as bool?,
+    );
+  }
+
   Season copyWith({
     num? number,
     int? id,

@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:meiyou/core/constants/default_sized_box.dart';
 import 'package:meiyou/presentation/widgets/add_space.dart';
 import 'package:meiyou/presentation/widgets/resizeable_text.dart';
 
@@ -9,12 +10,12 @@ class EpisodeHolder extends StatelessWidget {
   final String? thumbnail;
   final String? desc;
   final double? rated;
-  final String title;
+  final String? title;
   const EpisodeHolder({
     super.key,
     required this.onTap,
     required this.number,
-    required this.title,
+    this.title,
     this.thumbnail,
     this.desc,
     this.rated,
@@ -22,44 +23,70 @@ class EpisodeHolder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 15, right: 15),
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          decoration: BoxDecoration(
-              color: Colors.grey.withOpacity(0.1),
-              borderRadius: const BorderRadius.all(
-                Radius.circular(15),
-              )),
-          child: Column(
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
+    return LayoutBuilder(builder: (context, constraints) {
+      if (constraints.maxWidth < 230) {
+        return Row(
+          children: [
+            const Icon(
+              Icons.play_arrow,
+              color: Colors.white,
+            ),
+            Expanded(
+                child: Text(
+              '$number. ${title ?? "No Title"}',
+              style: const TextStyle(color: Colors.white),
+            ))
+          ],
+        );
+      }
+      return Padding(
+        padding: const EdgeInsets.only(left: 15, right: 15),
+        child: GestureDetector(
+          onTap: onTap,
+          child: Container(
+            decoration: const BoxDecoration(
+                color: Colors.black,
+                borderRadius: BorderRadius.all(
+                  Radius.circular(15),
+                )),
+            child: Container(
+              decoration: BoxDecoration(
+                  color: Colors.grey.withOpacity(0.1),
+                  borderRadius: const BorderRadius.all(
+                    Radius.circular(15),
+                  )),
+              child: Column(
                 children: [
-                  Stack(
-                    children: [_imageHolder(), _playButton()],
-                  ),
-                  addHorizontalSpace(10),
-                  Column(
+                  Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      addVerticalSpace(15),
-                      _buildTitle(context),
-                      addVerticalSpace(5),
-                      _buildRated()
+                      Stack(
+                        children: [_imageHolder(), _playButton()],
+                      ),
+                      addHorizontalSpace(10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            addVerticalSpace(15),
+                            _buildTitle(context),
+                            addVerticalSpace(5),
+                            _buildRated()
+                          ],
+                        ),
+                      )
                     ],
-                  )
+                  ),
+                  if (desc != null && desc!.isNotEmpty) _buildDesc(),
+                  if (desc != null && desc!.isNotEmpty) addVerticalSpace(10),
                 ],
               ),
-              if (desc != null) _buildDesc(),
-              if (desc != null) addVerticalSpace(10),
-            ],
+            ),
           ),
         ),
-      ),
-    );
+      );
+    });
   }
 
   Widget _buildDesc() {
@@ -67,7 +94,7 @@ class EpisodeHolder extends StatelessWidget {
         padding: const EdgeInsets.all(10),
         child: Align(
           alignment: Alignment.topLeft,
-          child: ResizeableTextWidget(
+          child: _RezisbleTextWidget(
             text: desc!,
             maxLines: 3,
             style: const TextStyle(
@@ -81,7 +108,7 @@ class EpisodeHolder extends StatelessWidget {
 
   Widget _buildRated() {
     return SizedBox(
-        height: 13.6,
+        height: 15,
         child: DefaultTextStyle(
           style: const TextStyle(
               fontSize: 13.6, color: Colors.grey, fontWeight: FontWeight.w600),
@@ -95,7 +122,7 @@ class EpisodeHolder extends StatelessWidget {
       child: DefaultTextStyle(
           style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
           child: Text(
-            '$number. $title',
+            '$number. ${title ?? 'No Title'}',
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
           )),
@@ -137,5 +164,45 @@ class EpisodeHolder extends StatelessWidget {
             size: 25,
           ),
         ));
+  }
+}
+
+class _RezisbleTextWidget extends StatefulWidget {
+  final String text;
+  final bool showButtons;
+  final int maxLines;
+  final TextStyle style;
+  const _RezisbleTextWidget(
+      {required this.text,
+      required this.maxLines,
+      this.showButtons = false,
+      this.style = const TextStyle(
+          color: Colors.white, fontSize: 14, fontWeight: FontWeight.w400),
+      super.key});
+
+  @override
+  State<_RezisbleTextWidget> createState() => __RezisbleTextWidgetState();
+}
+
+class __RezisbleTextWidgetState extends State<_RezisbleTextWidget> {
+  bool showFullText = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => setState(() {
+        if (showFullText) {
+          showFullText = false;
+        } else {
+          showFullText = true;
+        }
+      }),
+      child: Text(
+        widget.text,
+        style: widget.style,
+        maxLines: !showFullText ? widget.maxLines : null,
+        overflow: !showFullText ? TextOverflow.ellipsis : null,
+      ),
+    );
   }
 }

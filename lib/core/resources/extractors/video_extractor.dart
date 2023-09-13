@@ -10,5 +10,10 @@ abstract class VideoExtractor {
 
   String get hostUrl => videoServer.url;
 
+
+
   Future<VideoContainer> extract();
+
+
+
 }

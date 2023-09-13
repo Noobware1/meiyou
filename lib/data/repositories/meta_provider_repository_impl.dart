@@ -1,6 +1,7 @@
 import 'package:meiyou/core/resources/expections.dart';
 import 'package:meiyou/core/resources/meta_provider.dart';
 import 'package:meiyou/core/resources/response_state.dart';
+import 'package:meiyou/core/utils/data_converter/converters.dart';
 import 'package:meiyou/core/utils/extenstions/episode.dart';
 import 'package:meiyou/core/utils/extenstions/iterable.dart';
 import 'package:meiyou/core/utils/extenstions/list.dart';
@@ -17,6 +18,7 @@ import 'package:meiyou/data/models/row.dart';
 import 'package:meiyou/data/models/season.dart';
 import 'package:meiyou/domain/entities/media_details.dart';
 import 'package:meiyou/domain/entities/meta_response.dart';
+import 'package:meiyou/domain/entities/movie.dart';
 import 'package:meiyou/domain/entities/season.dart';
 import 'package:meiyou/domain/entities/episode.dart';
 import 'package:meiyou/domain/repositories/cache_repository.dart';
@@ -77,19 +79,19 @@ class MetaProviderRepositoryImpl implements MetaProviderRepository {
       final metaResponse = MetaResponse.fromEntity(response);
 
       final MediaDetails mediaDetails;
-      if (metaResponse.mediaProvider == MediaProvider.tmdb &&
-          metaResponse.isAnime()) {
-        final map = await mapTmdbToAnilist(metaResponse, _anilist);
-
-        mediaDetails = map ??
-            await _tmdb.fetchMediaDetails(
-                metaResponse.id, metaResponse.mediaType!);
-      } else if (metaResponse.mediaProvider == MediaProvider.anilist) {
+      if (metaResponse.mediaProvider == MediaProvider.anilist) {
         mediaDetails = await _anilist.fetchMediaDetails(
             metaResponse.id, metaResponse.mediaType!);
       } else {
-        mediaDetails = await _tmdb.fetchMediaDetails(
-            metaResponse.id, metaResponse.mediaType!);
+        final MediaDetails? map;
+        if (!metaResponse.isAnime()) {
+          map = null;
+        } else {
+          map = await mapTmdbToAnilist(metaResponse, _anilist);
+        }
+        mediaDetails = map ??
+            await _tmdb.fetchMediaDetails(
+                metaResponse.id, metaResponse.mediaType!);
       }
       return mediaDetails;
     });
@@ -98,15 +100,17 @@ class MetaProviderRepositoryImpl implements MetaProviderRepository {
   @override
   Future<List<Episode>> getMappedEpisodes(List<EpisodeEntity> episodes,
       {SeasonEntity? season,
-      required CacheRespository cacheRepository,
+      required CacheRespository cacheRespository,
       required MediaDetailsEntity mediaDetails}) async {
     final media = MediaDetails.fromEntity(mediaDetails);
-    const episodesKey = 'meta-episodes';
+    final episodesKey = '${mediaDetails.id}_meta-episodes';
     try {
       final List<Episode> episodesToMap;
       final key = season?.number ?? 1;
       final cache =
-          cacheRepository.get<Map<num, List<EpisodeEntity>>>(episodesKey);
+          await cacheRespository.getFromIOCache<Map<num, List<Episode>>>(
+              episodesKey, CacheWriters.seasonEpisodeWriter.readFromJson);
+
       //checks if cache is exist beforehand
       if (cache != null) {
         //checks if the cache contains the given season
@@ -120,7 +124,8 @@ class MetaProviderRepositoryImpl implements MetaProviderRepository {
 
           if (getEpisodes != null) {
             cache[key] = getEpisodes;
-            cacheRepository.update(episodesKey, cache);
+            cacheRespository.updateIOCacheValue(episodesKey,
+                CacheWriters.seasonEpisodeWriter.writeToJson(cache));
 
             episodesToMap = getEpisodes;
           } else {
@@ -129,7 +134,7 @@ class MetaProviderRepositoryImpl implements MetaProviderRepository {
         }
       } else {
         //fetchs fresh episodes then caches them
-        final Map<num, List<EpisodeEntity>> map = {};
+        final Map<num, List<Episode>> map = {};
         if (media.mediaProvider == MediaProvider.tmdb) {
           for (var i = 0; i < (media.seasons?.length ?? 1); i++) {
             final currentSeason = media.seasons?[i];
@@ -145,7 +150,8 @@ class MetaProviderRepositoryImpl implements MetaProviderRepository {
           }
         }
 
-        cacheRepository.add(episodesKey, data: map);
+        cacheRespository.addIOCache(
+            episodesKey, CacheWriters.seasonEpisodeWriter.writeToJson(map));
         episodesToMap = map[key]!.mapAsList((it) => Episode.fromEntity(it));
       }
 
@@ -167,7 +173,6 @@ class MetaProviderRepositoryImpl implements MetaProviderRepository {
       return episodes.mapAsList((it) => Episode.fromEntity(it).copyWith(
             title: it.title ?? 'Episode ${it.number}',
             thumbnail: it.thumbnail ?? media.bannerImage ?? media.poster,
-         
           ));
     }
   }
@@ -206,4 +211,16 @@ class MetaProviderRepositoryImpl implements MetaProviderRepository {
           type: MeiyouExceptionType.providerException);
     });
   }
+
+  @override
+  MovieEntity getMappedMovie(MovieEntity movie,
+      {required MediaDetailsEntity mediaDetails}) {
+    return MovieEntity(
+        url: movie.url,
+        cover: movie.cover ?? mediaDetails.bannerImage ?? mediaDetails.poster,
+        description: movie.description ?? mediaDetails.description,
+        title: movie.title ?? mediaDetails.title,
+        rated: movie.rated ?? mediaDetails.averageScore);
+  }
 }
+

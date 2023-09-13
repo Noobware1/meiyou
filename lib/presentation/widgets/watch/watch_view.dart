@@ -1,82 +1,51 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:meiyou/core/constants/default_sized_box.dart';
 import 'package:meiyou/core/resources/media_type.dart';
-import 'package:meiyou/domain/entities/media_details.dart';
-import 'package:meiyou/domain/entities/search_response.dart';
-import 'package:meiyou/domain/repositories/cache_repository.dart';
-import 'package:meiyou/domain/repositories/meta_provider_repository.dart';
-import 'package:meiyou/domain/repositories/watch_provider_repository.dart';
-import 'package:meiyou/domain/usecases/provider_use_cases/load_seasons_use_case.dart';
-import 'package:meiyou/presentation/widgets/episode_view/bloc/fetch_episodes/fetch_episodes_bloc.dart';
-import 'package:meiyou/presentation/widgets/season_selector/fetch_seasons_bloc/fetch_seasons_bloc_bloc.dart';
-import 'package:meiyou/presentation/widgets/season_selector/season_selector.dart';
-import 'package:meiyou/presentation/widgets/season_selector/seasons_selector_bloc/seasons_selector_bloc.dart';
+import 'package:meiyou/presentation/pages/info_watch/state/selected_searchResponse_bloc/selected_search_response_bloc.dart';
+import 'package:meiyou/presentation/widgets/not_found.dart';
+import 'package:meiyou/presentation/widgets/video_server_view.dart';
+import 'package:meiyou/presentation/widgets/watch/anime_view.dart';
+import 'package:meiyou/presentation/widgets/watch/movie_view.dart';
+import 'package:meiyou/presentation/widgets/watch/tv_view.dart';
 
-class WatchView extends StatefulWidget {
-  final SearchResponseEntity searchResponse;
-  const WatchView({super.key, required this.searchResponse});
+class WatchView extends StatelessWidget {
+  final void Function(SelectedServer server)? onServerSelected;
 
-  @override
-  State<WatchView> createState() => _WatchViewState();
-}
-
-class _WatchViewState extends State<WatchView> {
-  late final WatchProviderRepository _watchProviderRepository;
-  // late final LoadSeasonsUseCase? loadSeasonsUseCase;
-  late final FetchEpisodesBloc _epsiodeBloc;
-
-  @override
-  void initState() {
-    _watchProviderRepository =
-        RepositoryProvider.of<WatchProviderRepository>(context);
-    _epsiodeBloc = FetchEpisodesBloc(
-        repository: _watchProviderRepository,
-        cacheRespository: RepositoryProvider.of<CacheRespository>(context),
-        mediaDetails: RepositoryProvider.of<MediaDetailsEntity>(context),
-        metaProviderRepository:
-            RepositoryProvider.of<MetaProviderRepository>(context));
-
-//  loadSeasonsUseCase = LoadSeasonsUseCase(watchRepository);
-    super.initState();
-  }
+  const WatchView({
+    super.key,
+    this.onServerSelected,
+  });
 
   @override
   Widget build(BuildContext context) {
-    // print('rebuild');
-    final SeasonsSelectorBloc? seasonsSelectorBloc;
-    final FetchSeasonsBloc? fetchSeasonsBloc;
-    if (_isTv()) {
-      seasonsSelectorBloc = SeasonsSelectorBloc(_epsiodeBloc);
-      fetchSeasonsBloc = FetchSeasonsBloc(
-          LoadSeasonsUseCase(_watchProviderRepository), seasonsSelectorBloc);
-    } else {
-      seasonsSelectorBloc = null;
-      fetchSeasonsBloc = null;
-    }
-
-    return MultiBlocProvider(
-        providers: [
-          BlocProvider.value(value: _epsiodeBloc),
-          if (_isTv()) ...[
-            BlocProvider.value(value: seasonsSelectorBloc!),
-            BlocProvider.value(value: fetchSeasonsBloc!),
-          ]
-        ],
-        child: Column(
-          children: [
-            if (_isTv()) const SeasonSelector(),
-          ],
-        ));
+    return BlocBuilder<SelectedSearchResponseBloc, SelectedSearchResponseState>(
+        builder: (context, state) {
+      if ((state is SelectedSearchResponseFound ||
+              state is SelectedSearchResponseSelected) &&
+          !state.searchResponse.isEmpty) {
+        final searchReponse = state.searchResponse;
+        switch (searchReponse.type) {
+          case MediaType.anime:
+            return AnimeView(
+              onServerSelected: onServerSelected,
+            );
+          case MediaType.movie:
+            return MovieView(
+              onServerSelected: onServerSelected,
+            );
+          case MediaType.tvShow:
+            return TvView(
+              onServerSelected: onServerSelected,
+            );
+          default:
+            return defaultSizedBox;
+        }
+      } else if (state is SelectedSearchResponseNotFound) {
+        return const NotFound();
+      } else {
+        return const Center(child: CircularProgressIndicator());
+      }
+    });
   }
-
-  bool _isTv() => widget.searchResponse.type == MediaType.tvShow;
 }
-
-//  final FetchEpisodesBloc episodesBloc;
-//     final SeasonsSelectorBloc? _seasonsSelectorBloc;
-//     final FetchSeasonsBloc? _fetchSeasonsBloc;
-//     episodesBloc = FetchEpisodesBloc(repository: repository, cacheRespository: cacheRespository, mediaDetails: mediaDetails, metaProviderRepository: metaProviderRepository)
-//     if (searchResponse.type == MediaType.tvShow) {
-//       _seasonsSelectorBloc = SeasonsSelectorBloc(episodesBloc);
-//       _fetchSeasonsBloc = FetchSeasonsBloc(repository, bloc);
-//     }

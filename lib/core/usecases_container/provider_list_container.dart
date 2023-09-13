@@ -9,11 +9,8 @@ class LoadProviderListRepositoryContainer
 
   LoadProviderListRepositoryContainer(this._repository);
 
-  String get loadProviderListUseCase => 'loadProviderListUseCase';
-
   @override
-  Map<String, UseCase> get usecases => {
-        loadProviderListUseCase: LoadProvidersUseCase(_repository),
+  Set<UseCase> get usecases => {
+        LoadProvidersUseCase(_repository),
       };
-
 }

@@ -1,2 +1,2 @@
-String encode(String url) =>
-    Uri.encodeQueryComponent(url).replaceAll('+', '%20');
+String encode(String url, [String replaceWith = '%20']) =>
+    Uri.encodeQueryComponent(url).replaceAll('+', replaceWith);

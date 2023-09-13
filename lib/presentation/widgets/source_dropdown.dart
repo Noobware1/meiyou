@@ -58,11 +58,13 @@ class SourceDropDown extends StatelessWidget {
                       color: Colors.grey,
                       fontWeight: FontWeight.w600,
                       fontSize: 15),
+                  
                   onChanged: (value) {
                     if (value != null && value != state.provider) {
                       bloc.add(SourceDropDownOnSelected(provider: value));
                       
                     }
+
                   },
                   iconSize: 35,
                   value: state.provider,

@@ -1,11 +1,24 @@
 abstract interface class CacheRespository {
-  void add(String key, {required Object data});
+  void addMemoryCache(String key, {required Object data});
 
-  void remove(String key);
+  void removeMemoryCache(String key);
 
-  T? get<T>(String key);
+  T? getFromMemoryCache<T>(String key);
 
-  void update(String key, Object value);
+  void updateMemoryCacheValue(String key, Object value);
 
-  void deleteAllCache();
+  Future<void> addIOCache(String path, String data);
+
+  Future<void> removeIOCache(String path);
+
+  Future<T?> getFromIOCache<T>(
+      String path, T Function(dynamic data) transfromer);
+
+  Future<void> updateIOCacheValue(String path, String value);
+
+  Future<void> deleteAllIOCache();
+
+  void deleteAllMemoryCache();
+
+  Future<void> deleteAllCache();
 }
