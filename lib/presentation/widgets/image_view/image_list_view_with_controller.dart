@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:meiyou/core/constants/height_and_width.dart';
+import 'package:meiyou/domain/entities/meta_response.dart';
+import 'package:meiyou/domain/entities/results.dart';
 import 'package:meiyou/domain/entities/row.dart';
 
 import 'image_list_view.dart';
@@ -10,11 +12,14 @@ class ImageViewWithScrollController extends StatefulWidget {
   final MetaRowEntity data;
   final double height;
   final double width;
+  final void Function(MetaResponseEntity selected)? onSelected;
+
   // final Future<List<ImageListViewData>?> Function(int page)? fetchMoreData;
   final EdgeInsets padding;
   final double spaceBetween;
   final TextStyle? textStyle;
   final double paddingAtStart;
+
   final double paddingAtEnd;
 
   const ImageViewWithScrollController(
@@ -22,6 +27,7 @@ class ImageViewWithScrollController extends StatefulWidget {
       required this.type,
       this.textStyle,
       this.paddingAtStart = 0.0,
+      this.onSelected,
       this.paddingAtEnd = 0.0,
       required this.data,
       this.padding = const EdgeInsets.only(left: 5, right: 5),
@@ -62,7 +68,9 @@ class _ImageViewWithScrollControllerState
         paddingAtEnd: widget.paddingAtEnd,
         paddingAtStart: widget.paddingAtStart,
         controller: _controller,
+    
         textStyle: widget.textStyle,
+        onSelected: widget.onSelected,
         height: widget.height,
         padding: widget.padding,
         spaceBetween: widget.spaceBetween,
@@ -81,6 +89,7 @@ class _ImageViewWithScrollControllerState
           context: context,
           // label:? label,
           data: widget.data,
+          onSelected: widget.onSelected,
           textStyle: widget.textStyle,
           controller: _controller,
           // fetchMoreData: widget.fetchMoreData,
@@ -97,6 +106,7 @@ class _ImageViewWithScrollControllerState
           // label: label,
           data: widget.data,
           controller: _controller,
+          onSelected: widget.onSelected,
           // fetchMoreData: widget.fetchMoreData,
           height: widget.height,
           padding: widget.padding,

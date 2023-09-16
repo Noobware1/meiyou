@@ -19,69 +19,77 @@ import 'package:meiyou/presentation/widgets/season_selector/seasons_selector_blo
 import 'package:meiyou/presentation/widgets/video_server_view.dart';
 import 'package:meiyou/presentation/widgets/watch/state/fetch_seasons_episodes/fetch_seasons_episodes_bloc.dart';
 
-void changeEpisode(BuildContext context,
-    bool forward) {}//   void _showSnackBar() => showSnackBAr(context,
-//       text:
-//           forward ? 'No Next Episode Avaible' : 'No Previous Episode Avaible');
+void changeEpisode(BuildContext context, bool forward,
+    Widget Function(Widget child) injector) {
+  //   void _showSnackBar() => showSnackBAr(context,
+  final text =
+      forward ? 'No Next Episode Avaible' : 'No Previous Episode Avaible';
 
-//   if (BlocProvider.of<SelectedSearchResponseBloc>(context)
-//           .state
-//           .searchResponse
-//           .type ==
-//       MediaType.movie) {
-//     _showSnackBar();
-//   }
+  if (BlocProvider.of<SelectedSearchResponseBloc>(context)
+          .state
+          .searchResponse
+          .type ==
+      MediaType.movie) {
+    showSnackBAr(context, text: text);
+  }
+  // Widget injector(Widget child) =>
+  //     playerDependenciesInjector(context, child: child);
 
-//   final seekStateBeforeChange = SeekEpisodeState(
-//       currentEpIndex: BlocProvider.of<CurrentEpisodeCubit>(context).state,
-//       currentSeason: BlocProvider.of<SeasonsSelectorBloc>(context).state.season,
-//       currentEpKey:
-//           BlocProvider.of<EpisodeSelectorBloc>(context).state.current);
+  // final seekStateBeforeChange = SeekEpisodeState(
+  //     currentEpIndex: BlocProvider.of<CurrentEpisodeCubit>(context).state,
+  //     currentSeason: BlocProvider.of<SeasonsSelectorBloc>(context).state.season,
+  //     currentEpKey:
+  //         BlocProvider.of<EpisodeSelectorBloc>(context).state.current,
 
-//   final seekStateAfterChange = RepositoryProvider.of<
-//           VideoPlayerUseCaseContainer>(context)
-//       .get<SeekEpisodeUseCase>()
-//       .call(SeekEpisodeUseCaseParams(
-//           episodeSeasonsMap:
-//               BlocProvider.of<FetchSeasonsEpisodesBloc>(context).state.data!,
-//           forward: forward,
-//           currentSeason:
-//               BlocProvider.of<SeasonsSelectorBloc>(context).state.season,
-//           currentEpKey:
-//               BlocProvider.of<EpisodeSelectorBloc>(context).state.current,
-//           currentEpIndex: BlocProvider.of<CurrentEpisodeCubit>(context).state,
-//           getEpisodeChunksUseCase:
-//               RepositoryProvider.of<WatchProviderRepositoryContainer>(context)
-//                   .get<GetEpisodeChunksUseCase>()));
+  //         );
 
-//   if (seekStateAfterChange == null) {
-//     _showSnackBar();
-//   } else {
-//     _setState(context, seekStateAfterChange);
-//     VideoServerListView.showDialog(context, (value) {
-//       BlocProvider.of<SelectedServerCubit>(context).changeServer(value);
+  final seekState = RepositoryProvider.of<VideoPlayerUseCaseContainer>(context)
+      .get<SeekEpisodeUseCase>()
+      .call(SeekEpisodeUseCaseParams(
+          episodeSeasonsMap:
+              BlocProvider.of<FetchSeasonsEpisodesBloc>(context).state.data!,
+          forward: forward,
+          currentSeason:
+              BlocProvider.of<SeasonsSelectorBloc>(context).state.season,
+          currentEpKey:
+              BlocProvider.of<EpisodeSelectorBloc>(context).state.current,
+          currentEpIndex: BlocProvider.of<CurrentEpisodeCubit>(context).state,
+          getEpisodeChunksUseCase:
+              RepositoryProvider.of<WatchProviderRepositoryContainer>(context)
+                  .get<GetEpisodeChunksUseCase>()));
 
-//       initialise(context, player(context),
-//           RepositoryProvider.of<VideoController>(context));
-//       _setState(context, seekStateAfterChange);
-//     });
-//     _setState(context, seekStateBeforeChange);
-//   }
-// }
+  if (seekState == null) {
+    showSnackBAr(context, text: text);
+  } else {
+    VideoServerListView.showSelectServerDialog(
+        context, injector, seekState.episode.url, (value) {
+      _setState(context, seekState);
+      BlocProvider.of<SelectedServerCubit>(context).changeServer(value);
 
-// void _setState(BuildContext context, SeekEpisodeState state) {
-//   BlocProvider.of<SeasonsSelectorBloc>(context).add(SelectSeason(
-//       state.currentSeason,
-//       BlocProvider.of<FetchSeasonsEpisodesBloc>(context)
-//           .state
-//           .data![state.currentSeason]!));
+      initialise(
+        context,
+        player(context),
+        RepositoryProvider.of<VideoController>(context),
+      );
 
-//   BlocProvider.of<EpisodeSelectorBloc>(context).add(SelectEpisode(MapEntry(
-//       state.currentEpKey,
-//       BlocProvider.of<SeasonsSelectorBloc>(context)
-//           .state
-//           .episodes[state.currentEpKey]!)));
+   
+    });
+  }
+}
 
-//   BlocProvider.of<CurrentEpisodeCubit>(context)
-//       .changeEpisode(state.currentEpIndex);
-// }
+void _setState(BuildContext context, SeekEpisodeState state) {
+  BlocProvider.of<SeasonsSelectorBloc>(context).add(SelectSeason(
+      state.currentSeason,
+      BlocProvider.of<FetchSeasonsEpisodesBloc>(context)
+          .state
+          .data![state.currentSeason]!));
+
+  BlocProvider.of<EpisodeSelectorBloc>(context).add(SelectEpisode(MapEntry(
+      state.currentEpKey,
+      BlocProvider.of<SeasonsSelectorBloc>(context)
+          .state
+          .episodes[state.currentEpKey]!)));
+
+  BlocProvider.of<CurrentEpisodeCubit>(context)
+      .changeEpisode(state.currentEpIndex);
+}

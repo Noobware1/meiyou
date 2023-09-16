@@ -7,5 +7,11 @@ extension IterableUtils<E> on Iterable<E> {
         growable: false);
   }
 
-  
+  E? tryfirstWhere(bool Function(E) test, {E Function()? orElse}) {
+    try {
+      return firstWhere(test, orElse: orElse);
+    } catch (_) {
+      return null;
+    }
+  }
 }

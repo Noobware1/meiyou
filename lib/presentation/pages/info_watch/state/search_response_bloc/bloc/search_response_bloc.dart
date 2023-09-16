@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:equatable/equatable.dart';
+import 'package:meiyou/core/resources/bloc_concurrency.dart/restartable.dart';
 import 'package:meiyou/core/resources/expections.dart';
 import 'package:meiyou/core/resources/providers/base_provider.dart';
 import 'package:meiyou/core/resources/response_state.dart';
@@ -29,7 +31,8 @@ class SearchResponseBloc
       required this.cacheRespository,
       required this.mediaTitle})
       : super(const SearchResponseSearching()) {
-    on<SearchResponseSearch>(onSearchResponseSearch);
+    on<SearchResponseSearch>(onSearchResponseSearch,
+        transformer: restartable());
     on<SearchResponseSearchWithoutSelecting>(
         onSearchResponseSearchWithoutSelecting);
   }

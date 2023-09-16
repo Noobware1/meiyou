@@ -16,40 +16,29 @@ class Gogo extends AnimeProvider {
   @override
   String get name => 'Gogo';
   @override
-  String get hostUrl => 'https://gogoanime.cl';
+  String get hostUrl => 'https://gogoanime.hu';
 
   @override
-  Future<List<SearchResponse>> search(String query) async {
-    final response =
-        await client.get('$hostUrl/search.html?keyword=${encode(query)}');
-
-    return response.document.select('.items > li').map((it) {
-      final title = it.selectFirst('p.name > a').text;
-      final element = it.selectFirst('div.img > a');
-      final cover = element.selectFirst('img').attr('src');
-      final url = hostUrl + element.attr('href');
-      return SearchResponse(
-          title: title, url: url, cover: cover, type: MediaType.anime);
-    }).toList();
+  Future<List<SearchResponse>> search(String query) {
+    return client
+        .get('$hostUrl/search.html?keyword=${encode(query)}')
+        .then((response) {
+      return response.document.select('.items > li').mapAsList((it) {
+        final title = it.selectFirst('p.name > a').text;
+        final element = it.selectFirst('div.img > a');
+        final cover = element.selectFirst('img').attr('src');
+        final url = hostUrl + element.attr('href');
+        return SearchResponse(
+            title: title, url: url, cover: cover, type: MediaType.anime);
+      });
+    });
   }
-
-  // @override
-  // Future<LoadResponse?> load(
-  //     {required SearchResponse data,
-  //     List<Season>? seasons,
-  //     Season? season}) async {
-  //   List<Episode>? episodes = await loadEpisodes(data.url);
-
-  //   return (episodes != null)
-  //       ? LoadResponse.fromTvResponse(episodes: episodes)
-  //       : null;
-  // }
 
   @override
   Future<List<Episode>> loadEpisodes(String url) async {
-    final res = await client.get(url);
-    final animePage = res.document;
-    final ep_end =
+    final animePage = (await client.get(url)).document;
+
+    final epEnd =
         animePage.select('ul#episode_page > li > a').attr('ep_end').last;
 
     final id = animePage
@@ -58,11 +47,9 @@ class Gogo extends AnimeProvider {
     final alias = animePage
         .selectFirst('.anime_info_episodes_next >.alias_anime')
         .attr('value');
-    final ajaxRequest = await client.get(
-        'https://ajax.gogo-load.com/ajax/load-list-episode?ep_start=0&ep_end=$ep_end&id=$id&alias=$alias');
-
-    final episodeList = ajaxRequest.document;
-    final episodes = episodeList
+    return (await client.get(
+            'https://ajax.gogo-load.com/ajax/load-list-episode?ep_start=0&ep_end=$epEnd&id=$id&alias=$alias'))
+        .document
         .select('#episode_related > li > a')
         .mapAsList((it) {
           final num = it.selectFirst('div.name').text.replaceFirst('EP ', '');
@@ -71,8 +58,6 @@ class Gogo extends AnimeProvider {
         })
         .reversed
         .toList();
-
-    return episodes;
   }
 
   @override
@@ -85,31 +70,15 @@ class Gogo extends AnimeProvider {
   }
 
   @override
-  Future<List<VideoServer>> loadVideoServers(String url) async {
-    final page = await client.get(url);
-    final episodePage = page.document;
-    return episodePage.select('.anime_muti_link > ul > li > a').mapAsList((it) {
-      final name = it.text.replaceFirst('Choose this server', '').trim();
-      final url = httpify(it.attr('data-video'));
-      return VideoServer(url: url, name: name);
+  Future<List<VideoServer>> loadVideoServers(String url) {
+    return client.get(url).then((response) {
+      return response.document
+          .select('.anime_muti_link > ul > li > a')
+          .mapAsList((it) {
+        final name = it.text.replaceFirst('Choose this server', '').trim();
+        final url = httpify(it.attr('data-video'));
+        return VideoServer(url: url, name: name);
+      });
     });
   }
 }
-
-
-// @override
-// VideoExtractor? loadVideoExtractor(VideoServer server) {
-//   final serverUrl = server.serverUrl;
-//   if (serverUrl.contains('sb')) {
-//     return StreamSBExtractor(server);
-//   } else if (serverUrl.contains('dood')) {
-//     return DoodExtractor(server);
-//   } else if (serverUrl.contains('streaming.php?') ||
-//       serverUrl.contains('embedplus?')) {
-//     return GogoExtractor(server);
-//   } else {
-//     return null;
-//   }
-// }
-
-

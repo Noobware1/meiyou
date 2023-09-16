@@ -1,5 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:media_kit_video/media_kit_video.dart';
+import 'package:meiyou/core/usecases_container/video_player_usecase_container.dart';
+import 'package:meiyou/domain/usecases/video_player_usecase/get_default_subtitle_usecase.dart';
 import 'package:meiyou/presentation/player/video_controls/cubits/selected_server_cubit.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:flutter/material.dart';
@@ -11,31 +13,25 @@ void initialise(BuildContext context, Player player, VideoController controller,
           .state
           .videoContainerEntity
           .headers));
+  final sub = RepositoryProvider.of<VideoPlayerUseCaseContainer>(context)
+      .get<GetDefaultSubtitleUseCase>()
+      .call(BlocProvider.of<SelectedServerCubit>(context)
+          .state
+          .videoContainerEntity
+          .subtitles);
 
-  controller.waitUntilFirstFrameRendered.then((_) {
+  player.stream.duration.first.then((value) {
     player.setVideoTrack(player.state.tracks.video
         .sublist(2)
-        .reduce((high, low) => (high.h ?? 0) > (low.h ?? 0) ? high : low));
+        .reduce((high, low) => (high.w ?? 0) > (low.w ?? 0) ? high : low));
 
-    BlocProvider.of<SelectedServerCubit>(context)
-        .state
-        .videoContainerEntity
-        .subtitles
-        ?.forEach((it) {
-      player.state.tracks.subtitle.add(SubtitleTrack.uri(
-        it.url,
-        language: it.lang,
-      ));
-    });
+    if (sub != null) {
+      player.setSubtitleTrack(SubtitleTrack.uri(sub.url, language: sub.lang));
+    } else {
+      player.setSubtitleTrack(SubtitleTrack.no());
+    }
+    if (startVideoForm != null) {
+      player.seek(startVideoForm);
+    }
   });
-
-  if (startVideoForm != null) {
-    player.stream.duration.first.then((value) => player.seek(startVideoForm));
-  }
-}
-
-void reinitialise(
-    BuildContext context, Player player, VideoController controller,
-    {required Duration start}) {
-  initialise(context, player, controller, start);
 }

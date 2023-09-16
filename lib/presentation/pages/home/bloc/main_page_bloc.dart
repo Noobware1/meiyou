@@ -15,15 +15,15 @@ part 'main_page_event.dart';
 part 'main_page_state.dart';
 
 class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
-  final MetaProviderRepository repository;
-  MainPageBloc(this.repository) : super(const MainPageLoading()) {
+  final GetMainPageUseCase getMainPageUseCase;
+  MainPageBloc(this.getMainPageUseCase) : super(const MainPageLoading()) {
     on<GetMainPage>(getMainPage);
   }
 
   FutureOr<void> getMainPage(
       GetMainPage event, Emitter<MainPageState> emit) async {
     emit(const MainPageLoading());
-    final mainPageResponse = await GetMainPageUseCase(repository).call(noParams);
+    final mainPageResponse = await getMainPageUseCase.call(noParams);
     if (mainPageResponse is ResponseSuccess) {
       emit(MainPageWithData(mainPageResponse.data!));
     } else {

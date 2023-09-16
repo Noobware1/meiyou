@@ -1,9 +1,12 @@
 import 'package:meiyou/core/resources/client.dart';
 import 'package:meiyou/core/resources/extractors/video_extractor.dart';
+import 'package:meiyou/core/resources/video_format.dart';
+import 'package:meiyou/core/resources/watch_qualites.dart';
 import 'package:meiyou/core/utils/extenstions/iterable.dart';
 import 'package:meiyou/core/utils/extenstions/string.dart';
 import 'package:meiyou/core/utils/m3u8_parser/m3u8_parser.dart';
 import 'package:meiyou/data/models/subtitle.dart';
+import 'package:meiyou/data/models/video.dart';
 import 'package:meiyou/data/models/video_container.dart';
 
 class ReWatch extends VideoExtractor {
@@ -18,8 +21,12 @@ class ReWatch extends VideoExtractor {
             referer: videoServer.extra!['referer'] as String))
         .json(_RewatchJsonResponse.fromJson);
 
-    return M3u8Parser.generateVideoContainer(data.source,
-        subtitles: data.tracks);
+    return VideoContainer(videos: [
+      Video(
+          url: data.source,
+          quality: WatchQualites.master,
+          fromat: VideoFormat.hls)
+    ], subtitles: data.tracks);
   }
 }
 

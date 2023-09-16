@@ -20,5 +20,7 @@ abstract interface class CacheRespository {
 
   void deleteAllMemoryCache();
 
+  Future<void> deleteIOCacheFromDir(String path);
+
   Future<void> deleteAllCache();
 }

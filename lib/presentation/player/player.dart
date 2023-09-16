@@ -5,15 +5,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:media_kit/media_kit.dart'; // Provides [Player], [Media], [Playlist] etc.
 import 'package:media_kit_video/media_kit_video.dart';
+import 'package:meiyou/core/constants/animation_duration.dart';
+import 'package:meiyou/core/constants/default_sized_box.dart';
+import 'package:meiyou/core/constants/plaform_check.dart';
 import 'package:meiyou/core/resources/media_type.dart';
 import 'package:meiyou/core/usecases_container/cache_repository_usecase_container.dart';
-import 'package:meiyou/core/usecases_container/video_player_usecase_container.dart';
-import 'package:meiyou/core/utils/extenstions/list.dart';
-import 'package:meiyou/domain/entities/video_container.dart';
+import 'package:meiyou/core/utils/extenstions/iterable.dart';
 import 'package:meiyou/domain/repositories/cache_repository.dart';
-import 'package:meiyou/domain/usecases/provider_use_cases/load_episode_usecase.dart';
-import 'package:meiyou/domain/usecases/video_player_usecase/get_default_subtitle_usecase.dart';
-import 'package:meiyou/domain/usecases/video_player_usecase/get_default_video_usecase.dart';
 import 'package:meiyou/presentation/pages/info_watch/state/selected_searchResponse_bloc/selected_search_response_bloc.dart';
 import 'package:meiyou/presentation/pages/info_watch/state/source_dropdown_bloc/bloc/source_drop_down_bloc.dart';
 
@@ -21,17 +19,16 @@ import 'package:meiyou/presentation/player/button.dart';
 import 'package:meiyou/presentation/player/change_episodes.dart';
 import 'package:meiyou/presentation/player/initialise_player.dart';
 import 'package:meiyou/presentation/player/progress_bar.dart';
+import 'package:meiyou/presentation/player/subtitle_config.dart';
 import 'package:meiyou/presentation/player/video_controls/change_episode.dart';
 import 'package:meiyou/presentation/player/video_controls/cubits/buffering_cubit.dart';
 import 'package:meiyou/presentation/player/video_controls/cubits/current_episode_cubit.dart';
-import 'package:meiyou/presentation/player/video_controls/cubits/is_ready.dart';
 import 'package:meiyou/presentation/player/video_controls/cubits/progress_bar_cubit.dart';
 import 'package:meiyou/presentation/player/video_controls/cubits/resize_mode_cubit.dart';
 import 'package:meiyou/presentation/player/video_controls/cubits/selected_server_cubit.dart';
-import 'package:meiyou/presentation/player/video_controls/cubits/video_track_cubit.dart';
+import 'package:meiyou/presentation/player/video_controls/cubits/show_controls_cubit.dart';
 
 import 'package:meiyou/presentation/player/video_controls/key_board_shortcuts.dart';
-import 'package:meiyou/presentation/player/video_controls/cubits/playing_cubit.dart';
 import 'package:meiyou/presentation/player/video_controls/play_button.dart';
 import 'package:meiyou/presentation/player/video_controls/seek_animation.dart';
 import 'package:meiyou/core/utils/player_utils.dart';
@@ -43,66 +40,64 @@ import 'package:meiyou/presentation/widgets/video_server_view.dart';
 import 'package:meiyou/presentation/widgets/watch/state/movie_view/state/bloc/fetch_movie_bloc.dart';
 
 class MeiyouPlayer extends StatefulWidget {
-  // final SelectedServerCubit selectedServerCubit;
   const MeiyouPlayer({
     Key? key,
-    // required this.selectedServerCubit,
   }) : super(key: key);
   @override
   State<MeiyouPlayer> createState() => MeiyouPlayerState();
 }
 
 class MeiyouPlayerState extends State<MeiyouPlayer>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   late final AnimationController forwardAnimation;
   late final AnimationController rewindAnimation;
-  late final ResizeModeCubit resizeModeCubit;
-  late final player = Player();
+  late final Player player;
   late final videoController = VideoController(player);
-
-  ///roller = VideoController(player);
-  // late final PlayerCubit playerCubit;
-  late final IsPlayerReady isPlayerReady;
+  // late final AnimationController controller;
+  late final ShowVideoControlsCubit showVideoControlsCubit;
+  // late final IsPlayerReady isPlayerReady;
+  late final ResizeModeCubit resizeModeCubit;
   late final ProgressBarCubit progressBarCubit;
   late final VideoPlayerControlsTheme theme;
-  // late final CurrentSubtitleCubit currentSubtitleCubit;
 
   @override
   void initState() {
     super.initState();
     forwardAnimation = AnimationController(vsync: this);
     rewindAnimation = AnimationController(vsync: this);
+    WidgetsBinding.instance.addObserver(this);
+
+    player = Player();
 
     if (Platform.isAndroid || Platform.isIOS) {
       setLanscape();
+    } else {
+      // toggleFullscreen(context);
     }
-
-    // playerCubit = PlayerCubit(Player());
 
     theme = VideoPlayerControlsTheme();
 
     resizeModeCubit = ResizeModeCubit();
 
-    isPlayerReady = IsPlayerReady(videoController);
+    // isPlayerReady = IsPlayerReady(videoController);
 
-    initialise(context, player, videoController);
+    showVideoControlsCubit = ShowVideoControlsCubit();
 
     progressBarCubit = ProgressBarCubit(
         player.stream.position, player.stream.duration, player.stream.buffer);
 
-    // listen() {
-    //   BlocProvider.of<SeasonsSelectorBloc>(context).stream.listen((event) {
-    //     print('current season: ${event.season}');
-    //   });
-    //   BlocProvider.of<CurrentEpisodeCubit>(context).stream.listen((event) {
-    //     print('current episode: $event');
-    //   });
-    //   BlocProvider.of<SelectedServerCubit>(context).stream.listen((event) {
-    //     print('current servers: ${event.server}, ${event.selectedVideoIndex}');
-    //   });
-    // }
+    initialise(context, player, videoController);
+  }
 
-    // listen();
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      player.pause();
+    } else if (state == AppLifecycleState.resumed) {
+      player.playOrPause();
+    }
+
+    super.didChangeAppLifecycleState(state);
   }
 
   @override
@@ -113,43 +108,40 @@ class MeiyouPlayerState extends State<MeiyouPlayer>
 
     player.dispose();
     forwardAnimation.dispose();
+    rewindAnimation.dispose();
     resizeModeCubit.close();
-    // rewindAnimation.dispose();
-    isPlayerReady.close();
+
+    // isPlayerReady.close();
+    progressBarCubit.close();
+    showVideoControlsCubit.close();
     super.dispose();
   }
 
   Future setLanscape() async {
     await SystemChrome.setPreferredOrientations(
         [DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
-    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      // systemNavigationBarColor: Colors.transparent,
-    ));
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   }
 
   Future changeBackOrientation() async {
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-        statusBarColor: Colors.grey.shade900,
-        systemNavigationBarColor: Colors.grey.shade900));
-
     await SystemChrome.setPreferredOrientations(DeviceOrientation.values);
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge,
         overlays: SystemUiOverlay.values);
   }
 
   get _blocProviders => [
-        BlocProvider(
-          create: (context) => PlayingCubit(player.stream.playing),
+        BlocProvider.value(
+          value: showVideoControlsCubit,
         ),
+        // BlocProvider(
+        //   create: (context) => PlayingCubit(player.stream.playing),
+        // ),
         BlocProvider.value(value: resizeModeCubit),
         BlocProvider.value(value: progressBarCubit),
-        // BlocProvider.value(value: playerCubit),
         BlocProvider(
           create: (context) => BufferingCubit(player.stream.buffering),
         ),
-        BlocProvider(create: (context) => TracksCubit(player.stream.tracks))
+        // BlocPsrovider(create: (context) => TracksCubit(player.stream.tracks)),
       ];
 
   get _repoProviders => [
@@ -167,6 +159,7 @@ class MeiyouPlayerState extends State<MeiyouPlayer>
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     final height = MediaQuery.of(context).size.height;
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
@@ -180,15 +173,13 @@ class MeiyouPlayerState extends State<MeiyouPlayer>
                     child: SizedBox(
                         height: videoController.rect.value?.height ?? height,
                         width: videoController.rect.value?.width ?? width,
-                        child:
-                            // BlocBuilder<PlayerCubit, PlayerCubitState>(
-                            //     bloc: playerCubit,
-                            //     builder: (context, state) {
-                            //       return
-                            Video(
-                          controller: videoController,
-                          controls: (_) => const SizedBox.shrink(),
-                        )
+                        child: Video(
+                            controller: videoController,
+                            controls: (state) {
+                              return defaultSizedBox;
+                            },
+                            subtitleViewConfiguration:
+                                const SubtitleViewConfiguration(visible: false))
                         // })
                         ),
                   );
@@ -206,91 +197,141 @@ class MeiyouPlayerState extends State<MeiyouPlayer>
                   autofocus: true,
                   child: Stack(
                     children: [
-                      Positioned(
-                          top: 10,
-                          left: 20,
-                          child: SizedBox(
-                            height: 50,
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 5),
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      // Navigator.pop(context);
-                                    },
-                                    child: const Icon(
-                                        Icons.arrow_back_ios_new_rounded,
-                                        size: 25),
+                      SubtitleView(
+                          controller: videoController,
+                          configuration: subtitleConfigforMobile),
+                      BlocBuilder<ShowVideoControlsCubit, bool>(
+                          bloc: showVideoControlsCubit,
+                          builder: (context, visible) {
+                            return GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: () {
+                                if (visible) {
+                                  showVideoControlsCubit.hideControls();
+                                  // BlocProvider.of<ShowVideoControlsCubit>(context)
+                                  //     .hideControls();
+                                } else {
+                                  showVideoControlsCubit.showControls();
+                                  // BlocProvider.of<ShowVideoControlsCubit>(
+                                  //         context)
+                                  //     .showControls();
+                                }
+                              },
+                              child: IgnorePointer(
+                                ignoring: !visible,
+                                child: AnimatedOpacity(
+                                  duration: const Duration(milliseconds: 300),
+                                  opacity: visible ? 1.0 : 0.0,
+                                  child: Stack(
+                                    children: [
+                                      Container(
+                                        color: Colors.black.withOpacity(0.5),
+                                      ),
+                                      const BuildPlayAndRewindForwardButtons(),
+                                      const BuildProgressBar(),
+                                      const Positioned(
+                                          bottom: 20,
+                                          right: 0,
+                                          left: 0,
+                                          child: VideoPlayerButtons())
+                                    ],
                                   ),
                                 ),
-                                addHorizontalSpace(10),
-                                const Flexible(
-                                    fit: FlexFit.loose,
-                                    child: BuildVideoTitle())
-                              ],
+                              ),
+                            );
+                          }),
+                      BlocBuilder<ShowVideoControlsCubit, bool>(
+                          builder: (context, visible) {
+                        return IgnorePointer(
+                          ignoring: !visible,
+                          child: AnimatedOpacity(
+                            duration: const Duration(milliseconds: 300),
+                            opacity: visible ? 1.0 : 0.0,
+                            child: Container(
+                              constraints: const BoxConstraints(maxHeight: 100),
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                    top: 10, right: 10, left: 10),
+                                child: Row(children: [
+                                  Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(top: 5),
+                                          child: GestureDetector(
+                                            behavior: HitTestBehavior.opaque,
+                                            onTap: () {
+                                              Navigator.pop(context);
+                                            },
+                                            child: const Icon(
+                                                Icons
+                                                    .arrow_back_ios_new_rounded,
+                                                size: 25),
+                                          ),
+                                        ),
+                                        addHorizontalSpace(10),
+                                        const Flexible(
+                                            fit: FlexFit.loose,
+                                            child: BuildVideoTitle()),
+                                      ],
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Align(
+                                      alignment: Alignment.centerRight,
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
+                                        children: [
+                                          BlocBuilder<SelectedServerCubit,
+                                                  SelectedServer>(
+                                              builder: (context, state) {
+                                            return Text(
+                                              state.server,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(
+                                                color: Colors.grey,
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            );
+                                          }),
+                                          addVerticalSpace(3),
+                                          BlocBuilder<SourceDropDownBloc,
+                                                  SourceDropDownState>(
+                                              builder: (context, state) {
+                                            return Text(
+                                              state.provider.name,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(
+                                                  color: Colors.grey,
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.w800),
+                                            );
+                                          }),
+                                          addVerticalSpace(3),
+                                          const ShowCurrentVideoQuailty()
+                                          // BlocBuilder<VideoTrackCubit, VideoTrack>(
+                                          //     builder: (context, state) {
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ]),
+                              ),
                             ),
-                          )),
-                      Positioned(
-                        top: 10,
-                        right: 20,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            BlocBuilder<SelectedServerCubit, SelectedServer>(
-                                builder: (context, state) {
-                              return Text(
-                                state.server,
-                                style: const TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600),
-                              );
-                            }),
-                            addVerticalSpace(3),
-                            BlocBuilder<SourceDropDownBloc,
-                                SourceDropDownState>(builder: (context, state) {
-                              return Text(
-                                state.provider.name,
-                                style: const TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w800),
-                              );
-                            }),
-                            addVerticalSpace(3),
-                            StreamBuilder<Track>(
-                                stream: player.stream.track,
-                                builder: (context, snapshot) {
-                                  return Text(
-                                    '${snapshot.data?.video.h ?? 0} x ${snapshot.data?.video.w ?? 0}',
-                                    style: const TextStyle(
-                                        color: Colors.grey,
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w600),
-                                  );
-                                }),
-                          ],
-                        ),
-                      ),
-                      GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTapDown: (TapDownDetails tapDownDetails) {},
-                        child: const Stack(
-                          children: [
-                            BuildPlayAndRewindForwardButtons(),
-                            BuildProgressBar(),
-                            Positioned(
-                                bottom: 20,
-                                right: 0,
-                                left: 0,
-                                child: VideoPlayerButtons())
-                          ],
-                        ),
-                      ),
+                          ),
+                        );
+                      }),
                       BlocBuilder<BufferingCubit, bool>(
                           builder: (context, buffering) {
                         if (!buffering) {
@@ -300,12 +341,24 @@ class MeiyouPlayerState extends State<MeiyouPlayer>
                           child: CircularProgressIndicator(
                             color: theme.progressBarTheme.progressColor,
                           ),
+
+                          // child: CircularProgressIndicator(
+                          //   color: theme.progressBarTheme.progressColor,
+                          // ),
                         );
                       }),
-                      _rewindButton(height, width),
-                      _forWardButton(height, width),
+                      _rewindButton(context, height, width),
+                      _forWardButton(context, height, width),
                     ],
-                  ),
+                  )
+                  // .animate()
+                  // .fade(
+                  //   duration: Duration(seconds: 3),
+                  // )
+                  // .hide(
+                  //     duration: const Duration(seconds: 1),
+                  //     maintain: true),
+                  ,
                 ),
               ),
             ),
@@ -315,7 +368,7 @@ class MeiyouPlayerState extends State<MeiyouPlayer>
     );
   }
 
-  Widget _forWardButton(double height, double width) {
+  Widget _forWardButton(BuildContext context, double height, double width) {
     return Positioned(
       // top: 30,
       top: theme.rewindForwardPadding.top,
@@ -323,6 +376,13 @@ class MeiyouPlayerState extends State<MeiyouPlayer>
       bottom: theme.rewindForwardPadding.bottom,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
+        onTap: () {
+          if (showVideoControlsCubit.state == true) {
+            showVideoControlsCubit.hideControls();
+          } else {
+            showVideoControlsCubit.showControls();
+          }
+        },
         onDoubleTap: () => _seekOnDoubleTap(true),
         child: Container(
           // color: Colors.black,
@@ -336,16 +396,22 @@ class MeiyouPlayerState extends State<MeiyouPlayer>
     );
   }
 
-  Widget _rewindButton(double height, double width) {
+  Widget _rewindButton(BuildContext context, double height, double width) {
     return Positioned(
       top: theme.rewindForwardPadding.top,
       left: 0,
       bottom: theme.rewindForwardPadding.bottom,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
+        onTap: () {
+          if (showVideoControlsCubit.state == true) {
+            showVideoControlsCubit.hideControls();
+          } else {
+            showVideoControlsCubit.showControls();
+          }
+        },
         onDoubleTap: () => _seekOnDoubleTap(false),
         child: Container(
-          // color: Colors.black,
           height: height,
           alignment: Alignment.centerRight,
           width: width / 3,
@@ -357,9 +423,6 @@ class MeiyouPlayerState extends State<MeiyouPlayer>
   }
 
   void _seekOnDoubleTap(bool forward) {
-    if (isPlayerReady.state == false) {
-      return;
-    }
     const Duration duration = Duration(seconds: 10);
     final Duration seek;
 
@@ -376,11 +439,36 @@ class MeiyouPlayerState extends State<MeiyouPlayer>
   }
 }
 
+class ShowCurrentVideoQuailty extends StatelessWidget {
+  const ShowCurrentVideoQuailty({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<VideoTrack>(
+        initialData: VideoTrack.no(),
+        stream: player(context).stream.tracks.asyncMap((event) =>
+            event.video.tryfirstWhere(
+                (video) => video == player(context).state.track.video) ??
+            VideoTrack.no()),
+        builder: (context, snapshot) {
+          return Text(
+            snapshot.data == VideoTrack.auto()
+                ? 'Auto'
+                : '${snapshot.data?.w ?? 0} x ${snapshot.data?.h ?? 0}',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+                color: Colors.grey, fontSize: 15, fontWeight: FontWeight.w600),
+          );
+        });
+  }
+}
+
 class BuildVideoTitle extends StatelessWidget {
   const BuildVideoTitle({super.key});
 
   static const _style =
-      TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600);
+      TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600);
 
   static const _searchResponseStyle =
       TextStyle(color: Colors.grey, fontSize: 15, fontWeight: FontWeight.w700);
@@ -390,6 +478,7 @@ class BuildVideoTitle extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        addVerticalSpace(5),
         BlocProvider.of<SelectedSearchResponseBloc>(context)
                     .state
                     .searchResponse
@@ -399,7 +488,11 @@ class BuildVideoTitle extends StatelessWidget {
                 builder: (context, state) {
                 return DefaultTextStyle(
                     style: _style,
-                    child: Text(state.movie!.title ?? 'No Title'));
+                    child: Text(
+                      state.movie!.title ?? 'No Title',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ));
               })
             : BlocBuilder<SeasonsSelectorBloc, SeasonsSelectorState>(
                 builder: (context, seasonsState) {
@@ -410,7 +503,9 @@ class BuildVideoTitle extends StatelessWidget {
                       return DefaultTextStyle(
                         style: _style,
                         child: Text(
-                            '${seasonsState.season == 0 ? '' : "S${seasonsState.season}:"}E${episodesState.episodes[state].number}-${episodesState.episodes[state].title}'),
+                            '${seasonsState.season == 0 ? '' : "S${seasonsState.season}:"}E${episodesState.episodes[state].number}-${episodesState.episodes[state].title}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis),
                       );
                     });
                   });
@@ -441,36 +536,51 @@ class BuildPlayAndRewindForwardButtons extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: ChangeEpisode(
-                  icon: ChangeEpisodeIcon.previous,
-                  onTap: () {
-                    changeEpisode(context, false);
-                  }),
+            Expanded(
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: ChangeEpisode(
+                    icon: ChangeEpisodeIcon.previous,
+                    onTap: () {
+                      changeEpisode(
+                          context,
+                          false,
+                          (child) => playerDependenciesInjector(context,
+                              child: child));
+                    }),
+              ),
             ),
-            Center(
-              child: BlocBuilder<BufferingCubit, bool>(
-                  builder: (context, buffering) {
-                if (buffering) {
-                  return SizedBox(
-                    height: theme(context).playButtonSize,
-                    width: theme(context).playButtonSize,
-                  );
-                }
+            Expanded(
+              child: Center(
+                child: BlocBuilder<BufferingCubit, bool>(
+                    builder: (context, buffering) {
+                  final size = theme(context).playButtonSize;
+                  if (buffering) {
+                    return SizedBox(
+                      height: size,
+                      width: size,
+                    );
+                  }
 
-                return const BuildPlayButton();
-              }),
+                  return const BuildPlayButton();
+                }),
+              ),
             ),
-            Align(
-              alignment: Alignment.centerRight,
-              child: ChangeEpisode(
-                  icon: ChangeEpisodeIcon.next,
-                  onTap: () {
-                    changeEpisode(context, true);
-                  }),
+            Expanded(
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: ChangeEpisode(
+                    icon: ChangeEpisodeIcon.next,
+                    onTap: () {
+                      changeEpisode(
+                          context,
+                          true,
+                          (child) => playerDependenciesInjector(context,
+                              child: child));
+                    }),
+              ),
             ),
-          ].map((e) => Expanded(child: e)).toList(),
+          ],
         ),
       ),
     );

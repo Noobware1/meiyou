@@ -6,10 +6,12 @@ import 'package:meiyou/core/resources/crypto.dart';
 import 'package:meiyou/core/resources/extractors/video_extractor.dart';
 import 'package:meiyou/core/resources/quailty.dart';
 import 'package:meiyou/core/resources/video_format.dart';
+import 'package:meiyou/core/resources/watch_qualites.dart';
 import 'package:meiyou/core/utils/extenstions/iterable.dart';
 import 'package:meiyou/data/models/subtitle.dart';
 import 'package:meiyou/data/models/video.dart';
 import 'package:meiyou/data/models/video_container.dart';
+import 'package:meiyou/data/models/video_server.dart';
 
 class MoviesClub extends VideoExtractor {
   MoviesClub(super.videoServer);
@@ -21,18 +23,17 @@ class MoviesClub extends VideoExtractor {
   static const _keyV2 = "11x&W5UBrcqn\$9Yl";
   static const _keyV3 = "m4H6D9%0\$N&F6rQ&";
 
-  extractV3(String html) {
+  String extractV3(String html) {
     final masterjs = _MasterJs.fromHtmlV3(html);
-
-    crypto.aes.decrypt(masterjs.ciphertext, _keyV3,
-        iv: masterjs.iv, options: CipherOptions(salt: masterjs.salt, ivEncoding: 'hex'));
+    return (crypto.aes.decrypt(masterjs.ciphertext, _keyV3,
+            iv: masterjs.iv,
+            options: CipherOptions(salt: masterjs.salt, ivEncoding: 'hex')))
+        .convertToString(crypto.enc.utf8)
+        .replaceAll('\\n', '\n')
+        .replaceAll('\\', '');
   }
 
-  @override
-  Future<VideoContainer> extract() async {
-    final referer = videoServer.extra!['referer']! as String;
-    final masterjsVersion = videoServer.extra!['v'] as int? ?? 2;
-    final response = (await client.get(hostUrl, referer: referer)).text;
+  String extractV2V5(String response, String key) {
     final masterjs = _MasterJs.fromHtml(response);
 
     final salt = masterjs.salt;
@@ -45,9 +46,9 @@ class MoviesClub extends VideoExtractor {
         blockLength: 128,
         keylength: 32,
         salt: crypto.enc.hex.parse(salt),
-        key: masterjsVersion != 2 ? _keyV5 : _keyV2);
+        key: key);
 
-    final decoded = crypto.aes
+    return crypto.aes
         .decrypt(cipherText, derivedKey,
             iv: iv,
             options: const CipherOptions(
@@ -55,6 +56,22 @@ class MoviesClub extends VideoExtractor {
                 ivEncoding: 'hex',
                 padding: Padding.pkc5))
         .convertToString(crypto.enc.utf8);
+  }
+
+  @override
+  Future<VideoContainer> extract() async {
+    final referer = videoServer.extra!['referer']! as String;
+    final response = (await client.get(hostUrl, referer: referer)).text;
+    final masterjsVersion =
+        RegExp(r'masterjs_v(\d).js').firstMatch(response)!.group(1)!;
+    final String decoded;
+    if (masterjsVersion == '3') {
+      decoded = extractV3(response);
+    } else if (masterjsVersion == '2') {
+      decoded = extractV2V5(response, _keyV2);
+    } else {
+      decoded = extractV2V5(response, _keyV5);
+    }
 
     final List<_Source> sources =
         _parseList(RegExp(r'sources: ([^\]]*\])'), decoded, _Source.fromJson)!;
@@ -80,7 +97,9 @@ class _Source extends Video {
   _Source({required String file, required String label, required String type})
       : super(
             fromat: type == 'hls' ? VideoFormat.hls : VideoFormat.mp4,
-            quality: Quality.getQuailtyFromString(label),
+            quality: label.toLowerCase() == 'auto'
+                ? WatchQualites.master
+                : Quality.getQuailtyFromString(label),
             url: file);
 
   factory _Source.fromJson(dynamic json) {
@@ -140,4 +159,12 @@ class _MasterJs {
         iv: json['iv'] as String,
         salt: json['s'] as String);
   }
+}
+
+void main(List<String> args) async {
+  final a = await MoviesClub(VideoServer(
+      url: 'https://w1.moviesapi.club/v/JOKi4B5a1biM/',
+      name: '',
+      extra: {'referer': 'https://moviesapi.club/'})).extract();
+  print(a);
 }

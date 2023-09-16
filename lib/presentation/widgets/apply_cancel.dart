@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:meiyou/core/constants/animation_duration.dart';
+import 'package:meiyou/core/constants/plaform_check.dart';
 import 'package:meiyou/presentation/widgets/add_space.dart';
 
 class AppyCancel extends StatelessWidget {
@@ -38,10 +39,28 @@ class AppyCancel extends StatelessWidget {
       textStyle: MaterialStatePropertyAll(TextStyle(
           color: Colors.white, fontSize: 17, fontWeight: FontWeight.w600)));
 
+  static final _applyButtonStyleForMobile = _applyButtonStyle.copyWith(
+      textStyle: const MaterialStatePropertyAll(TextStyle(
+          color: Colors.black, fontSize: 15, fontWeight: FontWeight.w600)),
+      padding: const MaterialStatePropertyAll(EdgeInsets.all(10)));
+
+  static final _cancelButtonStyleForMobile = _cancelButtonStyle.copyWith(
+      textStyle: const MaterialStatePropertyAll(TextStyle(
+          color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600)),
+      padding: const MaterialStatePropertyAll(EdgeInsets.all(10)));
+
   @override
   Widget build(BuildContext context) {
+    ButtonStyle builBasedOnDevice(
+        ButtonStyle buttonStyle, ButtonStyle buttonStyleForMobile) {
+      if (isMobile) {
+        return buttonStyleForMobile;
+      }
+      return buttonStyle;
+    }
+
     return SizedBox(
-      height: 40,
+      height: isMobile ? 40 : 60,
       width: 200,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
@@ -50,7 +69,9 @@ class AppyCancel extends StatelessWidget {
           Expanded(
             child: ElevatedButton(
               onPressed: onApply,
-              style: buttonStyleForApply ?? _applyButtonStyle,
+              style: buttonStyleForApply ??
+                  builBasedOnDevice(
+                      _applyButtonStyle, _applyButtonStyleForMobile),
               child: const Text('Apply'),
             ),
           ),
@@ -58,7 +79,9 @@ class AppyCancel extends StatelessWidget {
           Expanded(
             child: ElevatedButton(
               onPressed: onCancel,
-              style: buttonStyleForCancel ?? _cancelButtonStyle,
+              style: buttonStyleForCancel ??
+                  builBasedOnDevice(
+                      _cancelButtonStyle, _cancelButtonStyleForMobile),
               child: const Text('Cancel'),
             ),
           ),

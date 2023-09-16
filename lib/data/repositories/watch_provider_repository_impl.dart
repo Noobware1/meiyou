@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:meiyou/core/constants/path.dart';
+import 'package:meiyou/core/constants/request_time_outs.dart';
 import 'package:meiyou/core/resources/expections.dart';
 import 'package:meiyou/core/resources/extractors/video_extractor.dart';
 import 'package:meiyou/core/resources/media_type.dart';
@@ -17,7 +19,6 @@ import 'package:meiyou/core/utils/extenstions/string.dart';
 import 'package:meiyou/core/utils/fix_file_name.dart';
 import 'package:meiyou/core/utils/generate_episode_chunks.dart';
 import 'package:meiyou/core/utils/network.dart';
-import 'package:meiyou/data/data_source/providers/movie_providers/mock_movie_provider.dart';
 import 'package:meiyou/data/models/episode.dart';
 import 'package:meiyou/data/models/media_details.dart';
 import 'package:meiyou/data/models/movie.dart';
@@ -33,7 +34,6 @@ import 'package:meiyou/domain/entities/video_server.dart';
 import 'package:meiyou/domain/repositories/cache_repository.dart';
 import 'package:meiyou/domain/repositories/watch_provider_repository.dart';
 import 'package:meiyou/domain/usecases/get_mapped_episodes_usecase.dart';
-import 'package:meiyou/presentation/pages/info_watch/state/read_json.dart';
 
 class WatchProviderRepositoryImpl implements WatchProviderRepository {
   final MediaDetails _media;
@@ -78,7 +78,7 @@ class WatchProviderRepositoryImpl implements WatchProviderRepository {
       }
 
       return getEpisodes;
-    }, timeout: const Duration(seconds: 20));
+    }, timeout: twentySecondTimeOut);
   }
 
   @override
@@ -107,7 +107,7 @@ class WatchProviderRepositoryImpl implements WatchProviderRepository {
         throw MeiyouException(
             'Load Movie is Not Supported on ${provider.providerType}');
       }
-    });
+    }, timeout: twentySecondTimeOut);
   }
 
   @override
@@ -131,7 +131,7 @@ class WatchProviderRepositoryImpl implements WatchProviderRepository {
       }
 
       return seasons;
-    });
+    }, timeout: twentySecondTimeOut);
   }
 
   @override
@@ -162,7 +162,7 @@ class WatchProviderRepositoryImpl implements WatchProviderRepository {
       } else {
         throw UnimplementedError();
       }
-    });
+    }, timeout: twentySecondTimeOut);
   }
 
   @override
@@ -215,7 +215,7 @@ class WatchProviderRepositoryImpl implements WatchProviderRepository {
 
         return response.data!;
       }
-    });
+    }, timeout: twentySecondTimeOut);
   }
 
   void _checksAreParamsVaild(
@@ -301,7 +301,7 @@ class WatchProviderRepositoryImpl implements WatchProviderRepository {
           ));
 
       return map;
-    }, timeout: const Duration(seconds: 30));
+    }, timeout: thirtySecondTimeOut);
   }
 
   @override
@@ -327,7 +327,7 @@ class WatchProviderRepositoryImpl implements WatchProviderRepository {
       } else {
         throw UnimplementedError();
       }
-    });
+    }, timeout: twentySecondTimeOut);
   }
 
   @override
@@ -417,7 +417,7 @@ class WatchProviderRepositoryImpl implements WatchProviderRepository {
         }
         return data;
       }
-    });
+    }, timeout: fourtySecondTimeOut);
   }
 }
 
@@ -427,12 +427,12 @@ class _SavePaths {
 
   static String episodesPath(
           BaseProvider provider, SearchResponseEntity searchResponse) =>
-      '${provider.name}_${fixFileName(searchResponse.title)}_episodes.cache';
+      '$responsesFolder\\${provider.name}_${fixFileName(searchResponse.title)}_episodes.cache';
 
   static String searchResponsePath(BaseProvider provider, MediaDetails media,
           [String? query]) =>
-      '${provider.name}_${fixFileName(query ?? media.mediaTitle)}';
+      '$responsesFolder\\${provider.name}_${fixFileName(query ?? media.mediaTitle)}';
 
   static String serverAndVideoPath(BaseProvider provider, String url) =>
-      '${provider.name}_${getFileNameFromUrl(url)}';
+      '$responsesFolder\\${provider.name}_${getFileNameFromUrl(url)}';
 }

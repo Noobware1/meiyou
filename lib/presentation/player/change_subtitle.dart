@@ -2,24 +2,30 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:media_kit/media_kit.dart';
+import 'package:meiyou/core/constants/plaform_check.dart';
 import 'package:meiyou/core/utils/player_utils.dart';
+import 'package:meiyou/domain/entities/subtitle.dart';
 import 'package:meiyou/presentation/player/video_controls/arrow_selector.dart';
+import 'package:meiyou/presentation/player/video_controls/cubits/selected_server_cubit.dart';
 import 'package:meiyou/presentation/widgets/apply_cancel.dart';
+import 'package:meiyou/presentation/widgets/selector_dilaog_box.dart';
+import 'package:meiyou/presentation/widgets/video_server_view.dart';
 
 class ChangeSubtitle extends StatefulWidget {
-  final List<SubtitleTrack> subtitleTracks;
+  final List<SubtitleEntity>? subtitles;
   final VoidCallback onCancel;
   final void Function(SubtitleTrack subtitleTrack) onApply;
   const ChangeSubtitle(
       {super.key,
-      required this.subtitleTracks,
+      required this.subtitles,
       required this.onCancel,
       required this.onApply});
 
   @override
   State<ChangeSubtitle> createState() => _ChangeSubtitleState();
 
-  static Future showSubtitlesDialog(BuildContext context, Player player) {
+  static Future showSubtitlesDialog(BuildContext context, Player player,
+      SelectedServerCubit selectedServerCubit) {
     return showDialog(
         context: context,
         builder: (context) {
@@ -28,16 +34,26 @@ class ChangeSubtitle extends StatefulWidget {
             backgroundColor: Colors.black,
             child: RepositoryProvider.value(
               value: player,
-              child: ChangeSubtitle(
-                subtitleTracks: player.state.tracks.subtitle,
-                onApply: (track) {
-                  if (track != player.state.track.subtitle) {
-                    player.setSubtitleTrack(track);
-                  }
-                  Navigator.pop(context);
-                },
-                onCancel: () {
-                  Navigator.pop(context);
+              child: BlocBuilder<SelectedServerCubit, SelectedServer>(
+                bloc: selectedServerCubit,
+                builder: (context, state) {
+                  return ChangeSubtitle(
+                    subtitles: state.videoContainerEntity.subtitles,
+                    onApply: (track) {
+                      Navigator.pop(context);
+                      if (track != player.state.track.subtitle) {
+                        Future.microtask(() async {
+                          await Future.delayed(
+                            const Duration(seconds: 1),
+                          );
+                          await player.setSubtitleTrack(track);
+                        });
+                      }
+                    },
+                    onCancel: () {
+                      Navigator.pop(context);
+                    },
+                  );
                 },
               ),
             ),
@@ -54,15 +70,16 @@ class _ChangeSubtitleState extends State<ChangeSubtitle> {
   void initState() {
     _controller = ScrollController();
 
-    selected = RepositoryProvider.of<Player>(context).state.track.subtitle;
+    selected = player(context).state.track.subtitle;
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      constraints:
-          const BoxConstraints(maxWidth: 300, maxHeight: 300, minHeight: 20),
+      constraints: isMobile
+          ? const BoxConstraints(maxWidth: 300, maxHeight: 300, minHeight: 20)
+          : const BoxConstraints(maxWidth: 350, maxHeight: 350, minHeight: 20),
       child: Column(
         // crossAxisAlignment: CrossAxisAlignment.end,
         children: [
@@ -90,23 +107,36 @@ class _ChangeSubtitleState extends State<ChangeSubtitle> {
                 child: ListView(
                   controller: _controller,
                   shrinkWrap: true,
-                  children: widget.subtitleTracks.sublist(1).map((it) {
-                    final isSame = selected == it;
-                    return ArrowButton(
-                        isSelected: isSame,
-                        text: it.language ?? it.id,
+                  children: [
+                    ArrowButton(
+                        isSelected: selected == SubtitleTrack.no(),
+                        text: 'No Subtitle',
                         onTap: () {
                           setState(() {
-                            selected = it;
+                            selected = SubtitleTrack.no();
                           });
-                        });
-                  }).toList(),
+                        }),
+                    if (widget.subtitles != null)
+                      ...widget.subtitles!.map((it) {
+                        final track =
+                            SubtitleTrack.uri(it.url, language: it.lang);
+                        final isSame = selected == track;
+                        return ArrowButton(
+                            isSelected: isSame,
+                            text: it.lang,
+                            onTap: () {
+                              setState(() {
+                                selected = track;
+                              });
+                            });
+                      })
+                  ],
                 ),
               ),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(bottom: 20),
+            padding: const EdgeInsets.only(bottom: 10),
             child: Align(
               alignment: Alignment.bottomRight,
               child: Container(

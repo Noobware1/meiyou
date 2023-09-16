@@ -5,9 +5,6 @@ import 'dart:typed_data';
 extension StringUtils on String {
   Uint8List decodeBase64() => base64Decode(this);
 
-
-  
-
   num toNum() => num.parse(this);
 
   num? toNumOrNull() => num.tryParse(this);
@@ -21,7 +18,7 @@ extension StringUtils on String {
   double? toDoubleOrNull() => double.tryParse(this);
 
   String trimNewLines() {
-    return replaceAll('\n', '').trim();
+    return replaceAll(RegExp(r'\s+'), ' ').trim();
   }
 
   // Uint8List decodeBase64() => base64.decode(this);

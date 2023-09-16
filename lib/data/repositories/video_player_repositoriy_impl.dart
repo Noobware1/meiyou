@@ -28,6 +28,7 @@ class VideoPlayerRepositoryImpl implements VideoPlayerRepository {
     return subtitles.firstWhere((it) => it.lang.toLowerCase().contains('eng'));
   }
 
+  @override
   SeekEpisodeState? seekEpisode({
     required Map<num, List<EpisodeEntity>> episodeSeasonsMap,
     required bool forward,
@@ -45,6 +46,7 @@ class VideoPlayerRepositoryImpl implements VideoPlayerRepository {
       return SeekEpisodeState(
           currentEpIndex: currentEpIndex,
           currentSeason: currentSeason,
+          episode: chunks[currentEpKey]![currentEpIndex],
           currentEpKey: currentEpKey);
     } else {
       //checks if episode to seek is present int the next episode chunk
@@ -61,7 +63,8 @@ class VideoPlayerRepositoryImpl implements VideoPlayerRepository {
         return SeekEpisodeState(
             currentEpIndex: currentEpIndex,
             currentSeason: currentSeason,
-            currentEpKey: currentEpKey);
+            currentEpKey: currentEpKey,
+            episode: currentEpisodes[currentEpIndex]);
       } else {
 //checks if the episode to seek is present in the next seasons episode chunk
         final keys = episodeSeasonsMap.keys.toList();
@@ -81,9 +84,11 @@ class VideoPlayerRepositoryImpl implements VideoPlayerRepository {
             : chunks[currentEpKey]!.indexOf(chunks[currentEpKey]!.last);
 
         return SeekEpisodeState(
-            currentEpIndex: currentEpIndex,
-            currentSeason: currentSeason,
-            currentEpKey: currentEpKey);
+          currentEpIndex: currentEpIndex,
+          currentSeason: currentSeason,
+          currentEpKey: currentEpKey,
+          episode: chunks[currentEpKey]![currentEpIndex],
+        );
       }
     }
   }
@@ -91,4 +96,3 @@ class VideoPlayerRepositoryImpl implements VideoPlayerRepository {
   @override
   void initialise() {}
 }
-

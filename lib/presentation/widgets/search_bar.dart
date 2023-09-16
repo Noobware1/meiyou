@@ -30,11 +30,13 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
           controller: _controller,
           onSubmitted: widget.onSearch,
           decoration: InputDecoration(
+            // prefixIconColor: Colors.blue,
             border: InputBorder.none,
             constraints: BoxConstraints(
               maxWidth: width / 1.2,
             ),
             prefixIcon: IconButton(
+                disabledColor: Colors.grey,
                 icon: const Icon(Icons.search),
                 onPressed: () => widget.onSearch(_controller.text)),
             // hintText: _controller.text,

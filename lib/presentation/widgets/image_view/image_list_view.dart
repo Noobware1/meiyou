@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:meiyou/core/constants/animation_duration.dart';
 import 'package:meiyou/core/constants/height_and_width.dart';
+import 'package:meiyou/core/utils/network.dart';
 import 'package:meiyou/domain/entities/meta_response.dart';
 import 'package:meiyou/domain/entities/row.dart';
 import 'package:meiyou/presentation/widgets/banner_view/banner_page_view.dart';
@@ -10,6 +11,7 @@ import 'image_holder.dart';
 class ImageListView extends StatefulWidget {
   final double height;
   final double width;
+  final void Function(MetaResponseEntity selected)? onSelected;
   final MetaRowEntity data;
   final EdgeInsets padding;
   final double spaceBetween;
@@ -22,6 +24,7 @@ class ImageListView extends StatefulWidget {
       {super.key,
       required this.data,
       this.textStyle,
+      this.onSelected,
       required this.controller,
       this.paddingAtStart = 0.0,
       this.paddingAtEnd = 0.0,
@@ -37,6 +40,7 @@ class ImageListView extends StatefulWidget {
       {required BuildContext context,
       required ScrollController controller,
       required MetaRowEntity data,
+      final void Function(MetaResponseEntity selected)? onSelected,
       double paddingAtStart = 0.0,
       double paddingAtEnd = 0.0,
       EdgeInsets padding = const EdgeInsets.only(left: 5, right: 5),
@@ -45,43 +49,41 @@ class ImageListView extends StatefulWidget {
       TextStyle? textStyle,
       double height = defaultPosterBoxHeight,
       double width = defaultPosterBoxWidth}) {
-    return Padding(
-      padding: padding,
-      child: SizedBox(
-        height: (height != defaultPosterBoxHeight ? height + 35 : height) + 42,
-        width: MediaQuery.of(context).size.width,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: labelPadding,
-              child: SizedBox(
-                height: 32,
-                child: DefaultTextStyle(
-                  style: const TextStyle(
-                      fontSize: 22, fontWeight: FontWeight.w600),
-                  child: Text(
-                    data.rowTitle,
-                  ),
+    return SizedBox(
+      height: (height != defaultPosterBoxHeight ? height + 35 : height) + 42,
+      width: MediaQuery.of(context).size.width,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: labelPadding,
+            child: SizedBox(
+              height: 32,
+              child: DefaultTextStyle(
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                child: Text(
+                  data.rowTitle,
                 ),
               ),
             ),
-            const SizedBox(
-              height: 10,
-            ),
-            ImageListView(
-              controller: controller,
-              data: data,
-              height: height,
-              textStyle: textStyle,
-              padding: padding,
-              spaceBetween: spaceBetween,
-              width: width,
-              paddingAtStart: paddingAtStart,
-              paddingAtEnd: paddingAtEnd,
-            )
-          ],
-        ),
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          ImageListView(
+            controller: controller,
+            data: data,
+            height: height,
+            onSelected: onSelected,
+            textStyle: textStyle,
+            padding: padding,
+            spaceBetween: spaceBetween,
+            width: width,
+            paddingAtStart: paddingAtStart,
+            paddingAtEnd: paddingAtEnd,
+          )
+        ],
       ),
     );
   }
@@ -90,6 +92,7 @@ class ImageListView extends StatefulWidget {
       {required BuildContext context,
       required ScrollController controller,
       required MetaRowEntity data,
+      final void Function(MetaResponseEntity selected)? onSelected,
       TextStyle? textStyle,
       double paddingAtStart = 0.0,
       double paddingAtEnd = 0.0,
@@ -106,6 +109,7 @@ class ImageListView extends StatefulWidget {
               left: 40,
             ),
             controller: controller,
+            onSelected: onSelected,
             context: context,
             data: data,
             textStyle: textStyle,
@@ -113,7 +117,7 @@ class ImageListView extends StatefulWidget {
             paddingAtEnd: paddingAtEnd,
             width: width,
             height: height,
-            padding: const EdgeInsets.only(left: 40, right: 40),
+            padding: padding,
             spaceBetween: spaceBetween),
         Positioned(
           left: 0,
@@ -175,10 +179,13 @@ class _ImageListViewState extends State<ImageListView> {
   }
 
   void fetchMoreData(int page) async {
-    final data = await widget.data.loadMoreData?.call(page);
-    if (data != null) {
-      list.addAll(data.metaResponses);
-    }
+    try {
+      final data = await widget.data.loadMoreData?.call(page);
+      if (data != null) {
+        list.addAll(data.metaResponses);
+        setState(() {});
+      }
+    } catch (_) {}
   }
 
   void _listener() {
@@ -186,7 +193,7 @@ class _ImageListViewState extends State<ImageListView> {
         widget.controller.position.maxScrollExtent) {
       setState(() {
         page++;
-        // fetchMoreData(page);
+        fetchMoreData(page);
       });
     }
   }
@@ -209,34 +216,50 @@ class _ImageListViewState extends State<ImageListView> {
     final height = widget.height != defaultPosterBoxHeight
         ? widget.height + 10
         : widget.height;
+    // return Padding(
+    //   padding: widget.padding,
+
     return Padding(
       padding: widget.padding,
       child: SizedBox(
+        // color: Colors.red,
         height: height,
         width: MediaQuery.of(context).size.width,
-        child: ListView.builder(
-            controller: widget.controller,
-            itemCount: list.length,
-            scrollDirection: Axis.horizontal,
-            itemBuilder: (BuildContext context, int index) {
-              final data = list[index];
-              return Padding(
-                  padding: EdgeInsets.only(
-                      left: (index == 0) ? widget.paddingAtStart : 0.0,
-                      right:
-                          (index != list.length - 1) ? widget.spaceBetween : 0),
-                  child: ImageButtonWrapper(
-                    onTap: () {},
-                    child: ImageHolder.withText(
-                      textStyle: widget.textStyle,
-                      imageUrl: data.poster ?? '',
-                      height: height,
-                      width: widget.width,
-                      text: data.title ?? data.romanji ?? data.native ?? '',
-                    ),
-                  ));
-            }),
+        child: MediaQuery.removePadding(
+          context: context,
+          removeLeft: true,
+          removeRight: true,
+          child: ListView.builder(
+              controller: widget.controller,
+              itemCount: list.length,
+              scrollDirection: Axis.horizontal,
+              itemBuilder: (BuildContext context, int index) {
+                return Padding(
+                    padding: EdgeInsets.only(
+                        left: (index == 0) ? widget.paddingAtStart : 0.0,
+                        right: (index != list.length - 1)
+                            ? widget.spaceBetween
+                            : 0),
+                    child: ImageButtonWrapper(
+                      onTap: () {
+                        widget.onSelected?.call(list[index]);
+                      },
+                      child: ImageHolder.withText(
+                        textStyle: widget.textStyle,
+                        imageUrl: list[index].poster ?? '',
+                        height: height,
+                        width: widget.width,
+                        text: list[index].title ??
+                            list[index].romanji ??
+                            list[index].native ??
+                            '',
+                      ),
+                    ));
+              }),
+        ),
       ),
     );
+    //   ),
+    // );
   }
 }

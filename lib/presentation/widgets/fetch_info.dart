@@ -8,6 +8,7 @@ import 'package:meiyou/domain/entities/media_details.dart';
 import 'package:meiyou/domain/entities/meta_response.dart';
 import 'package:meiyou/domain/usecases/get_media_details_usecase.dart';
 import 'package:meiyou/presentation/widgets/info.dart';
+import 'package:meiyou/presentation/widgets/retry_connection.dart';
 
 class LoadInfo extends StatefulWidget {
   final MetaResponseEntity metaResponse;
@@ -23,11 +24,26 @@ class _LoadInfoState extends State<LoadInfo> {
 
   @override
   void initState() {
-    media = RepositoryProvider.of<MetaProviderRepositoryContainer>(context)
-        .get<GetMediaDetailUseCase>()
-        .call(widget.metaResponse);
-
+    fetchInfo();
     super.initState();
+  }
+
+  void fetchInfo() {
+    setState(() {
+      media = RepositoryProvider.of<MetaProviderRepositoryContainer>(context)
+          .get<GetMediaDetailUseCase>()
+          .call(widget.metaResponse);
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant LoadInfo oldWidget) {
+    if (oldWidget.metaResponse != widget.metaResponse) {
+      setState(() {
+        fetchInfo();
+      });
+    }
+    super.didUpdateWidget(oldWidget);
   }
 
   @override
@@ -45,7 +61,9 @@ class _LoadInfoState extends State<LoadInfo> {
             media: snapshot.data!.data!,
           );
         } else {
-          return Text(snapshot.data?.error?.toString() ?? '');
+          return RetryConnection(
+              onRetryConnection: () => fetchInfo(),
+              retryReason: snapshot.data?.error?.toString() ?? '');
         }
       },
     );

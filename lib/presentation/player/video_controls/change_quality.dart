@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:meiyou/core/utils/player_utils.dart';
+import 'package:meiyou/core/constants/plaform_check.dart';
 import 'package:meiyou/presentation/player/video_controls/arrow_selector.dart';
 import 'package:meiyou/presentation/widgets/apply_cancel.dart';
 import 'package:media_kit/media_kit.dart';
@@ -8,8 +8,9 @@ import 'package:media_kit/media_kit.dart';
 class ChangeQuality extends StatefulWidget {
   final List<VideoTrack> videoTracks;
 
-  final void Function(VideoTrack track) onApply;
+    final void Function(VideoTrack track) onApply;
   final void Function() onCancel;
+
 
   const ChangeQuality(
       {super.key,
@@ -32,10 +33,13 @@ class ChangeQuality extends StatefulWidget {
               child: ChangeQuality(
                 videoTracks: player.state.tracks.video,
                 onApply: (track) {
-                  if (track != player.state.track.video) {
-                    player.setVideoTrack(track);
-                  }
                   Navigator.pop(context);
+                  if (track != player.state.track.video) {
+                    Future.microtask(() async {
+                      await Future.delayed(const Duration(seconds: 1));
+                      await player.setVideoTrack(track);
+                    });
+                  }
                 },
                 onCancel: () {
                   Navigator.pop(context);
@@ -63,8 +67,9 @@ class _ChangeQualityState extends State<ChangeQuality> {
     // print(player(context).state.track.video);
 
     return Container(
-      constraints:
-          const BoxConstraints(maxWidth: 300, maxHeight: 300, minHeight: 20),
+      constraints: isMobile
+          ? const BoxConstraints(maxWidth: 300, maxHeight: 300, minHeight: 20)
+          : const BoxConstraints(maxWidth: 350, maxHeight: 350, minHeight: 20),
       child: Column(
         // crossAxisAlignment: CrossAxisAlignment.end,
         children: [
@@ -95,7 +100,7 @@ class _ChangeQualityState extends State<ChangeQuality> {
                   children: [
                     ArrowButton(
                         isSelected: selected == widget.videoTracks[0],
-                        text: 'auto',
+                        text: 'Auto',
                         onTap: () {
                           setState(() {
                             selected = widget.videoTracks[0];
@@ -105,7 +110,7 @@ class _ChangeQualityState extends State<ChangeQuality> {
                       final isSame = selected == it;
                       return ArrowButton(
                           isSelected: isSame,
-                          text: '${it.h}x${it.w}',
+                          text: '${it.w}x${it.h}',
                           onTap: () {
                             setState(() {
                               selected = it;
@@ -118,7 +123,7 @@ class _ChangeQualityState extends State<ChangeQuality> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(bottom: 20),
+            padding: const EdgeInsets.only(bottom: 10),
             child: Align(
               alignment: Alignment.bottomRight,
               child: Container(

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meiyou/core/constants/default_sized_box.dart';
+import 'package:meiyou/core/resources/snackbar.dart';
+import 'package:meiyou/core/utils/add_padding_onrientation_change.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
 import 'package:meiyou/domain/entities/media_details.dart';
 import 'package:meiyou/presentation/widgets/add_space.dart';
@@ -48,7 +50,9 @@ class _ForSmallerScreens extends StatelessWidget {
                 begin: Alignment.bottomCenter,
                 end: Alignment.topCenter)),
         Positioned(
-            left: 20,
+            left: addPaddingOnOrientation(context).left,
+            right: 0,
+            // right: addPaddingOnOrientation(context).rights,
             bottom: 0,
             child: SizedBox(
               width: width,
@@ -96,7 +100,7 @@ class _ForSmallerScreens extends StatelessWidget {
                                 addVerticalSpace(10),
                                 CustomOrientationBuiler(
                                   portrait: defaultSizedBox,
-                                  landscape: _addToListButton(),
+                                  landscape: _addToListButton(context),
                                 )
                               ],
                             ),
@@ -107,7 +111,8 @@ class _ForSmallerScreens extends StatelessWidget {
                   ),
                   addVerticalSpace(10),
                   CustomOrientationBuiler(
-                      landscape: defaultSizedBox, portrait: _addToListButton())
+                      landscape: defaultSizedBox,
+                      portrait: _addToListButton(context))
                 ],
               ),
             ))
@@ -115,10 +120,12 @@ class _ForSmallerScreens extends StatelessWidget {
     );
   }
 
-  Widget _addToListButton() {
+  Widget _addToListButton(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(right: 40),
-      child: AddToListButton(onTap: () {}),
+      padding: const EdgeInsets.only(right: 30),
+      child: AddToListButton(onTap: () {
+        showSnackBAr(context, text: 'Coming soon', width: 150);
+      }),
     );
   }
 }
@@ -196,7 +203,9 @@ class _ForBiggerScreens extends StatelessWidget {
                             addVerticalSpace(10),
                             ConstrainedBox(
                               constraints: BoxConstraints(maxWidth: width),
-                              child: AddToListButton(onTap: () {}),
+                              child: AddToListButton(onTap: () {
+                                showSnackBAr(context, text: 'Coming soon');
+                              }),
                             )
                           ],
                         ),

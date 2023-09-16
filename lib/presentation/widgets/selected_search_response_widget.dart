@@ -18,7 +18,7 @@ class SelectedSearchResponseWidget extends StatelessWidget {
     );
     return ResponsiveBuilder(
         forSmallScreen: Padding(
-          padding: const EdgeInsets.only(left: 30, right: 30),
+          padding: const EdgeInsets.only(left: 50, right: 50),
           child: child,
         ),
         forLagerScreen: ConstarintsForBiggerScreeen(

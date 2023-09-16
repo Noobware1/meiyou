@@ -12,4 +12,6 @@ extension ContextUtils on BuildContext {
   Color get primaryColorDark => Theme.of(this).primaryColorDark;
 
   ThemeData get theme => Theme.of(this);
+
+  Orientation get orientation => MediaQuery.of(this).orientation;
 }

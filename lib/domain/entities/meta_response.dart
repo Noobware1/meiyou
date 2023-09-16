@@ -41,6 +41,8 @@ class MetaResponseEntity extends Equatable {
       this.description = '',
       this.mediaType});
 
+  String get nonNullTitle => title ?? romanji ?? native ?? 'No Title';
+
   @override
   List<Object?> get props => [
         id,

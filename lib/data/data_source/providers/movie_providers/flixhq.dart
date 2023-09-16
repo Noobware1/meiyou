@@ -62,7 +62,11 @@ class Flixhq extends MovieProvider {
               "X-Requested-With": "XMLHttpRequest",
             }))
             .jsonSafe((json) => VideoServer(
-                url: json['link'] as String, name: it.attr('title'))));
+                url: json['link'] as String,
+                name: it
+                    .attr('title')
+                    .replaceFirst('Server', '')
+                    .trimNewLines())));
       }
 
       return servers.nonNulls.toList();

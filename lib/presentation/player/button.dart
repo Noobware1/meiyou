@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:media_kit_video/media_kit_video.dart';
+import 'package:meiyou/core/constants/plaform_check.dart';
 import 'package:meiyou/core/resources/media_type.dart';
 import 'package:meiyou/core/resources/snackbar.dart';
-import 'package:meiyou/core/utils/extenstions/string.dart';
+import 'package:meiyou/core/utils/extenstions/context.dart';
 import 'package:meiyou/core/utils/player_utils.dart';
-import 'package:meiyou/domain/usecases/provider_use_cases/load_video_server_usecase.dart';
+import 'package:meiyou/domain/entities/episode.dart';
 import 'package:meiyou/presentation/pages/info_watch/state/selected_searchResponse_bloc/selected_search_response_bloc.dart';
-import 'package:meiyou/presentation/pages/info_watch/state/source_dropdown_bloc/bloc/source_drop_down_bloc.dart';
 import 'package:meiyou/presentation/player/change_subtitle.dart';
 import 'package:meiyou/presentation/player/initialise_player.dart';
 import 'package:meiyou/presentation/player/video_controls/change_quality.dart';
-import 'package:meiyou/presentation/player/video_controls/cubits/player_cubit.dart';
+import 'package:meiyou/presentation/player/video_controls/cubits/current_episode_cubit.dart';
 import 'package:meiyou/presentation/player/video_controls/cubits/resize_mode_cubit.dart';
 import 'package:meiyou/presentation/player/video_controls/cubits/selected_server_cubit.dart';
 import 'package:meiyou/presentation/widgets/add_space.dart';
 import 'package:meiyou/presentation/widgets/episode_view/state/episode_selector.dart';
+import 'package:meiyou/presentation/widgets/episode_view/state/episode_selector/episode_selector_bloc.dart';
 import 'package:meiyou/presentation/widgets/season_selector/season_selector.dart';
 import 'package:meiyou/presentation/widgets/video_server_view.dart';
 import 'package:meiyou/presentation/widgets/watch/watch_view.dart';
@@ -46,7 +47,8 @@ class _VideoPlayerButtonsState extends State<VideoPlayerButtons> {
               onTap: () {
                 BlocProvider.of<ResizeModeCubit>(context).resize();
                 showSnackBAr(context,
-                    text: BlocProvider.of<ResizeModeCubit>(context).state.name);
+                    text: BlocProvider.of<ResizeModeCubit>(context).state.name,
+                    width: 100);
               },
               // ),
             ),
@@ -66,7 +68,8 @@ class _VideoPlayerButtonsState extends State<VideoPlayerButtons> {
               icon: Icons.source_rounded,
               text: 'Subtitles',
               onTap: () {
-                ChangeSubtitle.showSubtitlesDialog(context, player(context));
+                ChangeSubtitle.showSubtitlesDialog(context, player(context),
+                    BlocProvider.of<SelectedServerCubit>(context));
               },
             ),
             // ),
@@ -77,7 +80,14 @@ class _VideoPlayerButtonsState extends State<VideoPlayerButtons> {
                 text: 'Servers',
                 onTap: () {
                   final pos = player(context).state.position;
-                  VideoServerListView.showDialog(context, (value) {
+                  VideoServerListView.showDialog(
+                      context,
+                      BlocProvider.of<EpisodeSelectorBloc>(context)
+                          .state
+                          .episodes[
+                              BlocProvider.of<CurrentEpisodeCubit>(context)
+                                  .state]
+                          .url, (value) {
                     if (value.selectedVideoIndex !=
                         BlocProvider.of<SelectedServerCubit>(context)
                             .state
@@ -85,8 +95,12 @@ class _VideoPlayerButtonsState extends State<VideoPlayerButtons> {
                       BlocProvider.of<SelectedServerCubit>(context)
                           .changeServer(value);
 
-                      initialise(context, player(context),
-                          RepositoryProvider.of<VideoController>(context), pos);
+                      initialise(
+                        context,
+                        player(context),
+                        RepositoryProvider.of<VideoController>(context),
+                        pos,
+                      );
                       // Navigator.pop(context);
                     }
                   });
@@ -102,6 +116,7 @@ class _VideoPlayerButtonsState extends State<VideoPlayerButtons> {
                 icon: Icons.video_library_sharp,
                 text: 'Episodes',
                 onTap: () {
+                  EpisodeEntity? episode;
                   final injected = playerDependenciesInjector(context,
                       child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -112,8 +127,19 @@ class _VideoPlayerButtonsState extends State<VideoPlayerButtons> {
                             const EpisodeSelector(),
                             addVerticalSpace(10),
                             Expanded(
-                                child: SingleChildScrollView(child: WatchView(
+                                child: SingleChildScrollView(
+                                    child: WatchView(
+                              onEpisodeSelected: (selected) =>
+                                  episode = selected,
                               onServerSelected: (server) {
+                                BlocProvider.of<CurrentEpisodeCubit>(context)
+                                    .changeEpisode(
+                                        BlocProvider.of<EpisodeSelectorBloc>(
+                                                context)
+                                            .state
+                                            .episodes
+                                            .indexOf(episode!));
+
                                 if (server.videoContainerEntity !=
                                     BlocProvider.of<SelectedServerCubit>(
                                             context)
@@ -123,16 +149,17 @@ class _VideoPlayerButtonsState extends State<VideoPlayerButtons> {
                                       .changeServer(server);
 
                                   initialise(
-                                      context,
-                                      player(context),
-                                      RepositoryProvider.of<VideoController>(
-                                          context));
+                                    context,
+                                    player(context),
+                                    RepositoryProvider.of<VideoController>(
+                                        context),
+                                  );
                                 }
                               },
                             ))),
                           ]));
                   showModalBottomSheet(
-                      backgroundColor: Colors.black,
+                      isScrollControlled: true,
                       context: context,
                       builder: (context) => injected);
                 },
@@ -167,6 +194,7 @@ class _BuildIconButton extends StatelessWidget {
                 child: Icon(
                   icon,
                   color: Colors.white,
+                  size: isMobile ? 25 : null,
                 ),
               ),
               // const SizedBox(

@@ -69,8 +69,9 @@ class Sflix extends MovieProvider {
         servers.add((await client.get(
                 '$hostUrl/ajax/sources/${it.attr("data-id")}',
                 headers: {"X-Requested-With": "XMLHttpRequest"}))
-            .jsonSafe((json) =>
-                VideoServer(url: json['link'] as String, name: it.text)));
+            .jsonSafe((json) => VideoServer(
+                url: json['link'] as String,
+                name: it.text.replaceFirst('Server', '').trimNewLines())));
       }
 
       return servers.nonNulls.toList();
@@ -110,4 +111,13 @@ class Sflix extends MovieProvider {
     }
     return null;
   }
+}
+
+void main(List<String> args) async {
+  // print("""Server
+  //               UpCloud"""
+  //     .trimNewLines());
+  final a = Sflix();
+  (await a.loadVideoServers('https://sflix.to/ajax/episode/servers/1376287'))
+      .forEach(print);
 }

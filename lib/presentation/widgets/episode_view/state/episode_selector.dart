@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meiyou/core/constants/animation_duration.dart';
 import 'package:meiyou/core/constants/default_sized_box.dart';
 import 'package:meiyou/core/resources/media_type.dart';
+import 'package:meiyou/core/utils/add_padding_onrientation_change.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
 import 'package:meiyou/domain/entities/episode.dart';
 import 'package:meiyou/presentation/pages/info_watch/state/selected_searchResponse_bloc/selected_search_response_bloc.dart';
@@ -11,7 +12,6 @@ import 'package:meiyou/presentation/widgets/constraints_box_for_large_screen.dar
 import 'package:meiyou/presentation/widgets/episode_view/state/episode_selector/episode_selector_bloc.dart';
 
 import 'package:meiyou/core/resources/snackbar.dart';
-import 'package:meiyou/presentation/widgets/episode_view/state/fetch_episodes/fetch_episodes_bloc.dart';
 import 'package:meiyou/presentation/widgets/layout_builder.dart';
 import 'package:meiyou/presentation/widgets/season_selector/seasons_selector_bloc/seasons_selector_bloc.dart';
 import 'package:meiyou/presentation/widgets/watch/state/fetch_seasons_episodes/fetch_seasons_episodes_bloc.dart';
@@ -57,7 +57,7 @@ class _EpisodeSelectorState extends State<EpisodeSelector> {
                   } else {
                     return ResponsiveBuilder(
                         forSmallScreen: Padding(
-                          padding: const EdgeInsets.only(left: 20, right: 20),
+                          padding: const EdgeInsets.only(left: 30, right: 30),
                           child: _BuildSelector(
                               episodes: episodes,
                               current: state.current,
@@ -141,7 +141,7 @@ class _BuildSelectorState extends State<_BuildSelector> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 50,
+      height: 40,
       width: context.screenWidth,
       child: _buildSrollBar(
         child: ListView.separated(

@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:meiyou/core/utils/player_utils.dart';
-// import 'package:meiyou/presentation/player/video_controls/get_player.dart';
-import 'package:meiyou/presentation/player/video_controls/cubits/playing_cubit.dart';
 
 class BuildPlayButton extends StatefulWidget {
   const BuildPlayButton({
@@ -28,8 +26,7 @@ class _BuildPlayButtonState extends State<BuildPlayButton>
         duration: const Duration(milliseconds: 300),
         reverseDuration: const Duration(milliseconds: 300))
       ..forward();
-    _subscription =
-        BlocProvider.of<PlayingCubit>(context).stream.listen((playing) {
+    _subscription = player(context).stream.playing.listen((playing) {
       if (!playing) {
         _animationController.reverse();
       } else {
@@ -50,6 +47,7 @@ class _BuildPlayButtonState extends State<BuildPlayButton>
   Widget build(BuildContext context) {
     // final button = ;
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: () {
         player(context).playOrPause();
       },

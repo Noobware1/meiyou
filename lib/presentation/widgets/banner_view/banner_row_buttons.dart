@@ -11,7 +11,14 @@ enum _ButtonDirection {
 }
 
 class _ForLagerScreens extends StatelessWidget {
-  const _ForLagerScreens({super.key});
+  final VoidCallback onTapMyList;
+  final VoidCallback onTapPlay;
+  final VoidCallback onTapInfo;
+  const _ForLagerScreens(
+      {super.key,
+      required this.onTapMyList,
+      required this.onTapPlay,
+      required this.onTapInfo});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +26,7 @@ class _ForLagerScreens extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         ElevatedButton.icon(
-          onPressed: () {},
+          onPressed: onTapMyList,
           icon: const Icon(
             Icons.add,
             color: Colors.black,
@@ -40,7 +47,7 @@ class _ForLagerScreens extends StatelessWidget {
         ),
         addHorizontalSpace(10),
         ElevatedButton.icon(
-          onPressed: () {},
+          onPressed: onTapInfo,
           icon: const Icon(Icons.info_outline),
           style: ButtonStyle(
               padding: const MaterialStatePropertyAll(EdgeInsets.all(15)),
@@ -70,9 +77,16 @@ class BannerButtons extends StatelessWidget {
   Widget build(BuildContext context) {
     if (context.screenWidth < smallScreenSize) {
       return _ForSmallerScreens(
-          onTapInfo: onTapInfo, onTapMyList: onTapMyList, onTapPlay: onTapPlay);
+        onTapInfo: onTapInfo,
+        onTapMyList: onTapMyList,
+        onTapPlay: onTapPlay,
+      );
     }
-    return _ForLagerScreens();
+    return _ForLagerScreens(
+      onTapInfo: onTapInfo,
+      onTapMyList: onTapMyList,
+      onTapPlay: onTapPlay,
+    );
   }
 }
 
@@ -125,12 +139,12 @@ class _ForSmallerScreens extends StatelessWidget {
                     overlayColor: MaterialStatePropertyAll(Colors.grey),
                     iconColor: MaterialStatePropertyAll(Colors.black),
                     iconSize: MaterialStatePropertyAll(25),
-                    fixedSize: MaterialStatePropertyAll(Size(100, 45))),
+                    fixedSize: MaterialStatePropertyAll(Size(90, 45))),
                 onPressed: onTapPlay,
                 icon: const Icon(Icons.play_arrow),
                 label: const DefaultTextStyle(
                     style: TextStyle(
-                        fontSize: 17,
+                        fontSize: 15,
                         fontWeight: FontWeight.w600,
                         color: Colors.black),
                     child: Text('Play'))),

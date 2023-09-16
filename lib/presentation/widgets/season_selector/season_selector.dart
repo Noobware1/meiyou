@@ -5,6 +5,7 @@ import 'package:meiyou/core/constants/default_sized_box.dart';
 import 'package:meiyou/core/resources/button_style.dart';
 import 'package:meiyou/core/resources/media_type.dart';
 import 'package:meiyou/core/resources/providers/base_provider.dart';
+import 'package:meiyou/core/utils/add_padding_onrientation_change.dart';
 import 'package:meiyou/domain/entities/episode.dart';
 import 'package:meiyou/presentation/pages/info_watch/state/selected_searchResponse_bloc/selected_search_response_bloc.dart';
 import 'package:meiyou/presentation/pages/info_watch/state/source_dropdown_bloc/bloc/source_drop_down_bloc.dart';
@@ -69,7 +70,7 @@ class _SeasonSelectorState extends State<SeasonSelector> {
 
                           return ResponsiveBuilder(
                             forSmallScreen: Padding(
-                              padding: const EdgeInsets.only(left: 30),
+                              padding: addPaddingOnOrientation(context),
                               child: ElevatedButton(
                                   style: MeiyouButtonStyle(
                                       minimumSize: const Size(100, 50),

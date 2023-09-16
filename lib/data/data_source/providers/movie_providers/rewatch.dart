@@ -75,18 +75,18 @@ class Rewatch extends MovieProvider {
 
       final episodes =
           doc.select('.dropdown.episodes > div > button').mapAsList((it) {
-        return jsonEncode({
+        return {
           'number': it.attr('id').replaceFirst('E', '').toNum(),
           'url': _generateUrl(it.attr("data-key"), token),
           'title': it.text,
           'referer': url
-        });
+        };
       });
 
       return List.generate(
           seasons.length,
-          (index) =>
-              Season(number: seasons[index].toNum(), url: episodes[index]));
+          (index) => Season(
+              number: seasons[index].toNum(), url: jsonEncode(episodes)));
     });
   }
 

@@ -26,10 +26,12 @@ class SeekEpisodeState {
   final int currentEpIndex;
   final num currentSeason;
   final String currentEpKey;
+  final EpisodeEntity episode;
 
   const SeekEpisodeState(
       {required this.currentEpIndex,
       required this.currentSeason,
+      required this.episode,
       required this.currentEpKey});
 
   @override

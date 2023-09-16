@@ -7,9 +7,12 @@ class VideoPlayerControlsTheme {
   final double changeEpisodeButtonSize;
   final double playButtonSize;
 
+
+
+
   VideoPlayerControlsTheme({
     this.rewindForwardPadding =
-        const EdgeInsets.only(top: 30, left: 0, bottom: 100),
+        const EdgeInsets.only(top: 70, left: 0, bottom: 100),
     this.progressBarTheme = const ProgressBarTheme(),
     this.changeEpisodeButtonSize = 40.0,
     this.playButtonSize = 50.0,

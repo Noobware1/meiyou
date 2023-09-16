@@ -12,7 +12,7 @@ class Video extends VideoEntity {
       super.extra,
       super.title});
 
-  static getFormatFromUrl(String url) {
+  static VideoFormat getFormatFromUrl(String url) {
     if (url.endsWith('.m3u8')) {
       return VideoFormat.hls;
     } else if (url.endsWith('.mp4')) {

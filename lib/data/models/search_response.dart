@@ -1,3 +1,4 @@
+import 'package:meiyou/core/resources/media_type.dart';
 import 'package:meiyou/domain/entities/search_response.dart';
 
 class SearchResponse extends SearchResponseEntity {
@@ -7,6 +8,15 @@ class SearchResponse extends SearchResponseEntity {
     required super.cover,
     required super.type,
   });
+
+  factory SearchResponse.anime({
+    required String title,
+    required String url,
+    required String cover,
+  }) {
+    return SearchResponse(
+        title: title, url: url, cover: cover, type: MediaType.anime);
+  }
 
   factory SearchResponse.fromEntity(SearchResponseEntity entity) {
     return SearchResponse(

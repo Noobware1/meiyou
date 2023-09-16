@@ -73,6 +73,19 @@ class CacheRepositoryImpl implements CacheRespository {
   }
 
   @override
+  Future<void> deleteIOCacheFromDir(String path) async {
+    final dir = Directory(_appendCacheDir(path));
+
+    if (await dir.exists()) {
+      await for (var entity in dir.list()) {
+        if (entity is File) {
+          await entity.delete();
+        }
+      }
+    }
+  }
+
+  @override
   Future<T?> getFromIOCache<T>(
       String path, T Function(dynamic data) transfromer) async {
     final file = File(_appendCacheDir(path));

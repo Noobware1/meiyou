@@ -4,7 +4,9 @@ import 'package:crypto_dart/crypto_dart.dart';
 import 'package:meiyou/core/resources/client.dart';
 import 'package:meiyou/core/resources/crypto.dart';
 import 'package:meiyou/core/resources/extractors/video_extractor.dart';
+import 'package:meiyou/core/resources/quailty.dart';
 import 'package:meiyou/core/resources/video_format.dart';
+import 'package:meiyou/core/resources/watch_qualites.dart';
 import 'package:meiyou/core/utils/extenstions/iterable.dart';
 import 'package:meiyou/core/utils/extenstions/string.dart';
 import 'package:meiyou/core/utils/m3u8_parser/m3u8_parser.dart';
@@ -14,7 +16,6 @@ import 'package:meiyou/data/models/video_container.dart';
 
 class RapidCloud extends VideoExtractor {
   RapidCloud(super.videoServer);
-
 
   String getUrl() {
     final serverUrl = videoServer.url;
@@ -67,13 +68,8 @@ class RapidCloud extends VideoExtractor {
         .mapAsList((it) => _Tracks.fromJson(it))
       ..removeWhere((it) => it.label == 'thumbnails');
 
-    final List<Video> videos = [];
-    for (var i = 0; i < sources.length; i++) {
-      videos.addAll(await M3u8Parser.generateVideos(sources[i].url));
-    }
-
     return VideoContainer(
-      videos: videos,
+      videos: sources,
       subtitles: tracks,
     );
   }
@@ -84,9 +80,8 @@ class RapidCloud extends VideoExtractor {
   @override
   String get name => 'RapidCloud';
 
-   String get keyUrl =>
+  String get keyUrl =>
       'https://raw.githubusercontent.com/enimax-anime/key/e6/key.txt';
-
 
   Future<List<List<int>>> _decryptKey() async {
     return (await client.get(keyUrl)).json((json) => (json as List)
@@ -94,15 +89,17 @@ class RapidCloud extends VideoExtractor {
   }
 }
 
-class _Source {
-  final String url;
-  late final VideoFormat format;
-  _Source({required this.url, required String type}) {
-    type == 'hls' ? format = VideoFormat.hls : format = VideoFormat.mp4;
-  }
+class _Source extends Video {
+  // final String url;
+  // late final VideoFormat format;
+  const _Source(String url, String type)
+      : super(
+            url: url,
+            quality: WatchQualites.master,
+            fromat: type == 'hls' ? VideoFormat.hls : VideoFormat.mp4);
 
   factory _Source.fromJson(dynamic json) {
-    return _Source(url: json['file'], type: json['type']);
+    return _Source(json['file'], json['type']);
   }
 }
 

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:meiyou/config/routes/routes.dart';
+import 'package:meiyou/config/routes/routes_name.dart';
 import 'package:meiyou/core/constants/default_sized_box.dart';
-import 'package:meiyou/core/resources/media_type.dart';
 import 'package:meiyou/core/resources/snackbar.dart';
 import 'package:meiyou/core/usecases_container/video_player_usecase_container.dart';
 import 'package:meiyou/core/usecases_container/watch_provider_repository_container.dart';
@@ -9,19 +11,13 @@ import 'package:meiyou/core/utils/player_utils.dart';
 import 'package:meiyou/data/repositories/video_player_repositoriy_impl.dart';
 import 'package:meiyou/domain/repositories/cache_repository.dart';
 import 'package:meiyou/domain/usecases/provider_use_cases/load_server_and_video_usecase.dart';
-import 'package:meiyou/presentation/pages/info_watch/state/selected_searchResponse_bloc/selected_search_response_bloc.dart';
 import 'package:meiyou/presentation/pages/info_watch/state/source_dropdown_bloc/bloc/source_drop_down_bloc.dart';
 import 'package:meiyou/presentation/player/player.dart';
-import 'package:meiyou/presentation/player/video_controls/cubits/current_episode_cubit.dart';
 import 'package:meiyou/presentation/player/video_controls/cubits/selected_server_cubit.dart';
 import 'package:meiyou/presentation/widgets/add_space.dart';
-import 'package:meiyou/presentation/widgets/season_selector/seasons_selector_bloc/seasons_selector_bloc.dart';
 import 'package:meiyou/presentation/widgets/video_server/state/bloc/load_video_server_and_video_container_bloc_bloc.dart';
 import 'package:meiyou/presentation/widgets/video_server_holder.dart';
 import 'package:meiyou/domain/entities/video_container.dart';
-import 'package:meiyou/presentation/widgets/watch/state/fetch_seasons_episodes/fetch_seasons_episodes_bloc.dart';
-import 'package:meiyou/presentation/widgets/watch/state/movie_view/state/bloc/fetch_movie_bloc.dart';
-import 'episode_view/state/episode_selector/episode_selector_bloc.dart';
 
 final class SelectedServer {
   final String server;
@@ -41,28 +37,33 @@ typedef PlayerDependendicesInjector = Widget Function(Widget child);
 class VideoServerListView extends StatefulWidget {
   final PlayerDependendicesInjector injector;
   final OnVideoServerSelected? onSelected;
-  // fina/l String? url;
+  final String url;
   const VideoServerListView(
-      {super.key, this.onSelected, required this.injector});
+      {super.key, this.onSelected, required this.injector, required this.url});
 
-  static Future _showSelectServerDialog(
-      BuildContext context, Widget Function(Widget child) injector,
+  static Future showSelectServerDialog(
+      BuildContext context, Widget Function(Widget child) injector, String url,
       [OnVideoServerSelected? onSelected]) {
     return showModalBottomSheet(
+        backgroundColor: Colors.black,
+        enableDrag: true,
+        showDragHandle: true,
         context: context,
         builder: (context) {
           return injector(VideoServerListView(
             onSelected: onSelected,
             injector: injector,
+            url: url,
           ));
         });
   }
 
-  static Future showDialog(BuildContext context,
+  static Future showDialog(BuildContext context, String url,
           [OnVideoServerSelected? onSelected]) =>
-      _showSelectServerDialog(
+      showSelectServerDialog(
           context,
           (child) => playerDependenciesInjector(context, child: child),
+          url,
           onSelected);
 
   @override
@@ -80,16 +81,8 @@ class _VideoServerListViewState extends State<VideoServerListView> {
         RepositoryProvider.of<CacheRespository>(context))
       ..add(LoadVideoServerAndVideoContainer(
           BlocProvider.of<SourceDropDownBloc>(context).state.provider,
-          BlocProvider.of<SelectedSearchResponseBloc>(context)
-                      .state
-                      .searchResponse
-                      .type ==
-                  MediaType.movie
-              ? BlocProvider.of<FetchMovieBloc>(context).state.movie!.url
-              : BlocProvider.of<EpisodeSelectorBloc>(context)
-                  .state
-                  .episodes[BlocProvider.of<CurrentEpisodeCubit>(context).state]
-                  .url));
+          widget.url));
+
     super.initState();
   }
 
@@ -102,9 +95,10 @@ class _VideoServerListViewState extends State<VideoServerListView> {
         children: [
           const Text(
             'Select Server',
-            style: TextStyle(color: Colors.white, fontSize: 20),
+            style: TextStyle(
+                color: Colors.white, fontSize: 20, fontWeight: FontWeight.w600),
           ),
-          addVerticalSpace(10),
+          addVerticalSpace(20),
           BlocConsumer<LoadVideoServerAndVideoContainerBloc,
                   LoadVideoServerAndVideoContainerState>(
               bloc: bloc,
@@ -155,45 +149,30 @@ class _VideoServerListViewState extends State<VideoServerListView> {
                                                                   .videos
                                                                   .indexOf(
                                                                       video)));
+
+                                                  Navigator.pop(context);
                                                 } else {
-                                                  print(video.url);
-                                                  Navigator.push(context,
-                                                      MaterialPageRoute(
-                                                          builder: (context) {
-                                                    return widget.injector(
-                                                        RepositoryProvider
-                                                            .value(
-                                                                value: VideoPlayerUseCaseContainer(
-                                                                    VideoPlayerRepositoryImpl()),
-                                                                child:
-                                                                    BlocProvider(
-                                                                  create: (context) =>
-                                                                      SelectedServerCubit(
-                                                                    SelectedServer(
-                                                                      server: state
-                                                                          .data!
-                                                                          .keys
-                                                                          .elementAt(
-                                                                              index),
-                                                                      videoContainerEntity: state
-                                                                          .data!
-                                                                          .values
-                                                                          .elementAt(
-                                                                              index),
-                                                                      selectedVideoIndex: state
-                                                                          .data!
-                                                                          .values
-                                                                          .elementAt(
-                                                                              index)
-                                                                          .videos
-                                                                          .indexOf(
-                                                                              video),
-                                                                    ),
-                                                                  ),
-                                                                  child:
-                                                                      const MeiyouPlayer(),
-                                                                )));
-                                                  }));
+                                                  context.push(
+                                                      '${GoRouter.of(context).routeInformationProvider.value.location}$playerRoute',
+                                                      extra: [
+                                                        SelectedServer(
+                                                          server: state
+                                                              .data!.keys
+                                                              .elementAt(index),
+                                                          videoContainerEntity:
+                                                              state.data!.values
+                                                                  .elementAt(
+                                                                      index),
+                                                          selectedVideoIndex:
+                                                              state.data!.values
+                                                                  .elementAt(
+                                                                      index)
+                                                                  .videos
+                                                                  .indexOf(
+                                                                      video),
+                                                        ),
+                                                        widget.injector,
+                                                      ]);
                                                 }
                                               },
                                               video: state.data!.values
@@ -225,70 +204,3 @@ class _VideoServerListViewState extends State<VideoServerListView> {
     super.dispose();
   }
 }
-
-// class _LazyLoadServer extends StatelessWidget {
-//   final VideoSeverEntity videoSever;
-//   final Set<MapEntry<VideoSeverEntity, VideoContainerEntity>> extracted;
-//   final LoadVideoExtractorUseCase loadVideoExtractorUseCase;
-//   final void Function(MapEntry<VideoSeverEntity, VideoContainerEntity> selected)
-//       onTap;
-//   final BaseProvider provider;
-//   const _LazyLoadServer(
-//       {super.key,
-//       required this.onTap,
-//       required this.videoSever,
-//       required this.extracted,
-//       required this.provider,
-//       required this.loadVideoExtractorUseCase});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return BlocConsumer<ExtractVideoBloc, ExtractVideoState>(
-//         bloc: ExtractVideoBloc(loadVideoExtractorUseCase)
-//           ..add(Extract(LoadVideoExtractorParams(
-//               server: videoSever, provider: provider))),
-//         builder: (context, state) {
-//           if (state is ExtractVideoExtracting) {
-//             return const CircularProgressIndicator();
-//           }
-
-//           if (state is ExtractVideoExtractionSuccess) {
-//             return Column(
-//               crossAxisAlignment: CrossAxisAlignment.start,
-//               children: [
-//                 Padding(
-//                   padding: const EdgeInsets.only(left: 20),
-//                   child: DefaultTextStyle(
-//                       style: const TextStyle(
-//                           color: Colors.white,
-//                           fontSize: 20,
-//                           fontWeight: FontWeight.w700),
-//                       child: Text(videoSever.name)),
-//                 ),
-//                 addVerticalSpace(5),
-//                 Column(
-//                   children: List.generate(
-//                     state.videoContainer!.videos.length,
-//                     (index) => VideoServerHolder(
-//                       onTap: () => onTap.call(extracted.firstWhere((it) =>
-//                           it.key == videoSever &&
-//                           it.value == state.videoContainer)),
-//                       video: state.videoContainer!.videos[index],
-//                     ),
-//                   ),
-//                 )
-//               ],
-//             );
-//           } else {
-//             return defaultSizedBox;
-//           }
-//         },
-//         listener: (context, state) {
-//           if (state is ExtractVideoExtractionFailed) {
-//             showSnackBAr(context, text: state.error.toString());
-//           } else if (state is ExtractVideoExtractionSuccess) {
-//             extracted.add(MapEntry(videoSever, state.videoContainer!));
-//           }
-//         });
-//   }
-// }

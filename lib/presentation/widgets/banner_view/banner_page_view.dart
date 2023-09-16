@@ -1,6 +1,9 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:meiyou/config/routes/routes.dart';
+import 'package:meiyou/config/routes/routes_name.dart';
 import 'package:meiyou/core/constants/default_sized_box.dart';
 import 'package:meiyou/core/constants/height_and_width.dart'
     show smallScreenSize;
@@ -84,9 +87,7 @@ class _BannerPageViewState extends State<BannerPageView> {
             right: 0,
             left: 0,
             child: DrawGradient(
-                height: 100,
-                begin: Alignment.bottomCenter,
-                end: Alignment.center),
+                height: 200, begin: Alignment(0, 0.0), end: Alignment(0.0, 50)),
           ),
           ResponsiveBuilder(
               forSmallScreen: defaultSizedBox,
@@ -113,7 +114,15 @@ class _BannerPageViewState extends State<BannerPageView> {
                   description:
                       bannerRow[_bannerPageViewController.page].description,
                   buttons: BannerButtons(
-                      onTapMyList: () {}, onTapPlay: () {}, onTapInfo: () {}),
+                      onTapMyList: () {},
+                      onTapPlay: () {
+                        context.go('$homeRoute/$watch',
+                            extra: bannerRow[_bannerPageViewController.page]);
+                      },
+                      onTapInfo: () {
+                        context.go('$homeRoute/$watch',
+                            extra: bannerRow[_bannerPageViewController.page]);
+                      }),
                 );
               }),
           context.screenWidth < smallScreenSize
@@ -124,8 +133,10 @@ class _BannerPageViewState extends State<BannerPageView> {
                   left: (context.screenWidth / 2) + 180,
                   child: PlayButton(
                     height: 200,
-                    onTap: () {},
-                   
+                    onTap: () {
+                      context.go('$homeRoute/$watch',
+                          extra: bannerRow[_bannerPageViewController.page]);
+                    },
                   )),
           if (!isMobile)
             Positioned(

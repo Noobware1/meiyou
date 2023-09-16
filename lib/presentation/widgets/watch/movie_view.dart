@@ -20,7 +20,8 @@ class MovieView extends StatelessWidget {
         if (state is FetchMovieSuccess) {
           return EpisodeHolder(
             onTap: () {
-              VideoServerListView.showDialog(context, onServerSelected);
+              VideoServerListView.showDialog(
+                  context, state.movie!.url, onServerSelected);
             },
             number: 0,
             title: state.movie!.title,
