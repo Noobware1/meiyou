@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:meiyou/core/constants/default_sized_box.dart';
+import 'package:meiyou/config/themes/utils.dart';
 import 'package:meiyou/core/constants/icons.dart';
+import 'package:meiyou/core/constants/plaform_check.dart';
+import 'package:meiyou/core/utils/extenstions/context.dart';
+import 'package:meiyou/presentation/widgets/app_theme.dart';
 
 class SideNavigatonBar extends StatelessWidget {
   final GoRouterState goRouterState;
@@ -12,34 +15,36 @@ class SideNavigatonBar extends StatelessWidget {
       required this.goRouterState,
       required this.statefulNavigationShell});
 
-  static _defaultTextStyle(String text) => DefaultTextStyle(
-      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-      child: Text(text));
-
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 90,
-      child: NavigationRail(
-        selectedIndex: statefulNavigationShell.currentIndex,
-        backgroundColor: Colors.black,
-        unselectedIconTheme: const IconThemeData(
-          color: Colors.grey,
-        ),
-        // unselectedLabelTextStyle: TextStyle(color: Colors.grey),
-        onDestinationSelected: (value) =>
-            statefulNavigationShell.goBranch(value),
-        destinations: [
-          NavigationRailDestination(
-              icon: outlinedIcons[0], label: defaultSizedBox),
-          NavigationRailDestination(
-              icon: outlinedIcons[1], label: defaultSizedBox),
-          NavigationRailDestination(
-              icon: outlinedIcons[2], label: defaultSizedBox),
-          NavigationRailDestination(
-              icon: outlinedIcons[3], label: defaultSizedBox)
-        ],
-      ),
-    );
+    return AppTheme.builder(
+        builder: (context, state) => SizedBox(
+              width: isMobile ? 120 : 90,
+              child: NavigationRail(
+                groupAlignment: -0.6,
+                elevation: 8.0,
+                selectedIndex: statefulNavigationShell.currentIndex,
+                backgroundColor: getTheme(context, state).colorScheme.secondary,
+                unselectedIconTheme: const IconThemeData(
+                  color: Colors.grey,
+                ),
+                unselectedLabelTextStyle: const TextStyle(color: Colors.grey),
+                selectedLabelTextStyle: TextStyle(
+                    color: getTheme(context, state).colorScheme.primary),
+                labelType: NavigationRailLabelType.all,
+                onDestinationSelected: (value) =>
+                    statefulNavigationShell.goBranch(value),
+                destinations: [
+                  NavigationRailDestination(
+                      icon: outlinedIcons[0], label: const Text('Home')),
+                  NavigationRailDestination(
+                      icon: outlinedIcons[1], label: const Text('Search')),
+                  NavigationRailDestination(
+                      icon: outlinedIcons[2], label: const Text('My List')),
+                  NavigationRailDestination(
+                      icon: outlinedIcons[3], label: const Text('Settings'))
+                ],
+              ),
+            ));
   }
 }

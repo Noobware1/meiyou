@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:meiyou/core/constants/animation_duration.dart';
 import 'package:meiyou/core/constants/height_and_width.dart';
-import 'package:meiyou/core/utils/network.dart';
+import 'package:meiyou/core/utils/extenstions/context.dart';
+import 'package:meiyou/presentation/widgets/add_space.dart';
 import 'package:meiyou/domain/entities/meta_response.dart';
 import 'package:meiyou/domain/entities/row.dart';
 import 'package:meiyou/presentation/widgets/banner_view/banner_page_view.dart';
@@ -29,7 +30,7 @@ class ImageListView extends StatefulWidget {
       this.paddingAtStart = 0.0,
       this.paddingAtEnd = 0.0,
       this.padding = const EdgeInsets.only(left: 5, right: 5),
-      this.spaceBetween = 8,
+      this.spaceBetween = 6,
       this.height = defaultPosterBoxHeight,
       this.width = defaultPosterBoxWidth});
 
@@ -43,10 +44,12 @@ class ImageListView extends StatefulWidget {
       final void Function(MetaResponseEntity selected)? onSelected,
       double paddingAtStart = 0.0,
       double paddingAtEnd = 0.0,
-      EdgeInsets padding = const EdgeInsets.only(left: 5, right: 5),
+      EdgeInsets padding = const EdgeInsets.only(left: 2, right: 5),
       EdgeInsets labelPadding = const EdgeInsets.only(left: 10),
-      double spaceBetween = 8,
+      double spaceBetween = 6,
       TextStyle? textStyle,
+      TextStyle labelTextStyle =
+          const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
       double height = defaultPosterBoxHeight,
       double width = defaultPosterBoxWidth}) {
     return SizedBox(
@@ -56,15 +59,44 @@ class ImageListView extends StatefulWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: labelPadding,
+            padding: const EdgeInsets.only(left: 10),
             child: SizedBox(
               height: 32,
-              child: DefaultTextStyle(
-                style:
-                    const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-                child: Text(
-                  data.rowTitle,
-                ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 3, bottom: 3),
+                    child: Container(
+                      decoration: BoxDecoration(
+                          color: context.theme.colorScheme.primary,
+                          borderRadius: BorderRadius.circular(15)),
+                      // color: context.primaryColor,
+                      width: 5,
+                    ),
+                  ),
+                  addHorizontalSpace(10),
+
+                  Text(
+                    data.rowTitle,
+                    style: labelTextStyle,
+                    textAlign: TextAlign.start,
+                  ),
+                  // Container(
+                  //   alignment: Alignment.bottomRight,
+                  //   color: Colors.blue,
+                  //   child: IconButton(
+                  //       alignment: Alignment.bottomRight,
+                  //       iconSize: 25,
+                  //       onPressed: () {},
+                  //       icon: Transform.rotate(
+                  //           angle: 180 * pi / 180,
+                  //           child: Icon(
+                  //             Icons.arrow_back_rounded,
+                  //           ))),
+                  // )
+                ],
               ),
             ),
           ),
@@ -97,7 +129,9 @@ class ImageListView extends StatefulWidget {
       double paddingAtStart = 0.0,
       double paddingAtEnd = 0.0,
       EdgeInsets padding = const EdgeInsets.only(left: 3, right: 3),
-      double spaceBetween = 8,
+      TextStyle labelTextStyle =
+          const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+      double spaceBetween = 6,
       Future<List<MetaRowEntity>?> Function(int page)? fetchMoreData,
       double height = defaultPosterBoxHeight,
       double width = defaultPosterBoxWidth}) {
@@ -113,6 +147,7 @@ class ImageListView extends StatefulWidget {
             context: context,
             data: data,
             textStyle: textStyle,
+            labelTextStyle: labelTextStyle,
             paddingAtStart: paddingAtStart,
             paddingAtEnd: paddingAtEnd,
             width: width,
@@ -123,38 +158,30 @@ class ImageListView extends StatefulWidget {
           left: 0,
           top: 40,
           bottom: 35,
-          child: Padding(
-            padding: const EdgeInsets.only(left: 10),
-            child: ArrowButton(
-              icon: const Icon(
-                Icons.arrow_back_ios_new,
-                size: 40,
-              ),
-              onTap: () => controller.animateTo(
-                  controller.position.pixels - 300,
-                  duration: animationDuration,
-                  curve: Curves.fastEaseInToSlowEaseOut),
-              shape: shape,
+          child: ArrowButton(
+            icon: const Icon(
+              Icons.arrow_back_ios_new,
+              size: 40,
             ),
+            onTap: () => controller.animateTo(controller.position.pixels - 300,
+                duration: animationDuration,
+                curve: Curves.fastEaseInToSlowEaseOut),
+            shape: shape,
           ),
         ),
         Positioned(
           right: 0,
           top: 40,
           bottom: 35,
-          child: Padding(
-            padding: const EdgeInsets.only(right: 10),
-            child: ArrowButton(
-              icon: const Icon(
-                Icons.arrow_forward_ios,
-                size: 40,
-              ),
-              shape: shape,
-              onTap: () => controller.animateTo(
-                  controller.position.pixels + 300,
-                  duration: animationDuration,
-                  curve: Curves.fastEaseInToSlowEaseOut),
+          child: ArrowButton(
+            icon: const Icon(
+              Icons.arrow_forward_ios,
+              size: 40,
             ),
+            shape: shape,
+            onTap: () => controller.animateTo(controller.position.pixels + 300,
+                duration: animationDuration,
+                curve: Curves.fastEaseInToSlowEaseOut),
           ),
         ),
       ],

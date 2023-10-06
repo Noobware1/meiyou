@@ -1,37 +1,57 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:meiyou/core/usecases_container/video_player_usecase_container.dart';
+import 'package:meiyou/core/utils/network.dart';
+import 'package:meiyou/domain/entities/subtitle.dart';
 import 'package:meiyou/domain/usecases/video_player_usecase/get_default_subtitle_usecase.dart';
+import 'package:meiyou/presentation/player/video_controls/cubits/is_ready.dart';
 import 'package:meiyou/presentation/player/video_controls/cubits/selected_server_cubit.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:flutter/material.dart';
+import 'package:meiyou/presentation/player/video_controls/subtitle_woker_bloc/subtitle_worker_bloc.dart';
 
 void initialise(BuildContext context, Player player, VideoController controller,
+    IsPlayerReady isPlayerReady, SubtitleWorkerBloc subtitleWorkerBloc,
     [Duration? startVideoForm]) {
-  player.open(Media(BlocProvider.of<SelectedServerCubit>(context).video.url,
-      httpHeaders: BlocProvider.of<SelectedServerCubit>(context)
-          .state
-          .videoContainerEntity
-          .headers));
-  final sub = RepositoryProvider.of<VideoPlayerUseCaseContainer>(context)
-      .get<GetDefaultSubtitleUseCase>()
-      .call(BlocProvider.of<SelectedServerCubit>(context)
-          .state
-          .videoContainerEntity
-          .subtitles);
+  player.open(
+      Media(BlocProvider.of<SelectedServerCubit>(context).video.url,
+          httpHeaders: BlocProvider.of<SelectedServerCubit>(context)
+              .state
+              .videoContainerEntity
+              .headers),
+      play: false);
+  player.pause();
+  // player.setSubtitleTrack(SubtitleTrack.no());
 
-  player.stream.duration.first.then((value) {
-    player.setVideoTrack(player.state.tracks.video
-        .sublist(2)
-        .reduce((high, low) => (high.w ?? 0) > (low.w ?? 0) ? high : low));
+  isPlayerReady.fromController(controller).then((value) {
+    if (player.state.tracks.video.isNotEmpty &&
+        player.state.tracks.video.length > 2) {
+      player.setVideoTrack(player.state.tracks.video
+          .sublist(2)
+          .reduce((high, low) => (high.w ?? 0) > (low.w ?? 0) ? high : low));
+    }
+
+    final sub = RepositoryProvider.of<VideoPlayerUseCaseContainer>(context)
+        .get<GetDefaultSubtitleUseCase>()
+        .call(BlocProvider.of<SelectedServerCubit>(context)
+            .state
+            .videoContainerEntity
+            .subtitles);
 
     if (sub != null) {
-      player.setSubtitleTrack(SubtitleTrack.uri(sub.url, language: sub.lang));
+      subtitleWorkerBloc.add(ChangeSubtitle(subtitle: sub));
+      // player.setSubtitleTrack(S(sub.url, language: sub.lang));
     } else {
-      player.setSubtitleTrack(SubtitleTrack.no());
-    }
-    if (startVideoForm != null) {
-      player.seek(startVideoForm);
+      subtitleWorkerBloc
+          .add(const ChangeSubtitle(subtitle: SubtitleEntity.noSubtitle));
     }
   });
+
+  if (startVideoForm != null) {
+    tryWithAsyncSafe(() => player.stream.duration.first.then((value) {
+          player.seek(startVideoForm).then((value) => player.play());
+        }));
+  } else {
+    player.seek(Duration.zero).then((value) => player.play());
+  }
 }

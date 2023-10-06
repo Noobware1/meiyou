@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meiyou/core/constants/plaform_check.dart';
+import 'package:meiyou/core/utils/player_utils.dart';
 import 'package:meiyou/presentation/player/video_controls/arrow_selector.dart';
 import 'package:meiyou/presentation/widgets/apply_cancel.dart';
 import 'package:media_kit/media_kit.dart';
+import 'package:meiyou/presentation/widgets/arrow_selector_list.dart';
 
-class ChangeQuality extends StatefulWidget {
+class ChangeQuality extends StatelessWidget {
   final List<VideoTrack> videoTracks;
 
-    final void Function(VideoTrack track) onApply;
+  final void Function(VideoTrack track) onApply;
   final void Function() onCancel;
-
 
   const ChangeQuality(
       {super.key,
@@ -18,16 +19,12 @@ class ChangeQuality extends StatefulWidget {
       required this.onApply,
       required this.onCancel});
 
-  @override
-  State<ChangeQuality> createState() => _ChangeQualityState();
-
   static Future showQuailtiesDialog(BuildContext context, Player player) {
     return showDialog(
         context: context,
         builder: (context) {
           return Dialog(
             elevation: 10,
-            backgroundColor: Colors.black,
             child: RepositoryProvider.value(
               value: player,
               child: ChangeQuality(
@@ -49,98 +46,24 @@ class ChangeQuality extends StatefulWidget {
           );
         });
   }
-}
-
-class _ChangeQualityState extends State<ChangeQuality> {
-  late final ScrollController _controller;
-  late VideoTrack selected;
-
-  @override
-  void initState() {
-    _controller = ScrollController();
-    selected = RepositoryProvider.of<Player>(context).state.track.video;
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
     // print(player(context).state.track.video);
 
     return Container(
-      constraints: isMobile
-          ? const BoxConstraints(maxWidth: 300, maxHeight: 300, minHeight: 20)
-          : const BoxConstraints(maxWidth: 350, maxHeight: 350, minHeight: 20),
-      child: Column(
-        // crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          const Padding(
-            padding: EdgeInsets.all(10),
-            child: Text(
-              'Change Quailty',
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600),
-            ),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          Expanded(
-            child: ScrollbarTheme(
-              data: const ScrollbarThemeData(
-                  thickness: MaterialStatePropertyAll(5.0),
-                  thumbColor: MaterialStatePropertyAll(Colors.grey)),
-              child: Scrollbar(
-                // thumbVisibility: true,
-                controller: _controller,
-                child: ListView(
-                  controller: _controller,
-                  shrinkWrap: true,
-                  children: [
-                    ArrowButton(
-                        isSelected: selected == widget.videoTracks[0],
-                        text: 'Auto',
-                        onTap: () {
-                          setState(() {
-                            selected = widget.videoTracks[0];
-                          });
-                        }),
-                    ...widget.videoTracks.sublist(2).map((it) {
-                      final isSame = selected == it;
-                      return ArrowButton(
-                          isSelected: isSame,
-                          text: '${it.w}x${it.h}',
-                          onTap: () {
-                            setState(() {
-                              selected = it;
-                            });
-                          });
-                    })
-                  ],
-                ),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: Align(
-              alignment: Alignment.bottomRight,
-              child: Container(
-                width: 200,
-                height: 50,
-                alignment: Alignment.bottomRight,
-                child: Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child: AppyCancel(
-                      onApply: () => widget.onApply.call(selected),
-                      onCancel: widget.onCancel,
-                    )),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+        constraints: isMobile
+            ? const BoxConstraints(maxWidth: 300, maxHeight: 300, minHeight: 20)
+            : const BoxConstraints(
+                maxWidth: 350, maxHeight: 350, minHeight: 20),
+        child: ArrowSelectorList(
+            items: [VideoTrack.auto(), ...videoTracks.sublist(2)],
+            label: 'Change Quality',
+            onApply: onApply,
+            onCancel: onCancel,
+            initalValue: player(context).state.track.video,
+            builder: (context, video) => video == VideoTrack.auto()
+                ? 'Auto'
+                : '${video.w ?? 0}x${video.h ?? 0}'));
   }
 }

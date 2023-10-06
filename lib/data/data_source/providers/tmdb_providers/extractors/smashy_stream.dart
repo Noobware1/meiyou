@@ -2,12 +2,14 @@ import 'dart:convert';
 
 import 'package:meiyou/core/resources/client.dart';
 import 'package:meiyou/core/resources/extractors/video_extractor.dart';
-import 'package:meiyou/core/utils/encode.dart';
-import 'package:meiyou/core/utils/extenstions/iterable.dart';
+import 'package:meiyou/core/resources/quailty.dart';
+import 'package:meiyou/core/resources/video_format.dart';
+import 'package:meiyou/core/resources/watch_qualites.dart';
+import 'package:meiyou/core/utils/extenstions/string.dart';
 import 'package:meiyou/data/models/subtitle.dart';
 import 'package:meiyou/data/models/video.dart';
 import 'package:meiyou/data/models/video_container.dart';
-import 'package:meiyou/data/models/video_server.dart';
+import 'package:ok_http_dart/ok_http_dart.dart';
 
 class SmashyStreamExtractor extends VideoExtractor {
   SmashyStreamExtractor(super.videoServer);
@@ -17,89 +19,135 @@ class SmashyStreamExtractor extends VideoExtractor {
 
   @override
   Future<VideoContainer> extract() {
-    throw UnimplementedError();
+    if (hostUrl.contains('fiz') || hostUrl.contains('segu')) {
+      // print('fizzzzzzzzzz');
+      return _extractFizz();
+    } else if (hostUrl.contains('fm')) {
+      return _exractFm();
+    } else if (hostUrl.contains('ems')) {
+      return _extractEms();
+    } else {
+      throw Exception('Cannot extract $hostUrl');
+    }
   }
 
   String getReferer() => videoServer.extra!['referer'] as String;
 
-  Future<VideoContainer> extractfix(String url) {
-    return client.get(url, referer: getReferer()).then((response) {
+  Future<VideoContainer> _extractFizz() {
+    return client.get(videoServer.url, referer: getReferer()).then((response) {
+      // print(response.text);
       final json = jsonDecode(
-          '{${RegExp(r'("file".*)}\);').firstMatch(response.text)!.group(1)!}}');
+          '{"file${RegExp(r'\((\{[^;]*\})\);').firstMatch(response.text)!.group(1)!.substringAfter('"file')}');
+      final List<Video> files = [];
+      final List<Subtitle> subtitles = [];
 
-      List<String> getList(String name, [bool Function(String)? test]) {
-        return (json[name] as String).split(',')
-          ..removeWhere(test ?? (it) => it.isEmpty);
+      if (((json['file'] as String).contains('[auto]'))) {
+        files.add(_utils.toVideo(_utils.strToList(json
+            .toString()
+            .split(',')
+            .firstWhere((it) => it.contains('auto')))));
+      } else {
+        json['file']
+            .toString()
+            .split(',')
+            .where((it) => it.isNotEmpty)
+            .forEach((it) {
+          files.add(_utils.toVideo(_utils.strToList(it)));
+        });
       }
 
-      final titleAndUrlRegex = RegExp(r'\[(.*)\](.*)');
-
-      List<String> getGroups(String text) => titleAndUrlRegex
-          .firstMatch(text)!
-          .groups([1, 2]).mapAsList((it) => it!);
-
-      final files =
-          getList('file', (str) => str.contains('auto') || str.isEmpty)
-              .mapAsList((it) {
-        final groups = getGroups(it);
-        return Video.withFromatAndQuailty(groups[1], groups[0]);
-      });
-
-      final subtitles = getList('subtitle').mapAsList((it) {
-        final groups = getGroups(it);
-        return Subtitle.withSubtitleFromatFromUrl(
-            groups[1], groups[0].replaceFirst('[', ''));
+      (json['subtitle'] as String?)
+          ?.split(',')
+          .where((it) => it.isNotEmpty)
+          .forEach((it) {
+        subtitles.add(_utils.toSubtitle(_utils.strToList(it)));
       });
 
       return VideoContainer(videos: files, subtitles: subtitles);
     });
   }
 
-  extractdude(String url) async {
-    final doc = client.get(url, referer: getReferer());
-    final corsUrl =
-        'https://embed.smashystream.com/cors.php?https://watchonline.ag';
-    Future<Map<String, dynamic>> search(String query, String type) async =>
-        (await client.get(
-                '$corsUrl/api/v1/${type == "movie" ? "movies" : "shows"}?per-page=5&filters[q]=${encode(query)}'))
-            .json((json) => json['items'] as Map<String, dynamic>);
-    final json = await search('', '');
-    final slug = json['slug'];
+  Future<VideoContainer> _exractFm() {
+    return client.get(videoServer.url, referer: getReferer()).then((response) {
+      var data = RegExp(r'\((\{[^;]*),\s\}\);')
+          .firstMatch(response.text)!
+          .group(1)!
+          .substringAfter('file');
+      if (data.contains('subtitle')) {
+        data = data.replaceFirst('subtitle', '"subtitle"');
+      }
+      data = '{"file"$data}';
 
-    Future<
-        String> getSlug(String query, String type) async => (await client.get(
-            '$corsUrl/api/v1/${type == "movie" ? "movies" : "shows"}?per-page=5&filters[q]=${encode(query)}'))
-        .json((json) => json["items"]['slug'].toString());
+      final List<Subtitle> subtitles = [];
+
+      final json = jsonDecode(data);
+
+      (json['subtitle'] as String?)
+          ?.split(',')
+          .where((it) => it.isNotEmpty)
+          .forEach((it) {
+        subtitles.add(_utils.toSubtitle(_utils.strToList(it)));
+      });
+
+      return VideoContainer(videos: [
+        Video(
+            url: json['file'].toString(),
+            quality: WatchQualites.master,
+            fromat: VideoFormat.hls)
+      ], subtitles: subtitles);
+    });
   }
+
+  Future<VideoContainer> _extractEms() {
+    return _extractServer((response) {
+      final json = jsonDecode(
+          '{"file${RegExp(r'\((\{[^;]*)\);').firstMatch(response.text)!.group(1)!.substringAfter('"file')}');
+      final List<Subtitle> subtitles = [];
+
+      (json['subtitle'] as String?)
+          ?.split(',')
+          .where((it) => it.isNotEmpty)
+          .forEach((it) {
+        subtitles.add(_utils.toSubtitle(_utils.strToList(it)));
+      });
+
+      return VideoContainer(videos: [
+        Video(
+            url: json['file'].toString(),
+            quality: WatchQualites.master,
+            fromat: VideoFormat.hls)
+      ], subtitles: subtitles);
+    });
+  }
+
+  // _extractSE() {
+  //   return _extractServer((response) {});
+  // }
+
+  Future<VideoContainer> _extractServer(
+          VideoContainer Function(OkHttpResponse response) extract) =>
+      client
+          .get(hostUrl, referer: getReferer())
+          .then((response) => extract(response));
+
+  final _utils = _ExtractorUtils();
 }
 
-void main(List<String> args) async {
-// {Player L, https://embed.smashystream.com/lktv09.php?imdb=tt0903747&season=1&episode=1}
-// {Player D (Hindi)  , https://embed.smashystream.com/dude11_tv.php?imdb=tt0903747&season=1&episode=1}
-// {Player H  , https://embed.smashystream.com/hdw.php?imdb=tt0903747&season=1&episode=1}
-// {Player FX, https://embed.smashystream.com/fx555.php?tmdb=1396&season=1&episode=1}
-// {Player ES  , https://embed.smashystream.com/ems.php?imdb=tt0903747&season=1&episode=1}
-// {Player S, https://embed.smashystream.com/supertv.php?tmdb=1396&season=1&episode=1}
-// {Player C  , https://embed.smashystream.com/cf.php?imdb=tt0903747&season=1&episode=1}
-  // final a = SmashyStreamExtractor(const VideoServer(
-  //     url:
-  //         'https://embed.smashystream.com/fix05.php?tmdb=1396&season=1&episode=1',
-  //     name: '',
-  //     extra: {
-  //       'referer':
-  //           'https://embed.smashystream.com/playere.php?tmdb=1396&season=1&episode=1'
-  //     }));
-  // final b = await a.extractfix(a.videoServer.url);
-  // b.videos.forEach((it) {
-  //   print({it.url, it.quality, it.fromat});
-  // });
+class _ExtractorUtils {
+  List<String> strToList(String str) {
+    return str.replaceFirst('[', '').replaceFirst(',', '').split(']');
+  }
 
-  // b.subtitles!.forEach((it) {
-  //   print({it.url, it.lang, it.format});
-  // });
+  Video toVideo(List<String> lst) {
+    return Video(
+        url: lst[1],
+        quality: lst[0] == 'auto'
+            ? WatchQualites.master
+            : Quality.getQuailtyFromString(lst[1]),
+        fromat: VideoFormat.hls);
+  }
 
-  final a = await client.get(
-      'https://embed.smashystream.com/lktv09.php?imdb=tt9362722',
-      referer: 'https://embed.smashystream.com/playere.php?imdb=tt9362722');
-  print(a.text);
+  Subtitle toSubtitle(List<String> lst) {
+    return Subtitle.withSubtitleFromatFromUrl(lst[1], lst[0]);
+  }
 }

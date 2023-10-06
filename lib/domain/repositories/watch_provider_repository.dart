@@ -34,8 +34,7 @@ abstract interface class WatchProviderRepository {
   Future<ResponseState<List<EpisodeEntity>>> loadEpisodes({
     required BaseProvider provider,
     required String url,
-    num? seasonNumber,
-    List<EpisodeEntity>? episodes,
+    SeasonEntity? season,
   });
 
   Future<ResponseState<List<SeasonEntity>>> loadSeason(
@@ -61,12 +60,13 @@ abstract interface class WatchProviderRepository {
       void Function(MeiyouException exception)? errorCallback});
 
   Future<SearchResponseEntity?> loadSavedSearchResponse(
-      BaseProvider provider, CacheRespository cacheRespository);
+      String savePath, BaseProvider provider);
 
-  Future<void> saveSearchResponse(
-      {required BaseProvider provider,
-      required SearchResponseEntity searchResponse,
-      required CacheRespository cacheRespository});
+  Future<void> saveSearchResponse({
+    required String savePath,
+    required BaseProvider provider,
+    required SearchResponseEntity searchResponse,
+  });
 
   Future<ResponseState<Map<String, VideoContainerEntity>>> loadServerAndVideo({
     required BaseProvider provider,

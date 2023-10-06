@@ -6,12 +6,14 @@ import 'package:meiyou/core/resources/button_style.dart';
 import 'package:meiyou/core/resources/media_type.dart';
 import 'package:meiyou/core/resources/providers/base_provider.dart';
 import 'package:meiyou/core/utils/add_padding_onrientation_change.dart';
+import 'package:meiyou/core/utils/extenstions/context.dart';
 import 'package:meiyou/domain/entities/episode.dart';
 import 'package:meiyou/presentation/pages/info_watch/state/selected_searchResponse_bloc/selected_search_response_bloc.dart';
 import 'package:meiyou/presentation/pages/info_watch/state/source_dropdown_bloc/bloc/source_drop_down_bloc.dart';
 import 'package:meiyou/presentation/widgets/add_space.dart';
+import 'package:meiyou/presentation/widgets/arrow_selector_list.dart';
 import 'package:meiyou/presentation/widgets/layout_builder.dart';
-import 'package:meiyou/presentation/widgets/season_selector/seasons_selector_bloc/seasons_selector_bloc.dart';
+import 'package:meiyou/presentation/widgets/season_selector/bloc/seasons_selector_bloc.dart';
 import 'package:meiyou/presentation/widgets/watch/state/fetch_seasons_episodes/fetch_seasons_episodes_bloc.dart';
 
 class SeasonSelector extends StatefulWidget {
@@ -75,17 +77,25 @@ class _SeasonSelectorState extends State<SeasonSelector> {
                                   style: MeiyouButtonStyle(
                                       minimumSize: const Size(100, 50),
                                       maximumSize: const Size(120, 50),
+                                      elevation: 4.0,
+                                      surfaceTintColor:
+                                          context.theme.colorScheme.tertiary,
+
                                       //fixedSize: const Size(100, 50),
                                       backgroundColor:
-                                          Colors.grey.withOpacity(0.2),
-                                      textStyle: const TextStyle(
-                                          color: Colors.grey, fontSize: 16)),
+                                          context.theme.colorScheme.tertiary,
+                                      textStyle: const TextStyle(fontSize: 16)),
                                   onPressed: () => showSeasonSelector(context,
                                       currentSeason: state4.season,
                                       bloc: seasonsSelectorBloc,
                                       provider: provider,
                                       data: state3.data!.entries.toList()),
-                                  child: Text(text)),
+                                  child: Text(
+                                    text,
+                                    style: TextStyle(
+                                        color: context
+                                            .theme.colorScheme.onSurface),
+                                  )),
                             ),
                             forLagerScreen: Padding(
                               padding: const EdgeInsets.only(left: 50),
@@ -94,16 +104,23 @@ class _SeasonSelectorState extends State<SeasonSelector> {
                                       minimumSize: const Size(100, 50),
                                       maximumSize: const Size(120, 50),
                                       //fixedSize: const Size(100, 50),
+                                      elevation: 4.0,
+                                      surfaceTintColor:
+                                          context.theme.colorScheme.tertiary,
                                       backgroundColor:
-                                          Colors.grey.withOpacity(0.2),
-                                      textStyle: const TextStyle(
-                                          color: Colors.grey, fontSize: 16)),
+                                          context.theme.colorScheme.tertiary,
+                                      textStyle: const TextStyle(fontSize: 16)),
                                   onPressed: () => showSeasonSelector(context,
                                       currentSeason: state4.season,
                                       bloc: seasonsSelectorBloc,
                                       provider: provider,
                                       data: state3.data!.entries.toList()),
-                                  child: Text(text)),
+                                  child: Text(
+                                    text,
+                                    style: TextStyle(
+                                        color: context
+                                            .theme.colorScheme.onSurface),
+                                  )),
                             ),
                           );
                         });
@@ -127,7 +144,6 @@ class _SeasonSelectorState extends State<SeasonSelector> {
           return Dialog(
             // insetPadding: EdgeInsets.all(40),
             elevation: 10,
-            backgroundColor: Colors.black,
 
             child: Container(
               constraints: const BoxConstraints(
@@ -137,86 +153,90 @@ class _SeasonSelectorState extends State<SeasonSelector> {
                   shrinkWrap: true,
                   // crossAxisAlignment: CrossAxisAlignment.center,
                   // mainAxisAlignment: MainAxisAlignment.start,
-                  children: List.generate(data.length, (index) {
-                    return SelectedButton(
-                      isSelected: currentSeason == data[index].key,
-                      onTap: () {
-                        final season = data[index].key;
-                        if (currentSeason != season) {
-                          bloc.add(SelectSeason(season, data[index].value));
-                          Navigator.pop(context);
-                        }
-                      },
-                      text: 'Season ${data[index].key}',
-                    );
-                  })),
+                  children: [
+                    addVerticalSpace(10),
+                    ...List.generate(data.length, (index) {
+                      return ArrowSelector(
+                        showArrow: currentSeason == data[index].key,
+                        onTap: () {
+                          final season = data[index].key;
+                          if (currentSeason != season) {
+                            bloc.add(SelectSeason(season, data[index].value));
+                            Navigator.pop(context);
+                          }
+                        },
+                        text: 'Season ${data[index].key}',
+                      );
+                    }),
+                    addVerticalSpace(10)
+                  ]),
             ),
           );
         });
   }
 }
 
-class SelectedButton extends StatelessWidget {
-  final VoidCallback onTap;
-  final bool isSelected;
+// class SelectedButton extends StatelessWidget {
+//   final VoidCallback onTap;
+//   final bool isSelected;
 
-  final String text;
-  const SelectedButton({
-    super.key,
-    required this.isSelected,
-    required this.text,
-    required this.onTap,
-  });
+//   final String text;
+//   const SelectedButton({
+//     super.key,
+//     required this.isSelected,
+//     required this.text,
+//     required this.onTap,
+//   });
 
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      animationDuration: animationDuration,
-      type: MaterialType.transparency,
-      child: InkWell(
-        onTap: onTap,
-        child: LayoutBuilder(
-            // stream: null,
-            builder: (context, constraints) {
-          return Container(
-            padding: const EdgeInsets.all(10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                if (constraints.maxWidth < 65)
-                  defaultSizedBox
-                else
-                  Visibility(
-                    visible: isSelected,
-                    replacement: const SizedBox(
-                      height: 30,
-                      width: 30,
-                    ),
-                    child: const Align(
-                      alignment: Alignment.bottomLeft,
-                      child: Icon(
-                        Icons.done,
-                        color: Colors.white,
-                        size: 30,
-                      ),
-                    ),
-                  ),
-                addHorizontalSpace(20),
-                Expanded(
-                  child: Text(
-                    text,
-                    // textAlign: TextAlign.start,
-                    style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: isSelected ? Colors.white : Colors.grey,
-                        fontSize: 18),
-                  ),
-                )
-              ],
-            ),
-          );
-        }),
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return Material(
+//       animationDuration: animationDuration,
+//       type: MaterialType.transparency,
+//       child: InkWell(
+//         onTap: onTap,
+//         child: LayoutBuilder(
+//             // stream: null,
+//             builder: (context, constraints) {
+//           return Container(
+//             padding: const EdgeInsets.all(10),
+//             child: Row(
+//               mainAxisAlignment: MainAxisAlignment.start,
+//               children: [
+//                 if (constraints.maxWidth < 65)
+//                   defaultSizedBox
+//                 else
+//                   Visibility(
+//                     visible: isSelected,
+//                     replacement: const SizedBox(
+//                       height: 30,
+//                       width: 30,
+//                     ),
+//                     child: const Align(
+//                       alignment: Alignment.bottomLeft,
+//                       child: Icon(
+//                         Icons.done,
+//                         color: Colors.white,
+//                         size: 30,
+//                       ),
+//                     ),
+//                   ),
+//                 addHorizontalSpace(20),
+//                 Expanded(
+//                   child: Text(
+//                     text,
+//                     // textAlign: TextAlign.start,
+//                     style: TextStyle(
+//                         fontWeight: FontWeight.w600,
+//                         color: isSelected ? Colors.white : Colors.grey,
+//                         fontSize: 18),
+//                   ),
+//                 )
+//               ],
+//             ),
+//           );
+//         }),
+//       ),
+//     );
+//   }
+// }

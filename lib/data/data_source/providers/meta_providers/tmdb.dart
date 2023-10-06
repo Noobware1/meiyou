@@ -68,23 +68,14 @@ class TMDB extends MetaProvider {
         '$TMDB_API_URL/$mediaType/$id?api_key=$TMDB_APIKEY&append_to_response=credits,external_ids,videos,recommendations');
     if (!response.success) ResponseFailed.fromTMDB();
 
-    final mediaDetails =
-        response.json((json) => MediaDetails.fromTMDB(json, mediaType));
-
-    return mediaDetails;
+    return response.json((json) => MediaDetails.fromTMDB(json, mediaType));
   }
 
   @override
   Future<MetaResults> fetchSearch(String query,
-      {int page = 1, bool isAdult = false}) async {
-    final response =
-        await client.get('$_search$query&page=$page&include_adult=$isAdult');
-
-    if (!response.success) ResponseFailed.fromTMDB();
-
-    final data = response.json((json) => MetaResults.fromTMDB(json, ''));
-
-    return data;
+      {int page = 1, bool isAdult = false}) {
+    return client.get('$_search$query&page=$page&include_adult=$isAdult').then(
+        (response) => response.json((json) => MetaResults.fromTMDB(json, '')));
   }
 
   @override
@@ -94,17 +85,21 @@ class TMDB extends MetaProvider {
   ]) async {
     return (await client.get(
             "$TMDB_API_URL/tv/${media.id}/season/${season?.number ?? 1}?api_key=$TMDB_APIKEY&language=en-US"))
-        .json((json) =>
-            (json['episodes'] as List).map((it) => Episode.fromTMDB(it)))
-        .toList();
+        .json((json) {
+      final episodes = <Episode>[];
+      for (final episode in (json['episodes'] as List)) {
+        episodes.add(Episode.fromTMDB(episode));
+      }
+      return episodes;
+    });
   }
 
   @override
   Future<MainPage> fetchMainPage() async {
     final futures = [
       _fetchTrending,
-      _fetchPopularMovies,
-      _fetchPopularTvShows,
+      // _fetchPopularMovies,
+      // _fetchPopularTvShows,
       _fetchTopRatedTvShows,
       _fetchTopRated
     ];
@@ -123,9 +118,9 @@ class TMDB extends MetaProvider {
 
   static const rowTitles = [
     'Trending',
-    'Popular Movies',
-    'Popular Tv Shows',
-    'Top Rated TvShows',
+    // 'Popular Movies',
+    // 'Popular Tv Shows',
+    'Top Rated TV Shows',
     'Top Rated'
   ];
 

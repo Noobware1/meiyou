@@ -5,24 +5,55 @@ import 'dart:io' show Directory;
 
 class AppDirectories {
   final Directory appCacheDirectory;
-  // final Directory responsesCacheDirectory;
+  final Directory appDocumentDirectory;
+  final Directory settingsDirectory;
+  // final Directory cacheResponsesDirectory;
+  final Directory savedSelectedResponseDirectory;
 
-  AppDirectories(
-      {required this.appCacheDirectory, 
-      // required this.responsesCacheDirectory
-      });
+  AppDirectories({
+    required this.appCacheDirectory,
+    required this.appDocumentDirectory,
+    required this.settingsDirectory,
+    required this.savedSelectedResponseDirectory,
+    // required this.cacheResponsesDirectory,
+    // required this.responsesCacheDirectory
+  });
 
-  static Future<AppDirectories> getInstance() {
-    return Future.wait([getApplicationCacheDirectory()]).then((value) =>
-        AppDirectories(
-            appCacheDirectory: value[0],
-            // responsesCacheDirectory:
-            //     Directory('${value[0].path}\\responses_folder')
-                )
-                );
+  static Future<AppDirectories> getInstance() async {
+    final dirs = await Future.wait([
+      getApplicationCacheDirectory(),
+      getApplicationDocumentsDirectory(),
+    ]);
+
+    final cacheDir = Directory('${dirs[0].path}\\cache');
+    if (!cacheDir.existsSync()) {
+      cacheDir.createSync();
+    }
+    final appDocDir = Directory('${dirs[1].path}\\meiyou');
+    if (!appDocDir.existsSync()) {
+      appDocDir.createSync();
+    }
+    final subDirectories = [
+      'settings',
+      'saved_selected_res',
+      'cache_responses'
+    ];
+
+    for (final subDirName in subDirectories) {
+      final subDir = Directory('${appDocDir.path}\\$subDirName');
+      if (!subDir.existsSync()) {
+        subDir.createSync();
+      }
+    }
+
+    return AppDirectories(
+      appCacheDirectory: cacheDir,
+      appDocumentDirectory: appDocDir,
+      settingsDirectory: Directory('${appDocDir.path}\\${subDirectories[0]}'),
+      savedSelectedResponseDirectory:
+          Directory('${appDocDir.path}\\${subDirectories[1]}'),
+
+      ///     Directory('${appDocDir.path}\\${subDirectories[2]}'),
+    );
   }
-
-  
 }
-
-

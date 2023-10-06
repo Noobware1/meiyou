@@ -10,10 +10,10 @@ sealed class SelectedSearchResponseEvent extends Equatable {
 
 final class FindBestSearchResponseFromList extends SelectedSearchResponseEvent {
   final List<SearchResponseEntity>? searchResponses;
-  final ProviderType type;
+
   final MeiyouException? error;
   const FindBestSearchResponseFromList(
-      this.searchResponses, this.type, this.error, super.provider);
+      this.searchResponses, this.error, super.provider);
 }
 
 final class SearchResponseWaiting extends SelectedSearchResponseEvent {
@@ -26,4 +26,12 @@ final class SelectSearchResponseFromUserSelection
   final SearchResponseEntity searchResponse;
   const SelectSearchResponseFromUserSelection(
       this.searchResponse, super.provider);
+}
+
+final class LoadSavedSearchResponseFromCache
+    extends SelectedSearchResponseEvent {
+  final List<SearchResponseEntity>? searchResponses;
+  final MeiyouException? error;
+  const LoadSavedSearchResponseFromCache(
+      this.searchResponses, this.error, super.provider);
 }

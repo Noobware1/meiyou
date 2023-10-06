@@ -1,7 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
-import 'package:meiyou/presentation/player/video_controls/cubits/progress_bar_cubit.dart';
 
 class PlayerCubitState {
   final Player player;

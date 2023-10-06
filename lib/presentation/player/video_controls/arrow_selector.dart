@@ -38,7 +38,6 @@ class ArrowButton extends StatelessWidget {
                       alignment: Alignment.bottomLeft,
                       child: Icon(
                         Icons.done,
-                        color: Colors.white,
                         size: 30,
                       ),
                     ),
@@ -51,7 +50,7 @@ class ArrowButton extends StatelessWidget {
                     // textAlign: TextAlign.start,
                     style: TextStyle(
                         fontWeight: FontWeight.w600,
-                        color: isSelected ? Colors.white : Colors.grey,
+                        color: isSelected ? null : Colors.grey,
                         fontSize: 18),
                   ),
                 )

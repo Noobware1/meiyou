@@ -15,6 +15,8 @@ import 'package:ok_http_dart/ok_http_dart.dart';
 class Gogo extends AnimeProvider {
   @override
   String get name => 'Gogo';
+
+  
   @override
   String get hostUrl => 'https://gogoanime.hu';
 

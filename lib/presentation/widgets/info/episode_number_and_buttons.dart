@@ -13,8 +13,10 @@ class EpisodeNumberAndButtons extends StatelessWidget {
   Widget build(BuildContext context) {
     final defaultTextStyle = textStyle ??
         const TextStyle(
-            fontSize: 17, fontWeight: FontWeight.w600, color: Colors.grey);
-    final primaryColor = context.primaryColor;
+            fontSize: 17,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF5F6267));
+    final primaryColor = context.theme.colorScheme.primary;
     return Row(
       children: [
         Expanded(

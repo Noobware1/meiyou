@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:meiyou/core/constants/height_and_width.dart';
 import 'package:meiyou/domain/entities/meta_response.dart';
-import 'package:meiyou/domain/entities/results.dart';
 import 'package:meiyou/domain/entities/row.dart';
 
 import 'image_list_view.dart';

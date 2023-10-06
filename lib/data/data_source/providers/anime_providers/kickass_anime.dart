@@ -2,6 +2,7 @@ import 'package:meiyou/core/resources/client.dart';
 import 'package:meiyou/core/resources/extractors/video_extractor.dart';
 import 'package:meiyou/core/resources/media_type.dart';
 import 'package:meiyou/core/resources/providers/anime_provider.dart';
+import 'package:meiyou/core/utils/extenstions/iterable.dart';
 import 'package:meiyou/core/utils/extenstions/map.dart';
 import 'package:meiyou/data/models/episode.dart';
 import 'package:meiyou/data/models/search_response.dart';
@@ -18,23 +19,25 @@ class KickAssAnime extends AnimeProvider {
   Future<List<Episode>> loadEpisodes(String url) async {
     final session = client.session();
     try {
-      final locale =
-          (await session.get(url)).json((json) => (json['locales'] as List)[0]);
+      final media = (await session.get(url)).json(_MediaResponse.fromJson);
 
       final episodeUrl = '$url/episodes';
 
       Map<String, String> params(int page) =>
-          {"ep": "1", "page": page.toString(), "lang": locale};
+          {"ep": "1", "page": page.toString(), "lang": media.locales.first};
 
       final res = (await session.get(episodeUrl, params: params(1)))
           .json(_KickAssAnimeEpisodeJson.fromJson);
-      final episodes = <Episode>[...res.result!.map((it) => it.toEpisode())];
+      final episodes = <Episode>[
+        ...res.result!.map((it) => it.toEpisode(hostUrl, media.slug))
+      ];
 
       for (var i = 1; i < res.pages!.length; i++) {
         final data = await session.get(episodeUrl, params: params(i));
 
         final episode = data.json(_KickAssAnimeEpisodeJson.fromJson);
-        episodes.addAll(episode.result!.map((e) => e.toEpisode()));
+        episodes.addAll(
+            episode.result!.map((e) => e.toEpisode(hostUrl, media.slug)));
       }
 
       return episodes;
@@ -68,8 +71,38 @@ class KickAssAnime extends AnimeProvider {
 
   @override
   Future<List<VideoServer>> loadVideoServers(String url) {
-    // TODO: implement loadVideoServer
-    throw UnimplementedError();
+    return client.get(url).then((response) {
+      return response.json(_Servers.fromKassResponse);
+    });
+  }
+}
+
+class _Servers extends VideoServer {
+  const _Servers({required super.url, required super.name});
+
+  factory _Servers.fromJson(dynamic json) {
+    return _Servers(url: json['src'], name: json['name']);
+  }
+
+  static List<_Servers> fromKassResponse(dynamic json) {
+    final servers = <_Servers>[];
+    for (var e in (json['servers'] as List)) {
+      servers.add(_Servers.fromJson(e));
+    }
+    return servers;
+  }
+}
+
+class _MediaResponse {
+  final String slug;
+  final List<String> locales;
+
+  const _MediaResponse({required this.slug, required this.locales});
+
+  factory _MediaResponse.fromJson(dynamic json) {
+    return _MediaResponse(
+        slug: json['slug'],
+        locales: (json['locales'] as List).mapAsList((it) => it.toString()));
   }
 }
 
@@ -88,10 +121,10 @@ class _KickAssAnimeEpisodeJson {
       _KickAssAnimeEpisodeJson(
         currentPage: json["current_page"],
         pages: json["pages"] == null
-            ? []
+            ? null
             : List<_Page>.from(json["pages"]!.map((x) => _Page.fromJson(x))),
         result: json["result"] == null
-            ? []
+            ? null
             : List<_Result>.from(
                 json["result"]!.map((x) => _Result.fromJson(x))),
       );
@@ -115,7 +148,7 @@ class _Page {
         from: json["from"],
         to: json["to"],
         eps: json["eps"] == null
-            ? []
+            ? null
             : List<double>.from(json["eps"]!.map((x) => x?.toDouble())),
       );
 }
@@ -137,8 +170,11 @@ class _Result {
     this.thumbnail,
   });
 
-  Episode toEpisode() => Episode(
-      number: episodeNumber!, title: title, thumbnail: thumbnail, url: slug!);
+  Episode toEpisode(String hostUrl, String watchSlug) => Episode(
+      number: episodeNumber!,
+      title: title,
+      thumbnail: thumbnail,
+      url: '$hostUrl/$watchSlug/episode/ep-$episodeNumber-$slug');
 
   factory _Result.fromJson(Map<String, dynamic> json) => _Result(
         slug: json["slug"],
@@ -198,9 +234,9 @@ class _Poster {
 }
 
 void main(List<String> args) async {
-  final Stopwatch stopwatch = Stopwatch()..start();
-  final a = await KickAssAnime()
-      .loadEpisodes('https://kickassanime.am/api/show/one-piece-0948');
-  print(a.length);
-  print(stopwatch.elapsed.toString());
+  // final a = await KickAssAnime().search('darling in the');
+  // a.forEach(print);
+  final b = await KickAssAnime().loadEpisodes(
+      'https://kickassanime.am/api/show/darling-in-the-franxx-fd31');
+  b.forEach(print);
 }

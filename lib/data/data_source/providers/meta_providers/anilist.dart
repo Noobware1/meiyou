@@ -56,7 +56,11 @@ class Anilist extends MetaProvider {
 
   @override
   Future<MainPage> fetchMainPage() async {
-    final rowFunctions = [_fetchRecentlyAdded, fetchTrending, _fetchPopular];
+    final rowFunctions = [
+      _fetchRecentlyAdded,
+      fetchTrending,
+      _fetchPopular,
+    ];
 
     final results = await Future.wait(rowFunctions.map((it) => it.call()));
 
@@ -73,7 +77,8 @@ class Anilist extends MetaProvider {
   }
 
   @override
-  Future<List<Episode>> fetchEpisodes(MediaDetails media, [
+  Future<List<Episode>> fetchEpisodes(
+    MediaDetails media, [
     Season? season,
   ]) async {
     final tmdbId = media.extrenalIds?['tmdb'];

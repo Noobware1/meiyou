@@ -4,21 +4,24 @@ import 'package:media_kit_video/media_kit_video.dart';
 import 'package:meiyou/core/constants/plaform_check.dart';
 import 'package:meiyou/core/resources/media_type.dart';
 import 'package:meiyou/core/resources/snackbar.dart';
-import 'package:meiyou/core/utils/extenstions/context.dart';
+import 'package:meiyou/core/utils/extenstions/string.dart';
 import 'package:meiyou/core/utils/player_utils.dart';
 import 'package:meiyou/domain/entities/episode.dart';
 import 'package:meiyou/presentation/pages/info_watch/state/selected_searchResponse_bloc/selected_search_response_bloc.dart';
-import 'package:meiyou/presentation/player/change_subtitle.dart';
+import 'package:meiyou/presentation/player/change_subtitle.dart'
+    as subtitleWidget;
 import 'package:meiyou/presentation/player/initialise_player.dart';
 import 'package:meiyou/presentation/player/video_controls/change_quality.dart';
 import 'package:meiyou/presentation/player/video_controls/cubits/current_episode_cubit.dart';
+import 'package:meiyou/presentation/player/video_controls/cubits/is_ready.dart';
 import 'package:meiyou/presentation/player/video_controls/cubits/resize_mode_cubit.dart';
 import 'package:meiyou/presentation/player/video_controls/cubits/selected_server_cubit.dart';
+import 'package:meiyou/presentation/player/video_controls/subtitle_woker_bloc/subtitle_worker_bloc.dart';
 import 'package:meiyou/presentation/widgets/add_space.dart';
-import 'package:meiyou/presentation/widgets/episode_view/state/episode_selector.dart';
-import 'package:meiyou/presentation/widgets/episode_view/state/episode_selector/episode_selector_bloc.dart';
+import 'package:meiyou/presentation/widgets/episode_selector/episode_selector.dart';
+import 'package:meiyou/presentation/widgets/episode_selector/episode_selector/episode_selector_bloc.dart';
+
 import 'package:meiyou/presentation/widgets/season_selector/season_selector.dart';
-import 'package:meiyou/presentation/widgets/video_server_view.dart';
 import 'package:meiyou/presentation/widgets/watch/watch_view.dart';
 
 class VideoPlayerButtons extends StatefulWidget {
@@ -47,7 +50,10 @@ class _VideoPlayerButtonsState extends State<VideoPlayerButtons> {
               onTap: () {
                 BlocProvider.of<ResizeModeCubit>(context).resize();
                 showSnackBAr(context,
-                    text: BlocProvider.of<ResizeModeCubit>(context).state.name,
+                    text: BlocProvider.of<ResizeModeCubit>(context)
+                        .state
+                        .name
+                        .toUpperCaseFirst(),
                     width: 100);
               },
               // ),
@@ -68,8 +74,12 @@ class _VideoPlayerButtonsState extends State<VideoPlayerButtons> {
               icon: Icons.source_rounded,
               text: 'Subtitles',
               onTap: () {
-                ChangeSubtitle.showSubtitlesDialog(context, player(context),
-                    BlocProvider.of<SelectedServerCubit>(context));
+                subtitleWidget.ChangeSubtitle.showSubtitlesDialog(
+                  context,
+                  player(context),
+                  BlocProvider.of<SelectedServerCubit>(context),
+                  BlocProvider.of<SubtitleWorkerBloc>(context),
+                );
               },
             ),
             // ),
@@ -79,31 +89,7 @@ class _VideoPlayerButtonsState extends State<VideoPlayerButtons> {
                 icon: Icons.playlist_play_rounded,
                 text: 'Servers',
                 onTap: () {
-                  final pos = player(context).state.position;
-                  VideoServerListView.showDialog(
-                      context,
-                      BlocProvider.of<EpisodeSelectorBloc>(context)
-                          .state
-                          .episodes[
-                              BlocProvider.of<CurrentEpisodeCubit>(context)
-                                  .state]
-                          .url, (value) {
-                    if (value.selectedVideoIndex !=
-                        BlocProvider.of<SelectedServerCubit>(context)
-                            .state
-                            .selectedVideoIndex) {
-                      BlocProvider.of<SelectedServerCubit>(context)
-                          .changeServer(value);
-
-                      initialise(
-                        context,
-                        player(context),
-                        RepositoryProvider.of<VideoController>(context),
-                        pos,
-                      );
-                      // Navigator.pop(context);
-                    }
-                  });
+                  showVideoServers(context);
                 }),
 
             // ),
@@ -153,6 +139,9 @@ class _VideoPlayerButtonsState extends State<VideoPlayerButtons> {
                                     player(context),
                                     RepositoryProvider.of<VideoController>(
                                         context),
+                                    BlocProvider.of<IsPlayerReady>(context),
+                                    BlocProvider.of<SubtitleWorkerBloc>(
+                                        context),
                                   );
                                 }
                               },
@@ -177,7 +166,7 @@ class _BuildIconButton extends StatelessWidget {
   final String text;
   final VoidCallback onTap;
   const _BuildIconButton(
-      {super.key, required this.icon, required this.text, required this.onTap});
+      {required this.icon, required this.text, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -203,7 +192,7 @@ class _BuildIconButton extends StatelessWidget {
               Expanded(
                 flex: 4,
                 child: DefaultTextStyle(
-                  style: const TextStyle(color: Colors.white, fontSize: 14),
+                  style: const TextStyle(fontSize: 14, color: Colors.white),
                   child: Text(
                     text,
                   ),

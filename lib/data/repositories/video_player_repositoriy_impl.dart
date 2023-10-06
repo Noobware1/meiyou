@@ -1,4 +1,17 @@
+import 'dart:convert';
+
+import 'package:meiyou/core/resources/client.dart';
+import 'package:meiyou/core/resources/expections.dart';
+import 'package:meiyou/core/resources/response_state.dart';
+import 'package:meiyou/core/resources/subtitle_decoders/exceptions/subtitle_parsing_expection.dart';
+import 'package:meiyou/core/resources/subtitle_decoders/models/cue.dart';
+import 'package:meiyou/core/resources/subtitle_decoders/parser/subrip_parser.dart';
+import 'package:meiyou/core/resources/subtitle_decoders/parser/webvtt_parser.dart';
+import 'package:meiyou/core/resources/subtitle_decoders/subtitle_parser.dart';
+import 'package:meiyou/core/resources/subtitle_format.dart';
 import 'package:meiyou/core/utils/extenstions/list.dart';
+import 'package:meiyou/core/utils/network.dart';
+import 'package:meiyou/data/models/subtitle.dart';
 import 'package:meiyou/data/models/video.dart';
 import 'package:meiyou/domain/entities/episode.dart';
 import 'package:meiyou/domain/entities/subtitle.dart';
@@ -24,7 +37,7 @@ class VideoPlayerRepositoryImpl implements VideoPlayerRepository {
 
   @override
   SubtitleEntity? getSubtitle(List<SubtitleEntity>? subtitles) {
-    if (subtitles == null) return null;
+    if (subtitles == null || subtitles.isEmpty) return null;
     return subtitles.firstWhere((it) => it.lang.toLowerCase().contains('eng'));
   }
 
@@ -91,6 +104,31 @@ class VideoPlayerRepositoryImpl implements VideoPlayerRepository {
         );
       }
     }
+  }
+
+  @override
+  Future<ResponseState<List<SubtitleCue>>> getSubtitleCues(
+      SubtitleEntity subtitle,
+      [Map<String, String>? headers]) {
+    return tryWithAsync(() async {
+      final String subtitleData = utf8
+          .decode((await client.get(subtitle.url, headers: headers)).bodyBytes);
+
+      final SubtitleParser parser;
+      switch (subtitle.format) {
+        case SubtitleFormat.vtt:
+          parser = WebVttParser();
+          break;
+        case SubtitleFormat.srt:
+          parser = SubripParser();
+          break;
+        default:
+          throw SubtitleParsingException(
+              'Cannot find parser for format ${subtitle.format}');
+      }
+
+      return parser.parse(subtitleData);
+    });
   }
 
   @override

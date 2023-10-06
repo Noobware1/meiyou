@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:meiyou/core/constants/colors.dart';
+import 'package:meiyou/core/utils/extenstions/context.dart';
 
 // Widget gradient() => Positioned(
 //     bottom: 0,
@@ -24,10 +25,10 @@ class DrawGradient extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
         height: height,
-        decoration: const BoxDecoration(
+        decoration:  BoxDecoration(
             gradient: LinearGradient(
                 begin: Alignment.bottomCenter,
                 end: Alignment.topCenter,
-                colors: blackWithTranspent)));
+                colors: [context.theme.scaffoldBackgroundColor, Colors.transparent])));
   }
 }

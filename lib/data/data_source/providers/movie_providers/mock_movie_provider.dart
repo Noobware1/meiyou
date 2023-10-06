@@ -3,8 +3,6 @@ import 'package:meiyou/core/resources/media_type.dart';
 import 'package:meiyou/core/resources/providers/movie_provider.dart';
 import 'package:meiyou/core/resources/video_format.dart';
 import 'package:meiyou/core/resources/watch_qualites.dart';
-import 'package:meiyou/data/data_source/providers/anime_providers/extractors/rapid_cloud.dart';
-import 'package:meiyou/data/data_source/providers/movie_providers/extractors/vidcloud.dart';
 import 'package:meiyou/data/models/episode.dart';
 import 'package:meiyou/data/models/movie.dart';
 import 'package:meiyou/data/models/search_response.dart';
@@ -19,7 +17,7 @@ class MockVideoExtractor extends VideoExtractor {
 
   @override
   Future<VideoContainer> extract() async {
-    return VideoContainer(videos: [
+    return const VideoContainer(videos: [
       Video(
           url: '', quality: WatchQualites.quaility1080, fromat: VideoFormat.hls)
     ]);

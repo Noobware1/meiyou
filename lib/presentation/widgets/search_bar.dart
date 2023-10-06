@@ -14,7 +14,7 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
 
   @override
   void initState() {
-    _controller = TextEditingController(text: widget.hint ?? 'Search');
+    _controller = TextEditingController(text: widget.hint);
     super.initState();
   }
 

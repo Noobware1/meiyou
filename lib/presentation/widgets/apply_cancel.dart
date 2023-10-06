@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:meiyou/core/constants/animation_duration.dart';
 import 'package:meiyou/core/constants/plaform_check.dart';
+import 'package:meiyou/core/utils/extenstions/context.dart';
 import 'package:meiyou/presentation/widgets/add_space.dart';
+import 'package:meiyou/core/resources/get_color_based_on_brightness.dart';
 
 class AppyCancel extends StatelessWidget {
   final VoidCallback onApply;
@@ -17,40 +19,45 @@ class AppyCancel extends StatelessWidget {
     this.buttonStyleForApply,
   });
 
-  static const _applyButtonStyle = ButtonStyle(
-      padding: MaterialStatePropertyAll(EdgeInsets.all(15)),
-      animationDuration: animationDuration,
-      backgroundColor: MaterialStatePropertyAll(Colors.white),
-      elevation: MaterialStatePropertyAll(8),
-      foregroundColor: MaterialStatePropertyAll(Colors.black),
-      overlayColor: MaterialStatePropertyAll(Colors.black54),
-      textStyle: MaterialStatePropertyAll(TextStyle(
-          color: Colors.black, fontSize: 17, fontWeight: FontWeight.w600)));
-
-  static const _cancelButtonStyle = ButtonStyle(
-      padding: MaterialStatePropertyAll(EdgeInsets.all(15)),
-      animationDuration: animationDuration,
-      backgroundColor: MaterialStatePropertyAll(
-        Color.fromARGB(255, 28, 27, 32),
-      ),
-      elevation: MaterialStatePropertyAll(8),
-      foregroundColor: MaterialStatePropertyAll(Colors.white),
-      overlayColor: MaterialStatePropertyAll(Colors.white54),
-      textStyle: MaterialStatePropertyAll(TextStyle(
-          color: Colors.white, fontSize: 17, fontWeight: FontWeight.w600)));
-
-  static final _applyButtonStyleForMobile = _applyButtonStyle.copyWith(
-      textStyle: const MaterialStatePropertyAll(TextStyle(
-          color: Colors.black, fontSize: 15, fontWeight: FontWeight.w600)),
-      padding: const MaterialStatePropertyAll(EdgeInsets.all(10)));
-
-  static final _cancelButtonStyleForMobile = _cancelButtonStyle.copyWith(
-      textStyle: const MaterialStatePropertyAll(TextStyle(
-          color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600)),
-      padding: const MaterialStatePropertyAll(EdgeInsets.all(10)));
-
   @override
   Widget build(BuildContext context) {
+    final applyButtonStyle = ButtonStyle(
+      padding: const MaterialStatePropertyAll(EdgeInsets.all(15)),
+      animationDuration: animationDuration,
+      surfaceTintColor:
+          MaterialStatePropertyAll(context.theme.colorScheme.onSurface),
+      backgroundColor:
+          MaterialStatePropertyAll(context.theme.colorScheme.onSurface),
+      elevation: const MaterialStatePropertyAll(8),
+      // foregroundColor: const MaterialStatePropertyAll(Colors.black),
+      overlayColor: MaterialStatePropertyAll(
+          context.theme.colorScheme.brightness == Brightness.dark
+              ? Colors.black45
+              : Colors.white54),
+    );
+
+    final cancelButtonStyle = ButtonStyle(
+      padding: const MaterialStatePropertyAll(EdgeInsets.all(15)),
+      animationDuration: animationDuration,
+      surfaceTintColor:
+          MaterialStatePropertyAll(context.theme.colorScheme.onSurface),
+      backgroundColor: MaterialStatePropertyAll(
+          context.theme.colorScheme.brightness == Brightness.dark
+              ? const Color.fromARGB(255, 28, 27, 32)
+              : context.theme.colorScheme.secondary),
+      elevation: const MaterialStatePropertyAll(8),
+      overlayColor: MaterialStatePropertyAll(
+          context.theme.colorScheme.brightness == Brightness.dark
+              ? Colors.white54
+              : Colors.black45),
+    );
+
+    final applyButtonStyleForMobile = applyButtonStyle.copyWith(
+        padding: const MaterialStatePropertyAll(EdgeInsets.all(10)));
+
+    final cancelButtonStyleForMobile = cancelButtonStyle.copyWith(
+        padding: const MaterialStatePropertyAll(EdgeInsets.all(10)));
+
     ButtonStyle builBasedOnDevice(
         ButtonStyle buttonStyle, ButtonStyle buttonStyleForMobile) {
       if (isMobile) {
@@ -71,8 +78,14 @@ class AppyCancel extends StatelessWidget {
               onPressed: onApply,
               style: buttonStyleForApply ??
                   builBasedOnDevice(
-                      _applyButtonStyle, _applyButtonStyleForMobile),
-              child: const Text('Apply'),
+                      applyButtonStyle, applyButtonStyleForMobile),
+              child: Text(
+                'Apply',
+                style: TextStyle(
+                    color: context.theme.colorScheme.surface,
+                    fontSize: isMobile ? 15 : 17,
+                    fontWeight: FontWeight.w600),
+              ),
             ),
           ),
           addHorizontalSpace(5),
@@ -81,8 +94,15 @@ class AppyCancel extends StatelessWidget {
               onPressed: onCancel,
               style: buttonStyleForCancel ??
                   builBasedOnDevice(
-                      _cancelButtonStyle, _cancelButtonStyleForMobile),
-              child: const Text('Cancel'),
+                      cancelButtonStyle, cancelButtonStyleForMobile),
+              child: Text('Cancel',
+                  style: TextStyle(
+                      color: context.theme.colorScheme.brightness ==
+                              Brightness.dark
+                          ? Colors.white
+                          : Colors.black,
+                      fontSize: isMobile ? 15 : 17,
+                      fontWeight: FontWeight.w600)),
             ),
           ),
         ],

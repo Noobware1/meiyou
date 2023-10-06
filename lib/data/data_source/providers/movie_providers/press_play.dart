@@ -91,7 +91,7 @@ class PressPlay extends MovieProvider {
   Future<List<VideoServer>> loadVideoServers(String url) async {
     final decoded = _PressPlayVideoServerResponse.decode(url);
     final serverUrl = (await client.get(decoded.url, referer: decoded.referer));
-    print(serverUrl.text);
+
     final b = serverUrl.document.selectFirst('iframe.vidframe').attr('src');
     final referer = Uri.parse(decoded.url);
     return [
@@ -120,7 +120,7 @@ class PressPlay extends MovieProvider {
   Future<String> _extractIframe(String url) {
     return client.get(url).then((response) async {
       final doc = response.document;
-      print(response.text);
+
       const playerQueryApi = 'data-cinemaplayer-query-api';
 
       final player = doc.selectFirst('div#cinemaplayer');
@@ -233,20 +233,3 @@ class _PressPlaySearchResponse extends SearchResponse {
   }
 }
 
-void main(List<String> args) async {
-  final a = PressPlay();
-  // (await a.loadVideoServers(
-  //         '''{"name":"MyCloud","url":"https://moviesapi.club/movie/635910","referer":"https://moviesapi.club/player/cinema-player.php?id=tt1001520"}'''))
-  //     .forEach(print);
-  print((await a
-      .loadVideoExtractor(VideoServer(
-          name: "MyCloud",
-          url: "https://w1.moviesapi.club/v/awVZaNQBwaTR/",
-          extra: {'referer': 'https://moviesapi.club/'}))
-      .extract()));
-  // await a._extractIframe(
-  // 'https://pressplay.top/movie-id413443470-wednesday-online-free');
-  // (await a.loadVideoServers(
-  //         '''{"name":"MyCloud","url":"https://moviesapi.club/tv/119051-1-8","referer":"https://moviesapi.club/player/cinema-player.php?id=tt13443470"}'''))
-  //     .forEach(print);
-}

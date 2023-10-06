@@ -1,86 +1,50 @@
 import 'package:flutter/material.dart';
-import 'package:media_kit_video/media_kit_video.dart';
 
-const subtitleConfigforMobile = SubtitleViewConfiguration(
-  visible: true,
-  style: TextStyle(
-      fontSize: 55.0,
-      letterSpacing: 0.0,
-      wordSpacing: 0.0,
-      color: Color(0xffffffff),
-      fontWeight: FontWeight.w600,
-      shadows: [
-        Shadow(
-            //bottomLeft
-            offset: Offset(1.5, -1.5),
-            blurRadius: 1.0,
-            color: Colors.black),
-        Shadow(
-            //bottomRight
-            offset: Offset(1.5, -1.5),
-            blurRadius: 1.0,
-            color: Colors.black),
-        Shadow(
-            //topRight
-            offset: Offset(1.5, 1.5),
-            blurRadius: 1.0,
-            color: Colors.black),
-        Shadow(
-            //topLeft
-            offset: Offset(1.5, 1.5),
-            blurRadius: 1.0,
-            color: Colors.black),
-      ]
+class SubtitleConfigruation {
+  final bool showBorder;
+  final bool showHighlight;
+  final Color highlightColor;
+  final double highlightWidth;
+  final BorderRadius borderRadius;
+  final Color borderColor;
+  final TextStyle textStyle;
 
-      // backgroundColor: Color(0xaa000000),
-      ),
-  textAlign: TextAlign.center,
-  padding: EdgeInsets.fromLTRB(
-    16.0,
-    0.0,
-    16.0,
-    24.0,
-  ),
+  const SubtitleConfigruation(
+      {this.highlightWidth = 3.0,
+      this.showBorder = false,
+      this.showHighlight = true,
+      this.highlightColor = Colors.black,
+      this.borderRadius = const BorderRadius.all(Radius.zero),
+      this.borderColor = const Color(0xB8000000),
+      this.textStyle = forMobile});
+
+  SubtitleConfigruation copyWith({
+    bool? showBorder,
+    BorderRadius? borderRadius,
+    Color? borderColor,
+    TextStyle? textStyle,
+    bool? showHighlight,
+    Color? highlightColor,
+  }) {
+    return SubtitleConfigruation(
+      showBorder: showBorder ?? this.showBorder,
+      borderColor: borderColor ?? this.borderColor,
+      borderRadius: borderRadius ?? this.borderRadius,
+      textStyle: textStyle ?? this.textStyle,
+      showHighlight: showHighlight ?? this.showHighlight,
+      highlightColor: highlightColor ?? this.highlightColor,
+    );
+  }
+}
+
+const forDesktop = TextStyle(
+  fontSize: 36.0,
+  fontWeight: FontWeight.w700,
+  color: Colors.white,
 );
 
-const subtitleConfigforDesktop = SubtitleViewConfiguration(
-  visible: true,
-  style: TextStyle(
-      fontSize: 45.0,
-      letterSpacing: 0.0,
-      wordSpacing: 0.0,
-      color: Color(0xffffffff),
-      fontWeight: FontWeight.w600,
-      shadows: [
-        Shadow(
-            //bottomLeft
-            offset: Offset(1.5, -1.5),
-            blurRadius: 1.0,
-            color: Colors.black),
-        Shadow(
-            //bottomRight
-            offset: Offset(1.5, -1.5),
-            blurRadius: 1.0,
-            color: Colors.black),
-        Shadow(
-            //topRight
-            offset: Offset(1.5, 1.5),
-            blurRadius: 1.0,
-            color: Colors.black),
-        Shadow(
-            //topLeft
-            offset: Offset(1.5, 1.5),
-            blurRadius: 1.0,
-            color: Colors.black),
-      ]
-
-      // backgroundColor: Color(0xaa000000),
-      ),
-  textAlign: TextAlign.center,
-  padding: EdgeInsets.fromLTRB(
-    16.0,
-    0.0,
-    16.0,
-    24.0,
-  ),
+const forMobile = TextStyle(
+  fontSize: 21.0,
+  fontWeight: FontWeight.w700,
+  color: Colors.white,
 );

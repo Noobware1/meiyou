@@ -1,5 +1,1 @@
-
-enum SubtitleFormat {
-  vtt,
-  srt
-}
+enum SubtitleFormat { vtt, srt, empty }

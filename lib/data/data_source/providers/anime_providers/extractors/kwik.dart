@@ -2,13 +2,9 @@ import 'package:meiyou/core/resources/client.dart';
 import 'package:meiyou/core/resources/extractors/video_extractor.dart';
 import 'package:meiyou/core/resources/js_unpacker.dart';
 import 'package:meiyou/core/resources/quailty.dart';
-import 'package:meiyou/core/utils/extenstions/list.dart';
-import 'package:meiyou/core/utils/extenstions/string.dart';
 import 'package:meiyou/data/models/video.dart';
-import 'dart:math';
 import 'package:meiyou/data/models/video_container.dart';
 import 'package:meiyou/data/models/video_server.dart';
-import 'package:ok_http_dart/ok_http_dart.dart';
 
 class Kwik extends VideoExtractor {
   Kwik(super.videoServer);
@@ -57,7 +53,7 @@ class _Packed {
 }
 
 void main(List<String> args) {
-  Kwik(VideoServer(url: 'https://kwik.cx/e/fDWLwOdx3p0i', name: '', extra: {
+  Kwik(const VideoServer(url: 'https://kwik.cx/e/fDWLwOdx3p0i', name: '', extra: {
     'referer': 'https://animepahe.ru/',
     'quality': Quality(pixel: 0, quaility: 0)
   })).extract().then((value) => print(value));

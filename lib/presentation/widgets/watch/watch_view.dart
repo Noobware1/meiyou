@@ -5,10 +5,10 @@ import 'package:meiyou/core/resources/media_type.dart';
 import 'package:meiyou/domain/entities/episode.dart';
 import 'package:meiyou/presentation/pages/info_watch/state/selected_searchResponse_bloc/selected_search_response_bloc.dart';
 import 'package:meiyou/presentation/widgets/not_found.dart';
-import 'package:meiyou/presentation/widgets/video_server_view.dart';
-import 'package:meiyou/presentation/widgets/watch/anime_view.dart';
-import 'package:meiyou/presentation/widgets/watch/movie_view.dart';
-import 'package:meiyou/presentation/widgets/watch/tv_view.dart';
+import 'package:meiyou/presentation/widgets/video_server/video_server_view.dart';
+import 'package:meiyou/presentation/widgets/watch/views/anime_view.dart';
+import 'package:meiyou/presentation/widgets/watch/views/movie_view.dart';
+import 'package:meiyou/presentation/widgets/watch/views/tv_view.dart';
 
 class WatchView extends StatelessWidget {
   final void Function(SelectedServer server)? onServerSelected;

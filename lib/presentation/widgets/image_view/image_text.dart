@@ -7,15 +7,12 @@ class ImageText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTextStyle(
+    return Text(
+      text,
       style: textStyle?.copyWith(overflow: TextOverflow.ellipsis) ??
           _defaultTextStyle,
-      child: Text(
-        text,
-        style: textStyle,
-        textAlign: TextAlign.center,
-        maxLines: 2,
-      ),
+      textAlign: TextAlign.center,
+      maxLines: 2,
     );
   }
 

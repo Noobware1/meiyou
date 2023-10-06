@@ -1,7 +1,5 @@
 import 'package:meiyou/core/usecases/usecase.dart';
 import 'package:meiyou/core/usecases_container/usecase_container.dart';
-import 'package:meiyou/data/data_source/providers/meta_providers/anilist.dart';
-import 'package:meiyou/data/repositories/meta_provider_repository_impl.dart';
 import 'package:meiyou/domain/repositories/meta_provider_repository.dart';
 import 'package:meiyou/domain/usecases/get_main_page_usecase.dart';
 import 'package:meiyou/domain/usecases/get_mapped_episodes_usecase.dart';
@@ -9,7 +7,6 @@ import 'package:meiyou/domain/usecases/get_mapped_movie.dart';
 import 'package:meiyou/domain/usecases/get_media_details_usecase.dart';
 import 'package:meiyou/domain/usecases/get_meta_results_usecase.dart';
 
-import '../../data/data_source/providers/meta_providers/tmdb.dart';
 
 class MetaProviderRepositoryContainer
     extends UseCaseContainer<MetaProviderRepositoryContainer> {

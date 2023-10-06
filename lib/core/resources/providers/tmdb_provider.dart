@@ -21,7 +21,7 @@ abstract class TMDBProvider extends WatchProvider {
 
   Future<List<Season>> loadSeasons(String id, List<Season> seasons);
 
-  Future<List<Episode>> loadEpisodes(Season season, List<Episode> episodes);
+  Future<List<Episode>> loadEpisodes(Season season);
 
   @override
   ProviderType get providerType => ProviderType.tmdb;

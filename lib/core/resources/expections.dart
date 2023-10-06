@@ -7,7 +7,7 @@ class MeiyouException implements Exception {
 
   @override
   String toString() {
-    return 'MeiyouException\n$message\nStack Trace\n$stackTrace\nException Type: $type';
+    return '$message\nStack Trace\n$stackTrace\nException Type: $type';
   }
 
   factory MeiyouException.fromTMDB() {
@@ -18,6 +18,26 @@ class MeiyouException implements Exception {
   factory MeiyouException.fromAnilist() {
     return const MeiyouException('Failed Fetch Data From Anilist',
         type: MeiyouExceptionType.providerException);
+  }
+
+  static T? tryWithSync<T>(T Function() fun,
+      [void Function(Object e, StackTrace s)? onError]) {
+    try {
+      return fun.call();
+    } catch (e, s) {
+      onError?.call(e, s);
+      return null;
+    }
+  }
+
+  static Future<T?> tryWithAsync<T>(Future<T> Function() fun,
+      [void Function(Object e, StackTrace s)? onError]) async {
+    try {
+      return await fun.call();
+    } catch (e, s) {
+      onError?.call(e, s);
+      return null;
+    }
   }
 
   static const empty = MeiyouException('');

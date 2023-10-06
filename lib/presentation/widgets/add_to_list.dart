@@ -19,7 +19,7 @@ class AddToListButton extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         borderRadius: _borderRadius,
-        splashColor: context.primaryColor,
+        splashColor: context.theme.colorScheme.primary,
         child: Container(
           alignment: Alignment.center,
           height: 50,
@@ -32,7 +32,7 @@ class AddToListButton extends StatelessWidget {
             'ADD TO LIST',
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: getPrimaryColor(context),
+              color: context.theme.colorScheme.primary,
               fontSize: 15,
               fontWeight: FontWeight.bold,
             ),

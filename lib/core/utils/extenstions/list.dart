@@ -1,6 +1,12 @@
 import 'dart:typed_data';
 
 extension ListUtils<T> on List<T> {
+  int? tryIndexOf(T? element, [int start = 0]) {
+    if (element == null) return null;
+
+    return indexOf(element, start);
+  }
+
   bool containsIndex(int index) {
     return index >= 0 && index < length;
     // if (index <= length) {

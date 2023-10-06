@@ -2,7 +2,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter/material.dart';
 import 'package:meiyou/core/constants/plaform_check.dart';
 import 'package:meiyou/core/utils/player_utils.dart';
-import 'package:meiyou/presentation/widgets/add_space.dart';
 
 class SeeekAnimation extends StatelessWidget {
   final AnimationController controller;

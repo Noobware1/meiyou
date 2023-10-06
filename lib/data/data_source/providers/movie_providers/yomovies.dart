@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:ok_http_dart/ok_http_dart.dart';
 import 'package:streamify/helpers/data_classes.dart';
 import 'package:streamify/helpers/m3u8_helper.dart';
 import 'package:streamify/helpers/utils.dart';

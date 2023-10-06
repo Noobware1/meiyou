@@ -1,5 +1,5 @@
-
 import 'package:flutter/material.dart';
+import 'package:meiyou/core/utils/extenstions/context.dart';
 
 class CustomOrientationBuiler extends StatelessWidget {
   final Widget landscape;
@@ -9,7 +9,7 @@ class CustomOrientationBuiler extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (MediaQuery.of(context).orientation == Orientation.landscape) {
+    if (context.orientation == Orientation.landscape) {
       return landscape;
     } else {
       return portrait;

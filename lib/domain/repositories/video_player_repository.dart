@@ -1,3 +1,5 @@
+import 'package:meiyou/core/resources/response_state.dart';
+import 'package:meiyou/core/resources/subtitle_decoders/models/cue.dart';
 import 'package:meiyou/domain/entities/episode.dart';
 import 'package:meiyou/domain/entities/subtitle.dart';
 import 'package:meiyou/domain/entities/video.dart';
@@ -20,6 +22,10 @@ abstract class VideoPlayerRepository {
     required int currentEpIndex,
     required GetEpisodeChunksUseCase getEpisodeChunksUseCase,
   });
+
+  Future<ResponseState<List<SubtitleCue>>> getSubtitleCues(
+      SubtitleEntity subtitle,
+      [Map<String, String>? headers]);
 }
 
 class SeekEpisodeState {

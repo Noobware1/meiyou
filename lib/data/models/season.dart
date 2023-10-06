@@ -80,6 +80,6 @@ class Season extends SeasonEntity {
 
   @override
   String toString() {
-    return 'number: $number,\nid: $id,\ntitle: $title,\nurl: $url,\nairDate: $airDate,\ntotalEpisode: $totalEpisode,\nisOnGoing: $isOnGoing';
+    return 'Season(number: $number, id: $id, title: $title, url: $url, airDate: $airDate, totalEpisode: $totalEpisode, isOnGoing: $isOnGoing)';
   }
 }

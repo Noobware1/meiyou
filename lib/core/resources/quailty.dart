@@ -23,30 +23,56 @@ class Quality extends Equatable {
   @override
   int get hashCode => Object.hash(pixel, quaility);
 
-  static Quality getQuailtyFromString(String str) {
+  factory Quality.getQuailtyFromString(String str) {
+    str = str.toLowerCase();
     const defaultQuality = 720;
-    if (str.contains('p')) {
-      final quaility =
-          (str.substring(0, str.length - 1)).toIntOrNull() ?? defaultQuality;
-      if (quaility == 1080) {
-        return WatchQualites.quaility1080;
-      } else if (quaility == 480) {
-        return WatchQualites.quaility480;
-      } else if (quaility == 360) {
-        return WatchQualites.quaility360;
+
+    try {
+      if (str.endsWith('p')) {
+        final quaility =
+            (str.substring(0, str.length - 1)).toIntOrNull() ?? defaultQuality;
+        print(quaility);
+        return Quality(pixel: (quaility.toInt() * 16) ~/ 9, quaility: quaility);
+      } else if (str.contains('x')) {
+        final list = str.split('x');
+        final pixel = list.first.toIntOrNull() ?? 1280;
+        final quality = list.last.toIntOrNull() ?? defaultQuality;
+        return Quality(pixel: pixel, quaility: quality);
       } else {
         return WatchQualites.quaility720;
       }
-    } else if (str.toIntOrNull() != null) {
-      final quailty = str.toInt();
-      return Quality(pixel: (quailty * (16 / 9)).ceil(), quaility: quailty);
-    } else if (str.contains('x')) {
-      final list = str.split('x');
-      final pixel = list.first.toIntOrNull() ?? 1280;
-      final quality = list.last.toIntOrNull() ?? defaultQuality;
-      return Quality(pixel: pixel, quaility: quality);
-    } else {
+    } catch (_) {
+      print(_);
       return WatchQualites.quaility720;
     }
   }
+}
+
+void main(List<String> args) {
+  Quality getFromStr(String str) {
+    str = str.toLowerCase();
+    const defaultQuality = 720;
+
+    try {
+      if (str.endsWith('p')) {
+        final quaility =
+            (str.substring(0, str.length - 1)).toIntOrNull() ?? defaultQuality;
+        print(quaility);
+        return Quality(pixel: (quaility.toInt() * 16) ~/ 9, quaility: quaility);
+      } else if (str.contains('x')) {
+        final list = str.split('x');
+        final pixel = list.first.toIntOrNull() ?? 1280;
+        final quality = list.last.toIntOrNull() ?? defaultQuality;
+        return Quality(pixel: pixel, quaility: quality);
+      } else {
+        return WatchQualites.quaility720;
+      }
+    } catch (_) {
+      print(_);
+      return WatchQualites.quaility720;
+    }
+  }
+
+  final a = getFromStr('');
+  print(a);
 }

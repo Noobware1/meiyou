@@ -43,12 +43,16 @@ class _ResizeableTextWidgetState extends State<ResizeableTextWidget> {
 
       final defaultHeight = tp2.height;
       final height = tp.height;
+
       final renderText = _renderText(showFullText ? height + 20 : defaultHeight,
           showFullText ? null : widget.maxLines);
       if (widget.showButtons) {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.end,
-          children: [renderText, _button(showFullText)],
+          children: [
+            renderText,
+            if (defaultHeight != height) _button(showFullText),
+          ],
         );
       } else {
         return GestureDetector(onTap: handleOnTap, child: renderText);
@@ -74,14 +78,15 @@ class _ResizeableTextWidgetState extends State<ResizeableTextWidget> {
           borderRadius: BorderRadius.circular(20),
           animationDuration: animationDuration,
           child: InkWell(
-            splashColor: context.primaryColor,
+            splashColor: context.theme.colorScheme.primary,
             onTap: handleOnTap,
             borderRadius: BorderRadius.circular(20),
             child: Container(
               padding: const EdgeInsets.all(5),
               child: Text(
                 showFullText ? 'Read less' : 'Read more',
-                style: TextStyle(color: context.primaryColor, fontSize: 16),
+                style: TextStyle(
+                    color: context.theme.colorScheme.primary, fontSize: 16),
               ),
             ),
           ),
@@ -91,6 +96,7 @@ class _ResizeableTextWidgetState extends State<ResizeableTextWidget> {
   Widget _renderText(double height, int? maxLines) => AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         height: height,
+        width: context.screenWidth,
         child: Text(
           widget.text,
           style: widget.style,
@@ -99,4 +105,3 @@ class _ResizeableTextWidgetState extends State<ResizeableTextWidget> {
         ),
       );
 }
-

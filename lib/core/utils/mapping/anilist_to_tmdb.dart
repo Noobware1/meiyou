@@ -1,5 +1,4 @@
 import 'package:meiyou/core/resources/meta_provider.dart';
-import 'package:meiyou/core/resources/providers/meta_provider.dart';
 import 'package:meiyou/core/utils/mapping/functions.dart';
 import 'package:meiyou/core/utils/snaitize_title.dart';
 import 'package:meiyou/data/data_source/providers/meta_providers/anilist.dart';

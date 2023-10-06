@@ -4,17 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meiyou/config/routes/routes.dart';
 import 'package:meiyou/config/routes/routes_name.dart';
-import 'package:meiyou/core/constants/default_sized_box.dart';
-import 'package:meiyou/core/constants/height_and_width.dart'
-    show smallScreenSize;
 import 'package:meiyou/core/constants/plaform_check.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
 import 'package:meiyou/domain/entities/meta_response.dart';
 import 'package:meiyou/domain/entities/row.dart';
 import 'package:meiyou/presentation/widgets/banner_view/state_management.dart/banner_page_view_controller.dart';
 import 'package:meiyou/presentation/widgets/gradient.dart';
-import 'package:meiyou/presentation/widgets/layout_builder.dart';
-import 'package:meiyou/presentation/widgets/play_button.dart';
 import 'banner_image_holder.dart';
 import 'banner_image_text.dart';
 import 'banner_row_buttons.dart';
@@ -56,93 +51,101 @@ class _BannerPageViewState extends State<BannerPageView> {
 
   @override
   Widget build(BuildContext context) {
-    final double defaultHeight = widget.height / 2 - 50;
+    final double defaultHeight = 400 / 2;
+
     final width = context.screenWidth;
 
     return ConstrainedBox(
       constraints: BoxConstraints(
-        minHeight: widget.height,
+        minHeight: 400,
         minWidth: width,
-        maxHeight: widget.height,
+        maxHeight: 400,
         maxWidth: width,
       ),
       child: Stack(
-        fit: StackFit.expand,
         children: [
-          PageView.builder(
-            itemCount: bannerRow.length,
-            controller: _controller,
-            onPageChanged: _bannerPageViewController.onPageChanged,
-            scrollDirection: Axis.horizontal,
-            itemBuilder: (context, index) => ResponsiveBuilder(
-                forSmallScreen:
-                    BannerImageHolder(imageUrl: bannerRow[index].poster ?? ''),
-                forLagerScreen: BannerImageHolder(
-                    imageUrl: bannerRow[index].bannerImage ??
-                        bannerRow[index].poster ??
-                        '')),
+          Positioned.fill(
+            child: DecoratedBox(
+              position: DecorationPosition.foreground,
+              decoration: BoxDecoration(
+                // border: Border.all(strokeAlign: -0.050),
+                gradient: LinearGradient(
+                  begin: const Alignment(0.0, 1.0), // Adjust the begin point
+                  end: const Alignment(0.0, -1.0),
+                  // begin: Alignment.topCenter,
+                  // end: Alignment.bottomCenter,
+                  colors: [
+                    context.theme.scaffoldBackgroundColor,
+                    Colors.transparent
+                    // Color.fromARGB(255, 0, 0, 0), // Dark color at the bottom
+                    // Color.fromARGB(120, 0, 0, 0), // Slightly lighter
+                    // Color.fromARGB(0, 0, 0, 0), // Transparent in the middle
+                  ],
+                ),
+              ),
+              child: PageView.builder(
+                itemCount: bannerRow.length,
+                controller: _controller,
+                onPageChanged: _bannerPageViewController.onPageChanged,
+                scrollDirection: Axis.horizontal,
+                itemBuilder: (context, index) => BannerImageHolder(
+                    height: 400, imageUrl: bannerRow[index].poster ?? ''),
+              ),
+            ),
           ),
           const Positioned(
-            bottom: 0,
+            top: 0,
             right: 0,
             left: 0,
-            child: DrawGradient(
-                height: 200, begin: Alignment(0, 0.0), end: Alignment(0.0, 50)),
+            child: RotatedBox(
+              quarterTurns: 2,
+              child: DrawGradient(
+                  height: 60,
+                  begin: Alignment(0, 0.0),
+                  end: Alignment(0.0, 50)),
+            ),
           ),
-          ResponsiveBuilder(
-              forSmallScreen: defaultSizedBox,
-              forLagerScreen: Container(
-                  height: 500,
-                  decoration: const BoxDecoration(
-                      //color: Colors.red,
-                      gradient: LinearGradient(
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight,
-                          colors: [Colors.black, Colors.black38])))),
-          ListenableBuilder(
-              listenable: _bannerPageViewController,
-              builder: (context, child) {
-                return BannerImageText(
-                  title: bannerRow[_bannerPageViewController.page].title ??
-                      bannerRow[_bannerPageViewController.page].romanji ??
-                      bannerRow[_bannerPageViewController.page].native ??
-                      'No Title',
-                  genres: bannerRow[_bannerPageViewController.page].genres,
-                  averageScore:
-                      bannerRow[_bannerPageViewController.page].averageScore ??
-                          0.0,
-                  description:
-                      bannerRow[_bannerPageViewController.page].description,
-                  buttons: BannerButtons(
-                      onTapMyList: () {},
-                      onTapPlay: () {
-                        context.go('$homeRoute/$watch',
-                            extra: bannerRow[_bannerPageViewController.page]);
-                      },
-                      onTapInfo: () {
-                        context.go('$homeRoute/$watch',
-                            extra: bannerRow[_bannerPageViewController.page]);
-                      }),
-                );
-              }),
-          context.screenWidth < smallScreenSize
-              ? defaultSizedBox
-              : Positioned(
-                  top: 0,
-                  bottom: 0,
-                  left: (context.screenWidth / 2) + 180,
-                  child: PlayButton(
-                    height: 200,
-                    onTap: () {
-                      context.go('$homeRoute/$watch',
-                          extra: bannerRow[_bannerPageViewController.page]);
-                    },
-                  )),
+          Positioned(
+            right: isMobile ? 0 : 50,
+            left: isMobile ? 0 : 50,
+            bottom: 0,
+            child: ListenableBuilder(
+                listenable: _bannerPageViewController,
+                builder: (context, child) {
+                  return BannerImageText(
+                    mediaType:
+                        bannerRow[_bannerPageViewController.page].mediaType ??
+                            'Other',
+                    releaseDate:
+                        bannerRow[_bannerPageViewController.page].airDate,
+                    title: bannerRow[_bannerPageViewController.page].title ??
+                        bannerRow[_bannerPageViewController.page].romanji ??
+                        bannerRow[_bannerPageViewController.page].native ??
+                        'No Title',
+                    genres: bannerRow[_bannerPageViewController.page].genres,
+                    averageScore: bannerRow[_bannerPageViewController.page]
+                            .averageScore ??
+                        0.0,
+                    description:
+                        bannerRow[_bannerPageViewController.page].description,
+                    buttons: BannerButtons(
+                        onTapMyList: () {},
+                        onTapPlay: () {
+                          context.go('$homeRoute/$watch',
+                              extra: bannerRow[_bannerPageViewController.page]);
+                        },
+                        onTapInfo: () {
+                          context.go('$homeRoute/$watch',
+                              extra: bannerRow[_bannerPageViewController.page]);
+                        }),
+                  );
+                }),
+          ),
           if (!isMobile)
             Positioned(
               left: 0,
               top: defaultHeight,
-              bottom: defaultHeight,
+              // bottom: defaultHeight,
               child: ArrowButton(
                   icon: const Icon(
                     Icons.arrow_back_ios,
@@ -163,7 +166,7 @@ class _BannerPageViewState extends State<BannerPageView> {
             Positioned(
               right: 0,
               top: defaultHeight,
-              bottom: defaultHeight,
+              // bottom: defaultHeight,
               child: ArrowButton(
                   icon: const Icon(
                     Icons.arrow_forward_ios,
@@ -183,7 +186,52 @@ class _BannerPageViewState extends State<BannerPageView> {
       ),
     );
   }
+
+  // return ConstrainedBox(
+  //   constraints: BoxConstraints(
+  //     minHeight: 300,
+  //     minWidth: width,
+  //     maxHeight: widget.height,
+  //     maxWidth: width,
+  //   ),
+  //     child: Stack(
+  //       fit: StackFit.expand,
+  //       children: [
+
+  //         // const Positioned.fill(
+  //         //   child: RotatedBox(
+  //         //     quarterTurns: 4,
+  //         //     child: DrawGradient(
+  //         //         height: 200,
+  //         //         begin: Alignment.bottomCenter,
+  //         //         end: Alignment.topCenter),
+  //         //   ),
+  //         // ),
+  //         const ResponsiveBuilder(
+  //             forSmallScreen: defaultSizedBox,
+  //             forLagerScreen: DrawGradient(
+  //               height: 500,
+  //               begin: Alignment.centerLeft,
+  //               end: Alignment.centerRight,
+  //             )),
+
+  //       ],
+  //     ),
+  //   );
 }
+
+// class _ForSmallScreens extends StatelessWidget {
+//   final PageController controller;
+
+//   final BannerPageViewController _bannerPageViewController;
+//   final List<MetaResponseEntity> bannerRow;
+//   const _ForSmallScreens(
+//       {required this.controller,
+//       required this._bannerPageViewController,
+//       required this.bannerRow});
+
+//   }
+// }
 
 class ArrowButton extends StatelessWidget {
   final Icon icon;
@@ -202,24 +250,21 @@ class ArrowButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final deafultSize = icon.size ?? 30;
-    return ClipRect(
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-        child: SizedBox(
-          height: height ?? deafultSize + 30,
-          width: deafultSize + 20,
-          child: Material(
-              shape: shape,
-              animationDuration: const Duration(milliseconds: 100),
-              // type: MaterialType.transparency,
-              color: Colors.black54,
-              child: InkWell(
-                customBorder: shape,
-                onTap: onTap,
-                child: icon,
-              )),
-        ),
-      ),
+    return SizedBox(
+      height: height ?? deafultSize + 30,
+      width: deafultSize + 20,
+      child: Material(
+          shape: shape,
+          animationDuration: const Duration(milliseconds: 100),
+          // type: MaterialType.transparency,
+          color: context.theme.colorScheme.brightness == Brightness.dark
+              ? Colors.black54
+              : Colors.white54,
+          child: InkWell(
+            customBorder: shape,
+            onTap: onTap,
+            child: icon,
+          )),
     );
   }
 }

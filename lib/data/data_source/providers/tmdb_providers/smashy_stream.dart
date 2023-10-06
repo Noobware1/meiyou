@@ -1,6 +1,8 @@
 import 'package:meiyou/core/resources/client.dart';
 import 'package:meiyou/core/resources/extractors/video_extractor.dart';
 import 'package:meiyou/core/resources/providers/tmdb_provider.dart';
+import 'package:meiyou/core/utils/extenstions/iterable.dart';
+import 'package:meiyou/data/data_source/providers/tmdb_providers/extractors/smashy_stream.dart';
 import 'package:meiyou/data/models/episode.dart';
 import 'package:meiyou/data/models/movie.dart';
 import 'package:meiyou/data/models/season.dart';
@@ -12,13 +14,12 @@ class SmashyStream extends TMDBProvider {
   String get hostUrl => 'https://embed.smashystream.com';
 
   @override
-  Future<List<Episode>> loadEpisodes(
-      int id, Season season, List<Episode> episodes) {
-    return Future.value(episodes
-        .map((it) => it.copyWith(
-            url:
-                '$hostUrl/playere.php?tmdb=$id&season=${season.number}&episode=${it.number}'))
-        .toList());
+  Future<List<Episode>> loadEpisodes(Season season) async {
+    return List.generate(
+        season.totalEpisode!,
+        (index) => Episode(
+            number: index + 1, url: '${season.url!}&episode=${index + 1}'));
+    // '$hostUrl/playere.php?tmdb=$id&season=${season.number}&episode=${it.number}'
   }
 
   @override
@@ -27,26 +28,23 @@ class SmashyStream extends TMDBProvider {
   }
 
   @override
-  Future<List<Season>> loadSeasons(List<Season>? seasons) {
-    if (seasons == null) {
-      throw Exception(
-          'Seasons is null, either the mediaType is incorrect or there is no seasons in media');
-    }
-    return Future.value(seasons);
+  Future<List<Season>> loadSeasons(String id, List<Season> seasons) async {
+    return seasons.mapAsList((it) =>
+        it.copyWith(url: '$hostUrl/playere.php?tmdb=$id&season=${it.number}'));
   }
 
   @override
   VideoExtractor loadVideoExtractor(VideoServer videoServer) {
-    // TODO: implement loadVideoExtractor
-    throw UnimplementedError();
+    return SmashyStreamExtractor(videoServer);
   }
 
   @override
-  Future<List<VideoServer>> loadVideoServer(String url) {
+  Future<List<VideoServer>> loadVideoServers(String url) {
     return client.get(url).then((response) => response.document
         .select('div.dropdown-menu > a')
         .sublist(1)
-        .map((it) => VideoServer(name: it.text, url: it.attr('data-id')))
+        .map((it) => VideoServer(
+            name: it.text, url: it.attr('data-id'), extra: {'referer': url}))
         .toList());
   }
 
@@ -54,8 +52,4 @@ class SmashyStream extends TMDBProvider {
   String get name => 'SmashyStream';
 }
 
-void main(List<String> args) async {
-  final a = await SmashyStream().loadVideoServer(
-      'https://embed.smashystream.com/playere.php?tmdb=1396&season=1&episode=1');
-  a.forEach((it) => print({it.name, it.url}));
-}
+

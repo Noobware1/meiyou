@@ -6,7 +6,7 @@ String generateSearchQuery(String name, [int? page, int? perPage]) {
       total,
       hasNextPage
     }
-    media(search: "$name", type: ANIME, format_not_in: [MUSIC, TV_SHORT, NOVEL, ONE_SHOT], isAdult: false) {
+    media(search: "$name", type: ANIME, format_not_in: [MUSIC, NOVEL], isAdult: false) {
       id
       title {
         romaji

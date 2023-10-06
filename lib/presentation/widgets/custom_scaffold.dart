@@ -1,10 +1,12 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:meiyou/core/constants/default_sized_box.dart';
+import 'package:meiyou/core/utils/extenstions/context.dart';
+import 'package:meiyou/presentation/widgets/custom_orientation_builder.dart';
 
 class CustomScaffold extends StatelessWidget {
   const CustomScaffold({
-    super.key,
+    Key? key,
     this.appBar,
     this.body,
     this.floatingActionButton,
@@ -30,7 +32,7 @@ class CustomScaffold extends StatelessWidget {
     this.drawerEnableOpenDragGesture = true,
     this.endDrawerEnableOpenDragGesture = true,
     this.restorationId,
-  });
+  }) : super(key: key ?? const ValueKey<String>('ScaffoldWithNavBar'));
 
   /// If true, and [bottomNavigationBar] or [persistentFooterButtons]
   /// is specified, then the [body] extends to the bottom of the Scaffold,
@@ -317,22 +319,17 @@ class CustomScaffold extends StatelessWidget {
     return Scaffold(
       key: key,
       appBar: appBar,
-      body: sideNavigatonBar != null
-          ? OrientationBuilder(builder: (context, orientation) {
-              if (orientation == Orientation.landscape) {
-                return Row(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    sideNavigatonBar!,
-                    Flexible(child: body ?? defaultSizedBox)
-                  ],
-                );
-              }
-              return body ?? defaultSizedBox;
-            })
-          : body,
+      body: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          if (sideNavigatonBar != null)
+            CustomOrientationBuiler(
+                landscape: sideNavigatonBar!, portrait: defaultSizedBox),
+          Flexible(child: body ?? defaultSizedBox),
+        ],
+      ),
       floatingActionButton: floatingActionButton,
       floatingActionButtonLocation: floatingActionButtonLocation,
       floatingActionButtonAnimator: floatingActionButtonAnimator,
@@ -343,12 +340,8 @@ class CustomScaffold extends StatelessWidget {
       endDrawer: endDrawer,
       onEndDrawerChanged: onEndDrawerChanged,
       bottomNavigationBar: bottomNavigationBar != null
-          ? OrientationBuilder(builder: (context, orientation) {
-              if (orientation == Orientation.landscape) {
-                return defaultSizedBox;
-              }
-              return bottomNavigationBar!;
-            })
+          ? CustomOrientationBuiler(
+              landscape: defaultSizedBox, portrait: bottomNavigationBar!)
           : null,
       bottomSheet: bottomSheet,
       backgroundColor: backgroundColor,

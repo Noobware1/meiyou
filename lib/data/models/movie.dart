@@ -18,8 +18,6 @@ class Movie extends MovieEntity {
     };
   }
 
-  
-
   factory Movie.fromJson(dynamic json) {
     return Movie(
       url: json['url'] as String,
@@ -28,5 +26,10 @@ class Movie extends MovieEntity {
       title: json['title'] as String?,
       rated: json['rated'] as double?,
     );
+  }
+
+  @override
+  String toString() {
+    return '''Movie("url": $url,"cover": $cover,"description": $description,"rated": $rated,"title": $title)''';
   }
 }

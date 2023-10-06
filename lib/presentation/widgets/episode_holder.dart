@@ -1,8 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:meiyou/core/constants/default_sized_box.dart';
+import 'package:meiyou/core/utils/extenstions/context.dart';
 import 'package:meiyou/presentation/widgets/add_space.dart';
-import 'package:meiyou/presentation/widgets/resizeable_text.dart';
 
 class EpisodeHolder extends StatelessWidget {
   final VoidCallback onTap;
@@ -34,7 +33,6 @@ class EpisodeHolder extends StatelessWidget {
             Expanded(
                 child: Text(
               '$number. ${title ?? "No Title"}',
-              style: const TextStyle(color: Colors.white),
             ))
           ],
         );
@@ -43,45 +41,46 @@ class EpisodeHolder extends StatelessWidget {
         padding: const EdgeInsets.only(left: 15, right: 15),
         child: GestureDetector(
           onTap: onTap,
-          child: Container(
-            decoration: const BoxDecoration(
-                color: Colors.black,
-                borderRadius: BorderRadius.all(
-                  Radius.circular(15),
-                )),
-            child: Container(
-              decoration: BoxDecoration(
-                  color: Colors.grey.withOpacity(0.1),
-                  borderRadius: const BorderRadius.all(
-                    Radius.circular(15),
-                  )),
-              child: Column(
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Stack(
-                        children: [_imageHolder(), _playButton()],
+          child: Card(
+            elevation: 4.0,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+                side: BorderSide(
+                    color:
+                        context.theme.colorScheme.secondary.withOpacity(0.2))),
+            //  decoration: BoxDecoration(
+            color: context.theme.colorScheme.tertiary,
+            surfaceTintColor: context.theme.colorScheme.tertiary,
+            // borderRadius: const BorderRadius.all(
+            //   Radius.circular(15),
+            // )),
+
+            child: Column(
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Stack(
+                      children: [_imageHolder(), _playButton()],
+                    ),
+                    addHorizontalSpace(10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          addVerticalSpace(15),
+                          _buildTitle(context),
+                          addVerticalSpace(5),
+                          _buildRated()
+                        ],
                       ),
-                      addHorizontalSpace(10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            addVerticalSpace(15),
-                            _buildTitle(context),
-                            addVerticalSpace(5),
-                            _buildRated()
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
-                  if (desc != null && desc!.isNotEmpty) _buildDesc(),
-                  if (desc != null && desc!.isNotEmpty) addVerticalSpace(10),
-                ],
-              ),
+                    )
+                  ],
+                ),
+                if (desc != null && desc!.isNotEmpty) _buildDesc(),
+                if (desc != null && desc!.isNotEmpty) addVerticalSpace(10),
+              ],
             ),
           ),
         ),
@@ -99,7 +98,7 @@ class EpisodeHolder extends StatelessWidget {
             maxLines: 3,
             style: const TextStyle(
               fontSize: 12.8,
-              color: Colors.grey,
+              color: Color(0xFF5F6267),
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -111,7 +110,9 @@ class EpisodeHolder extends StatelessWidget {
         height: 15,
         child: DefaultTextStyle(
           style: const TextStyle(
-              fontSize: 13.6, color: Colors.grey, fontWeight: FontWeight.w600),
+              fontSize: 13.6,
+              color: Color(0xFF5F6267),
+              fontWeight: FontWeight.w600),
           child: Text('Rated: ${rated ?? 0.0}'),
         ));
   }
@@ -119,13 +120,10 @@ class EpisodeHolder extends StatelessWidget {
   Widget _buildTitle(BuildContext context) {
     return SizedBox(
       width: MediaQuery.of(context).size.width - (170 + 50),
-      child: DefaultTextStyle(
-          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-          child: Text(
-            '$number. ${title ?? 'No Title'}',
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-          )),
+      child: Text('$number. ${title ?? 'No Title'}',
+          maxLines: 3,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
     );
   }
 
@@ -169,16 +167,13 @@ class EpisodeHolder extends StatelessWidget {
 
 class _RezisbleTextWidget extends StatefulWidget {
   final String text;
-  final bool showButtons;
   final int maxLines;
   final TextStyle style;
   const _RezisbleTextWidget(
       {required this.text,
       required this.maxLines,
-      this.showButtons = false,
       this.style = const TextStyle(
-          color: Colors.white, fontSize: 14, fontWeight: FontWeight.w400),
-      super.key});
+          color: Colors.white, fontSize: 14, fontWeight: FontWeight.w400)});
 
   @override
   State<_RezisbleTextWidget> createState() => __RezisbleTextWidgetState();

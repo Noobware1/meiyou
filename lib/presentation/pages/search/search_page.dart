@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -11,7 +10,7 @@ import 'package:meiyou/presentation/pages/search/state/bloc/search_page_bloc.dar
 import 'package:meiyou/presentation/widgets/add_space.dart';
 import 'package:meiyou/presentation/widgets/image_view/image_button_wrapper.dart';
 import 'package:meiyou/presentation/widgets/image_view/image_holder.dart';
-import 'package:meiyou/presentation/widgets/retry_connection.dart';
+import 'package:meiyou/config/routes/routes.dart';
 import 'package:meiyou/presentation/widgets/search_bar.dart';
 
 class SearchPage extends StatefulWidget {
@@ -41,6 +40,7 @@ class _SearchPageState extends State<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
+
     return Column(
       children: [
         addVerticalSpace(50),
@@ -83,7 +83,7 @@ class _SearchPageState extends State<SearchPage> {
                       state.results.metaResponses.length,
                       (index) => ImageButtonWrapper(
                           onTap: () {
-                            context.go('/$watch',
+                            context.go('$searchRoute/$watch',
                                 extra: state.results.metaResponses[index]);
                           },
                           child: ImageHolder.withText(
@@ -99,7 +99,7 @@ class _SearchPageState extends State<SearchPage> {
             },
           ),
         )),
-        addVerticalSpace(80)
+        addVerticalSpace(40),
       ],
     );
   }

@@ -5,14 +5,15 @@ import 'package:meiyou/domain/repositories/cache_repository.dart';
 import 'package:meiyou/domain/repositories/watch_provider_repository.dart';
 
 class SaveSearchResponseUseCaseParams {
+  final String savePath;
   final BaseProvider provider;
   final SearchResponseEntity searchResponse;
-  final CacheRespository cacheRespository;
 
-  SaveSearchResponseUseCaseParams(
-      {required this.provider,
-      required this.searchResponse,
-      required this.cacheRespository});
+  SaveSearchResponseUseCaseParams({
+    required this.savePath,
+    required this.provider,
+    required this.searchResponse,
+  });
 }
 
 class SaveSearchResponseUseCase
@@ -24,8 +25,9 @@ class SaveSearchResponseUseCase
   @override
   Future<void> call(SaveSearchResponseUseCaseParams params) {
     return _repository.saveSearchResponse(
-        provider: params.provider,
-        searchResponse: params.searchResponse,
-        cacheRespository: params.cacheRespository);
+      savePath: params.savePath,
+      provider: params.provider,
+      searchResponse: params.searchResponse,
+    );
   }
 }

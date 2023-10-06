@@ -1,4 +1,6 @@
-import 'package:meiyou/core/usecases_container/cache_repository_usecase_container.dart';
+
+import 'package:meiyou/core/resources/paths.dart';
+import 'package:meiyou/core/resources/providers/base_provider.dart';
 import 'package:meiyou/core/usecases_container/meta_provider_repository_container.dart';
 import 'package:meiyou/domain/entities/media_details.dart';
 import 'package:meiyou/domain/repositories/cache_repository.dart';
@@ -14,14 +16,15 @@ class InitializationViewParams {
   final MediaDetailsEntity media;
   final CacheRespository cacheRespository;
   final MetaProviderRepositoryContainer metaProviderRepositoryContainer;
-  final SourceDropDownBloc sourceDropDownBloc;
-
+  final BaseProvider defaultProvider;
+  final AppDirectories appDirectories;
   InitializationViewParams(
       {required this.type,
       required this.media,
+      required this.appDirectories,
       required this.cacheRespository,
       required this.metaProviderRepositoryContainer,
-      required this.sourceDropDownBloc});
+      required this.defaultProvider});
 }
 
 InitialiseView getViewFromType(InitializationViewParams params) {
@@ -29,9 +32,11 @@ InitialiseView getViewFromType(InitializationViewParams params) {
     case InitaliseViewType.watchview:
       return InitiliseWatchView(
         media: params.media,
+        appDirectories: params.appDirectories,
         cacheRespository: params.cacheRespository,
         metaProviderRepositoryContainer: params.metaProviderRepositoryContainer,
-        sourceDropDownBloc: params.sourceDropDownBloc,
+        sourceDropDownBloc: SourceDropDownBloc(params.defaultProvider)
+          ..add(SourceDropDownOnSelected(provider: params.defaultProvider)),
       );
     default:
       throw 'No Such View Available';

@@ -10,6 +10,16 @@ extension IterableUtils<E> on Iterable<E> {
   E? tryfirstWhere(bool Function(E) test, {E Function()? orElse}) {
     try {
       return firstWhere(test, orElse: orElse);
+    } catch (_, __) {
+      // print(_);
+      // print(__);
+      return null;
+    }
+  }
+
+  Iterable<E>? tryWhere(bool Function(E element) test) {
+    try {
+      return where(test);
     } catch (_) {
       return null;
     }

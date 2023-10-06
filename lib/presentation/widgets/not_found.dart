@@ -12,8 +12,7 @@ class NotFound extends StatelessWidget {
       child: const Text(
         'Couldn\'t find anything x( \nplease try another source',
         textAlign: TextAlign.center,
-        style: TextStyle(
-            color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
       ),
     );
   }

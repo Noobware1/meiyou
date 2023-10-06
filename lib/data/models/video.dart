@@ -1,6 +1,5 @@
 import 'package:meiyou/core/resources/quailty.dart';
 import 'package:meiyou/core/resources/video_format.dart';
-import 'package:meiyou/core/resources/watch_qualites.dart';
 import 'package:meiyou/domain/entities/video.dart';
 
 class Video extends VideoEntity {

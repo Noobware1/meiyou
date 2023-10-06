@@ -8,6 +8,7 @@ import 'package:meiyou/core/resources/providers/base_provider.dart';
 import 'package:meiyou/domain/entities/search_response.dart';
 import 'package:meiyou/domain/repositories/cache_repository.dart';
 import 'package:meiyou/domain/usecases/provider_use_cases/find_best_search_response.dart';
+import 'package:meiyou/domain/usecases/provider_use_cases/load_saved_search_response.dart';
 import 'package:meiyou/domain/usecases/provider_use_cases/save_search_response.dart';
 
 part 'selected_search_response_event.dart';
@@ -17,10 +18,15 @@ class SelectedSearchResponseBloc
     extends Bloc<SelectedSearchResponseEvent, SelectedSearchResponseState> {
   final FindBestSearchResponseUseCase findBestSearchResponseUseCase;
   final SaveSearchResponseUseCase saveSearchResponseUseCase;
+
+  final LoadSavedSearchResponseUseCase loadSavedSearchResponseUseCase;
   final String _mediaTitle;
   final CacheRespository cacheRespository;
+  final String savePath;
 
   SelectedSearchResponseBloc({
+    required this.loadSavedSearchResponseUseCase,
+    required this.savePath,
     required this.cacheRespository,
     required this.saveSearchResponseUseCase,
     required this.findBestSearchResponseUseCase,
@@ -36,21 +42,35 @@ class SelectedSearchResponseBloc
         onSelectSearchResponseFromUserSelection);
 
     on<SearchResponseWaiting>(onSearchResponseWaiting);
+
+    on<LoadSavedSearchResponseFromCache>(onLoadSavedSearchResponseFromCache);
   }
 
   FutureOr<void> onFindBestSearchResponseFromList(
       FindBestSearchResponseFromList event,
-      Emitter<SelectedSearchResponseState> emit) {
+      Emitter<SelectedSearchResponseState> emit) async {
+    await _findBestSearchResponse(
+        searchResponses: event.searchResponses,
+        provider: event.provider,
+        emit: emit,
+        error: event.error);
+  }
+
+  Future<void> _findBestSearchResponse(
+      {required List<SearchResponseEntity>? searchResponses,
+      required BaseProvider provider,
+      MeiyouException? error,
+      required Emitter<SelectedSearchResponseState> emit}) async {
     emit(SelectedSearchResponseFinding(
       _mediaTitle,
       // event.provider
     ));
 
-    if (event.searchResponses != null && event.searchResponses!.isNotEmpty) {
+    if (searchResponses != null && searchResponses!.isNotEmpty) {
       final best = findBestSearchResponseUseCase.call(
           FindBestSearchResponseParams(
-              responses: event.searchResponses!, type: event.type));
-
+              responses: searchResponses!, type: provider.providerType));
+      await _saveResponse(provider, best);
       emit(SelectedSearchResponseFound(
         best.title, best,
         // event.provider
@@ -58,7 +78,7 @@ class SelectedSearchResponseBloc
     } else {
       emit(SelectedSearchResponseNotFound(
         _mediaTitle,
-        event.error ?? MeiyouException('Could Not Find $_mediaTitle'),
+        error ?? MeiyouException('Could Not Find $_mediaTitle'),
         // event.provider
       ));
     }
@@ -67,14 +87,18 @@ class SelectedSearchResponseBloc
   FutureOr<void> onSelectSearchResponseFromUserSelection(
       SelectSearchResponseFromUserSelection event,
       Emitter<SelectedSearchResponseState> emit) async {
-    await saveSearchResponseUseCase.call(SaveSearchResponseUseCaseParams(
-        provider: event.provider,
-        searchResponse: event.searchResponse,
-        cacheRespository: cacheRespository));
-
     emit(SelectedSearchResponseSelected(
       event.searchResponse.title, event.searchResponse,
       // event.provider
+    ));
+  }
+
+  Future<void> _saveResponse(
+      BaseProvider provider, SearchResponseEntity searchResponse) {
+    return saveSearchResponseUseCase.call(SaveSearchResponseUseCaseParams(
+      savePath: savePath,
+      provider: provider,
+      searchResponse: searchResponse,
     ));
   }
 
@@ -92,5 +116,26 @@ class SelectedSearchResponseBloc
       event.title,
       // event.provider
     ));
+  }
+
+  Future<SearchResponseEntity?> _loadSavedResponse(BaseProvider provider) {
+    return loadSavedSearchResponseUseCase.call(
+        LoadSavedSearchResponseUseCaseParams(
+            savePath: savePath, provider: provider));
+  }
+
+  FutureOr<void> onLoadSavedSearchResponseFromCache(
+      LoadSavedSearchResponseFromCache event,
+      Emitter<SelectedSearchResponseState> emit) async {
+    final cache = await _loadSavedResponse(event.provider);
+    if (cache == null) {
+      await _findBestSearchResponse(
+          searchResponses: event.searchResponses,
+          provider: event.provider,
+          emit: emit,
+          error: event.error);
+    } else {
+      emit(SelectedSearchResponseSelected(cache.title, cache));
+    }
   }
 }

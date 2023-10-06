@@ -1,9 +1,6 @@
 import 'dart:async';
 
 import 'package:meiyou/core/resources/client.dart';
-import 'package:meiyou/core/resources/subtitle_format.dart';
-import 'package:meiyou/core/resources/video_format.dart';
-import 'package:meiyou/core/resources/watch_qualites.dart';
 import 'package:meiyou/core/utils/m3u8_parser/m3u8_parser.dart';
 import 'package:meiyou/data/models/subtitle.dart';
 import 'package:meiyou/data/models/video.dart';

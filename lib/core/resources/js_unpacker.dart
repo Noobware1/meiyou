@@ -29,10 +29,10 @@ class JSPacker {
       /// if group count is 4
       if (matches.groupCount == 4) {
         /// get value with group
-        var payload = matches.group(1)!.replaceAll("\\'", "\'");
+        var payload = matches.group(1)!.replaceAll("\\'", "'");
         final radixStr = matches.group(2);
         final countStr = matches.group(3);
-        final sym = matches.group(4)!.split('\|');
+        final sym = matches.group(4)!.split('|');
 
         /// initial value
         int radix;

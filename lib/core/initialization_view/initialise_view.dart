@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:meiyou/core/usecases_container/cache_repository_usecase_container.dart';
+import 'package:meiyou/core/resources/paths.dart';
 import 'package:meiyou/core/usecases_container/meta_provider_repository_container.dart';
 import 'package:meiyou/domain/entities/media_details.dart';
 import 'package:meiyou/domain/repositories/cache_repository.dart';
-import 'package:meiyou/presentation/pages/info_watch/state/selected_searchResponse_bloc/selected_search_response_bloc.dart';
 import 'package:meiyou/presentation/pages/info_watch/state/source_dropdown_bloc/bloc/source_drop_down_bloc.dart';
 
 abstract class InitialiseView {
   final MediaDetailsEntity media;
+
+  final AppDirectories appDirectories;
 
   final CacheRespository cacheRespository;
 
@@ -18,7 +19,8 @@ abstract class InitialiseView {
   final SourceDropDownBloc sourceDropDownBloc;
 
   InitialiseView(
-      {required this.media,
+      {required this.appDirectories,
+      required this.media,
       required this.cacheRespository,
       required this.metaProviderRepositoryContainer,
       required this.sourceDropDownBloc

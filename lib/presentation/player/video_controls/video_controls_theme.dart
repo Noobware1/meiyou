@@ -7,13 +7,10 @@ class VideoPlayerControlsTheme {
   final double changeEpisodeButtonSize;
   final double playButtonSize;
 
-
-
-
   VideoPlayerControlsTheme({
     this.rewindForwardPadding =
         const EdgeInsets.only(top: 70, left: 0, bottom: 100),
-    this.progressBarTheme = const ProgressBarTheme(),
+    required this.progressBarTheme,
     this.changeEpisodeButtonSize = 40.0,
     this.playButtonSize = 50.0,
     this.rewindForwardAnimationDuration = const Duration(milliseconds: 600),
@@ -34,5 +31,5 @@ class ProgressBarTheme {
       this.height = 2.0,
       this.bufferedColor = Colors.white,
       this.baseBarColor = Colors.grey,
-      this.progressColor = Colors.pinkAccent});
+      required this.progressColor});
 }

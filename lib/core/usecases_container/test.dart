@@ -10,13 +10,13 @@ import '../../domain/usecases/get_meta_results_usecase.dart';
 import '../usecases/usecase.dart';
 
 void main(List<String> args) {
-  final _repository = MetaProviderRepositoryImpl(TMDB(), Anilist());
+  final repository = MetaProviderRepositoryImpl(TMDB(), Anilist());
   Map<String, UseCase> usecases = {
-    '5': GetMainPageUseCase(_repository),
-    '4': GetMediaDetailUseCase(_repository),
-    '3': GetSearchUseCase(_repository),
-    '2': GetMappedEpisodesUseCase(_repository),
-    '1': GetMappedMovie(_repository),
+    '5': GetMainPageUseCase(repository),
+    '4': GetMediaDetailUseCase(repository),
+    '3': GetSearchUseCase(repository),
+    '2': GetMappedEpisodesUseCase(repository),
+    '1': GetMappedMovie(repository),
   };
 
   T get<T>() {

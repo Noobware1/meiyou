@@ -21,11 +21,14 @@ class SearchResponseBloc
   final LoadSearchUseCase providerSearchUseCase;
   final String mediaTitle;
   final CacheRespository cacheRespository;
-  final LoadSavedSearchResponseUseCase loadSavedSearchResponseUseCase;
+  // final LoadSavedSearchResponseUseCase loadSavedSearchResponseUseCase;
   final SelectedSearchResponseBloc bloc;
+  // final String savedResponsePath;
 
   SearchResponseBloc(
-      {required this.loadSavedSearchResponseUseCase,
+      {
+        // required this.savedResponsePath,
+      // required this.loadSavedSearchResponseUseCase,
       required this.providerSearchUseCase,
       required this.bloc,
       required this.cacheRespository,
@@ -47,15 +50,19 @@ class SearchResponseBloc
         query: event.query,
         cacheRespository: cacheRespository));
 
-    final cache = await loadSavedSearchResponseUseCase.call(
-        LoadSavedSearchResponseUseCaseParams(
-            provider: event.provider, cacheRespository: cacheRespository));
-    if (cache != null) {
-      bloc.add(SelectSearchResponseFromUserSelection(cache, event.provider));
-    } else {
-      bloc.add(FindBestSearchResponseFromList(response.data,
-          event.provider.providerType, response.error, event.provider));
-    }
+    bloc.add(LoadSavedSearchResponseFromCache(
+        response.data, response.error, event.provider));
+
+    // final cache = await loadSavedSearchResponseUseCase.call(
+    //     LoadSavedSearchResponseUseCaseParams(
+    //         savePath: savedResponsePath, provider: event.provider));
+
+    // if (cache != null) {
+    //   bloc.add(SelectSearchResponseFromUserSelection(cache, event.provider));
+    // } else {
+    //   bloc.add(FindBestSearchResponseFromList(response.data,
+    //       event.provider.providerType, response.error, event.provider));
+    // }
 
     if (response is ResponseSuccess) {
       emit(SearchResponseSuccess(response.data!));

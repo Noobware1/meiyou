@@ -1,7 +1,5 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:meiyou/core/utils/extenstions/list.dart';
-import 'package:meiyou/domain/entities/episode.dart';
 
 class CurrentEpisodeCubit extends Cubit<int> {
   CurrentEpisodeCubit([int? index]) : super(index ?? 0);

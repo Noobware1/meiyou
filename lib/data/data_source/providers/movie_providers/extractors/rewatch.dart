@@ -4,7 +4,6 @@ import 'package:meiyou/core/resources/video_format.dart';
 import 'package:meiyou/core/resources/watch_qualites.dart';
 import 'package:meiyou/core/utils/extenstions/iterable.dart';
 import 'package:meiyou/core/utils/extenstions/string.dart';
-import 'package:meiyou/core/utils/m3u8_parser/m3u8_parser.dart';
 import 'package:meiyou/data/models/subtitle.dart';
 import 'package:meiyou/data/models/video.dart';
 import 'package:meiyou/data/models/video_container.dart';

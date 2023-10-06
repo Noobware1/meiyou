@@ -6,10 +6,12 @@ import 'package:meiyou/domain/repositories/watch_provider_repository.dart';
 
 class LoadSavedSearchResponseUseCaseParams {
   final BaseProvider provider;
-  final CacheRespository cacheRespository;
 
-  LoadSavedSearchResponseUseCaseParams(
-      {required this.provider, required this.cacheRespository});
+  final String savePath;
+  LoadSavedSearchResponseUseCaseParams({
+    required this.savePath,
+    required this.provider,
+  });
 }
 
 class LoadSavedSearchResponseUseCase extends UseCase<
@@ -22,6 +24,8 @@ class LoadSavedSearchResponseUseCase extends UseCase<
   Future<SearchResponseEntity?> call(
       LoadSavedSearchResponseUseCaseParams params) {
     return _repository.loadSavedSearchResponse(
-        params.provider, params.cacheRespository);
+      params.savePath,
+      params.provider,
+    );
   }
 }

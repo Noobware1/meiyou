@@ -5,12 +5,10 @@ import 'package:meiyou/config/routes/routes.dart';
 import 'package:meiyou/config/routes/routes_name.dart';
 import 'package:meiyou/core/constants/plaform_check.dart';
 import 'package:meiyou/core/usecases_container/meta_provider_repository_container.dart';
-import 'package:meiyou/core/utils/extenstions/context.dart';
 import 'package:meiyou/domain/usecases/get_main_page_usecase.dart';
 import 'package:meiyou/presentation/pages/home/bloc/main_page_bloc.dart';
+import 'package:meiyou/presentation/widgets/add_space.dart';
 import 'package:meiyou/presentation/widgets/banner_view/banner_page_view.dart';
-import 'package:meiyou/presentation/widgets/image_view/image_holder.dart';
-import 'package:meiyou/presentation/widgets/image_view/image_list_view.dart';
 import 'package:meiyou/presentation/widgets/image_view/image_list_view_with_controller.dart';
 import 'package:meiyou/presentation/widgets/layout_builder.dart';
 import 'package:meiyou/presentation/widgets/retry_connection.dart';
@@ -48,15 +46,16 @@ class _HomePageState extends State<HomePage> {
                 child: SizedBox(
                     height: 50, width: 50, child: CircularProgressIndicator()));
           } else if (state is MainPageWithError) {
-            return SingleChildScrollView(
-              child: Padding(
+            return Center(
+              child: SingleChildScrollView(
+                child: Padding(
                   padding: const EdgeInsets.all(40),
-                  child: Center(
-                    child: RetryConnection(
-                        onRetryConnection: () =>
-                            mainPageBloc.add(const GetMainPage()),
-                        retryReason: state.error!.toString()),
-                  )),
+                  child: RetryConnection(
+                      onRetryConnection: () =>
+                          mainPageBloc.add(const GetMainPage()),
+                      retryReason: state.error!.toString()),
+                ),
+              ),
             );
           } else {
             // final data = (state as MainPageWithData).mainPageEntity!.rows;
@@ -72,9 +71,7 @@ class _HomePageState extends State<HomePage> {
                     BannerPageView(
                       bannerRow: state.mainPageEntity!.rows[0],
                     ),
-                    const SizedBox(
-                      height: 20,
-                    ),
+                    addVerticalSpace(10),
                     for (var i = 1; i < state.mainPageEntity!.rows.length; i++)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 20),

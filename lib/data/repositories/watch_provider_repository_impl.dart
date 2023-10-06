@@ -6,6 +6,7 @@ import 'package:meiyou/core/constants/request_time_outs.dart';
 import 'package:meiyou/core/resources/expections.dart';
 import 'package:meiyou/core/resources/extractors/video_extractor.dart';
 import 'package:meiyou/core/resources/media_type.dart';
+import 'package:meiyou/core/resources/prefrences.dart';
 import 'package:meiyou/core/resources/provider_type.dart';
 import 'package:meiyou/core/resources/providers/anime_provider.dart';
 import 'package:meiyou/core/resources/providers/base_provider.dart';
@@ -15,7 +16,6 @@ import 'package:meiyou/core/resources/response_state.dart';
 import 'package:meiyou/core/utils/comparing_strings.dart';
 import 'package:meiyou/core/utils/data_converter/converters.dart';
 import 'package:meiyou/core/utils/extenstions/iterable.dart';
-import 'package:meiyou/core/utils/extenstions/string.dart';
 import 'package:meiyou/core/utils/fix_file_name.dart';
 import 'package:meiyou/core/utils/generate_episode_chunks.dart';
 import 'package:meiyou/core/utils/network.dart';
@@ -29,6 +29,7 @@ import 'package:meiyou/data/models/video_server.dart';
 import 'package:meiyou/domain/entities/episode.dart';
 import 'package:meiyou/domain/entities/media_details.dart';
 import 'package:meiyou/domain/entities/search_response.dart';
+import 'package:meiyou/domain/entities/season.dart';
 import 'package:meiyou/domain/entities/video_container.dart';
 import 'package:meiyou/domain/entities/video_server.dart';
 import 'package:meiyou/domain/repositories/cache_repository.dart';
@@ -57,8 +58,7 @@ class WatchProviderRepositoryImpl implements WatchProviderRepository {
   Future<ResponseState<List<EpisodeEntity>>> loadEpisodes(
       {required BaseProvider provider,
       required String url,
-      num? seasonNumber,
-      List<EpisodeEntity>? episodes}) {
+      SeasonEntity? season}) {
     return tryWithAsync(() async {
       final List<Episode> getEpisodes;
 
@@ -68,45 +68,46 @@ class WatchProviderRepositoryImpl implements WatchProviderRepository {
         getEpisodes = await _getAnimeProvider(provider).loadEpisodes(url);
       } else if (isTMDBProvider(provider)) {
         getEpisodes = await _getTMDBProvider(provider).loadEpisodes(
-            Season(
-              id: url.toInt(),
-              number: seasonNumber ?? 1,
-            ),
-            episodes!.mapAsList((it) => Episode.fromEntity(it)));
+            season != null
+                ? Season.fromEntity(season)
+                : const Season(number: 1));
       } else {
         getEpisodes = await _getMovieProvider(provider).loadEpisodes(url);
       }
 
       return getEpisodes;
-    }, timeout: twentySecondTimeOut);
+    }, timeout: thirtySecondTimeOut);
   }
 
   @override
   Future<ResponseState<Movie>> loadMovie(
       BaseProvider provider, String url, CacheRespository cacheRespository) {
     return tryWithAsync(() async {
-      if (isMovieProvider(provider)) {
-        final cache = await tryWithAsyncSafe(() =>
-            cacheRespository.getFromIOCache<Movie>(
-                '${getFileNameFromUrl(url)}_movie.cache',
-                CacheWriters.movieWriter.readFromJson));
+      final cache = await tryWithAsyncSafe(() =>
+          cacheRespository.getFromIOCache<Movie>(
+              '${getFileNameFromUrl(url)}_movie.cache',
+              CacheWriters.movieWriter.readFromJson));
 
-        if (cache != null) return cache;
+      if (cache != null) return cache;
 
-        final response = await tryWithAsync(
+      final ResponseState<Movie> response;
+      if (isTMDBProvider(provider)) {
+        response =
+            await tryWithAsync(() => _getTMDBProvider(provider).loadMovie(url));
+      } else if (isMovieProvider(provider)) {
+        response = await tryWithAsync(
             () => _getMovieProvider(provider).loadMovie(url));
-
-        if (response is ResponseFailed) {
-          throw response.error!;
-        }
-
-        cacheRespository.addIOCache('${getFileNameFromUrl(url)}_movie.cache',
-            CacheWriters.movieWriter.writeToJson(response.data!));
-        return response.data!;
       } else {
         throw MeiyouException(
             'Load Movie is Not Supported on ${provider.providerType}');
       }
+      if (response is ResponseFailed) {
+        throw response.error!;
+      }
+
+      cacheRespository.addIOCache('${getFileNameFromUrl(url)}_movie.cache',
+          CacheWriters.movieWriter.writeToJson(response.data!));
+      return response.data!;
     }, timeout: twentySecondTimeOut);
   }
 
@@ -123,8 +124,8 @@ class WatchProviderRepositoryImpl implements WatchProviderRepository {
           throw const MeiyouException(
               'Seasons is null, either the seasons from the [MediaDetails] is null or the mediaType is not correct');
         }
-        seasons = await _getTMDBProvider(provider)
-            .loadSeasons(url, _media.seasons!.mapAsList(Season.fromEntity));
+        seasons =
+            await _getTMDBProvider(provider).loadSeasons(url, _media.seasons!);
       } else {
         throw MeiyouException(
             'load Season is not supported on ${provider.providerType}');
@@ -144,6 +145,9 @@ class WatchProviderRepositoryImpl implements WatchProviderRepository {
     } else if (isAnimeProvider(provider)) {
       extractor = _getAnimeProvider(provider)
           .loadVideoExtractor(videoServer as VideoServer);
+    } else if (isTMDBProvider(provider)) {
+      extractor = _getTMDBProvider(provider)
+          .loadVideoExtractor(videoServer as VideoServer);
     } else {
       throw UnimplementedError();
     }
@@ -159,6 +163,8 @@ class WatchProviderRepositoryImpl implements WatchProviderRepository {
         return _getMovieProvider(provider).loadVideoServers(url);
       } else if (isAnimeProvider(provider)) {
         return _getAnimeProvider(provider).loadVideoServers(url);
+      } else if (isTMDBProvider(provider)) {
+        return _getTMDBProvider(provider).loadVideoServers(url);
       } else {
         throw UnimplementedError();
       }
@@ -277,9 +283,7 @@ class WatchProviderRepositoryImpl implements WatchProviderRepository {
 
         for (final season in seasons.data!) {
           episodeResponse = await loadEpisodes(
-            provider: provider,
-            url: season.url!,
-          );
+              provider: provider, url: season.url!, season: season);
           // MetaProviderRepositoryImpl().getMappedEpisodes(episodes, cacheRespository: cacheRespository, mediaDetails: _media)
           if (episodeResponse is ResponseFailed) {
             errorCallback?.call(episodeResponse.error!);
@@ -332,33 +336,26 @@ class WatchProviderRepositoryImpl implements WatchProviderRepository {
 
   @override
   Future<SearchResponse?> loadSavedSearchResponse(
-      BaseProvider provider, CacheRespository cacheRespository) async {
-    try {
-      return cacheRespository.getFromIOCache(
-          _SavePaths.saveResponsePath(provider, _media),
-          SearchResponse.fromJson);
-    } catch (_, __) {
-      return null;
-    }
+      String savePath, BaseProvider provider) async {
+    return await loadData(
+        savePath:
+            savePath + '\\' + _SavePaths.saveResponsePath(provider, _media),
+        transFormer: SearchResponse.fromJson,
+        onError: (e) => print(e));
   }
 
   @override
-  Future<void> saveSearchResponse(
-      {required BaseProvider provider,
-      required SearchResponseEntity searchResponse,
-      required CacheRespository cacheRespository}) async {
-    final data = jsonEncode(SearchResponse.fromEntity(searchResponse).toJson());
-    try {
-      await cacheRespository.addIOCache(
-          _SavePaths.saveResponsePath(provider, _media), data);
-    } on MeiyouException catch (_) {
-      await cacheRespository.updateIOCacheValue(
-          _SavePaths.saveResponsePath(provider, _media), data);
-    } catch (_, __) {
-      print(_);
-      print(__);
-      return;
-    }
+  Future<void> saveSearchResponse({
+    required String savePath,
+    required BaseProvider provider,
+    required SearchResponseEntity searchResponse,
+  }) async {
+    return await saveData(
+        savePath:
+            savePath + '\\' + _SavePaths.saveResponsePath(provider, _media),
+        data: jsonEncode(SearchResponse.fromEntity(searchResponse).toJson()),
+        onCompleted: () => print('data written successFul'),
+        onError: (e) => print(e));
   }
 
   @override
@@ -427,12 +424,12 @@ class _SavePaths {
 
   static String episodesPath(
           BaseProvider provider, SearchResponseEntity searchResponse) =>
-      '$responsesFolder\\${provider.name}_${fixFileName(searchResponse.title)}_episodes.cache';
+      '${provider.name}_${fixFileName(searchResponse.title)}_episodes.cache';
 
   static String searchResponsePath(BaseProvider provider, MediaDetails media,
           [String? query]) =>
-      '$responsesFolder\\${provider.name}_${fixFileName(query ?? media.mediaTitle)}';
+      '${provider.name}_${fixFileName(query ?? media.mediaTitle)}';
 
   static String serverAndVideoPath(BaseProvider provider, String url) =>
-      '$responsesFolder\\${provider.name}_${getFileNameFromUrl(url)}';
+      '${provider.name}_${url.hashCode}';
 }

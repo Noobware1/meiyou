@@ -11,8 +11,7 @@ import 'package:meiyou/domain/entities/search_response.dart';
 import 'package:meiyou/domain/repositories/cache_repository.dart';
 import 'package:meiyou/domain/usecases/get_mapped_episodes_usecase.dart';
 import 'package:meiyou/domain/usecases/provider_use_cases/load_seasons_episodes.dart';
-import 'package:meiyou/presentation/pages/info_watch/state/search_response_bloc/bloc/search_response_bloc.dart';
-import 'package:meiyou/presentation/widgets/season_selector/seasons_selector_bloc/seasons_selector_bloc.dart';
+import 'package:meiyou/presentation/widgets/season_selector/bloc/seasons_selector_bloc.dart';
 
 part 'fetch_seasons_episodes_event.dart';
 part 'fetch_seasons_episodes_state.dart';
@@ -52,10 +51,9 @@ class FetchSeasonsEpisodesBloc
           SelectSeason(response.data!.keys.first, response.data!.values.first));
 
       emit(FetchSeasonsEpisodesSucess(response.data!));
-    } else if (response is SearchResponseFailed) {
+    } else if (response is ResponseFailed) {
+      print(response.error!);
       emit(FetchSeasonsEpisodesFailed(response.error!));
-    } else {
-      emit(const FetchSeasonsEpisodesFailed(MeiyouException('Not Found')));
     }
   }
 }

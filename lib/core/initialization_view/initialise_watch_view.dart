@@ -7,7 +7,6 @@ import 'package:meiyou/core/resources/providers/base_provider.dart';
 import 'package:meiyou/core/usecases_container/watch_provider_repository_container.dart';
 import 'package:meiyou/data/repositories/watch_provider_repository_impl.dart';
 import 'package:meiyou/domain/entities/episode.dart';
-import 'package:meiyou/domain/repositories/cache_repository.dart';
 import 'package:meiyou/domain/usecases/get_mapped_episodes_usecase.dart';
 import 'package:meiyou/domain/usecases/get_mapped_movie.dart';
 import 'package:meiyou/domain/usecases/provider_use_cases/find_best_search_response.dart';
@@ -21,15 +20,15 @@ import 'package:meiyou/presentation/pages/info_watch/state/search_response_bloc/
 import 'package:meiyou/presentation/pages/info_watch/state/selected_searchResponse_bloc/selected_search_response_bloc.dart';
 import 'package:meiyou/presentation/pages/info_watch/state/source_dropdown_bloc/bloc/source_drop_down_bloc.dart';
 import 'package:meiyou/presentation/player/video_controls/cubits/current_episode_cubit.dart';
-import 'package:meiyou/presentation/widgets/episode_view/state/episode_selector.dart';
-import 'package:meiyou/presentation/widgets/episode_view/state/episode_selector/episode_selector_bloc.dart';
+import 'package:meiyou/presentation/widgets/episode_selector/episode_selector.dart';
+import 'package:meiyou/presentation/widgets/episode_selector/episode_selector/episode_selector_bloc.dart';
+import 'package:meiyou/presentation/widgets/season_selector/bloc/seasons_selector_bloc.dart';
 import 'package:meiyou/presentation/widgets/season_selector/season_selector.dart';
-import 'package:meiyou/presentation/widgets/season_selector/seasons_selector_bloc/seasons_selector_bloc.dart';
 import 'package:meiyou/presentation/widgets/watch/search_response_bottom_sheet.dart';
+import 'package:meiyou/presentation/widgets/watch/selected_search_response_widget.dart';
+import 'package:meiyou/presentation/widgets/watch/state/fetch_movie_bloc/fetch_movie_bloc.dart';
 import 'package:meiyou/presentation/widgets/watch/state/fetch_seasons_episodes/fetch_seasons_episodes_bloc.dart';
-import 'package:meiyou/presentation/widgets/watch/state/movie_view/state/bloc/fetch_movie_bloc.dart';
 import 'package:meiyou/presentation/widgets/watch/watch_view.dart';
-import 'package:meiyou/presentation/widgets/watch/watch_view/selected_search_response_widget.dart';
 import 'initialise_view.dart';
 
 class InitiliseWatchView extends InitialiseView {
@@ -57,6 +56,9 @@ class InitiliseWatchView extends InitialiseView {
 
   late final SelectedSearchResponseBloc selectedSearchResponseBloc =
       SelectedSearchResponseBloc(
+          loadSavedSearchResponseUseCase: watchProviderRepositoryContainer
+              .get<LoadSavedSearchResponseUseCase>(),
+          savePath: appDirectories.savedSelectedResponseDirectory.path,
           findBestSearchResponseUseCase: watchProviderRepositoryContainer
               .get<FindBestSearchResponseUseCase>(),
           mediaTitle: media.mediaTitle,
@@ -65,13 +67,13 @@ class InitiliseWatchView extends InitialiseView {
               .get<SaveSearchResponseUseCase>());
 
   late final SearchResponseBloc searchResponseBloc = SearchResponseBloc(
-      providerSearchUseCase:
-          watchProviderRepositoryContainer.get<LoadSearchUseCase>(),
-      bloc: selectedSearchResponseBloc,
-      mediaTitle: media.mediaTitle,
-      cacheRespository: cacheRespository,
-      loadSavedSearchResponseUseCase: watchProviderRepositoryContainer
-          .get<LoadSavedSearchResponseUseCase>());
+    providerSearchUseCase:
+        watchProviderRepositoryContainer.get<LoadSearchUseCase>(),
+    bloc: selectedSearchResponseBloc,
+    mediaTitle: media.mediaTitle,
+    cacheRespository: cacheRespository,
+    // loadS/get<LoadSavedSearchResponseUseCase>()
+  );
 
   final EpisodeSelectorBloc episodeSelectorBloc =
       EpisodeSelectorBloc(const MapEntry('', <EpisodeEntity>[]));
@@ -79,6 +81,7 @@ class InitiliseWatchView extends InitialiseView {
   InitiliseWatchView(
       {required super.media,
       required super.cacheRespository,
+      required super.appDirectories,
       required super.metaProviderRepositoryContainer,
       required super.sourceDropDownBloc});
 
@@ -159,6 +162,7 @@ class InitiliseWatchView extends InitialiseView {
     return RepositoryProvider(
       create: (context) => watchProviderRepositoryContainer,
       child: MultiBlocProvider(providers: [
+        BlocProvider.value(value: sourceDropDownBloc),
         BlocProvider.value(value: selectedSearchResponseBloc),
         BlocProvider.value(value: fetchMovieBloc),
         BlocProvider.value(value: fetchSeasonsEpisodesBloc),
@@ -188,6 +192,7 @@ class InitiliseWatchView extends InitialiseView {
     fetchMovieBloc.close();
     fetchSeasonsEpisodesBloc.close();
     seasonsSelectorBloc.close();
+    sourceDropDownBloc.close();
     currentEpisodeCubit.close();
     _provider = null;
   }

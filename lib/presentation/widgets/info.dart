@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meiyou/core/constants/default_sized_box.dart';
 import 'package:meiyou/core/constants/height_and_width.dart';
 import 'package:meiyou/core/resources/media_type.dart';
+import 'package:meiyou/core/resources/paths.dart';
 import 'package:meiyou/core/resources/providers/base_provider.dart';
 
 import 'package:meiyou/core/usecases_container/meta_provider_repository_container.dart';
@@ -12,15 +13,16 @@ import 'package:meiyou/core/utils/extenstions/context.dart';
 import 'package:meiyou/core/utils/extenstions/date_titme.dart';
 import 'package:meiyou/domain/entities/media_details.dart';
 import 'package:meiyou/domain/repositories/cache_repository.dart';
-import 'package:meiyou/presentation/pages/info_watch/state/source_dropdown_bloc/bloc/source_drop_down_bloc.dart';
+import 'package:meiyou/domain/usecases/providers_repository_usecases/get_default_provider_usecase.dart';
 import 'package:meiyou/presentation/widgets/add_space.dart';
 import 'package:meiyou/presentation/widgets/constraints_box_for_large_screen.dart';
 import 'package:meiyou/domain/usecases/provider_use_cases/load_providers_use_case.dart';
 import 'package:meiyou/presentation/widgets/info/episode_number_and_buttons.dart';
 import 'package:meiyou/presentation/widgets/info/header.dart';
+import 'package:meiyou/presentation/widgets/info/loading_widget.dart';
 import 'package:meiyou/presentation/widgets/layout_builder.dart';
 import 'package:meiyou/presentation/widgets/resizeable_text.dart';
-import 'package:meiyou/presentation/widgets/source_dropdown.dart';
+import 'package:meiyou/presentation/widgets/watch/source_dropdown.dart';
 import 'package:meiyou/core/initialization_view/intialise_view_type.dart';
 import 'package:meiyou/core/initialization_view/initialise_view.dart';
 
@@ -34,131 +36,149 @@ class InfoPage extends StatefulWidget {
 }
 
 class _InfoPageState extends State<InfoPage> {
+  bool initalise = false;
   late final Map<String, BaseProvider> providers;
   late final MediaDetailsEntity media;
-  late final SourceDropDownBloc sourceDropDownBloc;
+  // late final SourceDropDownBloc sourceDropDownBloc;
   late final InitialiseView initialiseView;
 
-  static const _textStyleForEntryName =
-      TextStyle(color: Colors.grey, fontSize: 16, fontWeight: FontWeight.w600);
+  static const _textStyleForEntryName = TextStyle(
+      color: Color(0xFF5F6267), fontSize: 16, fontWeight: FontWeight.w600);
 
   static const _textStyleForEntry =
-      TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700);
+      TextStyle(fontSize: 16, fontWeight: FontWeight.w700);
 
   @override
   void initState() {
     media = widget.media;
 
     final providerListContainer =
-        RepositoryProvider.of<LoadProviderListRepositoryContainer>(context);
+        RepositoryProvider.of<ProvidersRepositoryContainer>(context);
     providers =
         providerListContainer.get<LoadProvidersUseCase>().call(media.mediaType);
+    final AppDirectories appDirectories =
+        RepositoryProvider.of<AppDirectories>(context);
 
-    final defaultProvider = providers.values.first;
+    providerListContainer
+        .get<GetDefaultProviderUseCase>()
+        .call(GetDefaultProviderUseCaseParams(
+            RepositoryProvider.of<AppDirectories>(context)
+                .appDocumentDirectory
+                .path,
+            providers.values.first.providerType))
+        .then((value) {
+      init(appDirectories, value);
+      // sourceDropDownBloc = SourceDropDownBloc(defaultProvider)
+      //   ..add(SourceDropDownOnSelected(provider: defaultProvider));
+    }).timeout(const Duration(seconds: 3), onTimeout: () {
+      init(appDirectories, null);
+    }).catchError((e, s) {
+      init(appDirectories, null);
+    });
 
-    sourceDropDownBloc = SourceDropDownBloc(defaultProvider)
-      ..add(SourceDropDownOnSelected(provider: defaultProvider));
+    super.initState();
+  }
 
+  init(AppDirectories appDirectories, BaseProvider? defaultProvider) {
     initialiseView = getViewFromType(InitializationViewParams(
+      appDirectories: appDirectories,
       type: widget.type,
       media: media,
       cacheRespository: RepositoryProvider.of<CacheRespository>(context),
       metaProviderRepositoryContainer:
           RepositoryProvider.of<MetaProviderRepositoryContainer>(context),
-      sourceDropDownBloc: sourceDropDownBloc,
+      defaultProvider: defaultProvider ?? providers.values.first,
     ));
 
     initialiseView.initalise();
-
-    super.initState();
+    setState(() {
+      initalise = true;
+    });
   }
 
   @override
   void dispose() {
     initialiseView.dispose();
-    sourceDropDownBloc.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final color = context.primaryColor;
+    if (!initalise) {
+      return const LoadingWidget();
+    }
+
+    final color = context.theme.colorScheme.primary;
     final width = context.screenWidth;
     final textStyle =
         TextStyle(color: color, fontSize: 15, fontWeight: FontWeight.w600);
 
     return Scaffold(
-        backgroundColor: Colors.black,
         body: RepositoryProvider.value(
-          value: media,
-          child: MultiBlocProvider(
-            providers: [
-              BlocProvider.value(value: sourceDropDownBloc),
-            ],
-            child: initialiseView.createBlocProvider(
-              child: SingleChildScrollView(
-                child: Stack(
-                  ///      fit: StackFit.expand,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const InfoHeader(),
-                        _episodeNumberAndButtons(media.totalEpisode),
-                        addVerticalSpace(10),
-                        _buildInfo(media, color),
-                        addVerticalSpace(20),
-                        initialiseView.selectedSearchResponseWidget,
-                        addVerticalSpace(5),
-                        _soureDropDown(),
-                        addVerticalSpace(5),
-                        _buildWrongTitle(context, textStyle),
-                        addVerticalSpace(10),
-                        ...initialiseView.selectors,
-                        addVerticalSpace(20),
-                        ResponsiveBuilder(
-                            forSmallScreen: initialiseView.view,
-                            forLagerScreen: defaultSizedBox),
-                        addVerticalSpace(20),
-                        _synopsis(media.description),
-                        addVerticalSpace(20),
-                      ],
+      value: media,
+      child: initialiseView.createBlocProvider(
+        child: SingleChildScrollView(
+          child: Stack(
+            ///      fit: StackFit.expand,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const InfoHeader(),
+                  _episodeNumberAndButtons(media.totalEpisode),
+                  addVerticalSpace(10),
+                  _buildInfo(media, color),
+                  addVerticalSpace(20),
+                  _synopsis(media.description),
+                  addVerticalSpace(20),
+                  initialiseView.selectedSearchResponseWidget,
+                  addVerticalSpace(5),
+                  _soureDropDown(),
+                  addVerticalSpace(5),
+                  _buildWrongTitle(context, textStyle),
+                  addVerticalSpace(10),
+                  ...initialiseView.selectors,
+                  addVerticalSpace(20),
+                  ResponsiveBuilder(
+                      forSmallScreen: initialiseView.view,
+                      forLagerScreen: defaultSizedBox),
+                  addVerticalSpace(70),
+                ],
+              ),
+              if (width > smallScreenSize)
+                Padding(
+                  padding:
+                      const EdgeInsets.only(right: 20, top: 50, bottom: 20),
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: SizedBox(
+                        width: (width / 2), child: initialiseView.view),
+                  ),
+                ),
+              Positioned(
+                top: 50,
+                right: 10,
+                child: GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Container(
+                    //      color: Colors.red,
+                    height: 35,
+                    width: 35,
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(30),
+                        color: context.theme.colorScheme.secondary),
+                    child: const Icon(
+                      Icons.close,
+                      size: 25,
                     ),
-                    if (width > smallScreenSize)
-                      Padding(
-                        padding: const EdgeInsets.only(
-                            right: 20, top: 50, bottom: 20),
-                        child: Align(
-                          alignment: Alignment.centerRight,
-                          child: SizedBox(
-                              width: (width / 2), child: initialiseView.view),
-                        ),
-                      ),
-                    Positioned(
-                      top: 50,
-                      right: 10,
-                      child: GestureDetector(
-                        onTap: () => Navigator.pop(context),
-                        child: Container(
-                          //      color: Colors.red,
-                          height: 35,
-                          width: 35,
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(30),
-                              color: Colors.grey.shade900),
-                          child: const Icon(
-                            Icons.close,
-                            size: 25,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
-            ),
+            ],
           ),
-        ));
+        ),
+      ),
+    ));
   }
 
   Widget _buildWrongTitle(BuildContext context, TextStyle textStyle) {
@@ -186,27 +206,22 @@ class _InfoPageState extends State<InfoPage> {
   }
 
   Widget _soureDropDown() {
-    return BlocProvider.value(
-      value: sourceDropDownBloc,
-      child: ResponsiveBuilder(
-        forSmallScreen: Padding(
-          padding: addPaddingOnOrientation(context),
-          child: SourceDropDown(providersList: providers),
-        ),
-        forLagerScreen: ConstarintsForBiggerScreeen(
-            child: Padding(
-          padding: const EdgeInsets.only(left: 50, right: 20),
-          child: SourceDropDown(providersList: providers),
-        )),
+    return ResponsiveBuilder(
+      forSmallScreen: Padding(
+        padding: addPaddingOnOrientation(context),
+        child: SourceDropDown(providersList: providers),
       ),
+      forLagerScreen: ConstarintsForBiggerScreeen(
+          child: Padding(
+        padding: const EdgeInsets.only(left: 50, right: 20),
+        child: SourceDropDown(providersList: providers),
+      )),
     );
   }
 
   Future showSearchBottomSheet(BuildContext context) {
     return showModalBottomSheet(
-        context: context,
-        backgroundColor: Colors.black,
-        builder: (context) => initialiseView.search);
+        context: context, builder: (context) => initialiseView.search);
   }
 
   Widget _buildInfo(MediaDetailsEntity media, Color primaryColor) {
@@ -243,13 +258,10 @@ class _InfoPageState extends State<InfoPage> {
       _buildEntries(
           entryName: 'Average score',
           textStyleForEntryName: textStyleForEntryName,
-          child: RichText(
-              text: TextSpan(children: [
-            TextSpan(
-                text: media.averageScore.toStringAsFixed(1), style: textStyle),
-            TextSpan(
-                text: ' / 10', style: textStyle.copyWith(color: Colors.white))
-          ]))),
+          child: Text(
+            media.averageScore.toStringAsFixed(1),
+            style: textStyle,
+          )),
       addVerticalSpace(5),
       _buildEntries(
           entryName: 'Format',
@@ -353,7 +365,7 @@ class _InfoPageState extends State<InfoPage> {
   Widget _synopsis(String desc) {
     return ResponsiveBuilder(
         forSmallScreen: Padding(
-          padding: const EdgeInsets.only(left: 50, right: 50),
+          padding: addPaddingOnOrientation(context),
           child: _showSynopsis(desc),
         ),
         forLagerScreen: ConstarintsForBiggerScreeen(
@@ -369,8 +381,7 @@ class _InfoPageState extends State<InfoPage> {
       children: [
         const Text(
           'Synopsis',
-          style: TextStyle(
-              color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
         ),
         addVerticalSpace(10),
         ResizeableTextWidget(
@@ -378,7 +389,6 @@ class _InfoPageState extends State<InfoPage> {
           text: desc,
           maxLines: 4,
           style: const TextStyle(
-            color: Colors.white,
             fontSize: 14,
           ),
         )

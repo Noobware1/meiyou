@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:meiyou/core/resources/expections.dart';
+import 'package:meiyou/core/utils/extenstions/directory.dart';
 import 'package:meiyou/domain/repositories/cache_repository.dart';
 
 class CacheRepositoryImpl implements CacheRespository {
@@ -74,15 +75,15 @@ class CacheRepositoryImpl implements CacheRespository {
 
   @override
   Future<void> deleteIOCacheFromDir(String path) async {
-    final dir = Directory(_appendCacheDir(path));
+    await Directory(_appendCacheDir(path)).deleteAllEntries();
 
-    if (await dir.exists()) {
-      await for (var entity in dir.list()) {
-        if (entity is File) {
-          await entity.delete();
-        }
-      }
-    }
+    // if (await dir.exists()) {
+    //   await for (var entity in dir.list()) {
+    //     if (entity is File) {
+    //       await entity.delete();
+    //     }
+    //   }
+    // }
   }
 
   @override
@@ -114,7 +115,6 @@ class CacheRepositoryImpl implements CacheRespository {
       throw MeiyouException(
           'file doesn\'t exists in ${_appendCacheDir(path)}, use addIOCache() to create it');
     } else {
-      file.writeAsStringSync('');
       await file.writeAsString(value, flush: true);
 
       print('data written successfully');

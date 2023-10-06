@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:meiyou/core/constants/plaform_check.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
 
 //only for mobile

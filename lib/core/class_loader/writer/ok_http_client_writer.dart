@@ -1,8 +1,5 @@
-import 'package:meiyou/core/resources/client.dart';
-import 'package:meiyou/core/utils/encode.dart';
 import 'package:meiyou/core/utils/extenstions/iterable.dart';
 import 'package:meiyou/core/utils/extenstions/string.dart';
-import 'package:ok_http_dart/http.dart';
 import 'package:ok_http_dart/ok_http_dart.dart';
 
 class OkHttpClientRequest {
@@ -22,7 +19,7 @@ class OkHttpClientRequest {
 class OkHttpClientCodeWriter {
   OkHttpClientRequest writeRequest(String code) {
     var matches =
-        RegExp(r"client.(\w+\s*)\('(.*)\)'").firstMatch(code)!.groups([1, 2])!;
+        RegExp(r"client.(\w+\s*)\('(.*)\)'").firstMatch(code)!.groups([1, 2]);
     final method = matches[0]!;
     var url = matches[1]!;
 
@@ -58,7 +55,7 @@ class OkHttpClientCodeWriter {
 
   List<String>? readFunctionParams(String function) {
     // final params = [];
-    return RegExp('(([^)]*)\)')
+    return RegExp('(([^)]*))')
         .firstMatch(function.substringAfter('('))
         ?.group(1)!
         .split(",");

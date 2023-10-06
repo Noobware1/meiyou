@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:meiyou/core/resources/response_state.dart';
 import 'package:meiyou/domain/entities/results.dart';
 
 class MetaRowEntity extends Equatable {

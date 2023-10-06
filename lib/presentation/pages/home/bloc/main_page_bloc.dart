@@ -5,10 +5,7 @@ import 'package:equatable/equatable.dart';
 import 'package:meiyou/core/resources/expections.dart';
 import 'package:meiyou/core/resources/response_state.dart';
 import 'package:meiyou/core/usecases/no_params.dart';
-import 'package:meiyou/data/data_source/providers/meta_providers/anilist.dart';
-import 'package:meiyou/data/data_source/providers/meta_providers/tmdb.dart';
 import 'package:meiyou/domain/entities/main_page.dart';
-import 'package:meiyou/domain/repositories/meta_provider_repository.dart';
 import 'package:meiyou/domain/usecases/get_main_page_usecase.dart';
 
 part 'main_page_event.dart';

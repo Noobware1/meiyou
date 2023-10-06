@@ -1,125 +1,159 @@
-import 'package:flutter/foundation.dart';
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meiyou/config/routes/routes.dart';
 import 'package:meiyou/config/routes/routes_name.dart';
-import 'package:meiyou/core/constants/path.dart';
 import 'package:meiyou/core/initialization_view/intialise_view_type.dart';
 import 'package:meiyou/core/resources/snackbar.dart';
-import 'package:meiyou/core/usecases_container/cache_repository_usecase_container.dart';
 import 'package:meiyou/core/usecases_container/video_player_usecase_container.dart';
-import 'package:meiyou/core/utils/extenstions/context.dart';
 import 'package:meiyou/data/repositories/video_player_repositoriy_impl.dart';
 import 'package:meiyou/domain/entities/meta_response.dart';
-import 'package:meiyou/domain/usecases/cache_repository_usecases/delete_io_cache_from_dir.dart';
 import 'package:meiyou/presentation/pages/home/home_page.dart';
 import 'package:meiyou/presentation/pages/search/search_page.dart';
+import 'package:meiyou/presentation/pages/settings_page.dart';
 import 'package:meiyou/presentation/player/player.dart';
 import 'package:meiyou/presentation/player/video_controls/cubits/selected_server_cubit.dart';
+import 'package:meiyou/presentation/widgets/app_theme.dart';
 import 'package:meiyou/presentation/widgets/custom_scaffold.dart';
-import 'package:meiyou/presentation/widgets/fetch_info.dart';
+import 'package:meiyou/presentation/widgets/info/fetch_info.dart';
 import 'package:meiyou/presentation/widgets/navigation_bars/bottom_navigatior.dart';
 import 'package:meiyou/presentation/widgets/navigation_bars/side_navigator.dart';
-import 'package:meiyou/presentation/widgets/video_server_view.dart';
+import 'package:meiyou/presentation/widgets/settings/providers.dart';
+import 'package:meiyou/presentation/widgets/settings/theme_page.dart';
+import 'package:meiyou/presentation/widgets/video_server/video_server_view.dart';
 
-final GlobalKey<NavigatorState> _rootKey = GlobalKey<NavigatorState>();
-final GlobalKey<NavigatorState> _shellkey = GlobalKey<NavigatorState>();
+final GlobalKey<NavigatorState> _rootNavigatorKey =
+    GlobalKey<NavigatorState>(debugLabel: 'root');
+final GlobalKey<NavigatorState> _sectionANavigatorKey =
+    GlobalKey<NavigatorState>(debugLabel: 'sectionANav');
 
-class MeiyouRouterProvider {
-  DateTime? lastPressed;
-
-  GoRouter router() {
-    return GoRouter(
-        navigatorKey: _rootKey,
-        initialLocation: homeRoute,
-        routes: [
+class RouterProvider {
+  GoRouter get router => GoRouter(
+        navigatorKey: _rootNavigatorKey,
+        initialLocation: '/home',
+        routes: <RouteBase>[
           StatefulShellRoute.indexedStack(
-              builder: (context, state, navigationShell) => CustomScaffold(
-                    backgroundColor: Colors.black,
+            builder: (BuildContext context, GoRouterState state,
+                StatefulNavigationShell navigationShell) {
+              // Return the widget that implements the custom shell (in this case
+              // using a BottomNavigationBar). The StatefulNavigationShell is passed
+              // to be able access the state of the shell and to navigate to other
+              // branches in a stateful way.
+              return AppTheme(
+                child: CustomScaffold(
                     bottomNavigationBar: MyBottomNavigationBar(
                         goRouterState: state,
                         statefulNavigationShell: navigationShell),
                     sideNavigatonBar: SideNavigatonBar(
                         goRouterState: state,
                         statefulNavigationShell: navigationShell),
-                    body: WillPopScope(
-                        child: navigationShell,
-                        onWillPop: () async {
-                          final now = DateTime.now();
-                          const maxDuration = Duration(seconds: 2);
-                          if (lastPressed == null ||
-                              now.difference(lastPressed!) > maxDuration) {
-                            lastPressed = DateTime.now();
-
-                            showSnackBAr(context,
-                                text: 'Double tap to exit app');
-                            return false;
-                          } else {
-                            lastPressed = null;
-                       
-
-                            return true;
-                          }
-                        }),
+                    body: navigationShell),
+              );
+            },
+            branches: <StatefulShellBranch>[
+              // The route branch for the first tab of the bottom navigation bar.
+              StatefulShellBranch(
+                navigatorKey: _sectionANavigatorKey,
+                routes: <RouteBase>[
+                  GoRoute(
+                    // The screen to display as the root in the first tab of the
+                    // bottom navigation bar.
+                    path: '/home',
+                    builder: (BuildContext context, GoRouterState state) =>
+                        const AppTheme(child: Scaffold(body: HomePage())),
+                    routes: <RouteBase>[_watchSubRoute],
                   ),
-              branches: [
-                StatefulShellBranch(navigatorKey: _shellkey, routes: [
-                  GoRoute(
-                      path: homeRoute,
-                      name: home,
-                      pageBuilder: (context, state) =>
-                          const MaterialPage(child: HomePage()),
-                      routes: [watchSubRoute]),
-                ]),
-                StatefulShellBranch(routes: [
-                  GoRoute(
-                      path: searchRoute,
-                      name: search,
-                      pageBuilder: (context, state) =>
-                          const MaterialPage(child: SearchPage()),
-                      routes: [watchSubRoute])
-                ]),
-                StatefulShellBranch(routes: [
-                  GoRoute(
-                      path: myListRoute,
-                      name: myList,
-                      pageBuilder: (context, state) =>
-                          const MaterialPage(child: SizedBox()))
-                ]),
-                StatefulShellBranch(routes: [
-                  GoRoute(
-                      path: settingsRoute,
-                      name: settings,
-                      pageBuilder: (context, state) =>
-                          const MaterialPage(child: SizedBox()))
-                ])
-              ])
-        ]);
-  }
+                ],
+              ),
 
-  final watchSubRoute = GoRoute(
+              // The route branch for the second tab of the bottom navigation bar.
+              StatefulShellBranch(
+                // It's not necessary to provide a navigatorKey if it isn't also
+                // needed elsewhere. If not provided, a default key will be used.
+                routes: <RouteBase>[
+                  GoRoute(
+                    // The screen to display as the root in the second tab of the
+                    // bottom navigation bar.
+                    path: '/search',
+                    builder: (BuildContext context, GoRouterState state) =>
+                        const Scaffold(body: SearchPage()),
+
+                    routes: <RouteBase>[_watchSubRoute],
+                  ),
+                ],
+              ),
+
+              // The route branch for the third tab of the bottom navigation bar.
+              StatefulShellBranch(
+                routes: <RouteBase>[
+                  GoRoute(
+                    // The screen to display as the root in the third tab of the
+                    // bottom navigation bar.
+                    path: '/myiist',
+                    builder: (BuildContext context, GoRouterState state) =>
+                        const Scaffold(
+                      body: SizedBox(),
+                    ),
+                  ),
+                ],
+              ),
+
+              // The route branch for the fourth tab of the bottom navigation bar.
+              StatefulShellBranch(
+                routes: <RouteBase>[
+                  GoRoute(
+                      // The screen to display as the root in the third tab of the
+                      // bottom navigation bar.
+                      path: '/settings',
+                      builder: (BuildContext context, GoRouterState state) =>
+                          const Scaffold(body: SettingsPage()),
+                      routes: [
+                        GoRoute(
+                            path: 'appearance',
+                            builder: (context, state) =>
+                                const AppearancePage()),
+                        GoRoute(
+                            path: 'providers',
+                            builder: (context, state) => const ProvidersPage())
+                      ]),
+                ],
+              ),
+            ],
+          ),
+        ],
+      );
+
+  final _watchSubRoute = GoRoute(
       path: 'watch',
-      parentNavigatorKey: _rootKey,
-      builder: (context, state) => LoadInfo(
-          metaResponse: state.extra as MetaResponseEntity,
-          type: InitaliseViewType.watchview),
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => AppTheme(
+            child: LoadInfo(
+                key: state.pageKey,
+                metaResponse: state.extra as MetaResponseEntity,
+                type: InitaliseViewType.watchview),
+          ),
       routes: [
         GoRoute(
-            path: 'player',
-            parentNavigatorKey: _rootKey,
-            builder: (context, state) =>
-                ((state.extra as List)[1] as Widget Function(Widget child))
-                    .call(
-                  RepositoryProvider(
-                    create: (context) => VideoPlayerUseCaseContainer(
-                        VideoPlayerRepositoryImpl()),
-                    child: BlocProvider(
-                        create: (context) => SelectedServerCubit(
-                            (state.extra as List)[0] as SelectedServer),
-                        child: const MeiyouPlayer()),
-                  ),
-                )),
+          path: 'player',
+          parentNavigatorKey: _rootNavigatorKey,
+          builder: (context, state) => AppTheme(
+            child: ((state.extra as List)[1] as Widget Function(Widget child))
+                .call(
+              RepositoryProvider(
+                key: state.pageKey,
+                create: (context) =>
+                    VideoPlayerUseCaseContainer(VideoPlayerRepositoryImpl()),
+                child: BlocProvider(
+                    create: (context) => SelectedServerCubit(
+                        (state.extra as List)[0] as SelectedServer),
+                    child: const MeiyouPlayer()),
+              ),
+            ),
+          ),
+        ),
       ]);
 }

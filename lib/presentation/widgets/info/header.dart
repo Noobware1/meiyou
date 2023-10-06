@@ -27,13 +27,12 @@ class InfoHeader extends StatelessWidget {
 }
 
 class _ForSmallerScreens extends StatelessWidget {
-  const _ForSmallerScreens({super.key});
+  const _ForSmallerScreens();
 
   @override
   Widget build(BuildContext context) {
     final width = context.screenWidth;
     final data = RepositoryProvider.of<MediaDetailsEntity>(context);
-    final primaryColor = context.primaryColor;
 
     return Stack(
       children: [
@@ -71,39 +70,36 @@ class _ForSmallerScreens extends StatelessWidget {
                           padding: const EdgeInsets.only(right: 30, top: 30),
                           // color: Colors.red,
 
-                          child: DefaultTextStyle(
-                            style: const TextStyle(),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  data.title ??
-                                      data.romaji ??
-                                      data.native ??
-                                      'No title',
-                                  maxLines: 5,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontSize: 20,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                data.title ??
+                                    data.romaji ??
+                                    data.native ??
+                                    'No title',
+                                maxLines: 5,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              addVerticalSpace(10),
+                              Text(
+                                data.status,
+                                style: TextStyle(
+                                    fontSize: 14,
                                     fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                addVerticalSpace(10),
-                                Text(
-                                  data.status,
-                                  style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w700,
-                                      color: primaryColor),
-                                ),
-                                addVerticalSpace(10),
-                                CustomOrientationBuiler(
-                                  portrait: defaultSizedBox,
-                                  landscape: _addToListButton(context),
-                                )
-                              ],
-                            ),
+                                    color: context.theme.colorScheme.primary),
+                              ),
+                              addVerticalSpace(10),
+                              CustomOrientationBuiler(
+                                portrait: defaultSizedBox,
+                                landscape: _addToListButton(context),
+                              )
+                            ],
                           ),
                         ),
                       ),
@@ -131,12 +127,12 @@ class _ForSmallerScreens extends StatelessWidget {
 }
 
 class _ForBiggerScreens extends StatelessWidget {
-  const _ForBiggerScreens({super.key});
+  const _ForBiggerScreens();
 
   @override
   Widget build(BuildContext context) {
     final width = context.screenWidth / 2;
-    final primaryColor = context.primaryColor;
+    final primaryColor = context.theme.colorScheme.primary;
     final data = RepositoryProvider.of<MediaDetailsEntity>(context);
     return Stack(
       children: [

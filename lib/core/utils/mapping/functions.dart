@@ -5,8 +5,13 @@ import 'package:meiyou/data/models/results.dart';
 
 MetaResponse? findBestMatchingTitle(
     List<MetaResponse> responses, String target) {
-  final titles =
-      responses.map((e) => e.title ?? e.romanji ?? e.native!).toList();
+  final titles = <String>[];
+  for (var i = 0; i < responses.length; i++) {
+    titles.add(responses[i].title ??
+        responses[i].romanji ??
+        responses[i].native ??
+        '');
+  }
   final index = findBestMatch(target, titles).index;
 
   return responses[index];

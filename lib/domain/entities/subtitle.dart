@@ -13,6 +13,9 @@ class SubtitleEntity extends Equatable {
       this.headers,
       required this.format});
 
+  static const noSubtitle = SubtitleEntity(
+      lang: 'No Subtitle', url: '', format: SubtitleFormat.empty);
+
   @override
   List<Object?> get props => [
         url,

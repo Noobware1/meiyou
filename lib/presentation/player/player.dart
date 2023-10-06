@@ -1,43 +1,50 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:media_kit/media_kit.dart'; // Provides [Player], [Media], [Playlist] etc.
+import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
-import 'package:meiyou/core/constants/animation_duration.dart';
+
 import 'package:meiyou/core/constants/default_sized_box.dart';
 import 'package:meiyou/core/constants/plaform_check.dart';
 import 'package:meiyou/core/resources/media_type.dart';
+import 'package:meiyou/core/resources/snackbar.dart';
 import 'package:meiyou/core/usecases_container/cache_repository_usecase_container.dart';
+import 'package:meiyou/core/usecases_container/video_player_usecase_container.dart';
+import 'package:meiyou/core/utils/extenstions/context.dart';
 import 'package:meiyou/core/utils/extenstions/iterable.dart';
 import 'package:meiyou/domain/repositories/cache_repository.dart';
+import 'package:meiyou/domain/usecases/video_player_usecase/get_subtitle_cue.dart';
 import 'package:meiyou/presentation/pages/info_watch/state/selected_searchResponse_bloc/selected_search_response_bloc.dart';
 import 'package:meiyou/presentation/pages/info_watch/state/source_dropdown_bloc/bloc/source_drop_down_bloc.dart';
-
 import 'package:meiyou/presentation/player/button.dart';
 import 'package:meiyou/presentation/player/change_episodes.dart';
 import 'package:meiyou/presentation/player/initialise_player.dart';
 import 'package:meiyou/presentation/player/progress_bar.dart';
 import 'package:meiyou/presentation/player/subtitle_config.dart';
+import 'package:meiyou/presentation/player/subtitle_renderer.dart';
 import 'package:meiyou/presentation/player/video_controls/change_episode.dart';
 import 'package:meiyou/presentation/player/video_controls/cubits/buffering_cubit.dart';
 import 'package:meiyou/presentation/player/video_controls/cubits/current_episode_cubit.dart';
+import 'package:meiyou/presentation/player/video_controls/cubits/is_ready.dart';
 import 'package:meiyou/presentation/player/video_controls/cubits/progress_bar_cubit.dart';
 import 'package:meiyou/presentation/player/video_controls/cubits/resize_mode_cubit.dart';
 import 'package:meiyou/presentation/player/video_controls/cubits/selected_server_cubit.dart';
 import 'package:meiyou/presentation/player/video_controls/cubits/show_controls_cubit.dart';
-
+import 'package:meiyou/presentation/player/video_controls/cubits/subtitle_worker_cubit.dart';
 import 'package:meiyou/presentation/player/video_controls/key_board_shortcuts.dart';
 import 'package:meiyou/presentation/player/video_controls/play_button.dart';
 import 'package:meiyou/presentation/player/video_controls/seek_animation.dart';
 import 'package:meiyou/core/utils/player_utils.dart';
+import 'package:meiyou/presentation/player/video_controls/subtitle_woker_bloc/subtitle_worker_bloc.dart';
 import 'package:meiyou/presentation/player/video_controls/video_controls_theme.dart';
 import 'package:meiyou/presentation/widgets/add_space.dart';
-import 'package:meiyou/presentation/widgets/episode_view/state/episode_selector/episode_selector_bloc.dart';
-import 'package:meiyou/presentation/widgets/season_selector/seasons_selector_bloc/seasons_selector_bloc.dart';
-import 'package:meiyou/presentation/widgets/video_server_view.dart';
-import 'package:meiyou/presentation/widgets/watch/state/movie_view/state/bloc/fetch_movie_bloc.dart';
+import 'package:meiyou/presentation/widgets/episode_selector/episode_selector/episode_selector_bloc.dart';
+import 'package:meiyou/presentation/widgets/season_selector/bloc/seasons_selector_bloc.dart';
+import 'package:meiyou/presentation/widgets/video_server/video_server_view.dart';
+import 'package:meiyou/presentation/widgets/watch/state/fetch_movie_bloc/fetch_movie_bloc.dart';
 
 class MeiyouPlayer extends StatefulWidget {
   const MeiyouPlayer({
@@ -53,12 +60,17 @@ class MeiyouPlayerState extends State<MeiyouPlayer>
   late final AnimationController rewindAnimation;
   late final Player player;
   late final videoController = VideoController(player);
-  // late final AnimationController controller;
+
   late final ShowVideoControlsCubit showVideoControlsCubit;
-  // late final IsPlayerReady isPlayerReady;
+  late final IsPlayerReady isPlayerReady;
   late final ResizeModeCubit resizeModeCubit;
   late final ProgressBarCubit progressBarCubit;
-  late final VideoPlayerControlsTheme theme;
+  late final VideoPlayerControlsTheme theme = VideoPlayerControlsTheme(
+      progressBarTheme:
+          ProgressBarTheme(progressColor: context.theme.colorScheme.primary));
+  late final SubtitleWorkerBloc subtitleWorkerBloc;
+  late final SubtitleWorkerCubit subtitleWorkerCubit;
+  late final BufferingCubit bufferingCubit;
 
   @override
   void initState() {
@@ -67,7 +79,8 @@ class MeiyouPlayerState extends State<MeiyouPlayer>
     rewindAnimation = AnimationController(vsync: this);
     WidgetsBinding.instance.addObserver(this);
 
-    player = Player();
+    player = Player(
+        configuration: const PlayerConfiguration(bufferSize: 30 * 1024 * 1024));
 
     if (Platform.isAndroid || Platform.isIOS) {
       setLanscape();
@@ -75,26 +88,43 @@ class MeiyouPlayerState extends State<MeiyouPlayer>
       // toggleFullscreen(context);
     }
 
-    theme = VideoPlayerControlsTheme();
+    isPlayerReady = IsPlayerReady();
+    
+    resizeModeCubit = ResizeModeCubit(isPlayerReady);
 
-    resizeModeCubit = ResizeModeCubit();
+    bufferingCubit = BufferingCubit(player.stream.buffering);
 
-    // isPlayerReady = IsPlayerReady(videoController);
+    subtitleWorkerBloc = SubtitleWorkerBloc(
+        RepositoryProvider.of<VideoPlayerUseCaseContainer>(context)
+            .get<GetSubtitleCueUseCase>(),
+        bufferingCubit,
+        player);
+
+    subtitleWorkerCubit =
+        SubtitleWorkerCubit(subtitleWorkerBloc.stream.asyncMap((event) {
+      if (event is SubtitleDecoded) {
+        return event.subtitleCues;
+      }
+      return null;
+    }), player.stream.position);
 
     showVideoControlsCubit = ShowVideoControlsCubit();
 
     progressBarCubit = ProgressBarCubit(
         player.stream.position, player.stream.duration, player.stream.buffer);
 
-    initialise(context, player, videoController);
+    initialise(
+        context, player, videoController, isPlayerReady, subtitleWorkerBloc);
   }
 
+  bool? playingState;
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused) {
+      playingState = player.state.playing;
       player.pause();
     } else if (state == AppLifecycleState.resumed) {
-      player.playOrPause();
+      playingState == false ? player.pause() : player.play();
     }
 
     super.didChangeAppLifecycleState(state);
@@ -102,18 +132,22 @@ class MeiyouPlayerState extends State<MeiyouPlayer>
 
   @override
   void dispose() {
-    if (Platform.isAndroid || Platform.isIOS) {
-      changeBackOrientation();
-    }
-
-    player.dispose();
+    // errorStream.cancel();
+    playingState = null;
     forwardAnimation.dispose();
     rewindAnimation.dispose();
     resizeModeCubit.close();
-
-    // isPlayerReady.close();
+    isPlayerReady.close();
+    bufferingCubit.close();
+    subtitleWorkerBloc.close();
+    subtitleWorkerCubit.close();
     progressBarCubit.close();
     showVideoControlsCubit.close();
+    player.dispose();
+
+    if (Platform.isAndroid || Platform.isIOS) {
+      changeBackOrientation();
+    }
     super.dispose();
   }
 
@@ -136,11 +170,13 @@ class MeiyouPlayerState extends State<MeiyouPlayer>
         // BlocProvider(
         //   create: (context) => PlayingCubit(player.stream.playing),
         // ),
+        BlocProvider.value(value: isPlayerReady),
+
+        BlocProvider.value(value: bufferingCubit),
         BlocProvider.value(value: resizeModeCubit),
         BlocProvider.value(value: progressBarCubit),
-        BlocProvider(
-          create: (context) => BufferingCubit(player.stream.buffering),
-        ),
+        BlocProvider.value(value: subtitleWorkerBloc),
+        BlocProvider.value(value: subtitleWorkerCubit),
         // BlocPsrovider(create: (context) => TracksCubit(player.stream.tracks)),
       ];
 
@@ -197,9 +233,12 @@ class MeiyouPlayerState extends State<MeiyouPlayer>
                   autofocus: true,
                   child: Stack(
                     children: [
-                      SubtitleView(
-                          controller: videoController,
-                          configuration: subtitleConfigforMobile),
+                      SubtitleRenderer(
+                          subtitleConfigruation: isMobile
+                              ? const SubtitleConfigruation()
+                              : const SubtitleConfigruation().copyWith(
+                                  textStyle: forDesktop)), // SubtitleView(
+
                       BlocBuilder<ShowVideoControlsCubit, bool>(
                           bloc: showVideoControlsCubit,
                           builder: (context, visible) {
@@ -208,13 +247,8 @@ class MeiyouPlayerState extends State<MeiyouPlayer>
                               onTap: () {
                                 if (visible) {
                                   showVideoControlsCubit.hideControls();
-                                  // BlocProvider.of<ShowVideoControlsCubit>(context)
-                                  //     .hideControls();
                                 } else {
                                   showVideoControlsCubit.showControls();
-                                  // BlocProvider.of<ShowVideoControlsCubit>(
-                                  //         context)
-                                  //     .showControls();
                                 }
                               },
                               child: IgnorePointer(
@@ -271,9 +305,10 @@ class MeiyouPlayerState extends State<MeiyouPlayer>
                                               Navigator.pop(context);
                                             },
                                             child: const Icon(
-                                                Icons
-                                                    .arrow_back_ios_new_rounded,
-                                                size: 25),
+                                              Icons.arrow_back_ios_new_rounded,
+                                              size: 25,
+                                              color: Colors.white,
+                                            ),
                                           ),
                                         ),
                                         addHorizontalSpace(10),
@@ -332,27 +367,44 @@ class MeiyouPlayerState extends State<MeiyouPlayer>
                           ),
                         );
                       }),
-                      BlocBuilder<BufferingCubit, bool>(
-                          builder: (context, buffering) {
-                        if (!buffering) {
-                          return const SizedBox.shrink();
-                        }
-                        return Center(
-                          child: CircularProgressIndicator(
-                            color: theme.progressBarTheme.progressColor,
-                          ),
+                      BlocListener<SubtitleWorkerBloc, SubtitleWorkerState>(
+                        listener: (context, state) {
+                          if (state is SubtitleDecodingFailed) {
+                            showSnackBAr(context, text: state.error.toString());
+                          }
+                        },
+                        child: defaultSizedBox,
+                      ),
+                      BlocBuilder<IsPlayerReady, bool>(
+                        builder: (context, ready) {
+                          if (!ready) {
+                            return Center(
+                              child: CircularProgressIndicator(
+                                color: theme.progressBarTheme.progressColor,
+                              ),
+                            );
+                          }
 
-                          // child: CircularProgressIndicator(
-                          //   color: theme.progressBarTheme.progressColor,
-                          // ),
-                        );
-                      }),
+                          return BlocBuilder<BufferingCubit, bool>(
+                              builder: (context, buffering) {
+                            if (!buffering) {
+                              return const SizedBox.shrink();
+                            }
+                            return Center(
+                              child: CircularProgressIndicator(
+                                color: theme.progressBarTheme.progressColor,
+                              ),
+                            );
+                          });
+                        },
+                      ),
                       _rewindButton(context, height, width),
                       _forWardButton(context, height, width),
                     ],
                   )
                   // .animate()
                   // .fade(
+
                   //   duration: Duration(seconds: 3),
                   // )
                   // .hide(
@@ -552,18 +604,22 @@ class BuildPlayAndRewindForwardButtons extends StatelessWidget {
             ),
             Expanded(
               child: Center(
-                child: BlocBuilder<BufferingCubit, bool>(
-                    builder: (context, buffering) {
-                  final size = theme(context).playButtonSize;
-                  if (buffering) {
-                    return SizedBox(
-                      height: size,
-                      width: size,
-                    );
-                  }
+                child: BlocBuilder<IsPlayerReady, bool>(
+                  builder: (context, ready) {
+                    return BlocBuilder<BufferingCubit, bool>(
+                        builder: (context, buffering) {
+                      final size = theme(context).playButtonSize;
+                      if (!ready || buffering) {
+                        return SizedBox(
+                          height: size,
+                          width: size,
+                        );
+                      }
 
-                  return const BuildPlayButton();
-                }),
+                      return const BuildPlayButton();
+                    });
+                  },
+                ),
               ),
             ),
             Expanded(
@@ -603,7 +659,7 @@ class BuildProgressBar extends StatelessWidget {
               total: state.totalDuration,
               barHeight: theme(context).progressBarTheme.height,
               buffered: state.buffered,
-              thumbColor: Colors.pinkAccent,
+              thumbColor: theme(context).progressBarTheme.progressColor,
               progressBarColor: theme(context).progressBarTheme.progressColor,
               bufferedBarColor: theme(context).progressBarTheme.bufferedColor,
               //  timeLabelType: Time,

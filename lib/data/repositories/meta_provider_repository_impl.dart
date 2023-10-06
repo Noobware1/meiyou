@@ -104,86 +104,79 @@ class MetaProviderRepositoryImpl implements MetaProviderRepository {
       {SeasonEntity? season,
       required CacheRespository cacheRespository,
       required MediaDetailsEntity mediaDetails}) async {
- 
-      final media = MediaDetails.fromEntity(mediaDetails);
-      final episodesKey = '$responsesFolder\\${mediaDetails.id}_meta-episodes';
-      try {
-        final List<Episode> episodesToMap;
-        final key = season?.number ?? 1;
-        final cache =
-            await cacheRespository.getFromIOCache<Map<num, List<Episode>>>(
-                episodesKey, CacheWriters.seasonEpisodeWriter.readFromJson);
+    final media = MediaDetails.fromEntity(mediaDetails);
+    final episodesKey = '${mediaDetails.id}_meta-episodes';
+    try {
+      final List<Episode> episodesToMap;
+      final key = season?.number ?? 1;
+      final cache =
+          await cacheRespository.getFromIOCache<Map<num, List<Episode>>>(
+              episodesKey, CacheWriters.seasonEpisodeWriter.readFromJson);
 
-        //checks if cache is exist beforehand
-        if (cache != null) {
-          //checks if the cache contains the given season
-          if (cache.containsKey(key)) {
-            episodesToMap =
-                cache[key]!.mapAsList((it) => Episode.fromEntity(it));
+      //checks if cache is exist beforehand
+      if (cache != null) {
+        //checks if the cache contains the given season
+        if (cache.containsKey(key)) {
+          episodesToMap = cache[key]!.mapAsList((it) => Episode.fromEntity(it));
+        } else {
+          //get new episodes for given seasons the adds them to new cache
+
+          final getEpisodes = await _getEpisodes(
+              (season == null ? null : Season.fromEntity(season)), media);
+
+          if (getEpisodes != null) {
+            cache[key] = getEpisodes;
+            cacheRespository.updateIOCacheValue(episodesKey,
+                CacheWriters.seasonEpisodeWriter.writeToJson(cache));
+
+            episodesToMap = getEpisodes;
           } else {
-            //get new episodes for given seasons the adds them to new cache
-
-            final getEpisodes = await _getEpisodes(
-                (season == null ? null : Season.fromEntity(season)), media);
-
-            if (getEpisodes != null) {
-              cache[key] = getEpisodes;
-              cacheRespository.updateIOCacheValue(episodesKey,
-                  CacheWriters.seasonEpisodeWriter.writeToJson(cache));
-
-              episodesToMap = getEpisodes;
-            } else {
-              episodesToMap =
-                  episodes.mapAsList((it) => Episode.fromEntity(it));
-            }
+            episodesToMap = episodes.mapAsList((it) => Episode.fromEntity(it));
+          }
+        }
+      } else {
+        //fetchs fresh episodes then caches them
+        final Map<num, List<Episode>> map = {};
+        if (media.mediaProvider == MediaProvider.tmdb) {
+          for (var i = 0; i < (media.seasons?.length ?? 1); i++) {
+            final currentSeason = media.seasons?[i];
+            final response = await _getEpisodes(
+                currentSeason != null ? Season.fromEntity(currentSeason) : null,
+                media);
+            if (response != null) map[currentSeason?.number ?? 1] = response;
           }
         } else {
-          //fetchs fresh episodes then caches them
-          final Map<num, List<Episode>> map = {};
-          if (media.mediaProvider == MediaProvider.tmdb) {
-            for (var i = 0; i < (media.seasons?.length ?? 1); i++) {
-              final currentSeason = media.seasons?[i];
-              final response = await _getEpisodes(
-                  currentSeason != null
-                      ? Season.fromEntity(currentSeason)
-                      : null,
-                  media);
-              if (response != null) map[currentSeason?.number ?? 1] = response;
-            }
-          } else {
-            final response = await fetchEpisodes(media);
-            if (response is ResponseSuccess) {
-              map[1] = response.data!;
-            }
+          final response = await fetchEpisodes(media);
+          if (response is ResponseSuccess) {
+            map[1] = response.data!;
           }
-
-          cacheRespository.addIOCache(
-              episodesKey, CacheWriters.seasonEpisodeWriter.writeToJson(map));
-          episodesToMap = map[key]!.mapAsList((it) => Episode.fromEntity(it));
         }
 
-        return List.generate(episodes.length, (i) {
-          if (episodesToMap.length < episodes.length) {
-            episodesToMap.fill(episodes.length, media);
-          }
-
-          return Episode(
-              number: episodes[i].number,
-              desc: episodes[i].desc ?? episodesToMap[i].desc,
-              isFiller: episodes[i].isFiller ?? episodesToMap[i].isFiller,
-              rated: episodes[i].rated ?? episodesToMap[i].rated,
-              thumbnail: episodes[i].thumbnail ?? episodesToMap[i].thumbnail,
-              title: episodes[i].title ?? episodesToMap[i].title,
-              url: episodes[i].url);
-        });
-      } catch (_) {
-        return episodes.mapAsList((it) => Episode.fromEntity(it).copyWith(
-              title: it.title ?? 'Episode ${it.number}',
-              thumbnail: it.thumbnail ?? media.bannerImage ?? media.poster,
-            ));
+        cacheRespository.addIOCache(
+            episodesKey, CacheWriters.seasonEpisodeWriter.writeToJson(map));
+        episodesToMap = map[key]!.mapAsList((it) => Episode.fromEntity(it));
       }
-    
 
+      return List.generate(episodes.length, (i) {
+        if (episodesToMap.length < episodes.length) {
+          episodesToMap.fill(episodes.length, media);
+        }
+
+        return Episode(
+            number: episodes[i].number,
+            desc: episodes[i].desc ?? episodesToMap[i].desc,
+            isFiller: episodes[i].isFiller ?? episodesToMap[i].isFiller,
+            rated: episodes[i].rated ?? episodesToMap[i].rated,
+            thumbnail: episodes[i].thumbnail ?? episodesToMap[i].thumbnail,
+            title: episodes[i].title ?? episodesToMap[i].title,
+            url: episodes[i].url);
+      });
+    } catch (_) {
+      return episodes.mapAsList((it) => Episode.fromEntity(it).copyWith(
+            title: it.title ?? 'Episode ${it.number}',
+            thumbnail: it.thumbnail ?? media.bannerImage ?? media.poster,
+          ));
+    }
   }
 
   Future<List<Episode>?> _getEpisodes(
@@ -218,7 +211,7 @@ class MetaProviderRepositoryImpl implements MetaProviderRepository {
       }
       throw const MeiyouException('The search response is empty',
           type: MeiyouExceptionType.providerException);
-    }, timeout: tenSecondTimeOut);
+    }, timeout: twentySecondTimeOut);
   }
 
   @override
