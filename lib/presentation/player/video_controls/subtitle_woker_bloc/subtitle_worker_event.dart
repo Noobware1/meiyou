@@ -10,5 +10,12 @@ sealed class SubtitleWorkerEvent extends Equatable {
 class ChangeSubtitle extends SubtitleWorkerEvent {
   final SubtitleEntity subtitle;
   final Map<String, String>? headers;
-  const ChangeSubtitle({required this.subtitle, this.headers});
+  // final BufferingCubit bufferingCubit;
+
+  const ChangeSubtitle(
+      {
+        // required this.player,
+      // required this.bufferingCubit,
+      required this.subtitle,
+      this.headers});
 }

@@ -214,8 +214,10 @@ class _ForSmallScreens extends StatelessWidget {
           addVerticalSpace(5),
           Row(
             children: [
-              _getSmilyFace(score, 20),
-              addHorizontalSpace(3),
+              if (score < 0.0) ...[
+                _getSmilyFace(score, 20),
+                addHorizontalSpace(3)
+              ],
               Text(
                 score.toString(),
                 style:

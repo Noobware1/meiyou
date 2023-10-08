@@ -1,8 +1,6 @@
-// Copyright 2013 The Flutter Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meiyou/config/routes/routes.dart';
@@ -10,6 +8,7 @@ import 'package:meiyou/config/routes/routes_name.dart';
 import 'package:meiyou/core/initialization_view/intialise_view_type.dart';
 import 'package:meiyou/core/resources/snackbar.dart';
 import 'package:meiyou/core/usecases_container/video_player_usecase_container.dart';
+import 'package:meiyou/core/utils/extenstions/context.dart';
 import 'package:meiyou/data/repositories/video_player_repositoriy_impl.dart';
 import 'package:meiyou/domain/entities/meta_response.dart';
 import 'package:meiyou/presentation/pages/home/home_page.dart';
@@ -24,12 +23,36 @@ import 'package:meiyou/presentation/widgets/navigation_bars/bottom_navigatior.da
 import 'package:meiyou/presentation/widgets/navigation_bars/side_navigator.dart';
 import 'package:meiyou/presentation/widgets/settings/providers.dart';
 import 'package:meiyou/presentation/widgets/settings/theme_page.dart';
+import 'package:meiyou/presentation/widgets/theme/bloc/theme_bloc.dart';
 import 'package:meiyou/presentation/widgets/video_server/video_server_view.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey =
     GlobalKey<NavigatorState>(debugLabel: 'root');
 final GlobalKey<NavigatorState> _sectionANavigatorKey =
     GlobalKey<NavigatorState>(debugLabel: 'sectionANav');
+
+SystemUiOverlayStyle setOverlays(MeiyouThemeState state, BuildContext context) {
+  if (state.themeMode == ThemeMode.dark ||
+      (state.themeMode == ThemeMode.system && context.isDarkMode)) {
+    return state.isAmoled
+        ? SystemUiOverlayStyle.dark.copyWith(
+            statusBarBrightness: Brightness.light,
+            statusBarIconBrightness: Brightness.light,
+            systemNavigationBarColor: Colors.black)
+        : SystemUiOverlayStyle.dark.copyWith(
+            statusBarBrightness: Brightness.light,
+            statusBarIconBrightness: Brightness.light,
+            systemNavigationBarColor:
+                state.theme.darkTheme.colorScheme.secondary);
+  } else {
+    return SystemUiOverlayStyle.light.copyWith(
+        statusBarBrightness: Brightness.dark,
+        statusBarIconBrightness: Brightness.dark,
+        // statusBarColor: Colors.transparent,
+        // statusBarColor: state.theme.lightTheme.colorScheme.background,
+        systemNavigationBarColor: state.theme.lightTheme.colorScheme.secondary);
+  }
+}
 
 class RouterProvider {
   GoRouter get router => GoRouter(
@@ -43,16 +66,22 @@ class RouterProvider {
               // using a BottomNavigationBar). The StatefulNavigationShell is passed
               // to be able access the state of the shell and to navigate to other
               // branches in a stateful way.
-              return AppTheme(
-                child: CustomScaffold(
-                    bottomNavigationBar: MyBottomNavigationBar(
-                        goRouterState: state,
-                        statefulNavigationShell: navigationShell),
-                    sideNavigatonBar: SideNavigatonBar(
-                        goRouterState: state,
-                        statefulNavigationShell: navigationShell),
-                    body: navigationShell),
-              );
+              return AppTheme.builder(
+                  // listener: (context, state) =>
+                  //     setOverlays(state as MeiyouThemeState, context),
+                  builder: (context, theme) {
+                return AnnotatedRegion(
+                  value: setOverlays(theme as MeiyouThemeState, context),
+                  child: CustomScaffold(
+                      bottomNavigationBar: MyBottomNavigationBar(
+                          goRouterState: state,
+                          statefulNavigationShell: navigationShell),
+                      sideNavigatonBar: SideNavigatonBar(
+                          goRouterState: state,
+                          statefulNavigationShell: navigationShell),
+                      body: navigationShell),
+                );
+              });
             },
             branches: <StatefulShellBranch>[
               // The route branch for the first tab of the bottom navigation bar.

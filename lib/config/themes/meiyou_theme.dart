@@ -1,6 +1,9 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:meiyou/config/themes/utils.dart';
+import 'package:meiyou/core/utils/extenstions/context.dart';
+import 'package:meiyou/presentation/widgets/theme/bloc/theme_bloc.dart';
 
 class MeiyouTheme extends Equatable {
   final String name;
@@ -36,7 +39,10 @@ class MeiyouTheme extends Equatable {
     bool isAmoled = false,
   }) {
     this.lightTheme = lightTheme.copyWith(
-      appBarTheme: AppBarTheme(color: lightTheme.colorScheme.background),
+      appBarTheme: AppBarTheme(
+        color: lightTheme.colorScheme.background,
+        elevation: 0.0,
+      ),
       dropdownMenuTheme: DropdownMenuThemeData(
           textStyle: TextStyle(color: lightTheme.colorScheme.onBackground)),
       dialogTheme: DialogTheme(
@@ -54,7 +60,8 @@ class MeiyouTheme extends Equatable {
     );
 
     this.darkTheme = darkTheme.copyWith(
-      appBarTheme: AppBarTheme(color: darkTheme.colorScheme.background),
+      appBarTheme:
+          AppBarTheme(elevation: 0.0, color: darkTheme.colorScheme.background),
       dropdownMenuTheme: DropdownMenuThemeData(
           textStyle: TextStyle(color: darkTheme.colorScheme.onBackground)),
       dialogTheme: DialogTheme(
@@ -98,41 +105,71 @@ class MeiyouTheme extends Equatable {
         name: 'Default'),
     MeiyouTheme(
         lightTheme: ThemeData(
-            colorScheme: const ColorScheme.light(
-                secondary: Color(0xFFEEEFEF),
-                onPrimary: Colors.black,
-                primary: Colors.pinkAccent,
-                tertiary: Color(0xFFEEEFEF))),
+          // primarySwatch: MaterialColor(primary, swatch),
+          // primaryColor: Color(0xff9b6969).withOpacity(0.4),
+          colorScheme: const ColorScheme.light(
+            secondary: Color.fromARGB(255, 250, 229, 229),
+            onPrimary: Colors.black,
+            primary: Color.fromARGB(255, 204, 150, 150),
+            tertiary: Color.fromARGB(255, 239, 238, 238),
+            // tertiary: ,
+          ),
+        ),
         darkTheme: ThemeData.dark().copyWith(
-            colorScheme: ThemeData.dark().colorScheme.copyWith(
-                background: Color.fromARGB(255, 194, 147, 147),
-                secondary: Color.fromARGB(255, 226, 166, 166),
+          colorScheme: ThemeData.dark().colorScheme.copyWith(
+                background: const Color(0xff1c1314),
+                secondary: const Color(0xff573e3e),
+                primary: const Color(0xff9b6969),
+                tertiary: const Color.fromARGB(255, 36, 24, 26),
+              ),
+        ),
+        name: 'Strawberry'),
+    MeiyouTheme(
+        lightTheme: ThemeData(
+          // primarySwatch: MaterialColor(primary, swatch),
+          // primaryColor: Color(0xff9b6969).withOpacity(0.4),
+          colorScheme: const ColorScheme.light(
+            background: Color(0xfffefbfe),
+            secondary: Color(0xfff9e4e0),
+            onPrimary: Colors.black,
+            primary: Colors.pinkAccent,
+            tertiary: Color.fromARGB(255, 239, 238, 238),
+            // tertiary: ,
+          ),
+        ),
+        darkTheme: ThemeData.dark().copyWith(
+          colorScheme: ThemeData.dark().colorScheme.copyWith(
+                background: const Color(0xff17151c),
+                secondary: const Color(0xff18131c),
                 primary: Colors.pinkAccent,
-                tertiary: const Color(0xff424242))),
-        name: 'Midnight Dusk')
+                tertiary: const Color.fromARGB(255, 19, 17, 24),
+              ),
+        ),
+        name: 'Mignight Dusk'),
+    MeiyouTheme(
+        lightTheme: ThemeData(
+          // primarySwatch: MaterialColor(primary, swatch),
+          // primaryColor: Color(0xff9b6969).withOpacity(0.4),
+          colorScheme: const ColorScheme.light(
+            background: Color(0xfffafef6),
+            secondary: Color(0xffe5f1e7),
+            onPrimary: Colors.black,
+            primary: Colors.green,
+            tertiary: Color.fromARGB(255, 239, 238, 238),
+            // tertiary: ,
+          ),
+        ),
+        darkTheme: ThemeData.dark().copyWith(
+          colorScheme: ThemeData.dark().colorScheme.copyWith(
+                background: const Color(0xff1a1c19),
+                secondary: const Color(0xff232c22),
+                primary: Colors.green,
+                tertiary: const Color.fromARGB(255, 31, 34, 30),
+              ),
+        ),
+        name: 'Green Apple'),
   ];
 
   @override
   List<Object?> get props => [name, lightTheme, darkTheme];
-}
-
-class MeiyouThemeFromPrimary extends MeiyouTheme {
-  MeiyouThemeFromPrimary({required Color primaryColor, required String name})
-      : super(
-            name: name,
-            darkTheme: ThemeData(
-                colorScheme: ColorScheme.dark(
-              onPrimary: const Color(0xff121212),
-              secondary: const Color(0xff121212),
-              primary: primaryColor,
-              onSecondary: const Color(0xff121212),
-              background: Colors.black,
-              surface: Colors.black,
-            )),
-            lightTheme: ThemeData(
-                colorScheme: ColorScheme.light(
-                    secondary: const Color(0xFFEEEFEF),
-                    onPrimary: Colors.black,
-                    primary: primaryColor,
-                    tertiary: const Color(0xFFEEEFEF))));
 }

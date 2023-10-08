@@ -65,7 +65,10 @@ class MediaDetails extends MediaDetailsEntity {
           .toList(),
       genres: genres ?? [''],
       runtime: media['runtime'],
-      averageScore: (media['vote_average']?.toString() ?? '0').toDouble(),
+      averageScore: (media['vote_average']?.toString() ?? '0')
+          .toDouble()
+          .toStringAsFixed(1)
+          .toDouble(),
       mediaType: type,
       originalLanguage: media['original_language'],
       bannerImage: getOriImageUrl(media["backdrop_path"]),

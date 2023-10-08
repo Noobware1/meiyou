@@ -1,18 +1,17 @@
 import 'dart:io';
 
 extension DirectoryUtils on Directory {
-  Future<void> deleteAllEntries([void Function()? callback]) async {
+  void deleteAllEntries([void Function()? callback]) {
     try {
       if (existsSync()) {
-        await for (var entity in list()) {
-          if (entity is File) {
-            await entity.delete();
-          }
-        }
+        listSync().forEach((e) {
+          e.deleteSync(recursive: true);
+        });
         callback?.call();
       }
-    } catch (e) {
+    } catch (e, s) {
       print(e);
+      print(s);
     }
   }
 }

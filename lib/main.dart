@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:meiyou/config/routes/router_provider.dart';
@@ -31,13 +33,10 @@ void main() async {
   MediaKit.ensureInitialized();
 
   final appdirs = await AppDirectories.getInstance();
-
-  // final ThemeRepositoryImpl themeRepo = await ThemeRepositoryImpl.getInstance(
-
-  //     '${appdirs.appDocumentDirectory.path}\\meiyou_theme.json');
+  
 
   final theme_bloc.MeiyouThemeState? theme = await loadData(
-      savePath: '${appdirs.settingsDirectory.path}\\theme.json',
+      savePath: '${appdirs.settingsDirectory.path}/theme.json',
       transFormer: (json) =>
           theme_bloc.MeiyouThemeState.fromJson(json as Map<String, dynamic>),
       onError: print);
@@ -45,7 +44,7 @@ void main() async {
   final CacheRespository cacheRespository =
       CacheRepositoryImpl(appdirs.appCacheDirectory.path);
 
-  await appdirs.appCacheDirectory.deleteAllEntries();
+  // appdirs.appCacheDirectory.deleteAllEntries();
   // await cacheRespository.deleteIOCacheFromDir(responsesFolder);
 
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
@@ -77,9 +76,13 @@ class Meiyou extends StatefulWidget {
 class _MeiyouState extends State<Meiyou> {
   @override
   void initState() {
+    // context.themeBloc.stream.listen((state) {
+    //   setOverlays(state as theme_bloc.MeiyouThemeState);
+    // });
     super.initState();
   }
 
+  
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -87,6 +90,7 @@ class _MeiyouState extends State<Meiyou> {
 
   @override
   void dispose() {
+    // _subscription.cancel();
     super.dispose();
   }
 
@@ -113,13 +117,15 @@ class _MeiyouState extends State<Meiyou> {
         ProvidersRepositoryContainer(ProvidersRepositoryImpl()).inject(),
         VideoPlayerUseCaseContainer(VideoPlayerRepositoryImpl()).inject(),
       ],
-      child: MaterialApp.router(
-        debugShowCheckedModeBanner: false,
-        routerConfig: RouterProvider().router,
-        themeMode: context.themeBloc.state.themeMode,
-        theme: context.themeBloc.state.theme.lightTheme,
-        darkTheme: context.themeBloc.state.theme.darkTheme,
-      ),
+     
+        child: MaterialApp.router(
+          debugShowCheckedModeBanner: false,
+          routerConfig: RouterProvider().router,
+          themeMode: context.themeBloc.state.themeMode,
+          theme: context.themeBloc.state.theme.lightTheme,
+          darkTheme: context.themeBloc.state.theme.darkTheme,
+        ),
+      
     );
   }
 }

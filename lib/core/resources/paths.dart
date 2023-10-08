@@ -25,11 +25,7 @@ class AppDirectories {
       getApplicationDocumentsDirectory(),
     ]);
 
-    final cacheDir = Directory('${dirs[0].path}\\cache');
-    if (!cacheDir.existsSync()) {
-      cacheDir.createSync();
-    }
-    final appDocDir = Directory('${dirs[1].path}\\meiyou');
+    final appDocDir = Directory('${dirs[1].path}/meiyou');
     if (!appDocDir.existsSync()) {
       appDocDir.createSync();
     }
@@ -40,20 +36,18 @@ class AppDirectories {
     ];
 
     for (final subDirName in subDirectories) {
-      final subDir = Directory('${appDocDir.path}\\$subDirName');
+      final subDir = Directory('${appDocDir.path}/$subDirName');
       if (!subDir.existsSync()) {
         subDir.createSync();
       }
     }
 
     return AppDirectories(
-      appCacheDirectory: cacheDir,
+      appCacheDirectory: dirs[0],
       appDocumentDirectory: appDocDir,
-      settingsDirectory: Directory('${appDocDir.path}\\${subDirectories[0]}'),
+      settingsDirectory: Directory('${appDocDir.path}/${subDirectories[0]}'),
       savedSelectedResponseDirectory:
-          Directory('${appDocDir.path}\\${subDirectories[1]}'),
-
-      ///     Directory('${appDocDir.path}\\${subDirectories[2]}'),
+          Directory('${appDocDir.path}/${subDirectories[1]}'),
     );
   }
 }

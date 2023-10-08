@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:meiyou/config/themes/utils.dart';
 import 'package:meiyou/core/constants/icons.dart';
 import 'package:meiyou/core/constants/plaform_check.dart';
+import 'package:meiyou/core/resources/colors.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
 import 'package:meiyou/presentation/widgets/app_theme.dart';
 
@@ -25,10 +26,11 @@ class SideNavigatonBar extends StatelessWidget {
                 elevation: 8.0,
                 selectedIndex: statefulNavigationShell.currentIndex,
                 backgroundColor: getTheme(context, state).colorScheme.secondary,
-                unselectedIconTheme: const IconThemeData(
-                  color: Colors.grey,
+                unselectedIconTheme: IconThemeData(
+                  color: getBaseColorFromThemeMode(context, state.themeMode),
                 ),
-                unselectedLabelTextStyle: const TextStyle(color: Colors.grey),
+                unselectedLabelTextStyle: TextStyle(
+                    color: getBaseColorFromThemeMode(context, state.themeMode)),
                 selectedLabelTextStyle: TextStyle(
                     color: getTheme(context, state).colorScheme.primary),
                 labelType: NavigationRailLabelType.all,

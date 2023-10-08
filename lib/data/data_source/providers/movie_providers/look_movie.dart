@@ -66,6 +66,7 @@ class LookMovie extends MovieProvider {
     return client
         .get('$hostUrl/shows/play/$url', cookie: cookie)
         .then((response) {
+      print(response.text);
       final text = response.text;
 
       final seasons = <Season>[];

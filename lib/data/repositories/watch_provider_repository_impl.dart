@@ -339,7 +339,7 @@ class WatchProviderRepositoryImpl implements WatchProviderRepository {
       String savePath, BaseProvider provider) async {
     return await loadData(
         savePath:
-            savePath + '\\' + _SavePaths.saveResponsePath(provider, _media),
+            savePath + '/' + _SavePaths.saveResponsePath(provider, _media),
         transFormer: SearchResponse.fromJson,
         onError: (e) => print(e));
   }
@@ -352,7 +352,7 @@ class WatchProviderRepositoryImpl implements WatchProviderRepository {
   }) async {
     return await saveData(
         savePath:
-            savePath + '\\' + _SavePaths.saveResponsePath(provider, _media),
+            savePath + '/' + _SavePaths.saveResponsePath(provider, _media),
         data: jsonEncode(SearchResponse.fromEntity(searchResponse).toJson()),
         onCompleted: () => print('data written successFul'),
         onError: (e) => print(e));

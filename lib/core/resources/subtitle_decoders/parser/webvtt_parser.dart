@@ -28,7 +28,7 @@ class WebVttParser extends SubtitleParser {
           cues.add(SubtitleCue(
               start: timeStamps[0],
               end: timeStamps[1],
-              text: lines.sublist(startIndex + 1).join('\n'),
+              text: parseText(lines.sublist(startIndex + 1)),
               index: index));
           index++;
         }

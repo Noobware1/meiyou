@@ -17,10 +17,8 @@ part 'subtitle_worker_state.dart';
 class SubtitleWorkerBloc
     extends Bloc<SubtitleWorkerEvent, SubtitleWorkerState> {
   final GetSubtitleCueUseCase _getSubtitleCueUseCase;
-  final BufferingCubit _bufferingCubit;
-  final Player _player;
-  SubtitleWorkerBloc(
-      this._getSubtitleCueUseCase, this._bufferingCubit, this._player)
+
+  SubtitleWorkerBloc(this._getSubtitleCueUseCase)
       : super(const SubtitleDecoding(SubtitleEntity.noSubtitle)) {
     on<ChangeSubtitle>(_changeSubtitle);
   }
@@ -30,7 +28,6 @@ class SubtitleWorkerBloc
     if (event.subtitle == SubtitleEntity.noSubtitle) {
       emit(NoSubtitle(event.subtitle));
     } else {
-      _bufferingCubit.setForceBuffering(_player);
       SubtitleDecoding(event.subtitle);
       final response = await _getSubtitleCueUseCase.call(
           GetSubtitleCueUseCaseParams(event.subtitle, headers: event.headers));
@@ -40,7 +37,6 @@ class SubtitleWorkerBloc
       } else {
         emit(SubtitleDecoded(response.data!, event.subtitle));
       }
-      _bufferingCubit.releaseForceBuffering(_player);
     }
   }
 }

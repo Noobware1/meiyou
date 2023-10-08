@@ -1,7 +1,6 @@
 import 'package:meiyou/core/resources/subtitle_decoders/exceptions/subtitle_parsing_expection.dart';
 import 'package:meiyou/core/resources/subtitle_decoders/models/cue.dart';
 import 'package:meiyou/core/resources/subtitle_decoders/subtitle_parser.dart';
-import 'package:meiyou/core/utils/extenstions/iterable.dart';
 import 'package:meiyou/core/utils/extenstions/string.dart';
 
 class SubripParser extends SubtitleParser {
@@ -10,14 +9,17 @@ class SubripParser extends SubtitleParser {
     return SubtitleParsingException.tryWith(() {
       final lines = readFile(subtitleData);
       final cues = <SubtitleCue>[];
+      int index = 0;
       for (final List<String> lines in lines) {
-        if (lines.first.toIntOrNull() != null) {
-          final timeStamps = parseTimeCodes(lines[1]);
+        if (lines.first.contains(_srtArrow)) {
+          final timeStamps = parseTimeCodes(lines[0]);
           cues.add(SubtitleCue(
               start: timeStamps[0],
               end: timeStamps[1],
-              text: lines.sublist(2).join('\n'),
-              index: lines[0].toInt()));
+              text: parseText(lines.sublist(2)),
+              index: index));
+
+          index++;
         }
       }
       return cues;
@@ -26,19 +28,15 @@ class SubripParser extends SubtitleParser {
 
   @override
   List<Duration> parseTimeCodes(String time) {
-    final timeStamps = time.replaceAll(',', ':').split(_srtArrow);
-    return [
-      _parseTimeStamp(
-        timeStamps[0],
-      ),
-      _parseTimeStamp(timeStamps[1])
-    ];
+    final timeStamps =
+        time.replaceAll(',', ':').replaceAll('.', ':').split(_srtArrow);
+    return [_parseTimeStamp(timeStamps[0]), _parseTimeStamp(timeStamps[1])];
   }
 
   Duration _parseTimeStamp(String timeStamp) {
     final numbers = timeStamp
         .split(':')
-        .mapAsList((it) => RegExp('\\d+').firstMatch(it)?.group(0))
+        .map((it) => RegExp('\\d+').firstMatch(it)?.group(0))
         .nonNulls
         .toList();
 
@@ -67,26 +65,4 @@ class SubripParser extends SubtitleParser {
   }
 
   static const _srtArrow = ' --> ';
-}
-
-void main(List<String> args) {
-  final test = r'''
-1
-00:00:00,498 --> 00:00:02,827
-- Here's what I love most
-about food and diet.
-
-2
-00:00:02,827 --> 00:00:06,383
-We all eat several times a day,
-and we're totally in charge
-
-3
-00:00:06,383 --> 00:00:09,427
-of what goes on our plate
-and what stays off.
-''';
-
-  final a = SubripParser().parse(test);
-  print(a);
 }

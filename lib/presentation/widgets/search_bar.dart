@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:meiyou/core/utils/extenstions/context.dart';
 
 class CustomSearchBar extends StatefulWidget {
   final void Function(String query) onSearch;
@@ -31,7 +32,10 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
           onSubmitted: widget.onSearch,
           decoration: InputDecoration(
             // prefixIconColor: Colors.blue,
-            border: InputBorder.none,
+            filled: true,
+            fillColor: context.theme.colorScheme.background,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(25)),
+            // enabledBorder: ,
             constraints: BoxConstraints(
               maxWidth: width / 1.2,
             ),

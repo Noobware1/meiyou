@@ -6,11 +6,13 @@ class MeiyouSearchBar extends StatefulWidget {
   final double height;
   final BorderRadius borderRadius;
   final Widget? child;
+  final Function(String query) onSearch;
   const MeiyouSearchBar(
       {super.key,
       this.height = 80,
       this.child,
-      this.borderRadius = const BorderRadius.all(Radius.circular(20))});
+      this.borderRadius = const BorderRadius.all(Radius.circular(20)),
+      required this.onSearch});
 
   @override
   State<MeiyouSearchBar> createState() => _MeiyouSearchBarState();
@@ -20,9 +22,11 @@ class _MeiyouSearchBarState extends State<MeiyouSearchBar> {
   static const fallbackColor = Colors.grey;
   Color color = fallbackColor;
   var borderWidth = 1.0;
+  late final TextEditingController controller;
 
   @override
   void initState() {
+    controller = TextEditingController();
     super.initState();
   }
 
@@ -82,35 +86,60 @@ class _MeiyouSearchBarState extends State<MeiyouSearchBar> {
                       border: Border.all(color: color, width: borderWidth),
                       borderRadius: widget.borderRadius,
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(left: 10),
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: Icon(
-                              Icons.search_rounded,
-                              color: color,
-                              size: widget.height / 2,
-                            ),
+                    child: TextField(
+                      controller: controller,
+                      style: TextStyle(fontSize: 40),
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        constraints: BoxConstraints(
+                          maxWidth: context.screenWidth / 1.2,
+                        ),
+                        prefixIcon: IconButton(
+                            disabledColor: Colors.grey,
+                            icon: Icon(Icons.search, color: color),
+                            onPressed: () => widget.onSearch(controller.text)),
+                        // hintText: controller.text,
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            controller.clear();
+                          },
+                          icon: Icon(
+                            Icons.clear,
+                            color: color,
                           ),
                         ),
-                        if (widget.child != null)
-                          Expanded(child: widget.child!),
-                        Padding(
-                          padding: const EdgeInsets.only(right: 10.0),
-                          child: Align(
-                            alignment: Alignment.centerRight,
-                            child: Icon(
-                              Icons.search_rounded,
-                              color: color,
-                              size: widget.height / 2,
-                            ),
-                          ),
-                        )
-                      ],
+                      ),
                     ),
+                    // child: Row(
+                    //   mainAxisSize: MainAxisSize.max,
+                    //   children: [
+                    //     Padding(
+                    //       padding: const EdgeInsets.only(left: 10),
+                    //       child: Align(
+                    //         alignment: Alignment.centerLeft,
+                    //         child: Icon(
+                    //           Icons.search_rounded,
+                    //           color: color,
+                    //           size: widget.height / 2,
+                    //         ),
+                    //       ),
+                    //     ),
+                    //     ,
+                    //     // if (widget.child != null)
+                    //     //   Expanded(child: widget.child!),
+                    //     Padding(
+                    //       padding: const EdgeInsets.only(right: 10.0),
+                    //       child: Align(
+                    //         alignment: Alignment.centerRight,
+                    //         child: Icon(
+                    //           Icons.search_rounded,
+                    //           color: color,
+                    //           size: widget.height / 2,
+                    //         ),
+                    //       ),
+                    //     )
+                    //   ],
+                    // ),
                   ),
                 ),
                 Positioned(

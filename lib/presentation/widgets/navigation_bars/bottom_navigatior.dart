@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:meiyou/config/themes/utils.dart';
 // import 'package:meiyou/config/themes/app_themes/app_theme.dart';
 import 'package:meiyou/core/constants/icons.dart';
+import 'package:meiyou/core/resources/colors.dart';
+import 'package:meiyou/core/utils/extenstions/color.dart';
 import 'package:meiyou/presentation/widgets/app_theme.dart';
 
 class MyBottomNavigationBar extends StatelessWidget {
@@ -23,8 +25,16 @@ class MyBottomNavigationBar extends StatelessWidget {
           useLegacyColorScheme: false,
           selectedIconTheme: IconThemeData(
               color: getTheme(context, state).colorScheme.primary),
-          unselectedIconTheme: const IconThemeData(color: Colors.grey),
-          unselectedLabelStyle: const TextStyle(color: Colors.grey),
+          unselectedIconTheme: IconThemeData(
+              color: getBaseColorFromThemeMode(context, state.themeMode)),
+          unselectedLabelStyle: TextStyle(
+              color: getBaseColorFromThemeMode(context, state.themeMode)
+              // color: getTheme(context, state)
+              //     .colorScheme
+              //     .primary
+              //     .resloveBasedOnThemeMode(context, state.themeMode)
+
+              ),
           selectedLabelStyle:
               TextStyle(color: getTheme(context, state).colorScheme.primary),
           onTap: (value) => statefulNavigationShell.goBranch(value),

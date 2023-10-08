@@ -40,7 +40,7 @@ void initialise(BuildContext context, Player player, VideoController controller,
 
     if (sub != null) {
       subtitleWorkerBloc.add(ChangeSubtitle(subtitle: sub));
-      // player.setSubtitleTrack(S(sub.url, language: sub.lang));
+      //.setSubtitleTrack(S(sub.url, language: sub.lang));
     } else {
       subtitleWorkerBloc
           .add(const ChangeSubtitle(subtitle: SubtitleEntity.noSubtitle));
@@ -48,10 +48,11 @@ void initialise(BuildContext context, Player player, VideoController controller,
   });
 
   if (startVideoForm != null) {
-    tryWithAsyncSafe(() => player.stream.duration.first.then((value) {
-          player.seek(startVideoForm).then((value) => player.play());
+    tryWithAsyncSafe(() => player.stream.duration.first.then((value) async {
+          await player.seek(startVideoForm);
+          player.play();
         }));
   } else {
-    player.seek(Duration.zero).then((value) => player.play());
+    player.play();
   }
 }

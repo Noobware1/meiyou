@@ -25,6 +25,7 @@ class _BuildPlayButtonState extends State<BuildPlayButton>
         reverseDuration: const Duration(milliseconds: 300))
       ..forward();
     _subscription = player(context).stream.playing.listen((playing) {
+      print(playing);
       if (!playing) {
         _animationController.reverse();
       } else {

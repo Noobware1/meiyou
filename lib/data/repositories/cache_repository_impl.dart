@@ -48,12 +48,12 @@ class CacheRepositoryImpl implements CacheRespository {
   @override
   Future<void> addIOCache(String path, String data) async {
     final file = File(_appendCacheDir(path));
-
+    print(file.path);
     if (file.existsSync()) {
       throw MeiyouException(
           'file alreadys exists in ${_appendCacheDir(path)}, use updateIOCacheValue() to update it or use remove it with removeIOCache()');
     } else {
-      await file.create(recursive: true);
+      await file.create();
       //   file.writeAsString(data);
       await file.writeAsString(data, flush: true);
 
@@ -75,7 +75,7 @@ class CacheRepositoryImpl implements CacheRespository {
 
   @override
   Future<void> deleteIOCacheFromDir(String path) async {
-    await Directory(_appendCacheDir(path)).deleteAllEntries();
+    Directory(_appendCacheDir(path)).deleteAllEntries();
 
     // if (await dir.exists()) {
     //   await for (var entity in dir.list()) {
@@ -127,5 +127,5 @@ class CacheRepositoryImpl implements CacheRespository {
     await deleteAllIOCache();
   }
 
-  String _appendCacheDir(String path) => '$_cacheDir\\$path';
+  String _appendCacheDir(String path) => '$_cacheDir/$path';
 }

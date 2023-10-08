@@ -16,6 +16,7 @@ class BufferingCubit extends Cubit<bool> {
     _subscription.pause();
 
     emit(true);
+
     playingState = player.state.playing;
     player.pause();
   }
@@ -24,7 +25,11 @@ class BufferingCubit extends Cubit<bool> {
     emit(false);
 
     _subscription.resume();
-    playingState == false ? player.pause() : player.play();
+    if (playingState == true) {
+      player.play();
+    }
+
+    
     playingState = null;
   }
 

@@ -1,9 +1,12 @@
 import 'dart:async';
 
+import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:meiyou/config/themes/meiyou_theme.dart';
+import 'package:meiyou/core/utils/extenstions/context.dart';
 
 part 'theme_event.dart';
 part 'theme_state.dart';
@@ -48,5 +51,11 @@ class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
         theme: state.theme,
         themeMode: event.themeMode,
         isAmoled: state.isAmoled));
+  }
+
+  @override
+  Future<void> close() {
+    // _subscription.cancel();
+    return super.close();
   }
 }

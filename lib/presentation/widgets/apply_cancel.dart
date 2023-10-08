@@ -3,7 +3,6 @@ import 'package:meiyou/core/constants/animation_duration.dart';
 import 'package:meiyou/core/constants/plaform_check.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
 import 'package:meiyou/presentation/widgets/add_space.dart';
-import 'package:meiyou/core/resources/get_color_based_on_brightness.dart';
 
 class AppyCancel extends StatelessWidget {
   final VoidCallback onApply;
@@ -44,7 +43,7 @@ class AppyCancel extends StatelessWidget {
       backgroundColor: MaterialStatePropertyAll(
           context.theme.colorScheme.brightness == Brightness.dark
               ? const Color.fromARGB(255, 28, 27, 32)
-              : context.theme.colorScheme.secondary),
+              : Colors.white60),
       elevation: const MaterialStatePropertyAll(8),
       overlayColor: MaterialStatePropertyAll(
           context.theme.colorScheme.brightness == Brightness.dark

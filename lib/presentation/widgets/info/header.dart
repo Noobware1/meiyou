@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meiyou/core/constants/default_sized_box.dart';
 import 'package:meiyou/core/resources/snackbar.dart';
@@ -12,6 +13,11 @@ import 'package:meiyou/presentation/widgets/custom_orientation_builder.dart';
 import 'package:meiyou/presentation/widgets/gradient.dart';
 import 'package:meiyou/presentation/widgets/image_view/image_holder.dart';
 import 'package:meiyou/presentation/widgets/layout_builder.dart';
+
+_copyToClipBoard(BuildContext context, MediaDetailsEntity data) {
+  Clipboard.setData(ClipboardData(text: data.mediaTitle)).then(
+      (value) => showSnackBAr(context, text: 'Copied ${data.mediaTitle}'));
+}
 
 class InfoHeader extends StatelessWidget {
   const InfoHeader({
@@ -74,16 +80,18 @@ class _ForSmallerScreens extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.end,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                data.title ??
-                                    data.romaji ??
-                                    data.native ??
-                                    'No title',
-                                maxLines: 5,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w700,
+                              GestureDetector(
+                                onLongPress: () {
+                                  _copyToClipBoard(context, data);
+                                },
+                                child: Text(
+                                  data.mediaTitle,
+                                  maxLines: 5,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w700,
+                                  ),
                                 ),
                               ),
                               addVerticalSpace(10),
@@ -176,16 +184,18 @@ class _ForBiggerScreens extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.end,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              data.title ??
-                                  data.romaji ??
-                                  data.native ??
-                                  'No Title',
-                              maxLines: 5,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontSize: 25,
-                                fontWeight: FontWeight.w700,
+                            GestureDetector(
+                              onLongPress: () {
+                                _copyToClipBoard(context, data);
+                              },
+                              child: Text(
+                                data.mediaTitle,
+                                maxLines: 5,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 25,
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
                             ),
                             addVerticalSpace(10),

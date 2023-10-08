@@ -1,7 +1,10 @@
 part of 'theme_bloc.dart';
 
 sealed class ThemeEvent extends Equatable {
-  const ThemeEvent();
+  // final void Function(MeiyouThemeState state) setOverlayCallback;
+  const ThemeEvent(
+      // this.setOverlayCallback
+      );
 
   @override
   List<Object> get props => [];
@@ -10,16 +13,25 @@ sealed class ThemeEvent extends Equatable {
 class ToggleTheme extends ThemeEvent {
   final MeiyouTheme theme;
 
-  const ToggleTheme(this.theme);
+  const ToggleTheme(
+    this.theme,
+    // super.setOverlayCallback
+  );
 }
 
 class ToggleThemeMode extends ThemeEvent {
   final ThemeMode themeMode;
 
-  const ToggleThemeMode(this.themeMode);
+  const ToggleThemeMode(
+    this.themeMode,
+    // super.setOverlayCallback
+  );
 }
 
 class ToggleAmoledTheme extends ThemeEvent {
   final bool toggleAmoled;
-  const ToggleAmoledTheme(this.toggleAmoled);
+  const ToggleAmoledTheme(
+    this.toggleAmoled,
+    // super.setOverlayCallback
+  );
 }

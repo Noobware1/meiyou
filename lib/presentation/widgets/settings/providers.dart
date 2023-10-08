@@ -61,15 +61,21 @@ class _ProvidersPageState extends State<ProvidersPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Providers')),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            addVerticalSpace(20),
-            _defaultProviders(context),
-          ],
+    return SafeArea(
+      left: false,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Providers'),
+          primary: false,
+        ),
+        body: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              addVerticalSpace(20),
+              _defaultProviders(context),
+            ],
+          ),
         ),
       ),
     );

@@ -5,6 +5,7 @@ import 'package:meiyou/core/constants/plaform_check.dart';
 import 'package:meiyou/core/utils/extenstions/iterable.dart';
 import 'package:meiyou/core/utils/player_utils.dart';
 import 'package:meiyou/domain/entities/subtitle.dart';
+import 'package:meiyou/presentation/player/video_controls/cubits/buffering_cubit.dart';
 import 'package:meiyou/presentation/player/video_controls/cubits/selected_server_cubit.dart';
 import 'package:meiyou/presentation/player/video_controls/cubits/subtitle_worker_cubit.dart';
 import 'package:meiyou/presentation/player/video_controls/subtitle_woker_bloc/subtitle_worker_bloc.dart'
@@ -46,7 +47,8 @@ class ChangeSubtitle extends StatelessWidget {
                         if (subtitle != workerBloc.state.subtitle) {
                           workerBloc.add(bloc.ChangeSubtitle(
                               subtitle: subtitle,
-                              headers: selectedServerCubit.headers));
+                              headers: selectedServerCubit.headers,
+                              ));
                         }
                         //  if(track != )
                         // if (track != player.state.track.subtitle) {

@@ -8,6 +8,17 @@ abstract class SubtitleParser {
 
   List<Duration> parseTimeCodes(String time);
 
+  String parseText(List<String> text) {
+    final cleaned = [];
+    for (var i = 0; i < text.length; i++) {
+      cleaned.add(text[i].replaceAll(htmlRegex, ''));
+    }
+    return cleaned.join("\n");
+   
+  }
+
+  final htmlRegex = RegExp(r'<[^>]+>');
+
   List<List<String>> readFile(String file) {
     final List<String> lines = LineSplitter.split(file).toList();
 

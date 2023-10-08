@@ -89,16 +89,15 @@ class MeiyouPlayerState extends State<MeiyouPlayer>
     }
 
     isPlayerReady = IsPlayerReady();
-    
+
     resizeModeCubit = ResizeModeCubit(isPlayerReady);
 
     bufferingCubit = BufferingCubit(player.stream.buffering);
 
     subtitleWorkerBloc = SubtitleWorkerBloc(
-        RepositoryProvider.of<VideoPlayerUseCaseContainer>(context)
-            .get<GetSubtitleCueUseCase>(),
-        bufferingCubit,
-        player);
+      RepositoryProvider.of<VideoPlayerUseCaseContainer>(context)
+          .get<GetSubtitleCueUseCase>(),
+    );
 
     subtitleWorkerCubit =
         SubtitleWorkerCubit(subtitleWorkerBloc.stream.asyncMap((event) {

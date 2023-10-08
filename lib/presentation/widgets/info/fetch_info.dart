@@ -54,21 +54,20 @@ class _LoadInfoState extends State<LoadInfo> {
       future: media,
       builder: (context, snapshot) {
         if (snapshot.waiting) {
-          return const LoadingWidget();
+          return const Center(
+              child: SizedBox(
+                  height: 50, width: 50, child: CircularProgressIndicator()));
         } else if (snapshot.done && snapshot.data is ResponseSuccess) {
           return InfoPage(
             type: widget.type,
             media: snapshot.data!.data!,
           );
         } else {
-          return Scaffold(
-            appBar: AppBar(),
-            body: Center(
-              child: SingleChildScrollView(
-                child: RetryConnection(
-                    onRetryConnection: () => fetchInfo(),
-                    retryReason: snapshot.data?.error?.toString() ?? ''),
-              ),
+          return Center(
+            child: SingleChildScrollView(
+              child: RetryConnection(
+                  onRetryConnection: () => fetchInfo(),
+                  retryReason: snapshot.data?.error?.toString() ?? ''),
             ),
           );
         }

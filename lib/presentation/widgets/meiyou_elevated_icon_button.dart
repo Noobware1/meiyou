@@ -2,36 +2,36 @@ import 'package:flutter/material.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
 
 class MeiyouElevatedIconButton extends StatelessWidget {
-  final String text;
+  final Widget child;
   final Icon icon;
   final double? height;
   final double? width;
   // final Color? iconColor;
-  final TextStyle? textStyle;
+  final EdgeInsets? padding;
   final VoidCallback onTap;
   // final double? fontSize;
 
   const MeiyouElevatedIconButton(
       {super.key,
-      required this.text,
       required this.icon,
-      // this.iconColor,
-      this.textStyle,
       this.height,
       this.width,
-      required this.onTap});
+      required this.onTap,
+      this.padding,
+      required this.child});
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton.icon(
       style: ButtonStyle(
-          maximumSize: MaterialStatePropertyAll(Size(context.screenWidth, 50)),
-          minimumSize: MaterialStatePropertyAll(Size(context.screenWidth, 50)),
-          iconSize: const MaterialStatePropertyAll(25),
+          // maximumSize: MaterialStatePropertyAll(Size(context.screenWidth, 50)),
+          // minimumSize: MaterialStatePropertyAll(Size(context.screenWidth, 50)),
+          iconSize: const MaterialStatePropertyAll(30),
           backgroundColor: const MaterialStatePropertyAll(Colors.transparent),
           elevation: const MaterialStatePropertyAll(0.0),
           iconColor:
               MaterialStatePropertyAll(context.theme.colorScheme.onSurface),
+          padding: MaterialStatePropertyAll(padding),
           alignment: Alignment.centerLeft,
           overlayColor: MaterialStatePropertyAll(
               context.theme.colorScheme.brightness == Brightness.dark
@@ -39,16 +39,12 @@ class MeiyouElevatedIconButton extends StatelessWidget {
                   : Colors.black26)),
       onPressed: onTap,
       icon: icon,
-      label: Padding(
-        padding: const EdgeInsets.only(left: 30),
-        child: Text(text,
-            style: textStyle ??
-                TextStyle(
-                    inherit: true,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
-                    color: context.theme.colorScheme.onSurface)),
-      ),
+      label:
+          // Padding(
+          // padding: const EdgeInsets.only(left: 20),
+          // child:
+          child,
+      // ),
     );
   }
 }
