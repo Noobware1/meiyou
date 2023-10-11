@@ -146,8 +146,8 @@ class _Source extends Video {
       : super(
             fromat: type == 'hls' ? VideoFormat.hls : VideoFormat.mp4,
             quality: label.toLowerCase() == 'auto'
-                ? WatchQualites.master
-                : Quality.getQuailtyFromString(label),
+                ? Qualites.master
+                : Qualites.getFromString(label),
             url: file);
 
   factory _Source.fromJson(dynamic json) {

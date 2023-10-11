@@ -21,10 +21,9 @@ class ReWatch extends VideoExtractor {
         .json(_RewatchJsonResponse.fromJson);
 
     return VideoContainer(videos: [
-      Video(
-          url: data.source,
-          quality: WatchQualites.master,
-          fromat: VideoFormat.hls)
+      Video.hlsMaster(
+        data.source,
+      )
     ], subtitles: data.tracks);
   }
 }

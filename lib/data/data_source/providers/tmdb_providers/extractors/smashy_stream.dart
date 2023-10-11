@@ -9,6 +9,7 @@ import 'package:meiyou/core/utils/extenstions/string.dart';
 import 'package:meiyou/data/models/subtitle.dart';
 import 'package:meiyou/data/models/video.dart';
 import 'package:meiyou/data/models/video_container.dart';
+import 'package:meiyou/data/models/video_server.dart';
 import 'package:ok_http_dart/ok_http_dart.dart';
 
 class SmashyStreamExtractor extends VideoExtractor {
@@ -31,10 +32,12 @@ class SmashyStreamExtractor extends VideoExtractor {
     }
   }
 
-  String getReferer() => videoServer.extra!['referer'] as String;
+  // String videoServer.referer => videoServer.extra!['referer'] as String;
 
   Future<VideoContainer> _extractFizz() {
-    return client.get(videoServer.url, referer: getReferer()).then((response) {
+    return client
+        .get(videoServer.url, referer: videoServer.referer)
+        .then((response) {
       // print(response.text);
       final json = jsonDecode(
           '{"file${RegExp(r'\((\{[^;]*\})\);').firstMatch(response.text)!.group(1)!.substringAfter('"file')}');
@@ -68,7 +71,9 @@ class SmashyStreamExtractor extends VideoExtractor {
   }
 
   Future<VideoContainer> _exractFm() {
-    return client.get(videoServer.url, referer: getReferer()).then((response) {
+    return client
+        .get(videoServer.url, referer: videoServer.referer)
+        .then((response) {
       var data = RegExp(r'\((\{[^;]*),\s\}\);')
           .firstMatch(response.text)!
           .group(1)!
@@ -89,12 +94,9 @@ class SmashyStreamExtractor extends VideoExtractor {
         subtitles.add(_utils.toSubtitle(_utils.strToList(it)));
       });
 
-      return VideoContainer(videos: [
-        Video(
-            url: json['file'].toString(),
-            quality: WatchQualites.master,
-            fromat: VideoFormat.hls)
-      ], subtitles: subtitles);
+      return VideoContainer(
+          videos: [Video.hlsMaster(json['file'].toString())],
+          subtitles: subtitles);
     });
   }
 
@@ -112,10 +114,9 @@ class SmashyStreamExtractor extends VideoExtractor {
       });
 
       return VideoContainer(videos: [
-        Video(
-            url: json['file'].toString(),
-            quality: WatchQualites.master,
-            fromat: VideoFormat.hls)
+        Video.hlsMaster(
+          json['file'].toString(),
+        )
       ], subtitles: subtitles);
     });
   }
@@ -127,7 +128,7 @@ class SmashyStreamExtractor extends VideoExtractor {
   Future<VideoContainer> _extractServer(
           VideoContainer Function(OkHttpResponse response) extract) =>
       client
-          .get(hostUrl, referer: getReferer())
+          .get(hostUrl, referer: videoServer.referer)
           .then((response) => extract(response));
 
   final _utils = _ExtractorUtils();
@@ -141,9 +142,9 @@ class _ExtractorUtils {
   Video toVideo(List<String> lst) {
     return Video(
         url: lst[1],
-        quality: lst[0] == 'auto'
-            ? WatchQualites.master
-            : Quality.getQuailtyFromString(lst[1]),
+        quality: lst[0].toLowerCase() == 'auto'
+            ? Qualites.master
+            : Qualites.getFromString(lst[0]),
         fromat: VideoFormat.hls);
   }
 

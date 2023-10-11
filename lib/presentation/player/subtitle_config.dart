@@ -10,7 +10,7 @@ class SubtitleConfigruation {
   final TextStyle textStyle;
 
   const SubtitleConfigruation(
-      {this.highlightWidth = 3.0,
+      {this.highlightWidth = 2.0,
       this.showBorder = false,
       this.showHighlight = true,
       this.highlightColor = Colors.black,
@@ -48,3 +48,4 @@ const forMobile = TextStyle(
   fontWeight: FontWeight.w700,
   color: Colors.white,
 );
+

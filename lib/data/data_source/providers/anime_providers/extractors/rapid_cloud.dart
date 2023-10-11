@@ -93,7 +93,7 @@ class _Source extends Video {
   const _Source(String url, String type)
       : super(
             url: url,
-            quality: WatchQualites.master,
+            quality: Qualites.master,
             fromat: type == 'hls' ? VideoFormat.hls : VideoFormat.mp4);
 
   factory _Source.fromJson(dynamic json) {

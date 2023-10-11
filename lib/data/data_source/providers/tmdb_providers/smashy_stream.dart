@@ -43,13 +43,11 @@ class SmashyStream extends TMDBProvider {
     return client.get(url).then((response) => response.document
         .select('div.dropdown-menu > a')
         .sublist(1)
-        .map((it) => VideoServer(
-            name: it.text, url: it.attr('data-id'), extra: {'referer': url}))
+        .map((it) =>
+            VideoServer(name: it.text, url: it.attr('data-id'), referer: url))
         .toList());
   }
 
   @override
   String get name => 'SmashyStream';
 }
-
-

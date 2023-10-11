@@ -7,10 +7,13 @@ import 'package:meiyou/core/usecases_container/video_player_usecase_container.da
 import 'package:meiyou/core/usecases_container/watch_provider_repository_container.dart';
 
 import 'package:meiyou/core/utils/player_utils.dart';
+import 'package:meiyou/domain/repositories/cache_repository.dart';
 import 'package:meiyou/domain/repositories/video_player_repository.dart';
 import 'package:meiyou/domain/usecases/provider_use_cases/get_episode_chunks_usecase.dart';
+import 'package:meiyou/domain/usecases/provider_use_cases/load_server_and_video_usecase.dart';
 import 'package:meiyou/domain/usecases/video_player_usecase/seek_episode.dart';
 import 'package:meiyou/presentation/pages/info_watch/state/selected_searchResponse_bloc/selected_search_response_bloc.dart';
+import 'package:meiyou/presentation/pages/info_watch/state/source_dropdown_bloc/bloc/source_drop_down_bloc.dart';
 import 'package:meiyou/presentation/player/initialise_player.dart';
 import 'package:meiyou/presentation/player/video_controls/cubits/current_episode_cubit.dart';
 import 'package:meiyou/presentation/player/video_controls/cubits/is_ready.dart';
@@ -18,6 +21,7 @@ import 'package:meiyou/presentation/player/video_controls/cubits/selected_server
 import 'package:meiyou/presentation/player/video_controls/subtitle_woker_bloc/subtitle_worker_bloc.dart';
 import 'package:meiyou/presentation/widgets/episode_selector/episode_selector/episode_selector_bloc.dart';
 import 'package:meiyou/presentation/widgets/season_selector/bloc/seasons_selector_bloc.dart';
+import 'package:meiyou/presentation/widgets/video_server/state/load_server_video_bloc/load_video_server_and_video_container_bloc_bloc.dart';
 import 'package:meiyou/presentation/widgets/video_server/video_server_view.dart';
 import 'package:meiyou/presentation/widgets/watch/state/fetch_seasons_episodes/fetch_seasons_episodes_bloc.dart';
 
@@ -36,19 +40,7 @@ void changeEpisode(BuildContext context, bool forward,
 
   final seekState = RepositoryProvider.of<VideoPlayerUseCaseContainer>(context)
       .get<SeekEpisodeUseCase>()
-      .call(SeekEpisodeUseCaseParams(
-          episodeSeasonsMap:
-              BlocProvider.of<FetchSeasonsEpisodesBloc>(context).state.data!,
-          forward: forward,
-          currentSeason:
-              BlocProvider.of<SeasonsSelectorBloc>(context).state.season,
-          currentEpKey:
-              BlocProvider.of<EpisodeSelectorBloc>(context).state.current,
-          currentEpIndex: BlocProvider.of<CurrentEpisodeCubit>(context).state,
-          getEpisodeChunksUseCase:
-              RepositoryProvider.of<WatchProviderRepositoryContainer>(context)
-                  .get<GetEpisodeChunksUseCase>()));
-
+      .call(_generateSeekParams(context, forward));
 
   if (seekState == null) {
     showSnackBAr(context, text: text);
@@ -59,13 +51,13 @@ void changeEpisode(BuildContext context, bool forward,
       BlocProvider.of<SelectedServerCubit>(context).changeServer(value);
 
       initialise(
-          context,
-          player(context),
-          RepositoryProvider.of<VideoController>(context),
-          BlocProvider.of<IsPlayerReady>(context),
-          BlocProvider.of<SubtitleWorkerBloc>(context),
-          
-          );
+        context,
+        player(context),
+        RepositoryProvider.of<VideoController>(context),
+        BlocProvider.of<IsPlayerReady>(context),
+        BlocProvider.of<SubtitleWorkerBloc>(context),
+      );
+      if (forward) _cacheNextEpisode(context);
     });
   }
 }
@@ -85,4 +77,40 @@ void _setState(BuildContext context, SeekEpisodeState state) {
 
   BlocProvider.of<CurrentEpisodeCubit>(context)
       .changeEpisode(state.currentEpIndex);
+}
+
+void _cacheNextEpisode(BuildContext context) {
+  final nextEpisodeUrl =
+      (RepositoryProvider.of<VideoPlayerUseCaseContainer>(context)
+              .get<SeekEpisodeUseCase>()
+              .call(_generateSeekParams(context, true)))
+          ?.episode
+          .url;
+
+  if (nextEpisodeUrl != null) {
+    WatchProviderRepositoryContainer.of(context)
+        .get<LoadServerAndVideoUseCase>()
+        .call(LoadServerAndVideoUseCaseParams(
+            onError: (e, data) => showSnackBAr(context, text: e.message),
+            provider: RepositoryProvider.of<SourceDropDownBloc>(context)
+                .state
+                .provider,
+            url: nextEpisodeUrl,
+            cacheRespository:
+                RepositoryProvider.of<CacheRespository>(context)));
+  }
+}
+
+SeekEpisodeUseCaseParams _generateSeekParams(
+    BuildContext context, bool forward) {
+  return SeekEpisodeUseCaseParams(
+      episodeSeasonsMap:
+          BlocProvider.of<FetchSeasonsEpisodesBloc>(context).state.data!,
+      forward: forward,
+      currentSeason: BlocProvider.of<SeasonsSelectorBloc>(context).state.season,
+      currentEpKey: BlocProvider.of<EpisodeSelectorBloc>(context).state.current,
+      currentEpIndex: BlocProvider.of<CurrentEpisodeCubit>(context).state,
+      getEpisodeChunksUseCase:
+          RepositoryProvider.of<WatchProviderRepositoryContainer>(context)
+              .get<GetEpisodeChunksUseCase>());
 }

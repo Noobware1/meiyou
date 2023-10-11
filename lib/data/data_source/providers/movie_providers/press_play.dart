@@ -229,7 +229,14 @@ class _PressPlaySearchResponse extends SearchResponse {
         title: json['title'] ?? json['title_en'] ?? json['title_full'] ?? '',
         url: json['url'],
         cover: json['poster'],
-        type: json['type'] == 1 ? MediaType.tvShow : MediaType.movie);
+        type: json['type'].toString() == '0'
+            ? MediaType.movie
+            : MediaType.tvShow);
   }
 }
 
+void main(List<String> args) async {
+  final a = PressPlay();
+  print(await a.loadMovie(
+      'https://pressplay.top/movie-id406718170-the-super-mario-bros-movie-2023-online-free'));
+}

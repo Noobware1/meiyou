@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io' show Directory;
 
@@ -49,5 +51,9 @@ class AppDirectories {
       savedSelectedResponseDirectory:
           Directory('${appDocDir.path}/${subDirectories[1]}'),
     );
+  }
+
+  factory AppDirectories.of(BuildContext context) {
+    return RepositoryProvider.of<AppDirectories>(context);
   }
 }

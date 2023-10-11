@@ -42,15 +42,13 @@ class GogoCDN extends VideoExtractor {
       if (label != "auto p" && label != "hls p") {
         list.add(Video(
           url: url,
-          quality: Quality.getQuailtyFromString(label),
+          quality: Qualites.getFromString(label),
           fromat: VideoFormat.other,
           backup: backup ?? false,
         ));
       } else {
-        list.add(Video(
-          url: url,
-          quality: WatchQualites.master,
-          fromat: VideoFormat.hls,
+        list.add(Video.hlsMaster(
+          url,
           backup: backup ?? false,
         ));
       }

@@ -214,15 +214,15 @@ class _ForSmallScreens extends StatelessWidget {
           addVerticalSpace(5),
           Row(
             children: [
-              if (score < 0.0) ...[
+              if (score > 0.0) ...[
                 _getSmilyFace(score, 20),
-                addHorizontalSpace(3)
+                addHorizontalSpace(3),
+                Text(
+                  score.toString(),
+                  style: const TextStyle(
+                      fontSize: 14, fontWeight: FontWeight.w500),
+                ),
               ],
-              Text(
-                score.toString(),
-                style:
-                    const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-              ),
               addHorizontalSpace(10),
               const Icon(
                 Icons.tv_rounded,

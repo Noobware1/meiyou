@@ -29,7 +29,7 @@ class MovieProviders extends Providers {
   Map<String, MovieProvider> get providers => {
         'PressPlay': PressPlay(),
         'LookMovie': LookMovie(),
-        'Rewatch': Rewatch(),
+        // 'Rewatch': Rewatch(),
         'FlixHQ': Flixhq(),
         'Sflix': Sflix(),
       };
@@ -48,6 +48,6 @@ class TMDBProviders extends Providers {
   @override
   Map<String, TMDBProvider> get providers => {
         'SmashyStream': SmashyStream(),
-        'Susflix': Susflix(),
+        // 'Susflix': Susflix(),
       };
 }

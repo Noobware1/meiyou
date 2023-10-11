@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:meiyou/core/resources/copy_to_clipboard.dart';
 import 'package:meiyou/core/resources/video_format.dart';
 import 'package:meiyou/core/resources/watch_qualites.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
@@ -19,9 +20,15 @@ class VideoServerHolder extends StatelessWidget {
       child: Material(
         elevation: 5.0,
         surfaceTintColor: context.theme.colorScheme.tertiary,
+        type: MaterialType.button,
         borderRadius: BorderRadius.circular(15),
         child: InkWell(
           onTap: () => onTap(video),
+          borderRadius: BorderRadius.circular(15),
+          splashColor: context.theme.colorScheme.primary,
+          onLongPress: () {
+            copyToClipBoard(context, video.url);
+          },
           child: Container(
             alignment: Alignment.centerLeft,
             padding: const EdgeInsets.all(20),
@@ -32,9 +39,9 @@ class VideoServerHolder extends StatelessWidget {
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(
                   (video.fromat == VideoFormat.hls &&
-                          video.quality == WatchQualites.master)
+                          video.quality == Qualites.master)
                       ? 'Multi Quailty'
-                      : '${video.quality.quaility}p',
+                      : video.quality.toString(true),
                   textAlign: TextAlign.left,
                   style: TextStyle(
                       color: context.theme.colorScheme.primary,

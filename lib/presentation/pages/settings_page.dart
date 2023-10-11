@@ -24,9 +24,38 @@ class _SettingsPageState extends State<SettingsPage> {
     return SafeArea(
       left: false,
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
           addVerticalSpace(50),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              addHorizontalSpace(20),
+              Icon(
+                Icons.settings_outlined,
+                color: context.theme.colorScheme.primary,
+                size: isMobile ? 25 : 32,
+              ),
+              addHorizontalSpace(10),
+              Text(
+                'Settings',
+                style: TextStyle(
+                    fontSize: isMobile ? 20 : 25, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          addVerticalSpace(30),
+          MeiyouElevatedIconButton(
+            padding: const EdgeInsets.only(left: 20),
+            icon: Icon(
+              Icons.tune_outlined,
+              color: context.theme.colorScheme.primary,
+            ),
+            onTap: () => context.go('/$settings/general'),
+            child: const TextInsideText(
+                outerText: 'General', innerText: 'App mode, cache'),
+          ),
           MeiyouElevatedIconButton(
             padding: const EdgeInsets.only(left: 20),
             icon: Icon(
@@ -35,17 +64,17 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             onTap: () => context.go('/$settings/appearance'),
             child: const TextInsideText(
-                outerText: 'Appaerance', innerText: 'Theme, Amoled'),
+                outerText: 'Appaerance', innerText: 'Theme'),
           ),
           MeiyouElevatedIconButton(
             padding: const EdgeInsets.only(left: 20),
             icon: Icon(
-              Icons.palette_outlined,
+              Icons.subtitles_outlined,
               color: context.theme.colorScheme.primary,
             ),
             onTap: () => context.go('/$settings/providers'),
             child: const TextInsideText(
-                outerText: 'Providers', innerText: 'default providers'),
+                outerText: 'Providers', innerText: 'Default providers'),
           ),
         ],
       ),

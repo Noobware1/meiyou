@@ -5,6 +5,7 @@ import 'package:meiyou/core/resources/extractors/video_extractor.dart';
 import 'package:meiyou/core/resources/quailty.dart';
 import 'package:meiyou/core/resources/subtitle_format.dart';
 import 'package:meiyou/core/resources/video_format.dart';
+import 'package:meiyou/core/resources/watch_qualites.dart';
 import 'package:meiyou/data/models/subtitle.dart';
 import 'package:meiyou/data/models/video.dart';
 import 'package:meiyou/data/models/video_container.dart';
@@ -19,8 +20,6 @@ class SusflixExtractor extends VideoExtractor {
             cookie:
                 'session=eyJfZnJlc2giOmZhbHNlLCJwaG9uZV9udW1iZXIiOiJsb2xpc3lvdXJraW5nIn0.ZQ2S9Q.kcOWpRD4AGycgr5Ue8ltzCMBSZI; remember_me="303220303220303216303212303225303262303223303226303224303214303213303247303213"')
         .then((response) {
-   
-
       final json = jsonDecode(RegExp(r'response\s=\s({.*?});')
           .firstMatch(response.text)!
           .group(1)!
@@ -50,7 +49,7 @@ class _Quailties extends Video {
       : super(
             fromat: VideoFormat.mp4,
             url: path,
-            quality: Quality.getQuailtyFromString(quality));
+            quality: Qualites.getFromString(quality));
 
   factory _Quailties.fromJson(dynamic json) {
     return _Quailties(path: json['path'], quality: json['quality']);
@@ -65,4 +64,3 @@ class _SrtFiles extends Subtitle {
     return _SrtFiles(caption: json['caption'], url: json['url']);
   }
 }
-

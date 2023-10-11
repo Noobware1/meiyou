@@ -33,7 +33,6 @@ void main() async {
   MediaKit.ensureInitialized();
 
   final appdirs = await AppDirectories.getInstance();
-  
 
   final theme_bloc.MeiyouThemeState? theme = await loadData(
       savePath: '${appdirs.settingsDirectory.path}/theme.json',
@@ -44,8 +43,7 @@ void main() async {
   final CacheRespository cacheRespository =
       CacheRepositoryImpl(appdirs.appCacheDirectory.path);
 
-  // appdirs.appCacheDirectory.deleteAllEntries();
-  // await cacheRespository.deleteIOCacheFromDir(responsesFolder);
+  appdirs.appCacheDirectory.deleteAllEntries();
 
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
@@ -82,7 +80,6 @@ class _MeiyouState extends State<Meiyou> {
     super.initState();
   }
 
-  
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -117,15 +114,13 @@ class _MeiyouState extends State<Meiyou> {
         ProvidersRepositoryContainer(ProvidersRepositoryImpl()).inject(),
         VideoPlayerUseCaseContainer(VideoPlayerRepositoryImpl()).inject(),
       ],
-     
-        child: MaterialApp.router(
-          debugShowCheckedModeBanner: false,
-          routerConfig: RouterProvider().router,
-          themeMode: context.themeBloc.state.themeMode,
-          theme: context.themeBloc.state.theme.lightTheme,
-          darkTheme: context.themeBloc.state.theme.darkTheme,
-        ),
-      
+      child: MaterialApp.router(
+        debugShowCheckedModeBanner: false,
+        routerConfig: RouterProvider().router,
+        themeMode: context.themeBloc.state.themeMode,
+        theme: context.themeBloc.state.theme.lightTheme,
+        darkTheme: context.themeBloc.state.theme.darkTheme,
+      ),
     );
   }
 }

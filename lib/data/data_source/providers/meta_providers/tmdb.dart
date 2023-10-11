@@ -18,7 +18,8 @@ class TMDB extends MetaProvider {
       '$TMDB_API_URL/search/multi?api_key=$TMDB_APIKEY&language=en-US&query=';
 
   static const String _netflix =
-      "$TMDB_API_URL/discover/tv?api_key=$TMDB_APIKEY&with_networks=213";
+      // "$TMDB_API_URL/discover/tv?api_key=$TMDB_APIKEY&with_networks=213&watch_region=IN";
+      "$TMDB_API_URL/discover/tv?api_key=$TMDB_APIKEY&with_watch_providers=8&sort_bypopularity.desc&watch_region=IN";
 
   static const String _amazon =
       "$TMDB_API_URL/discover/tv?api_key=$TMDB_APIKEY&with_networks=1024";
@@ -96,33 +97,25 @@ class TMDB extends MetaProvider {
 
   @override
   Future<MainPage> fetchMainPage() async {
-    final futures = [
-      _fetchTrending,
-      // _fetchPopularMovies,
-      // _fetchPopularTvShows,
-      _fetchTopRatedTvShows,
-      _fetchTopRated
-    ];
-    final results = await Future.wait(futures.map((e) => e.call()));
+    final map = {
+      'Trending': _fetchTrending,
+      'Trending On Netflix': _fetchNetflixShows,
+      'Trending On Amazon': _fetchAmazonShows,
+      'Top Rated': _fetchTopRated,
+    };
+
+    final results = await Future.wait(map.values.map((e) => e.call()));
 
     final rows = <MetaRow>[];
     for (var i = 0; i < results.length; i++) {
       rows.add(MetaRow(
-          rowTitle: rowTitles[i],
+          rowTitle: map.keys.elementAt(i),
           resultsEntity: results[i],
-          loadMoreData: futures[i]));
+          loadMoreData: map.values.elementAt(i)));
     }
-    // results.map((it) => MetaRow(rowTitle: ro, resultsEntity: resultsEntity))
+
     return MainPage(rows);
   }
-
-  static const rowTitles = [
-    'Trending',
-    // 'Popular Movies',
-    // 'Popular Tv Shows',
-    'Top Rated TV Shows',
-    'Top Rated'
-  ];
 
   Future<MetaResults> _fetchTopRatedTvShows([int page = 1]) async =>
       (await client.get('$_topRatedTvShows&page=$page'))

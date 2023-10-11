@@ -80,7 +80,8 @@ class MeiyouPlayerState extends State<MeiyouPlayer>
     WidgetsBinding.instance.addObserver(this);
 
     player = Player(
-        configuration: const PlayerConfiguration(bufferSize: 30 * 1024 * 1024));
+        configuration:
+            const PlayerConfiguration(bufferSize: 32 * 1024 * 1024, vo: 'gpu'));
 
     if (Platform.isAndroid || Platform.isIOS) {
       setLanscape();
@@ -101,7 +102,7 @@ class MeiyouPlayerState extends State<MeiyouPlayer>
 
     subtitleWorkerCubit =
         SubtitleWorkerCubit(subtitleWorkerBloc.stream.asyncMap((event) {
-      if (event is SubtitleDecoded) {
+      if (event is SubtitleDecoded && event.subtitleCues.isNotEmpty) {
         return event.subtitleCues;
       }
       return null;

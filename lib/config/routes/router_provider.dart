@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -21,6 +20,7 @@ import 'package:meiyou/presentation/widgets/custom_scaffold.dart';
 import 'package:meiyou/presentation/widgets/info/fetch_info.dart';
 import 'package:meiyou/presentation/widgets/navigation_bars/bottom_navigatior.dart';
 import 'package:meiyou/presentation/widgets/navigation_bars/side_navigator.dart';
+import 'package:meiyou/presentation/widgets/settings/general_page.dart';
 import 'package:meiyou/presentation/widgets/settings/providers.dart';
 import 'package:meiyou/presentation/widgets/settings/theme_page.dart';
 import 'package:meiyou/presentation/widgets/theme/bloc/theme_bloc.dart';
@@ -55,6 +55,8 @@ SystemUiOverlayStyle setOverlays(MeiyouThemeState state, BuildContext context) {
 }
 
 class RouterProvider {
+  DateTime? lastPressed;
+
   GoRouter get router => GoRouter(
         navigatorKey: _rootNavigatorKey,
         initialLocation: '/home',
@@ -79,7 +81,24 @@ class RouterProvider {
                       sideNavigatonBar: SideNavigatonBar(
                           goRouterState: state,
                           statefulNavigationShell: navigationShell),
-                      body: navigationShell),
+                      body: WillPopScope(
+                          onWillPop: () async {
+                            final now = DateTime.now();
+                            const maxDuration = Duration(seconds: 2);
+                            if (lastPressed == null ||
+                                now.difference(lastPressed!) > maxDuration) {
+                              lastPressed = DateTime.now();
+
+                              showSnackBAr(context,
+                                  text: 'Double tap to exit app');
+                              return false;
+                            } else {
+                              lastPressed = null;
+
+                              return true;
+                            }
+                          },
+                          child: navigationShell)),
                 );
               });
             },
@@ -147,7 +166,10 @@ class RouterProvider {
                                 const AppearancePage()),
                         GoRoute(
                             path: 'providers',
-                            builder: (context, state) => const ProvidersPage())
+                            builder: (context, state) => const ProvidersPage()),
+                        GoRoute(
+                            path: 'general',
+                            builder: (context, state) => const GeneralPage())
                       ]),
                 ],
               ),

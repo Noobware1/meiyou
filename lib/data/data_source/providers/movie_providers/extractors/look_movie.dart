@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:meiyou/core/resources/client.dart';
 import 'package:meiyou/core/resources/extractors/video_extractor.dart';
 import 'package:meiyou/core/resources/quailty.dart';
+import 'package:meiyou/core/resources/watch_qualites.dart';
 import 'package:meiyou/data/models/subtitle.dart';
 import 'package:meiyou/data/models/video.dart';
 import 'package:meiyou/data/models/video_container.dart';
@@ -30,7 +31,7 @@ class _Streams extends Video {
   _Streams({required super.url, required String quailty})
       : super(
             fromat: Video.getFormatFromUrl(url),
-            quality: Quality.getQuailtyFromString(quailty));
+            quality: Qualites.getFromString(quailty));
 
   factory _Streams.fromMapEntry(MapEntry entry) {
     return _Streams(url: entry.value, quailty: entry.key);

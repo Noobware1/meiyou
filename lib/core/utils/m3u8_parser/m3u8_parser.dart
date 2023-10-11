@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:meiyou/core/resources/client.dart';
 import 'package:meiyou/core/resources/quailty.dart';
 import 'package:meiyou/core/resources/video_format.dart';
+import 'package:meiyou/core/resources/watch_qualites.dart';
 import 'package:meiyou/core/utils/extenstions/iterable.dart';
 
 import 'package:meiyou/core/utils/extenstions/string.dart';
@@ -24,16 +25,16 @@ class M3u8Parser {
     Map<String, String>? headers,
     bool? backup,
     List<Subtitle>? subtitles,
-  })  async {
-    
-    final videos =  await generateVideos(url, headers: headers, backup: backup);
+  }) async {
+    final videos = await generateVideos(url, headers: headers, backup: backup);
 
-    return VideoContainer(videos: videos, headers: headers, subtitles: subtitles);
+    return VideoContainer(
+        videos: videos, headers: headers, subtitles: subtitles);
   }
 
   static Future<List<Video>> generateVideos(
     String url, {
-   bool? backup,
+    bool? backup,
     Map<String, String>? headers,
   }) async {
     final parsed = await parse(url, headers: headers);
@@ -73,7 +74,7 @@ class M3u8Parser {
   }
 
   static List<M3u8File> parseMaster(String mainUrl, String master) {
-    List<Quality> quailites = [];
+    List<Qualites> quailites = [];
     List<String> urls = [];
     LineSplitter.split(master).forEach((it) {
       if (it.startsWith('#EXT-X-STREAM')) {
@@ -112,7 +113,7 @@ class M3u8Parser {
       final total = urls.length;
       for (var i = 0; i < total; i++) {
         final recevied = (i / urls.length) * 100;
-       await downloader(
+        await downloader(
             client: clnt, file: file, url: urls[i], deleteOnError: true);
 
         onReceiveProgress?.call(recevied, total.toDouble());
@@ -129,10 +130,10 @@ class M3u8Parser {
   }
 }
 
-Quality parseResolution(String resoultionString) {
+Qualites parseResolution(String resoultionString) {
   final group = _resoultionRegex.firstMatch(resoultionString)!.groups([1, 2]);
 
-  return Quality(pixel: group[0]!.toInt(), quaility: group[1]!.toInt());
+  return Qualites.getFromString('${group[0]!}x{$group[1]!}');
 }
 
 String _isBase64Encoded(String str) {

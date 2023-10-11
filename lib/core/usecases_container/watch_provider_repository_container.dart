@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meiyou/core/usecases_container/usecase_container.dart';
 import 'package:meiyou/core/usecases/usecase.dart';
 import 'package:meiyou/domain/repositories/watch_provider_repository.dart';
@@ -56,4 +58,7 @@ class WatchProviderRepositoryContainer
 
         LoadServerAndVideoUseCase(_repository),
       };
+
+  factory WatchProviderRepositoryContainer.of(BuildContext context) =>
+      RepositoryProvider.of<WatchProviderRepositoryContainer>(context);
 }

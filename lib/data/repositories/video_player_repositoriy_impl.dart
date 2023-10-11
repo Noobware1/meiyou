@@ -31,8 +31,8 @@ class VideoPlayerRepositoryImpl implements VideoPlayerRepository {
     if (videos.length == 1) {
       return Video.formEntity(videos[0]);
     }
-    return videos.map(Video.formEntity).reduce((high, low) =>
-        high.quality.quaility > low.quality.quaility ? high : low);
+    return videos.map(Video.formEntity).reduce(
+        (high, low) => high.quality.width > low.quality.width ? high : low);
   }
 
   @override

@@ -1,7 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:meiyou/core/usecases_container/video_player_usecase_container.dart';
-import 'package:meiyou/core/utils/network.dart';
 import 'package:meiyou/domain/entities/subtitle.dart';
 import 'package:meiyou/domain/usecases/video_player_usecase/get_default_subtitle_usecase.dart';
 import 'package:meiyou/presentation/player/video_controls/cubits/is_ready.dart';
@@ -47,11 +46,14 @@ void initialise(BuildContext context, Player player, VideoController controller,
     }
   });
 
-  if (startVideoForm != null) {
-    tryWithAsyncSafe(() => player.stream.duration.first.then((value) async {
-          await player.seek(startVideoForm);
-          player.play();
-        }));
+  _startFrom(startVideoForm, player);
+}
+
+Future<void> _startFrom(Duration? duration, Player player) async {
+  if (duration != null) {
+    await player.stream.duration.first;
+    player.seek(duration);
+    player.play();
   } else {
     player.play();
   }

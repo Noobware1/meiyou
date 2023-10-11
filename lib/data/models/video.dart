@@ -1,5 +1,6 @@
 import 'package:meiyou/core/resources/quailty.dart';
 import 'package:meiyou/core/resources/video_format.dart';
+import 'package:meiyou/core/resources/watch_qualites.dart';
 import 'package:meiyou/domain/entities/video.dart';
 
 class Video extends VideoEntity {
@@ -25,8 +26,17 @@ class Video extends VideoEntity {
       [Map<String, dynamic>? extra]) {
     return Video(
         url: url,
-        quality: Quality.getQuailtyFromString(quailty),
+        quality: Qualites.getFromString(quailty),
         fromat: getFormatFromUrl(url));
+  }
+
+  factory Video.hlsMaster(String url,
+      {bool? backup, Map<String, dynamic>? extra}) {
+    return Video(
+        url: url,
+        quality: Qualites.master,
+        fromat: VideoFormat.hls,
+        backup: backup ?? false);
   }
 
   factory Video.formEntity(VideoEntity entity) {
@@ -42,8 +52,8 @@ class Video extends VideoEntity {
   Map<String, dynamic> toJson() {
     return {
       'url': url,
-      'quality': quality.toString(),
-      'fromat': fromat.toString(),
+      'quality': quality.index,
+      'fromat': fromat.index,
       'backup': backup,
       'extra': extra,
       'title': title
@@ -53,9 +63,8 @@ class Video extends VideoEntity {
   factory Video.fromJson(dynamic json) {
     return Video(
         url: json['url'],
-        quality: Quality.getQuailtyFromString(json['quality']),
-        fromat: VideoFormat.values.firstWhere(
-            (element) => element.toString() == json['fromat'].toString()),
+        quality: Qualites.values[json['quality']],
+        fromat: VideoFormat.values[json['fromat']],
         backup: json['backup'],
         extra: json['extra'],
         title: json['title']);
@@ -65,4 +74,3 @@ class Video extends VideoEntity {
   String toString() =>
       'url: $url,\nquality: $quality,\nfromat: $fromat,\ntitle: $title\n\backup: $backup\nextra: $extra';
 }
-

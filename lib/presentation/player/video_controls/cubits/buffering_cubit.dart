@@ -13,11 +13,11 @@ class BufferingCubit extends Cubit<bool> {
   }
 
   void setForceBuffering(Player player) {
+    playingState = player.state.playing;
     _subscription.pause();
 
     emit(true);
 
-    playingState = player.state.playing;
     player.pause();
   }
 
@@ -29,7 +29,6 @@ class BufferingCubit extends Cubit<bool> {
       player.play();
     }
 
-    
     playingState = null;
   }
 

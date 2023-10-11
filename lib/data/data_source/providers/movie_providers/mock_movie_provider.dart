@@ -18,8 +18,7 @@ class MockVideoExtractor extends VideoExtractor {
   @override
   Future<VideoContainer> extract() async {
     return const VideoContainer(videos: [
-      Video(
-          url: '', quality: WatchQualites.quaility1080, fromat: VideoFormat.hls)
+      Video(url: '', quality: Qualites.quality1080, fromat: VideoFormat.hls)
     ]);
   }
 

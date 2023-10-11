@@ -22,6 +22,7 @@ abstract class UseCaseContainer<Container> {
       child: child,
     );
   }
+
 }
 
 final class UseCaseNotFoundException implements Exception {}

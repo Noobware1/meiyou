@@ -6,4 +6,4 @@ const double defaultPosterBoxWidth = 120.0;
 
 const double defaultPosterHeight = 175.0;
 
-const int smallScreenSize = 810;
+const int smallScreenSize = 1000;

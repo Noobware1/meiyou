@@ -2,6 +2,7 @@ import 'package:meiyou/core/resources/client.dart';
 import 'package:meiyou/core/resources/extractors/video_extractor.dart';
 import 'package:meiyou/core/resources/js_unpacker.dart';
 import 'package:meiyou/core/resources/quailty.dart';
+import 'package:meiyou/core/resources/watch_qualites.dart';
 import 'package:meiyou/data/models/video.dart';
 import 'package:meiyou/data/models/video_container.dart';
 import 'package:meiyou/data/models/video_server.dart';
@@ -25,8 +26,8 @@ class Kwik extends VideoExtractor {
     return VideoContainer(videos: [
       Video(
           url: url,
-          quality: Quality.getQuailtyFromString(
-              videoServer.extra!['quality'] as String),
+          quality:
+              Qualites.getFromString(videoServer.extra!['quality'] as String),
           fromat: Video.getFormatFromUrl(url)),
     ]);
   }
@@ -35,26 +36,4 @@ class Kwik extends VideoExtractor {
   String get name => "Kwik";
 }
 
-class _Packed {
-  final String p;
-  final String a;
-  final String c;
-  final String k;
-  final String e;
-  final String d;
 
-  _Packed(this.p, this.a, this.c, this.k, this.e, this.d);
-
-  factory _Packed.FromIterable(List<String> iterable) {
-    assert(iterable.length == 6);
-    return _Packed(iterable[0], iterable[1], iterable[2], iterable[3],
-        iterable[4], iterable[5]);
-  }
-}
-
-void main(List<String> args) {
-  Kwik(const VideoServer(url: 'https://kwik.cx/e/fDWLwOdx3p0i', name: '', extra: {
-    'referer': 'https://animepahe.ru/',
-    'quality': Quality(pixel: 0, quaility: 0)
-  })).extract().then((value) => print(value));
-}

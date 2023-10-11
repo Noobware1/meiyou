@@ -30,8 +30,8 @@ class _AppearancePageState extends State<AppearancePage> {
   Future<bool>? _saving;
 
   _saveTheme(String path, MeiyouThemeState state) async {
-    // if (_saving == null) {
-    await _saving;
+   
+   await _saving;
     _saving = Future.value(true);
     await saveData(
         savePath: path,
@@ -42,7 +42,7 @@ class _AppearancePageState extends State<AppearancePage> {
         // onCompleted: () => showSnackBAr(context, text: 'Updated Theme'),
         onError: (e) => print(e));
     _saving = null;
-    // }
+   
   }
 
   @override

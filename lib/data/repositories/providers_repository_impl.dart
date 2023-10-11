@@ -83,14 +83,12 @@ class DefaultProvider {
   static DefaultProvider decode(String encoded) =>
       DefaultProvider.fromJson(jsonDecode(encoded));
 
-  Map<String, String> toJson() {
-    return {providerType.toString(): providerName};
+  Map<int, String> toJson() {
+    return {providerType.index: providerName};
   }
 
   factory DefaultProvider.fromMapEntry(MapEntry json) {
-    return DefaultProvider(
-        ProviderType.values.firstWhere((e) => e.toString() == json.key),
-        json.value);
+    return DefaultProvider(ProviderType.values[json.key], json.value);
   }
 
   factory DefaultProvider.fromJson(dynamic json) {
