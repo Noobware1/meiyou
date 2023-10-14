@@ -1,6 +1,12 @@
 import 'dart:typed_data';
 
 extension ListUtils<T> on List<T> {
+  void addIfNotNull(T? value) {
+    if (value != null) {
+      add(value);
+    }
+  }
+
   int? tryIndexOf(T? element, [int start = 0]) {
     if (element == null) return null;
 

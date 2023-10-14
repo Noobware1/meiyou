@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:meiyou/core/constants/path.dart';
 import 'package:meiyou/core/constants/request_time_outs.dart';
 import 'package:meiyou/core/resources/expections.dart';
 import 'package:meiyou/core/resources/extractors/video_extractor.dart';
@@ -13,6 +12,7 @@ import 'package:meiyou/core/resources/providers/base_provider.dart';
 import 'package:meiyou/core/resources/providers/movie_provider.dart';
 import 'package:meiyou/core/resources/providers/tmdb_provider.dart';
 import 'package:meiyou/core/resources/response_state.dart';
+import 'package:meiyou/core/try_catch.dart';
 import 'package:meiyou/core/utils/comparing_strings.dart';
 import 'package:meiyou/core/utils/data_converter/converters.dart';
 import 'package:meiyou/core/utils/extenstions/iterable.dart';
@@ -168,7 +168,7 @@ class WatchProviderRepositoryImpl implements WatchProviderRepository {
       } else {
         throw UnimplementedError();
       }
-    }, timeout: twentySecondTimeOut);
+    }, timeout: oneMinuteTimeOut);
   }
 
   @override
@@ -376,45 +376,44 @@ class WatchProviderRepositoryImpl implements WatchProviderRepository {
         onError,
   }) {
     return tryWithAsync(() async {
-      final cache = await tryWithAsyncSafe(() =>
-          cacheRespository.getFromIOCache(
-              _SavePaths.serverAndVideoPath(provider, url),
-              CacheWriters.videoServerVideoContainerMapWriter.readFromJson));
+      final cache = await tryAsync(() => cacheRespository.getFromIOCache(
+          _SavePaths.serverAndVideoPath(provider, url),
+          CacheWriters.videoServerVideoContainerMapWriter.readFromJson));
 
       if (cache != null) return cache;
 
       final response = await loadVideoServers(provider, url);
-      if (response is ResponseFailed) {
-        throw response.error!;
-      } else {
-        final Map<String, VideoContainer> data = {};
-        for (final server in response.data!) {
-          final extractor = loadVideoExtractor(provider, server);
-          if (extractor != null) {
-            try {
-              final extracted = await extractor.extract();
-              data[server.name] = extracted;
-              onData?.call(data);
-            } catch (e, stack) {
-              onError?.call(
-                  MeiyouException(
-                    e.toString(),
-                    stackTrace: stack,
-                    type: MeiyouExceptionType.providerException,
-                  ),
-                  data);
-            }
-          }
+
+      if (response is ResponseFailed) throw response.error!;
+
+      final Map<String, VideoContainer> data = {};
+
+      for (final server in response.data!) {
+        final extracted = await tryAsync(
+          () => loadVideoExtractor(provider, server)?.extract(),
+          timeout: oneMinuteTimeOut,
+          onError: (error, stackTrace) {
+            onError?.call(
+                MeiyouException(
+                  error.toString(),
+                  stackTrace: stackTrace,
+                  type: MeiyouExceptionType.providerException,
+                ),
+                data);
+          },
+        );
+        if (extracted != null) {
+          data[server.name] = extracted;
+          onData?.call(data);
         }
-        if (data.isNotEmpty) {
-          await tryWithAsyncSafe(() => cacheRespository.addIOCache(
-              _SavePaths.serverAndVideoPath(provider, url),
-              CacheWriters.videoServerVideoContainerMapWriter
-                  .writeToJson(data)));
-        }
-        return data;
       }
-    }, timeout: fourtySecondTimeOut);
+      if (data.isNotEmpty) {
+        await tryAsync(() => cacheRespository.addIOCache(
+            _SavePaths.serverAndVideoPath(provider, url),
+            CacheWriters.videoServerVideoContainerMapWriter.writeToJson(data)));
+      }
+      return data;
+    });
   }
 }
 

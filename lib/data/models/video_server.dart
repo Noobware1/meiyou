@@ -13,4 +13,17 @@ class VideoServer extends VideoSeverEntity {
   String toString() {
     return 'VideoServer(name: "$name", url: "$url", extra: $extra)';
   }
+
+  VideoServer copyWith({
+    String? url,
+    String? name,
+    String? referer,
+    Map<String, dynamic>? extra,
+  }) {
+    return VideoServer(
+        url: url ?? this.url,
+        name: name ?? this.name,
+        extra: extra ?? this.extra,
+        referer: referer ?? this.referer);
+  }
 }

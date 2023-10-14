@@ -101,7 +101,7 @@ class TMDB extends MetaProvider {
       'Trending': _fetchTrending,
       'Trending On Netflix': _fetchNetflixShows,
       'Trending On Amazon': _fetchAmazonShows,
-      'Top Rated': _fetchTopRated,
+      // 'Top Rated': _fetchTopRated,
     };
 
     final results = await Future.wait(map.values.map((e) => e.call()));

@@ -56,19 +56,24 @@ class MetaProviderRepositoryImpl implements MetaProviderRepository {
 
       final rows = <MetaRow>[];
 
-      rows.addAll([...(futures[0].rows), ...(futures[1].rows)]);
+      rows.addAll([
+        futures[0].rows[0],
+        ...(futures[1].rows),
+        ...futures[0].rows.sublist(1)
+      ]);
 
       final bannerRow = MetaRow.buildBannerList(
-          rows
-              .firstWhere((it) => it.rowTitle == 'Trending Anime')
-              .resultsEntity
-              .metaResponses
-              .mapAsList((it) => MetaResponse.fromEntity(it)),
-          rows
-              .firstWhere((it) => it.rowTitle == 'Trending')
-              .resultsEntity
-              .metaResponses
-              .mapAsList((it) => MetaResponse.fromEntity(it)));
+        rows
+            .firstWhere((it) => it.rowTitle == 'Trending')
+            .resultsEntity
+            .metaResponses
+            .mapAsList((it) => MetaResponse.fromEntity(it)),
+        rows
+            .firstWhere((it) => it.rowTitle == 'Trending Anime')
+            .resultsEntity
+            .metaResponses
+            .mapAsList((it) => MetaResponse.fromEntity(it)),
+      );
 
       return MainPage([bannerRow, ...rows]);
     }, timeout: tenSecondTimeOut);

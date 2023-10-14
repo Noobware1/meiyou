@@ -47,5 +47,5 @@ class SearchResponse extends SearchResponseEntity {
 
   @override
   String toString() =>
-      'title: $title,\n url: $url,\n cover: $cover,\n type: $type\n';
+      'SearchResponse(title: $title, url: $url, cover: $cover, type: $type)';
 }

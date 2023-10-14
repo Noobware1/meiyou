@@ -21,6 +21,7 @@ class VideoServerHolder extends StatelessWidget {
         elevation: 5.0,
         surfaceTintColor: context.theme.colorScheme.tertiary,
         type: MaterialType.button,
+        color: context.theme.colorScheme.tertiary,
         borderRadius: BorderRadius.circular(15),
         child: InkWell(
           onTap: () => onTap(video),
@@ -32,9 +33,7 @@ class VideoServerHolder extends StatelessWidget {
           child: Container(
             alignment: Alignment.centerLeft,
             padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-                color: context.theme.colorScheme.tertiary,
-                borderRadius: BorderRadius.circular(15)),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(15)),
             child:
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(

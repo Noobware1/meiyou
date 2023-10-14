@@ -9,21 +9,25 @@ import 'package:meiyou/data/models/video_server.dart';
 
 class Susflix extends TMDBProvider {
   @override
-  String get hostUrl => "https://susflix.tv";
+  String get name => 'Susflix';
+
+  @override
+  String get hostUrl => "https://susflix.tv/api";
 
   @override
   Future<List<Episode>> loadEpisodes(Season season) async {
     return List.generate(
         season.totalEpisode!,
         (index) => Episode(
-            number: index + 1,
-            url:
-                "$hostUrl/view/tv/${season.url}/${season.number}/${index + 1}"));
+              number: index + 1,
+              url:
+                  "$hostUrl/tv?id=${season.url}&s=${season.number}&e=${index + 1}",
+            ));
   }
 
   @override
   Future<Movie> loadMovie(String id) async {
-    return Movie(url: "$hostUrl/view/movie/$id");
+    return Movie(url: "$hostUrl/movie?id=$id");
   }
 
   @override
@@ -38,10 +42,7 @@ class Susflix extends TMDBProvider {
 
   @override
   Future<List<VideoServer>> loadVideoServers(String url) async {
-    return [VideoServer(url: url, name: 'Susflix [Main]')];
+    return [VideoServer(url: url, name: 'Susflix')];
   }
-
-  @override
-  String get name => 'Susflix';
 }
 

@@ -37,13 +37,10 @@ void initialise(BuildContext context, Player player, VideoController controller,
             .videoContainerEntity
             .subtitles);
 
-    if (sub != null) {
-      subtitleWorkerBloc.add(ChangeSubtitle(subtitle: sub));
-      //.setSubtitleTrack(S(sub.url, language: sub.lang));
-    } else {
-      subtitleWorkerBloc
-          .add(const ChangeSubtitle(subtitle: SubtitleEntity.noSubtitle));
-    }
+    sub != null
+        ? subtitleWorkerBloc.add(ChangeSubtitle(subtitle: sub))
+        : subtitleWorkerBloc
+            .add(const ChangeSubtitle(subtitle: SubtitleEntity.noSubtitle));
   });
 
   _startFrom(startVideoForm, player);

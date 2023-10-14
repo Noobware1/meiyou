@@ -18,6 +18,8 @@ class LoadVideoServerAndVideoContainerBloc extends Bloc<
   final LoadServerAndVideoUseCase loadServerAndVideoUseCase;
   final CacheRespository cacheRespository;
 
+  Completer<bool> completer = Completer();
+
   LoadVideoServerAndVideoContainerBloc(
       this.loadServerAndVideoUseCase, this.cacheRespository)
       : super(const LoadVideoServerAndVideoContainerLoading()) {
@@ -45,6 +47,7 @@ class LoadVideoServerAndVideoContainerBloc extends Bloc<
           onError: (error, data) =>
               add(_OnError(data, error, event.provider, event.url))),
     );
+    completer.complete(true);
 
     if (response is ResponseFailed) {
       emit(LoadVideoServerAndVideoContainerCompletedError(
@@ -54,6 +57,12 @@ class LoadVideoServerAndVideoContainerBloc extends Bloc<
     } else {
       emit(LoadVideoServerAndVideoContainerCompletedSucess(response.data!));
     }
+  }
+
+  @override
+  Future<void> close() async {
+    await completer.future;
+    return super.close();
   }
 }
 

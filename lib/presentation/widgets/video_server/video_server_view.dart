@@ -89,114 +89,125 @@ class _VideoServerListViewState extends State<VideoServerListView> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: context.theme.scaffoldBackgroundColor,
-      constraints: const BoxConstraints(minHeight: 100, maxHeight: 800),
-      child: Column(
-        children: [
-          addVerticalSpace(10),
-          const Text(
-            'Select Server',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+    return Scaffold(
+      body: Center(
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 100, maxHeight: 800),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              addVerticalSpace(10),
+              const Text(
+                'Select Server',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              addVerticalSpace(20),
+              BlocConsumer<LoadVideoServerAndVideoContainerBloc,
+                      LoadVideoServerAndVideoContainerState>(
+                  bloc: bloc,
+                  builder: (context, state) {
+                    if (state is LoadVideoServerAndVideoContainerLoading) {
+                      return const CircularProgressIndicator();
+                    } else if (state.data != null) {
+                      return Expanded(
+                        child: ListView(children: [
+                          ...List.generate(
+                              state.data!.length,
+                              (index) => Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.only(left: 20),
+                                        child: Text(
+                                          state.data!.keys.elementAt(index),
+                                          style: const TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w700),
+                                        ),
+                                      ),
+                                      addVerticalSpace(5),
+                                      Column(
+                                        children: List.generate(
+                                            state.data!.values
+                                                .elementAt(index)
+                                                .videos
+                                                .length,
+                                            (i) => VideoServerHolder(
+                                                  onTap: (video) {
+                                                    if (widget.onSelected !=
+                                                        null) {
+                                                      widget.onSelected?.call(
+                                                          SelectedServer(
+                                                              server: state
+                                                                  .data!.keys
+                                                                  .elementAt(
+                                                                      index),
+                                                              videoContainerEntity:
+                                                                  state.data!
+                                                                      .values
+                                                                      .elementAt(
+                                                                          index),
+                                                              selectedVideoIndex:
+                                                                  state.data!
+                                                                      .values
+                                                                      .elementAt(
+                                                                          index)
+                                                                      .videos
+                                                                      .indexOf(
+                                                                          video)));
+      
+                                                      Navigator.pop(context);
+                                                    } else {
+                                                      context.pop();
+                                                      context.push(
+                                                          '${GoRouter.of(context).routeInformationProvider.value.location}$playerRoute',
+                                                          extra: [
+                                                            SelectedServer(
+                                                              server: state
+                                                                  .data!.keys
+                                                                  .elementAt(
+                                                                      index),
+                                                              videoContainerEntity:
+                                                                  state.data!
+                                                                      .values
+                                                                      .elementAt(
+                                                                          index),
+                                                              selectedVideoIndex:
+                                                                  state.data!
+                                                                      .values
+                                                                      .elementAt(
+                                                                          index)
+                                                                      .videos
+                                                                      .indexOf(
+                                                                          video),
+                                                            ),
+                                                            widget.injector,
+                                                          ]);
+                                                    }
+                                                  },
+                                                  video: state.data!.values
+                                                      .elementAt(index)
+                                                      .videos[i],
+                                                )),
+                                      ),
+                                    ],
+                                  )),
+                          _buildLoadingIndicatorIfExtracting(state),
+                        ]),
+                      );
+                    } else {
+                      return defaultSizedBox;
+                    }
+                  },
+                  listener: (context, state) {
+                    if (state is LoadVideoServerAndVideoContainerFailed ||
+                        state is LoadVideoServerAndVideoContainerCompletedError) {
+                      showSnackBAr(context, text: state.error.toString());
+                    }
+                  })
+            ],
           ),
-          addVerticalSpace(20),
-          BlocConsumer<LoadVideoServerAndVideoContainerBloc,
-                  LoadVideoServerAndVideoContainerState>(
-              bloc: bloc,
-              builder: (context, state) {
-                if (state is LoadVideoServerAndVideoContainerLoading) {
-                  return const CircularProgressIndicator();
-                } else if (state.data != null) {
-                  return Expanded(
-                    child: ListView(children: [
-                      ...List.generate(
-                          state.data!.length,
-                          (index) => Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(left: 20),
-                                    child: Text(
-                                      state.data!.keys.elementAt(index),
-                                      style: const TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w700),
-                                    ),
-                                  ),
-                                  addVerticalSpace(5),
-                                  Column(
-                                    children: List.generate(
-                                        state.data!.values
-                                            .elementAt(index)
-                                            .videos
-                                            .length,
-                                        (i) => VideoServerHolder(
-                                              onTap: (video) {
-                                                if (widget.onSelected != null) {
-                                                  widget.onSelected?.call(
-                                                      SelectedServer(
-                                                          server: state
-                                                              .data!.keys
-                                                              .elementAt(index),
-                                                          videoContainerEntity:
-                                                              state.data!.values
-                                                                  .elementAt(
-                                                                      index),
-                                                          selectedVideoIndex:
-                                                              state.data!.values
-                                                                  .elementAt(
-                                                                      index)
-                                                                  .videos
-                                                                  .indexOf(
-                                                                      video)));
-
-                                                  Navigator.pop(context);
-                                                } else {
-                                                  context.pop();
-                                                  context.push(
-                                                      '${GoRouter.of(context).routeInformationProvider.value.location}$playerRoute',
-                                                      extra: [
-                                                        SelectedServer(
-                                                          server: state
-                                                              .data!.keys
-                                                              .elementAt(index),
-                                                          videoContainerEntity:
-                                                              state.data!.values
-                                                                  .elementAt(
-                                                                      index),
-                                                          selectedVideoIndex:
-                                                              state.data!.values
-                                                                  .elementAt(
-                                                                      index)
-                                                                  .videos
-                                                                  .indexOf(
-                                                                      video),
-                                                        ),
-                                                        widget.injector,
-                                                      ]);
-                                                }
-                                              },
-                                              video: state.data!.values
-                                                  .elementAt(index)
-                                                  .videos[i],
-                                            )),
-                                  ),
-                                ],
-                              )),
-                      _buildLoadingIndicatorIfExtracting(state),
-                    ]),
-                  );
-                } else {
-                  return defaultSizedBox;
-                }
-              },
-              listener: (context, state) {
-                if (state is LoadVideoServerAndVideoContainerFailed ||
-                    state is LoadVideoServerAndVideoContainerCompletedError) {
-                  showSnackBAr(context, text: state.error.toString());
-                }
-              })
-        ],
+        ),
       ),
     );
   }

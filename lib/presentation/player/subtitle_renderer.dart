@@ -65,9 +65,7 @@ class SubtitleRenderer extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<SubtitleWorkerBloc, SubtitleWorkerState>(
         builder: (context, state) {
-      if ((state is SubtitleDecoded && state.subtitleCues.isNotEmpty) ||
-          state is NoSubtitle ||
-          state is SubtitleDecodingFailed) {
+      if ((state is SubtitleDecoded && state.subtitleCues.isNotEmpty)) {
         return BlocBuilder<SubtitleWorkerCubit, List<SubtitleCue>?>(
             builder: (context, state) {
           if (state != null && state.isNotEmpty) {

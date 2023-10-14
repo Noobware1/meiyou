@@ -7,9 +7,7 @@ import 'package:meiyou/core/resources/response_state.dart';
 import 'package:meiyou/core/resources/subtitle_decoders/models/cue.dart';
 import 'package:meiyou/domain/entities/subtitle.dart';
 import 'package:meiyou/domain/usecases/video_player_usecase/get_subtitle_cue.dart';
-import 'package:meiyou/presentation/player/video_controls/cubits/buffering_cubit.dart';
 
-import 'package:media_kit/media_kit.dart';
 
 part 'subtitle_worker_event.dart';
 part 'subtitle_worker_state.dart';

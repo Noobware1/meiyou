@@ -5,6 +5,7 @@ import 'package:equatable/equatable.dart';
 import 'package:meiyou/core/resources/expections.dart';
 import 'package:meiyou/core/resources/provider_type.dart';
 import 'package:meiyou/core/resources/providers/base_provider.dart';
+import 'package:meiyou/core/try_catch.dart';
 import 'package:meiyou/domain/entities/search_response.dart';
 import 'package:meiyou/domain/repositories/cache_repository.dart';
 import 'package:meiyou/domain/usecases/provider_use_cases/find_best_search_response.dart';
@@ -87,6 +88,7 @@ class SelectedSearchResponseBloc
   FutureOr<void> onSelectSearchResponseFromUserSelection(
       SelectSearchResponseFromUserSelection event,
       Emitter<SelectedSearchResponseState> emit) async {
+    await _saveResponse(event.provider, event.searchResponse);
     emit(SelectedSearchResponseSelected(
       event.searchResponse.title, event.searchResponse,
       // event.provider
@@ -95,11 +97,12 @@ class SelectedSearchResponseBloc
 
   Future<void> _saveResponse(
       BaseProvider provider, SearchResponseEntity searchResponse) {
-    return saveSearchResponseUseCase.call(SaveSearchResponseUseCaseParams(
-      savePath: savePath,
-      provider: provider,
-      searchResponse: searchResponse,
-    ));
+    return tryAsync(
+        () => saveSearchResponseUseCase.call(SaveSearchResponseUseCaseParams(
+              savePath: savePath,
+              provider: provider,
+              searchResponse: searchResponse,
+            )));
   }
 
   // void _invokeFetchEpisodeForAnime(

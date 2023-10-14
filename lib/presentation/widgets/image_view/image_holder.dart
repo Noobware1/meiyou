@@ -182,7 +182,7 @@ class ImageHolder extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-          color: context.theme.scaffoldBackgroundColor,
+          color: context.theme.colorScheme.secondary,
           borderRadius: const BorderRadius.all(Radius.circular(10))),
       height: height,
       width: width,

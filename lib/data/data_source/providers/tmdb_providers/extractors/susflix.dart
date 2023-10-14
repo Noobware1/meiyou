@@ -1,8 +1,5 @@
-import 'dart:convert';
-
 import 'package:meiyou/core/resources/client.dart';
 import 'package:meiyou/core/resources/extractors/video_extractor.dart';
-import 'package:meiyou/core/resources/quailty.dart';
 import 'package:meiyou/core/resources/subtitle_format.dart';
 import 'package:meiyou/core/resources/video_format.dart';
 import 'package:meiyou/core/resources/watch_qualites.dart';
@@ -14,16 +11,8 @@ class SusflixExtractor extends VideoExtractor {
   SusflixExtractor(super.videoServer);
 
   @override
-  Future<VideoContainer> extract() {
-    return client
-        .get(hostUrl,
-            cookie:
-                'session=eyJfZnJlc2giOmZhbHNlLCJwaG9uZV9udW1iZXIiOiJsb2xpc3lvdXJraW5nIn0.ZQ2S9Q.kcOWpRD4AGycgr5Ue8ltzCMBSZI; remember_me="303220303220303216303212303225303262303223303226303224303214303213303247303213"')
-        .then((response) {
-      final json = jsonDecode(RegExp(r'response\s=\s({.*?});')
-          .firstMatch(response.text)!
-          .group(1)!
-          .replaceAll("'", '"'));
+  Future<VideoContainer> extract() async {
+    return (await client.get(hostUrl)).json((json) {
       final videos = <Video>[];
 
       for (var e in (json['Qualities'] as List)) {
@@ -47,9 +36,13 @@ class SusflixExtractor extends VideoExtractor {
 class _Quailties extends Video {
   _Quailties({required String path, required String quality})
       : super(
-            fromat: VideoFormat.mp4,
+            fromat: quality.toLowerCase() == 'auto'
+                ? VideoFormat.hls
+                : VideoFormat.mp4,
             url: path,
-            quality: Qualites.getFromString(quality));
+            quality: quality.toLowerCase() == 'auto'
+                ? Qualites.master
+                : Qualites.getFromString(quality));
 
   factory _Quailties.fromJson(dynamic json) {
     return _Quailties(path: json['path'], quality: json['quality']);

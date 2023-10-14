@@ -30,6 +30,6 @@ class Movie extends MovieEntity {
 
   @override
   String toString() {
-    return '''Movie("url": $url,"cover": $cover,"description": $description,"rated": $rated,"title": $title)''';
+    return '''Movie(url: "$url",cover: "$cover",description: "$description",rated: "$rated",title: "$title")''';
   }
 }

@@ -46,32 +46,25 @@ extension StringUtils on String {
     int i;
     i = indexOf(pattern);
     final len = i + pattern.length;
-    if (i == -1) {
-      return '';
-    } else {
-      return substring(len, length).trim();
-    }
+    if (i == -1) return this;
+
+    return substring(len, length).trim();
   }
 
   String substringBeforeLast(String pattern) {
     int i;
     i = lastIndexOf(pattern);
-    if (i == -1) {
-      return '';
-    } else {
-      return substring(0, i);
-    }
+    if (i == -1) return this;
+    return substring(0, i);
   }
 
   String substringAfterLast(String pattern) {
     int i;
     i = lastIndexOf(pattern);
     final len = i + pattern.length;
-    if (i == -1) {
-      return '';
-    } else {
-      return substring(len, length).trim();
-    }
+    if (i == -1) return this;
+
+    return substring(len, length).trim();
   }
 
   String toUpperCaseFirst() {

@@ -1,87 +1,53 @@
 import 'dart:convert';
 
-import 'package:streamify/helpers/data_classes.dart';
-import 'package:streamify/helpers/m3u8_helper.dart';
-import 'package:streamify/helpers/utils.dart';
-import 'package:streamify/providers/extractors/vidmoly_extractor.dart';
-import 'package:streamify/providers/movie_providers/base_movie_source_parser.dart';
+import 'package:meiyou/core/resources/client.dart';
+import 'package:meiyou/core/resources/extractors/video_extractor.dart';
+import 'package:meiyou/core/resources/media_type.dart';
+import 'package:meiyou/core/resources/providers/movie_provider.dart';
+import 'package:meiyou/core/try_catch.dart';
+import 'package:meiyou/core/utils/encode.dart';
+import 'package:meiyou/core/utils/extenstions/iterable.dart';
+import 'package:meiyou/core/utils/extenstions/string.dart';
+import 'package:meiyou/data/models/episode.dart';
+import 'package:meiyou/data/models/movie.dart';
+import 'package:meiyou/data/models/search_response.dart';
+import 'package:meiyou/data/models/season.dart';
+import 'package:meiyou/data/models/video_server.dart';
+import 'package:ok_http_dart/ok_http_dart.dart';
 
-class YoMovies extends MovieSource {
+import 'extractors/speedo_stream.dart';
+
+class YoMovies extends MovieProvider {
   @override
   String get name => 'YoMovies';
 
   @override
-  String get hostUrl => 'https://yomovies.hair';
+  String get hostUrl => 'https://yomovies.network';
 
   @override
-  Future<List<SearchResponse>?> search(String query) async {
-    final res = await client.get('$hostUrl?s=${encode(query, '+')}');
-    final search = res.document
+  Future<List<SearchResponse>> search(String query) async {
+    return (await client.get('$hostUrl?s=${encode(query, '+')}'))
+        .document
         .select('.movies-list.movies-list.movies-list-full > div > a')
-        .map((it) {
+        .mapAsList((it) {
       final url = it.attr('href');
       return SearchResponse(
           title: it.selectFirst('span.mli-info > h2').text,
-          cover: it.selectFirst('img').attr('src'),
+          cover:
+              trySync(() => it.selectFirst('img').attr('data-original')) ?? '',
           url: url,
-          type: (url.contains('series')) ? MediaType.tvShow : MediaType.movie);
-    }).toList();
-
-    return search;
-  }
-
-  Future<LoadResponse?> load(
-      {required SearchResponse data,
-      List<Season>? seasons,
-      Season? season}) async {
-    //print(data.title);
-    final LoadResponse? response;
-    if (data.type == MediaType.movie) {
-      final movie = await loadMovie(data.url);
-
-      response = movie != null ? LoadResponse.fromMovie(movie: movie) : null;
-    } else {
-      final List<Episode>? episode;
-      if (seasons == null) {
-        final allSeasons = await loadSeasons(data.url);
-        if (allSeasons == null || allSeasons.isEmpty) {
-          episode = await loadEpisodes(data.url);
-          response = (episode != null)
-              ? LoadResponse.fromTvResponse(episodes: episode, seasons: seasons)
-              : null;
-        } else {
-          episode = await loadEpisodes(
-              allSeasons[season!.number.toInt() - 1].seasonUrl);
-          response = (episode != null)
-              ? LoadResponse.fromTvResponse(
-                  episodes: episode, seasons: allSeasons)
-              : null;
-        }
-      } else {
-        episode =
-            await loadEpisodes(seasons[season!.number.toInt() - 1].seasonUrl);
-        response = (episode != null)
-            ? LoadResponse.fromTvResponse(episodes: episode, seasons: seasons)
-            : null;
-      }
-    }
-
-    return response;
+          type:
+              (url.contains('/series/')) ? MediaType.tvShow : MediaType.movie);
+    });
   }
 
   @override
-  Future<List<Episode>?> loadEpisodes(String url) async {
-    final data = json.decode(url);
-    final episodes = List<dynamic>.from(data)
-        .map(
-            (ep) => Episode(number: ep['number'], url: ep['episodeUrl']))
-        .toList();
-
-    return episodes;
+  Future<List<Episode>> loadEpisodes(String url) async {
+    return (json.decode(url) as List).mapAsList((it) => Episode.fromJson(it));
   }
 
   @override
-  Future<Movie?> loadMovie(String url) async {
+  Future<Movie> loadMovie(String url) async {
     final movieUrl = await _extractIframe(url);
     return Movie(url: movieUrl);
   }
@@ -94,86 +60,39 @@ class YoMovies extends MovieSource {
   }
 
   @override
-  Future<List<Season>?> loadSeasons(String url) async {
-    final res = await client.get(url);
-    final episodes =
-        res.document.select('.tvseason > div.les-content > a').map((it) {
-      return {
-        'number': it.text.substringAfter('Episode '),
-        'episodeUrl': it.attr('href')
-      };
-    }).toList();
+  Future<List<Season>> loadSeasons(String url) async {
+    final episodes = (await client.get(url))
+        .document
+        .select('.tvseason > div.les-content > a')
+        .mapAsList((it) {
+      return Episode(
+              number: it.text.substringAfter('Episode ').toNum(),
+              url: it.attr('href'))
+          .toJson();
+    });
 
-    return [Season(number: '1', seasonUrl: json.encode(episodes))];
+    return [Season(number: 1, url: json.encode(episodes))];
   }
 
   @override
-  Future<List<VideoServer>?> loadVideoServers(String url) async {
-    if (url.startsWith('//')) {
-      return null;
-    }
-    const name = 'SpeedoStream';
-    if (url.contains('speedo')) {
-      return [VideoServer(name: name, serverUrl: url, referer: hostUrl)];
+  Future<List<VideoServer>> loadVideoServers(String url) async {
+    final name =
+        Uri.tryParse(url)?.host.substringBeforeLast('.').toUpperCaseFirst() ??
+            'SpeedoStream';
+    final VideoServer server;
+    if (url.startsWith(hostUrl)) {
+      server = VideoServer(url: (await _extractIframe(url)), name: name);
     } else {
-      try {
-        final serverUrl = await _extractIframe(url);
-        return [VideoServer(name: 'S', serverUrl: serverUrl, referer: hostUrl)];
-      } catch (e) {
-        return null;
-      }
+      server = VideoServer(url: url, name: name);
     }
+    return [server.copyWith(referer: '$hostUrl/')];
   }
 
   @override
-  VideoExtractor? loadVideoExtractor(VideoServer server) {
-    if (server.serverUrl.contains('speedo')) {
-      return SpeedoStreamExtractor(
-        server,
-      );
-    } else {
-      return null;
-    }
+  VideoExtractor loadVideoExtractor(VideoServer videoServer) {
+    return SpeedoStreamExtractor(videoServer);
   }
 }
 
-class SpeedoStreamExtractor extends VideoExtractor {
-  @override
-  // TODO: implement name
-  String get name => 'SpeedoStream';
-  @override
-  // TODO: implement hostUrl
-  String get hostUrl => server.serverUrl.substringBeforeLast('/');
 
-  @override
-  // TODO: implement doesRequireReferer
-  bool get doesRequireReferer => true;
 
-  SpeedoStreamExtractor(super.server);
-
-  @override
-  Future<VideoFile?> extractor([String referer = '']) async {
-    try {
-      final serverUrl = server.serverUrl;
-      final headers = {"Referer": '$hostUrl/'};
-
-      final text =
-          (await client.get(serverUrl, headers: {"Referer": server.referer!}))
-              .text;
-
-      final RegExp fileRegex = RegExp(r'sources:\s\[{file:"(.*)"}\]');
-
-      final masterUrl = fileRegex.firstMatch(text)?.group(1);
-
-      if (masterUrl == null) {
-        return null;
-      }
-
-      final file = (await client.get(masterUrl, headers: headers)).text;
-      return toM3u8Helper(name, masterUrl, headers: headers);
-    } catch (e, stack) {
-      print(stack);
-      return null;
-    }
-  }
-}
