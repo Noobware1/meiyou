@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:meiyou/core/resources/bloc_concurrency.dart/restartable.dart';
 import 'package:meiyou/core/resources/expections.dart';
 import 'package:meiyou/core/resources/providers/base_provider.dart';
 import 'package:meiyou/core/resources/response_state.dart';
@@ -18,12 +19,11 @@ class LoadVideoServerAndVideoContainerBloc extends Bloc<
   final LoadServerAndVideoUseCase loadServerAndVideoUseCase;
   final CacheRespository cacheRespository;
 
-  Completer<bool> completer = Completer();
-
   LoadVideoServerAndVideoContainerBloc(
       this.loadServerAndVideoUseCase, this.cacheRespository)
       : super(const LoadVideoServerAndVideoContainerLoading()) {
-    on<LoadVideoServerAndVideoContainer>(onLoadVideoServerAndVideoContainer);
+    on<LoadVideoServerAndVideoContainer>(onLoadVideoServerAndVideoContainer,
+        transformer: restartable());
     on<_OnData>(
       (event, emit) =>
           emit(LoadVideoServerAndVideoContainerSuccess(event.data)),
@@ -47,7 +47,6 @@ class LoadVideoServerAndVideoContainerBloc extends Bloc<
           onError: (error, data) =>
               add(_OnError(data, error, event.provider, event.url))),
     );
-    completer.complete(true);
 
     if (response is ResponseFailed) {
       emit(LoadVideoServerAndVideoContainerCompletedError(
@@ -57,12 +56,6 @@ class LoadVideoServerAndVideoContainerBloc extends Bloc<
     } else {
       emit(LoadVideoServerAndVideoContainerCompletedSucess(response.data!));
     }
-  }
-
-  @override
-  Future<void> close() async {
-    await completer.future;
-    return super.close();
   }
 }
 

@@ -14,6 +14,8 @@ class SourceDropDownBloc
     on<SourceDropDownOnSelected>(onSelected);
   }
 
+  BaseProvider get provider => state.provider;
+
   FutureOr<void> onSelected(
       SourceDropDownOnSelected event, Emitter<SourceDropDownState> emit) {
     emit(SourceDropDownSelected(event.provider));

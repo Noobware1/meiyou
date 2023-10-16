@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:meiyou/core/resources/client.dart';
@@ -106,15 +107,7 @@ class PressPlay extends MovieProvider {
   Future<List<SearchResponse>> search(String query) async {
     return (await client.get('$hostUrl/search?json=1&q=${encode(query)}')).json(
         (json) => (json['movies'] as List)
-            .mapAsList(_PressPlaySearchResponse.fromJson));
-  }
-
-  String _safeSelect(String Function() fun) {
-    try {
-      return fun.call();
-    } catch (_) {
-      return '';
-    }
+            .mapAsList((e) => _PressPlaySearchResponse.fromJson(hostUrl, e)));
   }
 
   Future<String> _extractIframe(String url) {
@@ -224,19 +217,14 @@ class _PressPlaySearchResponse extends SearchResponse {
       required super.cover,
       required super.type});
 
-  factory _PressPlaySearchResponse.fromJson(dynamic json) {
+  factory _PressPlaySearchResponse.fromJson(String hosturl, dynamic json) {
     return _PressPlaySearchResponse(
         title: json['title'] ?? json['title_en'] ?? json['title_full'] ?? '',
+        cover: hosturl + (json['poster'] as String),
         url: json['url'],
-        cover: json['poster'],
         type: json['type'].toString() == '0'
             ? MediaType.movie
             : MediaType.tvShow);
   }
 }
 
-void main(List<String> args) async {
-  final a = PressPlay();
-  print(await a.loadMovie(
-      'https://pressplay.top/movie-id406718170-the-super-mario-bros-movie-2023-online-free'));
-}

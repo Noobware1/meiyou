@@ -18,40 +18,27 @@ class AnimePahe extends AnimeProvider {
   @override
   String get hostUrl => 'https://animepahe.ru';
 
-  List<Episode> _episodeFromApi(dynamic json, String id) {
-    final episodes = List.from(json['data']).map((data) {
-      return Episode(
-          thumbnail: data['snapshot'],
-          url: '$hostUrl/play/$id/${data['session']}',
-          number: data['episode'] as num);
-    }).toList();
-    return episodes;
-  }
-
   @override
   Future<List<Episode>> loadEpisodes(String url) async {
     final res = (await client
             .get('$hostUrl/api?m=release&id=$url&sort=episode_asc&page=1'))
         .json();
     final lastPage = int.parse(res['last_page']?.toString() ?? '1');
-    if (lastPage == 1) {
-      return _episodeFromApi(res, url);
-    } else {
-      final List<Episode> episodes = [..._episodeFromApi(res, url)];
 
-      for (var i = 2; i < lastPage + 1; i++) {
-        episodes.addAll((await client
+    return [
+      for (var i = 1; i <= lastPage; i++)
+        (await client
                 .get('$hostUrl/api?m=release&id=$url&sort=episode_asc&page=$i'))
-            .json((json) => _episodeFromApi(json, url)));
-      }
-      return episodes;
-    }
+            .json((json) {
+          return (json['data'] as List).mapAsList((data) {
+            return Episode(
+                thumbnail: data['snapshot'],
+                url: '$hostUrl/play/$url/${data['session']}',
+                number: data['episode'] as num);
+          });
+        })
+    ].faltten();
   }
-
-  // @override
-  // VideoExtractor? loadVideoExtractor(VideoServer server) {
-  //   return KwikExtractor(server);
-  // }
 
   @override
   Future<List<VideoServer>> loadVideoServers(String url) async {
@@ -80,14 +67,13 @@ class AnimePahe extends AnimeProvider {
   }
 
   List<SearchResponse> _searchResponsefromApi(dynamic json) {
-    final data = List<dynamic>.from(json['data']).map((list) {
+    return (json['data'] as List).mapAsList((list) {
       return SearchResponse(
           title: list['title'],
           cover: list['poster'],
           url: list['session'],
           type: MediaType.anime);
-    }).toList();
-    return data;
+    });
   }
 
   @override
@@ -95,4 +81,3 @@ class AnimePahe extends AnimeProvider {
     return Kwik(videoServer);
   }
 }
-

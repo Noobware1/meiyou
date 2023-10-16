@@ -4,11 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:meiyou/config/routes/routes.dart';
 import 'package:meiyou/core/constants/default_sized_box.dart';
 import 'package:meiyou/core/resources/snackbar.dart';
-import 'package:meiyou/core/usecases_container/watch_provider_repository_container.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
 import 'package:meiyou/core/utils/player_utils.dart';
-import 'package:meiyou/domain/repositories/cache_repository.dart';
-import 'package:meiyou/domain/usecases/provider_use_cases/load_server_and_video_usecase.dart';
 import 'package:meiyou/presentation/pages/info_watch/state/source_dropdown_bloc/bloc/source_drop_down_bloc.dart';
 import 'package:meiyou/presentation/widgets/add_space.dart';
 import 'package:meiyou/presentation/widgets/video_server/state/load_server_video_bloc/load_video_server_and_video_container_bloc_bloc.dart';
@@ -30,7 +27,7 @@ typedef OnVideoServerSelected = void Function(SelectedServer selected);
 
 typedef PlayerDependendicesInjector = Widget Function(Widget child);
 
-class VideoServerListView extends StatefulWidget {
+class VideoServerListView extends StatelessWidget {
   final PlayerDependendicesInjector injector;
   final OnVideoServerSelected? onSelected;
   final String url;
@@ -68,26 +65,6 @@ class VideoServerListView extends StatefulWidget {
           onSelected);
 
   @override
-  State<VideoServerListView> createState() => _VideoServerListViewState();
-}
-
-class _VideoServerListViewState extends State<VideoServerListView> {
-  late final LoadVideoServerAndVideoContainerBloc bloc;
-
-  @override
-  void initState() {
-    bloc = LoadVideoServerAndVideoContainerBloc(
-        RepositoryProvider.of<WatchProviderRepositoryContainer>(context)
-            .get<LoadServerAndVideoUseCase>(),
-        RepositoryProvider.of<CacheRespository>(context))
-      ..add(LoadVideoServerAndVideoContainer(
-          BlocProvider.of<SourceDropDownBloc>(context).state.provider,
-          widget.url));
-
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
@@ -104,7 +81,12 @@ class _VideoServerListViewState extends State<VideoServerListView> {
               addVerticalSpace(20),
               BlocConsumer<LoadVideoServerAndVideoContainerBloc,
                       LoadVideoServerAndVideoContainerState>(
-                  bloc: bloc,
+                
+                  bloc: BlocProvider.of<LoadVideoServerAndVideoContainerBloc>(
+                      context)
+                    ..add(LoadVideoServerAndVideoContainer(
+                        BlocProvider.of<SourceDropDownBloc>(context).provider,
+                        url)),
                   builder: (context, state) {
                     if (state is LoadVideoServerAndVideoContainerLoading) {
                       return const CircularProgressIndicator();
@@ -114,10 +96,12 @@ class _VideoServerListViewState extends State<VideoServerListView> {
                           ...List.generate(
                               state.data!.length,
                               (index) => Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Padding(
-                                        padding: const EdgeInsets.only(left: 20),
+                                        padding:
+                                            const EdgeInsets.only(left: 20),
                                         child: Text(
                                           state.data!.keys.elementAt(index),
                                           style: const TextStyle(
@@ -134,28 +118,23 @@ class _VideoServerListViewState extends State<VideoServerListView> {
                                                 .length,
                                             (i) => VideoServerHolder(
                                                   onTap: (video) {
-                                                    if (widget.onSelected !=
-                                                        null) {
-                                                      widget.onSelected?.call(
-                                                          SelectedServer(
-                                                              server: state
-                                                                  .data!.keys
+                                                    if (onSelected != null) {
+                                                      onSelected?.call(SelectedServer(
+                                                          server: state
+                                                              .data!.keys
+                                                              .elementAt(index),
+                                                          videoContainerEntity:
+                                                              state.data!.values
                                                                   .elementAt(
                                                                       index),
-                                                              videoContainerEntity:
-                                                                  state.data!
-                                                                      .values
-                                                                      .elementAt(
-                                                                          index),
-                                                              selectedVideoIndex:
-                                                                  state.data!
-                                                                      .values
-                                                                      .elementAt(
-                                                                          index)
-                                                                      .videos
-                                                                      .indexOf(
-                                                                          video)));
-      
+                                                          selectedVideoIndex:
+                                                              state.data!.values
+                                                                  .elementAt(
+                                                                      index)
+                                                                  .videos
+                                                                  .indexOf(
+                                                                      video)));
+
                                                       Navigator.pop(context);
                                                     } else {
                                                       context.pop();
@@ -181,7 +160,7 @@ class _VideoServerListViewState extends State<VideoServerListView> {
                                                                       .indexOf(
                                                                           video),
                                                             ),
-                                                            widget.injector,
+                                                            injector,
                                                           ]);
                                                     }
                                                   },
@@ -201,7 +180,8 @@ class _VideoServerListViewState extends State<VideoServerListView> {
                   },
                   listener: (context, state) {
                     if (state is LoadVideoServerAndVideoContainerFailed ||
-                        state is LoadVideoServerAndVideoContainerCompletedError) {
+                        state
+                            is LoadVideoServerAndVideoContainerCompletedError) {
                       showSnackBAr(context, text: state.error.toString());
                     }
                   })
@@ -210,12 +190,6 @@ class _VideoServerListViewState extends State<VideoServerListView> {
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    bloc.close();
-    super.dispose();
   }
 
   Widget _buildLoadingIndicatorIfExtracting(

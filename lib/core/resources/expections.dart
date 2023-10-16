@@ -10,6 +10,12 @@ class MeiyouException implements Exception {
     return '$message\nStack Trace\n$stackTrace\nException Type: $type';
   }
 
+  factory MeiyouException.fromAuth([StackTrace? stack]) {
+    return MeiyouException(
+        'Authentication failed! Please double check if you verified meiyou successfully or try again',
+        stackTrace: stack);
+  }
+
   factory MeiyouException.fromTMDB() {
     return const MeiyouException('Failed Fetch Data From TMDB',
         type: MeiyouExceptionType.providerException);

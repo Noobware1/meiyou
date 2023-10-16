@@ -53,8 +53,7 @@ class WebVttParser extends SubtitleParser {
     final numbers = timeStamp
         .split(':')
         .mapAsList((it) => RegExp('\\d+').firstMatch(it)?.group(0))
-        .nonNulls
-        .toList();
+        .nonNullsList;
 
     final int hour;
     final int minute;
@@ -83,13 +82,3 @@ class WebVttParser extends SubtitleParser {
   static const _webvttArrow = ' --> ';
 }
 
-void main(List<String> args) {
-  final a = r'''
-
-''';
-
-  final b = WebVttParser();
-  final c = b.parse(a);
-  print(c.first.text);
-  print(c.first.text.toUint8List());
-}

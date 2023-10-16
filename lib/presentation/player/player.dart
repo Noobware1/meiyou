@@ -101,12 +101,7 @@ class MeiyouPlayerState extends State<MeiyouPlayer>
     );
 
     subtitleWorkerCubit =
-        SubtitleWorkerCubit(subtitleWorkerBloc.stream.asyncMap((event) {
-      if (event is SubtitleDecoded && event.subtitleCues.isNotEmpty) {
-        return event.subtitleCues;
-      }
-      return null;
-    }), player.stream.position);
+        SubtitleWorkerCubit(subtitleWorkerBloc.stream, player.stream.position);
 
     showVideoControlsCubit = ShowVideoControlsCubit();
 

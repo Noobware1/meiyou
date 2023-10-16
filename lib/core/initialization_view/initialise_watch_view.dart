@@ -14,6 +14,7 @@ import 'package:meiyou/domain/usecases/provider_use_cases/get_episode_chunks_use
 import 'package:meiyou/domain/usecases/provider_use_cases/load_movie_usecase.dart';
 import 'package:meiyou/domain/usecases/provider_use_cases/load_saved_search_response.dart';
 import 'package:meiyou/domain/usecases/provider_use_cases/load_seasons_episodes.dart';
+import 'package:meiyou/domain/usecases/provider_use_cases/load_server_and_video_usecase.dart';
 import 'package:meiyou/domain/usecases/provider_use_cases/save_search_response.dart';
 import 'package:meiyou/domain/usecases/provider_use_cases/search_use_case.dart';
 import 'package:meiyou/presentation/pages/info_watch/state/search_response_bloc/bloc/search_response_bloc.dart';
@@ -24,6 +25,7 @@ import 'package:meiyou/presentation/widgets/episode_selector/episode_selector.da
 import 'package:meiyou/presentation/widgets/episode_selector/episode_selector/episode_selector_bloc.dart';
 import 'package:meiyou/presentation/widgets/season_selector/bloc/seasons_selector_bloc.dart';
 import 'package:meiyou/presentation/widgets/season_selector/season_selector.dart';
+import 'package:meiyou/presentation/widgets/video_server/state/load_server_video_bloc/load_video_server_and_video_container_bloc_bloc.dart';
 import 'package:meiyou/presentation/widgets/watch/search_response_bottom_sheet.dart';
 import 'package:meiyou/presentation/widgets/watch/selected_search_response_widget.dart';
 import 'package:meiyou/presentation/widgets/watch/state/fetch_movie_bloc/fetch_movie_bloc.dart';
@@ -74,6 +76,10 @@ class InitiliseWatchView extends InitialiseView {
     cacheRespository: cacheRespository,
     // loadS/get<LoadSavedSearchResponseUseCase>()
   );
+
+  late final videoServerBloc = LoadVideoServerAndVideoContainerBloc(
+      watchProviderRepositoryContainer.get<LoadServerAndVideoUseCase>(),
+      cacheRespository);
 
   final EpisodeSelectorBloc episodeSelectorBloc =
       EpisodeSelectorBloc(const MapEntry('', <EpisodeEntity>[]));
@@ -166,6 +172,7 @@ class InitiliseWatchView extends InitialiseView {
         BlocProvider.value(value: selectedSearchResponseBloc),
         BlocProvider.value(value: fetchMovieBloc),
         BlocProvider.value(value: fetchSeasonsEpisodesBloc),
+        BlocProvider.value(value: videoServerBloc),
         BlocProvider.value(value: seasonsSelectorBloc),
         BlocProvider.value(value: episodeSelectorBloc),
         BlocProvider.value(value: currentEpisodeCubit),
@@ -194,6 +201,7 @@ class InitiliseWatchView extends InitialiseView {
     seasonsSelectorBloc.close();
     sourceDropDownBloc.close();
     currentEpisodeCubit.close();
+    videoServerBloc.close();
     _provider = null;
   }
 }

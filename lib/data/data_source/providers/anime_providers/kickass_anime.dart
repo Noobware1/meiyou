@@ -28,19 +28,14 @@ class KickAssAnime extends AnimeProvider {
 
       final res = (await session.get(episodeUrl, params: params(1)))
           .json(_KickAssAnimeEpisodeJson.fromJson);
-      final episodes = <Episode>[
-        ...res.result!.map((it) => it.toEpisode(hostUrl, media.slug))
-      ];
 
-      for (var i = 1; i < res.pages!.length; i++) {
-        final data = await session.get(episodeUrl, params: params(i));
-
-        final episode = data.json(_KickAssAnimeEpisodeJson.fromJson);
-        episodes.addAll(
-            episode.result!.map((e) => e.toEpisode(hostUrl, media.slug)));
-      }
-
-      return episodes;
+      return [
+        res.result!,
+        for (var i = 1; i <= res.pages!.length; i++)
+          (await session.get(episodeUrl, params: params(i)))
+              .json(_KickAssAnimeEpisodeJson.fromJson)
+              .result!
+      ].faltten();
     } finally {
       session.close();
     }
@@ -153,34 +148,35 @@ class _Page {
       );
 }
 
-class _Result {
-  final String? slug;
-  final String? title;
+class _Result extends Episode {
+  // final String? url;
+  // final String? title;
   final num? durationMs;
-  final num? episodeNumber;
+  // final num? episodeNumber;
   final String? episodeString;
-  final String? thumbnail;
+  // final String? thumbnail;
 
   const _Result({
-    this.slug,
-    this.title,
+    required super.number,
+    required super.url,
+    super.title,
     this.durationMs,
-    this.episodeNumber,
+    // this.episodeNumber,
     this.episodeString,
-    this.thumbnail,
+    super.thumbnail,
   });
 
-  Episode toEpisode(String hostUrl, String watchSlug) => Episode(
-      number: episodeNumber!,
-      title: title,
-      thumbnail: thumbnail,
-      url: '$hostUrl/$watchSlug/episode/ep-$episodeNumber-$slug');
+  // Episode toEpisode(String hostUrl, String watchSlug) => Episode(
+  //     number: episodeNumber!,
+  //     title: title,
+  //     thumbnail: thumbnail,
+  //     url: '$hostUrl/$watchSlug/episode/ep-$episodeNumber-$slug');
 
   factory _Result.fromJson(Map<String, dynamic> json) => _Result(
-        slug: json["slug"],
+        url: json["slug"],
         title: json["title"],
         durationMs: json["duration_ms"],
-        episodeNumber: json["episode_number"],
+        number: json["episode_number"],
         episodeString: json["episode_string"],
         thumbnail: json["thumbnail"] == null
             ? null

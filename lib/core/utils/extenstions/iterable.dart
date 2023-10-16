@@ -1,5 +1,12 @@
+import 'dart:async';
+
+import 'package:meiyou/core/try_catch.dart';
+
 extension IterableUtils<E> on Iterable<E> {
-  List<T> mapAsList<T>(T Function(E it) toElement) => map(toElement).toList();
+  E? tryElementAt(index) => trySync(() => elementAt(index));
+
+  List<T> mapAsList<T>(T Function(E it) toElement) =>
+      [for (var value in this) toElement(value)];
 
   List<T> mapWithIndex<T>(T Function(int index, E it) toElement) {
     return List.generate(
@@ -26,81 +33,88 @@ extension IterableUtils<E> on Iterable<E> {
   }
 }
 
-extension FutureIterableUtils<E> on Future<Iterable<E>> {
-  Future<Iterable<T>> map<T>(Future<T> Function(E it) toElement) async {
-    return Future.wait((await this).map((e) => toElement(e)));
+extension NonNull<E> on Iterable<E?> {
+  List<E> get nonNullsList => [
+        for (var value in this)
+          if (value != null) value
+      ];
+}
+
+extension Faltten<E> on List<List<E>> {
+  List<E> faltten() {
+    return [for (Iterable<E> l in this) ...l];
+  }
+}
+
+extension IterableFutureUtils<E> on Iterable<Future<E>> {
+  Future<List<E?>> get tryWait {
+    var results = [for (var f in this) _FutureResult<E>(f)];
+    if (results.isEmpty) return Future<List<E>>.value(<E>[]);
+    final c = Completer<List<E?>>.sync();
+    _FutureResult._waitAll(results, () {
+      c.complete([for (var r in results) r.value]);
+    });
+    return c.future;
+  }
+}
+
+//copied from dart future extenstions
+class _FutureResult<T> {
+  // Consider integrating directly into `_Future` as a `_FutureListener`
+  // to avoid creating as many function tear-offs.
+
+  /// The value or `null`.
+  ///
+  /// Set when the future completes with a value.
+  T? valueOrNull;
+
+  void Function(int errors) onReady = _noop;
+
+  _FutureResult(Future<T> future) {
+    _resolveFuture(future, _onValue, _onError);
   }
 
-  Future<Iterator<E>> get asyncIterator => then((value) => value.iterator);
+  /// The value.
+  ///
+  /// Should only be used when the future is known to have completed with
+  /// a value.
+  T? get value => valueOrNull;
 
-  Future<Iterable<E>> followedBy(Iterable<E> other) async =>
-      (await this).followedBy(other);
+  void _onValue(T value) {
+    valueOrNull = value;
+    onReady(0);
+  }
 
-  Future<Iterable<E>> where(bool Function(E element) test) async =>
-      (await this).where(test);
+  void _onError(Object error, StackTrace stack) {
+    valueOrNull = null;
+    onReady(1);
+  }
 
-  Future<Iterable<T>> whereType<T>() async => (await this).whereType<T>();
+  /// Waits for a number of [_FutureResult]s to all have completed.
+  ///
+  /// List must not be empty.
+  static void _waitAll(List<_FutureResult> results, void Function() whenReady) {
+    assert(results.isNotEmpty);
+    var ready = 0;
+    void onReady(int error) {
+      if (++ready == results.length) {
+        whenReady();
+      }
+    }
 
-  Future<Iterable<T>> expand<T>(
-          Iterable<T> Function(E element) toElements) async =>
-      (await this).expand(toElements);
+    for (var r in results) {
+      r.onReady = onReady;
+    }
+  }
 
-  Future<bool> asyncContains(Object? element) async =>
-      (await this).contains(element);
+  static void _noop(_) {}
+}
 
-  Future<void> forEach(void Function(E element) action) async =>
-      (await this).forEach(action);
-
-  Future<E> reduce(E Function(E value, E element) combine) async =>
-      (await this).reduce(combine);
-
-  Future<T> fold<T>(
-          T initialValue, T combine(T previousValue, E element)) async =>
-      (await this).fold<T>(initialValue, combine);
-
-  Future<bool> every(bool test(E element)) async => (await this).every(test);
-
-  Future<String> join([String separator = ""]) async =>
-      (await this).join(separator);
-
-  Future<bool> any(bool test(E element)) async => (await this).any(test);
-
-  Future<List<E>> toList({bool growable = true}) async => (await this).toList();
-
-  Future<Set<E>> toSet() async => (await this).toSet();
-
-  Future<int> get length async => (await this).length;
-
-  Future<bool> get isEmpty async => (await this).isEmpty;
-
-  Future<bool> get isNotEmpty async => (await this).isNotEmpty;
-
-  Future<Iterable<E>> take(int count) async => (await this).take(count);
-
-  Future<Iterable<E>> takeWhile(bool test(E value)) async =>
-      (await this).takeWhile(test);
-
-  Future<Iterable<E>> skip(int count) async => (await this).skip(count);
-
-  Future<Iterable<E>> skipWhile(bool test(E value)) async =>
-      (await this).skipWhile(test);
-
-  Future<E> get first async => (await this).first;
-
-  Future<E> get last async => (await this).last;
-
-  Future<E> get single async => (await this).single;
-
-  Future<E> firstWhere(bool test(E element), {E orElse()?}) async =>
-      (await this).firstWhere(test, orElse: orElse);
-
-  Future<E> lastWhere(bool Function(E element) test,
-          {E Function()? orElse}) async =>
-      (await this).lastWhere(test, orElse: orElse);
-
-  Future<E> singleWhere(bool Function(E element) test,
-          {E Function()? orElse}) async =>
-      (await this).singleWhere(test, orElse: orElse);
-
-  Future<E> elementAt(int index) async => (await this).elementAt(index);
+void _resolveFuture<T>(Future<T> future, void Function(T value) onData,
+    void Function(Object error, StackTrace stackTrace) onError) async {
+  try {
+    onData.call(await future);
+  } catch (e, s) {
+    return onError.call(e, s);
+  }
 }

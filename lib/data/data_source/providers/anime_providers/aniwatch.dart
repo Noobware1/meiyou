@@ -1,6 +1,7 @@
 import 'package:meiyou/core/resources/client.dart';
 import 'package:meiyou/core/resources/extractors/video_extractor.dart';
 import 'package:meiyou/core/resources/providers/anime_provider.dart';
+import 'package:meiyou/core/try_catch.dart';
 import 'package:meiyou/core/utils/encode.dart';
 import 'package:meiyou/core/utils/extenstions/iterable.dart';
 import 'package:meiyou/core/utils/extenstions/string.dart';
@@ -67,22 +68,23 @@ class AniWatch extends AnimeProvider {
 
   @override
   Future<List<VideoServer>> loadVideoServers(String url) async {
-    return Future.wait((await client.get(
-            '$hostUrl/ajax/v2/episode/servers?episodeId=$url',
-            headers: _headers))
-        .json((json) => html_parser.parse(json['html']))
-        .select('div.item.server-item')
-        .mapAsList((it) async {
+    return (await (await client.get(
+                '$hostUrl/ajax/v2/episode/servers?episodeId=$url',
+                headers: _headers))
+            .json((json) => html_parser.parse(json['html']))
+            .select('div.item.server-item')
+            .mapAsList((it) async {
       final url = (await client.get(
               '$hostUrl/ajax/v2/episode/sources?id=${it.attr('data-id')}',
               headers: _embedHeaders))
-          .json((json) => json["link"]);
-
+          .jsonSafe((json) => json["link"] as String);
+      if (url == null) return null;
       return VideoServer(
         url: url,
         name: "${it.attr('data-type').toUpperCase()} - ${it.text}"
             .replaceAll(RegExp(r'\s+'), ' '),
       );
-    }));
+    }).tryWait)
+        .nonNullsList;
   }
 }

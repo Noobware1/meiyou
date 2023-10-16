@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meiyou/core/constants/default_sized_box.dart';
+import 'package:meiyou/core/resources/snackbar.dart';
 import 'package:meiyou/core/resources/subtitle_decoders/models/cue.dart';
 import 'package:meiyou/core/utils/player_utils.dart';
 import 'package:meiyou/presentation/player/subtitle_config.dart';
@@ -63,29 +64,57 @@ class SubtitleRenderer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<SubtitleWorkerBloc, SubtitleWorkerState>(
-        builder: (context, state) {
-      if ((state is SubtitleDecoded && state.subtitleCues.isNotEmpty)) {
-        return BlocBuilder<SubtitleWorkerCubit, List<SubtitleCue>?>(
-            builder: (context, state) {
-          if (state != null && state.isNotEmpty) {
-            return Align(
-              alignment: Alignment.bottomCenter,
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 24.0),
-                child: _buildWithBorder(
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                    child: _buildWithHighlight(state),
-                  ),
+    return BlocListener<SubtitleWorkerBloc, SubtitleWorkerState>(
+      listenWhen: (prev, current) => current is SubtitleDecodingFailed,
+      listener: (context, state) {
+        if (state is SubtitleDecodingFailed) {
+          showSnackBAr(context, text: state.error.toString());
+        }
+      },
+      child: BlocBuilder<SubtitleWorkerCubit, List<SubtitleCue>?>(
+          builder: (context, state) {
+        if (state != null && state.isNotEmpty) {
+          return Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 24.0),
+              child: _buildWithBorder(
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                  child: _buildWithHighlight(state),
                 ),
               ),
-            );
-          }
-          return defaultSizedBox;
-        });
-      }
-      return defaultSizedBox;
-    });
+            ),
+          );
+        }
+        return defaultSizedBox;
+      }),
+    );
   }
+  // return BlocListener<SubtitleWorkerBloc, SubtitleWorkerState>(
+
+  //       builder: (context, state) {
+  //     if ((state is SubtitleDecoded && state.subtitleCues.isNotEmpty)) {
+  // return BlocBuilder<SubtitleWorkerCubit, List<SubtitleCue>?>(
+  //     builder: (context, state) {
+  //   if (state != null && state.isNotEmpty) {
+  //     return Align(
+  //       alignment: Alignment.bottomCenter,
+  //       child: Padding(
+  //         padding: const EdgeInsets.only(bottom: 24.0),
+  //         child: _buildWithBorder(
+  //           Padding(
+  //             padding: const EdgeInsets.symmetric(horizontal: 2.0),
+  //             child: _buildWithHighlight(state),
+  //           ),
+  //         ),
+  //       ),
+  //     );
+  //         }
+  //         return defaultSizedBox;
+  //       });
+  //     }
+  //     return defaultSizedBox;
+  //   });
+  // }
 }

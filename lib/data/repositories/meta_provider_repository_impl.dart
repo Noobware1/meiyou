@@ -3,6 +3,7 @@ import 'package:meiyou/core/constants/request_time_outs.dart';
 import 'package:meiyou/core/resources/expections.dart';
 import 'package:meiyou/core/resources/meta_provider.dart';
 import 'package:meiyou/core/resources/response_state.dart';
+import 'package:meiyou/core/try_catch.dart';
 import 'package:meiyou/core/utils/data_converter/converters.dart';
 import 'package:meiyou/core/utils/extenstions/episode.dart';
 import 'package:meiyou/core/utils/extenstions/iterable.dart';
@@ -51,25 +52,30 @@ class MetaProviderRepositoryImpl implements MetaProviderRepository {
   @override
   Future<ResponseState<MainPage>> fetchMainPage() {
     return tryWithAsync(() async {
-      final futures =
-          await Future.wait([_anilist.fetchMainPage(), _tmdb.fetchMainPage()]);
+      final futures = (await [
+        tryAsync(() => _anilist.fetchMainPage()),
+        tryAsync(() => _tmdb.fetchMainPage())
+      ].wait);
 
-      final rows = <MetaRow>[];
-
-      rows.addAll([
-        futures[0].rows[0],
-        ...(futures[1].rows),
-        ...futures[0].rows.sublist(1)
+      final List<MetaRow> rows = [];
+      var a = [
+        futures.first?.rows.first,
+        ...(futures.elementAt(1)?.rows ?? []),
+        ...(futures.elementAt(0)?.rows.sublist(1) ?? []),
+      ];
+      rows.addAllRemoveNulls([
+        futures.first?.rows.first,
+        ...(futures.elementAt(1)?.rows ?? []),
+        ...(futures.elementAt(0)?.rows.sublist(1) ?? []),
       ]);
 
       final bannerRow = MetaRow.buildBannerList(
-        rows
-            .firstWhere((it) => it.rowTitle == 'Trending')
+        (rows.tryfirstWhere((it) => it.rowTitle == 'Trending') ?? rows.first)
             .resultsEntity
             .metaResponses
             .mapAsList((it) => MetaResponse.fromEntity(it)),
-        rows
-            .firstWhere((it) => it.rowTitle == 'Trending Anime')
+        (rows.tryfirstWhere((it) => it.rowTitle == 'Trending Anime') ??
+                rows.elementAt(2))
             .resultsEntity
             .metaResponses
             .mapAsList((it) => MetaResponse.fromEntity(it)),
@@ -200,16 +206,24 @@ class MetaProviderRepositoryImpl implements MetaProviderRepository {
       final results = <MetaResponse>[];
 
       final future = await Future.wait([
-        _tmdb.fetchSearch(query, page: page, isAdult: isAdult),
-        _anilist.fetchSearch(query, page: page, isAdult: isAdult)
+        tryAsync(() => _tmdb.fetchSearch(query, page: page, isAdult: isAdult)),
+        tryAsync(
+            () => _anilist.fetchSearch(query, page: page, isAdult: isAdult)),
       ]);
 
-      results.addAll(future[0]
-          .metaResponses
-          .whereSafe((it) => !(it as MetaResponse).isAnime())
-          .map((it) => MetaResponse.fromEntity(it)));
-      results.addAll(
-          future[1].metaResponses.map((it) => MetaResponse.fromEntity(it)));
+      results.addAllRemoveNulls([
+        ...future
+                .tryElementAt(0)
+                ?.metaResponses
+                .whereSafe((it) => !(it as MetaResponse).isAnime())
+                .map((it) => MetaResponse.fromEntity(it)) ??
+            [],
+        ...future
+                .tryElementAt(1)
+                ?.metaResponses
+                .map((it) => MetaResponse.fromEntity(it)) ??
+            [],
+      ]);
 
       if (results.isNotEmpty) {
         return MetaResults(totalPage: 1, metaResponses: results);

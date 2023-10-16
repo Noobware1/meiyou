@@ -2,6 +2,8 @@ import 'package:meiyou/core/resources/genres.dart';
 import 'package:meiyou/core/resources/meta_provider.dart';
 import 'package:meiyou/core/utils/date_time.dart';
 import 'package:meiyou/core/utils/extenstions/string.dart';
+import 'package:meiyou/core/utils/extenstions/iterable.dart';
+
 import 'package:meiyou/core/utils/fix_anilist_description.dart';
 import 'package:meiyou/core/utils/fix_tmdb_image.dart';
 import 'package:meiyou/domain/entities/meta_response.dart';
@@ -62,7 +64,7 @@ class MetaResponse extends MetaResponseEntity {
 
   factory MetaResponse.fromTMDB(dynamic json, String? type) {
     final genres = getGeneres(
-        (json['genre_ids'] as List?)?.map((e) => e.toString()).toList());
+        (json['genre_ids'] as List?)?.mapAsList((e) => e.toString()));
 
     return MetaResponse(
         id: json['id'],

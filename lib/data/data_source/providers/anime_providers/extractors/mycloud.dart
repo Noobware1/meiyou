@@ -13,22 +13,24 @@ class MyCloud extends VideoExtractor {
   Future<VideoContainer> extract() async {
     final token = (await client.get('https://vidstream.pro/futoken')).text;
     final query = hostUrl.substringAfterLast('/').substringBefore('?');
-
+    print(videoServer.extra!['api']);
     final raw = (await client.post(videoServer.extra!['api'],
             headers: {"Content-Type": "application/x-www-form-urlencoded"},
             body: {'query': query, 'futoken': token}))
         .json((json) {
-      print(json);
       return '${(json['rawURL'] as String)}?${hostUrl.substringAfter('?')}'
           .appendAutoStart;
     });
     print(raw);
+    print(hostUrl.appendAutoStart);
 
-    return (await client.get(raw, headers: {
+    final data = (await client.get(raw, headers: {
       'Referer': hostUrl.appendAutoStart,
       "X-requested-with": "XMLHttpRequest"
-    }))
-        .json((json) => _SourceResponse.fromJson(json['result']));
+    }));
+
+    print(data.text);
+    return data.json((json) => _SourceResponse.fromJson(json['result']));
   }
 
   @override

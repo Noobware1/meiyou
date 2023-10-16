@@ -49,7 +49,7 @@ class MediaDetails extends MediaDetailsEntity {
   factory MediaDetails.fromTMDB(Map<String, dynamic> media, String type,
       [Map<String, dynamic>? episodes]) {
     final genres =
-        (media['genres'] as List?)?.map((e) => e['name'].toString()).toList();
+        (media['genres'] as List?)?.mapAsList((e) => e['name'].toString());
 
     final lastEpisodeToAir = media['last_episode_to_air'];
 
@@ -61,8 +61,7 @@ class MediaDetails extends MediaDetailsEntity {
       id: media['id'],
       mediaProvider: MediaProvider.tmdb,
       cast: (media['credits']?['cast'] as List?)
-          ?.map((it) => Cast.fromTMDB(it))
-          .toList(),
+          ?.mapAsList((it) => Cast.fromTMDB(it)),
       genres: genres ?? [''],
       runtime: media['runtime'],
       averageScore: (media['vote_average']?.toString() ?? '0')
@@ -85,13 +84,12 @@ class MediaDetails extends MediaDetailsEntity {
       extrenalIds: getExternalIds(media['external_ids']),
       title: (media['name'] ?? media['title']) as String,
       recommendations: (media['recommendations']['results'] as List?)
-          ?.map((it) => Recommendations.fromTMDB(it))
-          .toList(),
+          ?.mapAsList((it) => Recommendations.fromTMDB(it)),
 
       totalEpisode: totalEpisode,
       totalSeason: totalSeason,
       seasons:
-          (media['seasons'] as List?)?.map((it) => Season.fromTMDB(it)).toList()
+          (media['seasons'] as List?)?.mapAsList((it) => Season.fromTMDB(it))
             ?..removeWhere((it) => it.number == 0),
       currentNumberEpisode:
           (media['next_episode_to_air']?['episode_number']?.toString() ?? '')
@@ -136,10 +134,10 @@ class MediaDetails extends MediaDetailsEntity {
       originalLanguage: 'JP',
       startDate: DateTimeFormatter.toDateTimeFromAnilistFormat(startDate),
       endDate: DateTimeFormatter.toDateTimeFromAnilistFormat(endDate),
-      genres: (media['genres'] as List).map((e) => e.toString()).toList(),
+      genres: (media['genres'] as List).mapAsList((e) => e.toString()),
       // runtime: 1,
       averageScore: (media['meanScore']?.toString() ?? '0').toInt() / 10.0,
-      cast: characters?.map((it) => Cast.fromAnilist(it)).toList(),
+      cast: characters?.mapAsList((it) => Cast.fromAnilist(it)),
       description:
           fixAnilistDescription(media['description']?.toString() ?? ''),
       // lastSeason: null,

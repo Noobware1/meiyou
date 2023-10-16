@@ -2,12 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:meiyou/core/constants/plaform_check.dart';
-import 'package:meiyou/core/utils/extenstions/iterable.dart';
-import 'package:meiyou/core/utils/player_utils.dart';
 import 'package:meiyou/domain/entities/subtitle.dart';
-import 'package:meiyou/presentation/player/video_controls/cubits/buffering_cubit.dart';
 import 'package:meiyou/presentation/player/video_controls/cubits/selected_server_cubit.dart';
-import 'package:meiyou/presentation/player/video_controls/cubits/subtitle_worker_cubit.dart';
 import 'package:meiyou/presentation/player/video_controls/subtitle_woker_bloc/subtitle_worker_bloc.dart'
     as bloc;
 import 'package:meiyou/presentation/widgets/arrow_selector_list.dart';
@@ -46,19 +42,10 @@ class ChangeSubtitle extends StatelessWidget {
                         Navigator.pop(context);
                         if (subtitle != workerBloc.state.subtitle) {
                           workerBloc.add(bloc.ChangeSubtitle(
-                              subtitle: subtitle,
-                              headers: selectedServerCubit.headers,
-                              ));
+                            subtitle: subtitle,
+                            headers: selectedServerCubit.headers,
+                          ));
                         }
-                        //  if(track != )
-                        // if (track != player.state.track.subtitle) {
-                        //   Future.microtask(() async {
-                        //     await Future.delayed(
-                        //       const Duration(seconds: 1),
-                        //     );
-                        //     await player.setSubtitleTrack(track);
-                        //   });
-                        // }
                       },
                       onCancel: () {
                         Navigator.pop(context);

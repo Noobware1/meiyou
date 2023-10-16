@@ -17,6 +17,7 @@ import 'package:meiyou/presentation/player/video_controls/video_controls_theme.d
 import 'package:media_kit/media_kit.dart';
 import 'package:meiyou/presentation/widgets/episode_selector/episode_selector/episode_selector_bloc.dart';
 import 'package:meiyou/presentation/widgets/season_selector/bloc/seasons_selector_bloc.dart';
+import 'package:meiyou/presentation/widgets/video_server/state/load_server_video_bloc/load_video_server_and_video_container_bloc_bloc.dart';
 import 'package:meiyou/presentation/widgets/video_server/video_server_view.dart';
 import 'package:meiyou/presentation/widgets/watch/state/fetch_movie_bloc/fetch_movie_bloc.dart';
 import 'package:meiyou/presentation/widgets/watch/state/fetch_seasons_episodes/fetch_seasons_episodes_bloc.dart';
@@ -92,6 +93,9 @@ Widget playerDependenciesInjector(BuildContext context,
       ],
       child: MultiBlocProvider(
         providers: [
+          BlocProvider.value(
+              value: BlocProvider.of<LoadVideoServerAndVideoContainerBloc>(
+                  context)),
           BlocProvider.value(
               value: BlocProvider.of<SelectedSearchResponseBloc>(context)),
 

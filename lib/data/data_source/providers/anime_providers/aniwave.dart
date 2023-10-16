@@ -39,6 +39,7 @@ class Aniwave extends AnimeProvider {
 
   @override
   VideoExtractor? loadVideoExtractor(VideoServer videoServer) {
+    print(videoServer.url);
     switch (videoServer.name.substringBefore('-').trim()) {
       case 'Filemoon':
         return FileMoon(videoServer);
@@ -48,7 +49,7 @@ class Aniwave extends AnimeProvider {
       case 'Vidplay':
         return MyCloud(videoServer.copyWith(extra: {
           'api':
-              '$_apiUrl/raw${name == 'MyCloud' ? "Mcloud" : "Vizcloud"}?apikey=$_apiKey'
+              '$_apiUrl/raw${name == 'Vidplay' ? "Vizcloud" : "Mcloud"}?apikey=$_apiKey'
         }));
       default:
         return null;
@@ -83,7 +84,7 @@ class Aniwave extends AnimeProvider {
   }
 
   @override
-  String get name => 'Animwave';
+  String get name => 'Aniwave';
 
   @override
   Future<List<SearchResponse>> search(String query) async {
@@ -171,3 +172,17 @@ extension _JsonUtils on OkHttpResponse {
       parser.parse(aniwaveJson((json) => json['result']));
 }
 
+void main(List<String> args) async {
+  final servers =
+      await Aniwave().loadVideoServers('HTWaA8kl,HTSfDswm,HTWZDsMv');
+  for (final server in servers) {
+    try {
+      print(await Aniwave().loadVideoExtractor(server)?.extract());
+    } catch (e, s) {
+      print(e);
+      print(s);
+    }
+
+    print('');
+  }
+}

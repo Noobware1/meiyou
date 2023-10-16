@@ -36,8 +36,12 @@ class FetchSeasonsEpisodesBloc
     );
   }
 
+
+
+
   FutureOr<void> onFetchSeasonsEpisodes(FetchSeasonsEpisodes event,
       Emitter<FetchSeasonsEpisodesState> emit) async {
+   
     emit(const FetchSeasonsEpisodesLoading());
     final response = await loadSeasonsEpisodesUseCase.call(
         LoadSeasonsEpisodesUseCaseParams(

@@ -1,10 +1,16 @@
 import 'dart:typed_data';
 
-extension ListUtils<T> on List<T> {
+typedef NullableIterable<T extends Object> = Iterable<T?>;
+
+extension ListUtils<T extends Object> on List<T> {
   void addIfNotNull(T? value) {
     if (value != null) {
       add(value);
     }
+  }
+
+  void addAllRemoveNulls(NullableIterable<T> iterable) {
+    addAll(iterable.nonNulls);
   }
 
   int? tryIndexOf(T? element, [int start = 0]) {

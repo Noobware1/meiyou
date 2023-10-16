@@ -1,3 +1,4 @@
+import 'package:meiyou/core/utils/extenstions/iterable.dart';
 import 'package:meiyou/data/models/meta_response.dart';
 import 'package:meiyou/domain/entities/results.dart';
 
@@ -9,8 +10,7 @@ class MetaResults extends MetaResultsEntity {
 
   factory MetaResults.fromTMDB(dynamic json, String? type) => MetaResults(
       metaResponses: (json['results'] as List)
-          .map((it) => MetaResponse.fromTMDB(it, type))
-          .toList(),
+          .mapAsList((it) => MetaResponse.fromTMDB(it, type)),
       totalPage: json['total_pages'] as int? ?? 1);
 
   factory MetaResults.fromAnilist(dynamic json) {
@@ -22,7 +22,7 @@ class MetaResults extends MetaResultsEntity {
     // final hasNextPage = pageInfo?['hasNextPage'];
     final media = data['media'] as List;
 
-    final results = media.map((it) => MetaResponse.fromAnilist(it)).toList();
+    final results = media.mapAsList((it) => MetaResponse.fromAnilist(it));
 
     return MetaResults(totalPage: total, metaResponses: results);
   }

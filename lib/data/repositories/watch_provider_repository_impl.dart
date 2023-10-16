@@ -42,18 +42,6 @@ class WatchProviderRepositoryImpl implements WatchProviderRepository {
   WatchProviderRepositoryImpl(
     MediaDetailsEntity media,
   ) : _media = MediaDetails.fromEntity(media);
-
-  MovieProvider _getMovieProvider(BaseProvider provider) =>
-      provider as MovieProvider;
-  AnimeProvider _getAnimeProvider(BaseProvider provider) =>
-      provider as AnimeProvider;
-  TMDBProvider _getTMDBProvider(BaseProvider provider) =>
-      provider as TMDBProvider;
-  bool isTMDBProvider(BaseProvider provider) => provider is TMDBProvider;
-
-  bool isAnimeProvider(BaseProvider provider) => provider is AnimeProvider;
-  bool isMovieProvider(BaseProvider provider) => provider is MovieProvider;
-
   @override
   Future<ResponseState<List<EpisodeEntity>>> loadEpisodes(
       {required BaseProvider provider,
@@ -175,7 +163,7 @@ class WatchProviderRepositoryImpl implements WatchProviderRepository {
   SearchResponse findBestSearchResponse(
       List<SearchResponseEntity> responses, ProviderType type) {
     final String? title;
-    final titles = responses.map((it) => it.title).toList();
+    final titles = responses.mapAsList((it) => it.title);
     if (type == ProviderType.anime) {
       title = _media.romaji ?? _media.title ?? _media.native;
     } else {
@@ -338,8 +326,7 @@ class WatchProviderRepositoryImpl implements WatchProviderRepository {
   Future<SearchResponse?> loadSavedSearchResponse(
       String savePath, BaseProvider provider) async {
     return await loadData(
-        savePath:
-            savePath + '/' + _SavePaths.saveResponsePath(provider, _media),
+        savePath: '$savePath/${_SavePaths.saveResponsePath(provider, _media)}',
         transFormer: SearchResponse.fromJson,
         onError: (e) => print(e));
   }
@@ -351,8 +338,7 @@ class WatchProviderRepositoryImpl implements WatchProviderRepository {
     required SearchResponseEntity searchResponse,
   }) async {
     return await saveData(
-        savePath:
-            savePath + '/' + _SavePaths.saveResponsePath(provider, _media),
+        savePath: '$savePath/${_SavePaths.saveResponsePath(provider, _media)}',
         data: jsonEncode(SearchResponse.fromEntity(searchResponse).toJson()),
         onCompleted: () => print('data written successFul'),
         onError: (e) => print(e));
@@ -415,6 +401,17 @@ class WatchProviderRepositoryImpl implements WatchProviderRepository {
       return data;
     });
   }
+
+  MovieProvider _getMovieProvider(BaseProvider provider) =>
+      provider as MovieProvider;
+  AnimeProvider _getAnimeProvider(BaseProvider provider) =>
+      provider as AnimeProvider;
+  TMDBProvider _getTMDBProvider(BaseProvider provider) =>
+      provider as TMDBProvider;
+  bool isTMDBProvider(BaseProvider provider) => provider is TMDBProvider;
+
+  bool isAnimeProvider(BaseProvider provider) => provider is AnimeProvider;
+  bool isMovieProvider(BaseProvider provider) => provider is MovieProvider;
 }
 
 class _SavePaths {

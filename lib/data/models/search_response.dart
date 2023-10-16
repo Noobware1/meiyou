@@ -45,6 +45,21 @@ class SearchResponse extends SearchResponseEntity {
     );
   }
 
+
+
+  SearchResponse copyWith({
+    String? title,
+    String? url,
+    String? cover,
+    String? type,
+  }) {
+    return SearchResponse(
+        title: title ?? this.title,
+        url: url ?? this.url,
+        cover: cover ?? this.cover,
+        type: type ?? this.type);
+  }
+
   @override
   String toString() =>
       'SearchResponse(title: $title, url: $url, cover: $cover, type: $type)';

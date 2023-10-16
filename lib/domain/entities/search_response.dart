@@ -20,4 +20,5 @@ class SearchResponseEntity extends Equatable {
 
   bool get isEmpty =>
       title.isEmpty && url.isEmpty && cover.isEmpty && type.isEmpty;
+
 }

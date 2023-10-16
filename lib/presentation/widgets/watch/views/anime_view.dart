@@ -18,7 +18,6 @@ class AnimeView extends StatelessWidget {
   final void Function(EpisodeEntity episode)? onEpisodeSelected;
   const AnimeView({super.key, this.onServerSelected, this.onEpisodeSelected});
 
-  
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<FetchSeasonsEpisodesBloc, FetchSeasonsEpisodesState>(
