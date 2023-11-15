@@ -11,24 +11,30 @@ import 'package:meiyou/core/utils/extenstions/context.dart';
 class DrawGradient extends StatelessWidget {
   final double height;
   final AlignmentGeometry begin;
-
+  final double? width;
   final AlignmentGeometry end;
-  final List<Color> colors;
+  final List<Color>? colors;
   const DrawGradient(
       {super.key,
       required this.height,
       required this.begin,
       required this.end,
-      this.colors = blackWithTranspent});
+      this.width,
+      this.colors});
 
   @override
   Widget build(BuildContext context) {
     return Container(
         height: height,
-        decoration:  BoxDecoration(
+        width: width,
+        decoration: BoxDecoration(
             gradient: LinearGradient(
                 begin: Alignment.bottomCenter,
                 end: Alignment.topCenter,
-                colors: [context.theme.scaffoldBackgroundColor, Colors.transparent])));
+                colors: colors ??
+                    [
+                      context.theme.scaffoldBackgroundColor,
+                      Colors.transparent
+                    ])));
   }
 }

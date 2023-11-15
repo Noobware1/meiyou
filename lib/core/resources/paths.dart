@@ -1,59 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:meiyou/core/utils/extenstions/context.dart';
+import 'package:meiyou/core/utils/extenstions/directory.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path_helper;
 import 'dart:io' show Directory;
 
 // final Future<Directory> tempDir = getTemporaryDirectory();//
 
 class AppDirectories {
-  final Directory appCacheDirectory;
-  final Directory appDocumentDirectory;
-  final Directory settingsDirectory;
-  // final Directory cacheResponsesDirectory;
-  final Directory savedSelectedResponseDirectory;
+  final Directory pluginDirectory;
+  final Directory databaseDirectory;
 
   AppDirectories({
-    required this.appCacheDirectory,
-    required this.appDocumentDirectory,
-    required this.settingsDirectory,
-    required this.savedSelectedResponseDirectory,
-    // required this.cacheResponsesDirectory,
-    // required this.responsesCacheDirectory
+    required this.databaseDirectory,
+    required this.pluginDirectory,
   });
 
   static Future<AppDirectories> getInstance() async {
     final dirs = await Future.wait([
-      getApplicationCacheDirectory(),
       getApplicationDocumentsDirectory(),
     ]);
+    final appDocDir = Directory(path_helper.join(dirs[0].path, 'meiyou'));
+    await appDocDir.createIfDontExist();
 
-    final appDocDir = Directory('${dirs[1].path}/meiyou');
-    if (!appDocDir.existsSync()) {
-      appDocDir.createSync();
-    }
-    final subDirectories = [
-      'settings',
-      'saved_selected_res',
-      'cache_responses'
-    ];
+    final subDirectories = ['plugins', 'database'];
 
-    for (final subDirName in subDirectories) {
-      final subDir = Directory('${appDocDir.path}/$subDirName');
-      if (!subDir.existsSync()) {
-        subDir.createSync();
-      }
+    final appDirs = <Directory>[];
+    for (final subDir in subDirectories) {
+      appDirs.add(Directory(path_helper.join(appDocDir.path, subDir))
+        ..createIfDontExistSync());
     }
 
     return AppDirectories(
-      appCacheDirectory: dirs[0],
-      appDocumentDirectory: appDocDir,
-      settingsDirectory: Directory('${appDocDir.path}/${subDirectories[0]}'),
-      savedSelectedResponseDirectory:
-          Directory('${appDocDir.path}/${subDirectories[1]}'),
+      pluginDirectory: appDirs[0],
+      databaseDirectory: appDirs[1],
     );
   }
 
   factory AppDirectories.of(BuildContext context) {
-    return RepositoryProvider.of<AppDirectories>(context);
+    return context.repository<AppDirectories>();
   }
 }

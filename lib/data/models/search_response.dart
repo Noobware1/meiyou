@@ -1,66 +1,49 @@
-import 'package:meiyou/core/resources/media_type.dart';
+import 'package:meiyou/core/utils/from_entity.dart';
 import 'package:meiyou/domain/entities/search_response.dart';
+import 'package:meiyou/domain/entities/show_type.dart';
 
 class SearchResponse extends SearchResponseEntity {
   const SearchResponse({
     required super.title,
     required super.url,
-    required super.cover,
+    required super.poster,
     required super.type,
+    super.description,
+    super.generes,
+    super.rating,
+    super.current,
+    super.total,
   });
-
-  factory SearchResponse.anime({
-    required String title,
-    required String url,
-    required String cover,
-  }) {
-    return SearchResponse(
-        title: title, url: url, cover: cover, type: MediaType.anime);
-  }
-
   factory SearchResponse.fromEntity(SearchResponseEntity entity) {
-    return SearchResponse(
-      title: entity.title,
-      url: entity.url,
-      cover: entity.cover,
-      type: entity.type,
+    return createFromEntity<SearchResponseEntity, SearchResponse>(
+      entity,
+      SearchResponse(
+        title: entity.title,
+        url: entity.url,
+        poster: entity.poster,
+        type: entity.type,
+        description: entity.description,
+        generes: entity.generes,
+        rating: entity.rating,
+        current: entity.current,
+        total: entity.total,
+      ),
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'title': title,
-      'url': url,
-      'cover': cover,
-      'type': type,
-    };
-  }
-
-  factory SearchResponse.fromJson(dynamic json) {
-    return SearchResponse(
-      title: json['title'] as String,
-      url: json['url'] as String,
-      cover: json['cover'] as String,
-      type: json['type'] as String,
-    );
-  }
-
-
-
-  SearchResponse copyWith({
-    String? title,
-    String? url,
-    String? cover,
-    String? type,
-  }) {
-    return SearchResponse(
-        title: title ?? this.title,
-        url: url ?? this.url,
-        cover: cover ?? this.cover,
-        type: type ?? this.type);
   }
 
   @override
-  String toString() =>
-      'SearchResponse(title: $title, url: $url, cover: $cover, type: $type)';
+  String toString() {
+    return '''SearchResponse(
+     title: $title,
+     url: $url,
+     poster: $poster,
+     type: $type,
+     description: $description,
+     generes: $generes,
+     rating: $rating,
+     current: $current,
+     total: $total
+  )''';
+  }
 }
+

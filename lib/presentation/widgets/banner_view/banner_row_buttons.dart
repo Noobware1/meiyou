@@ -1,70 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:meiyou/core/constants/height_and_width.dart'
     show smallScreenSize;
+import 'package:meiyou/core/resources/platform_check.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
 import 'package:meiyou/presentation/widgets/add_space.dart';
-
-// class _ForLagerScreens extends StatelessWidget {
-//   final VoidCallback onTapMyList;
-//   final VoidCallback onTapPlay;
-//   final VoidCallback onTapInfo;
-//   const _ForLagerScreens(
-//       {required this.onTapMyList,
-//       required this.onTapPlay,
-//       required this.onTapInfo});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Row(
-//       mainAxisAlignment: MainAxisAlignment.start,
-//       children: [
-//         ElevatedButton.icon(
-//           onPressed: onTapMyList,
-//           icon: const Icon(
-//             Icons.add,
-//           ),
-//           style: ButtonStyle(
-//             iconColor: MaterialStatePropertyAll(
-//                 context.theme.brightness == Brightness.dark
-//                     ? Colors.black
-//                     : Colors.white),
-//             padding: const MaterialStatePropertyAll(EdgeInsets.all(15)),
-//             backgroundColor: MaterialStatePropertyAll(
-//                 context.theme.brightness == Brightness.dark
-//                     ? Colors.white
-//                     : Colors.black),
-//             textStyle: const MaterialStatePropertyAll(TextStyle(
-//               fontSize: 16,
-//               fontWeight: FontWeight.w600,
-//             )),
-//             overlayColor: MaterialStatePropertyAll(
-//                 context.theme.brightness == Brightness.dark
-//                     ? Colors.white
-//                     : Colors.black),
-//           ),
-//           label: Text('My List',
-//               style: TextStyle(
-//                   color: context.theme.brightness == Brightness.dark
-//                       ? Colors.black
-//                       : Colors.white)),
-//         ),
-//         addHorizontalSpace(10),
-//         ElevatedButton.icon(
-//           onPressed: onTapInfo,
-//           icon: const Icon(Icons.info_outline),
-//           style: ButtonStyle(
-//               padding: const MaterialStatePropertyAll(EdgeInsets.all(15)),
-//               backgroundColor:
-//                   MaterialStatePropertyAll(Colors.black.withOpacity(0.5)),
-//               textStyle: const MaterialStatePropertyAll(
-//                   TextStyle(fontSize: 16, fontWeight: FontWeight.w600))),
-//           label: const Text('Info'),
-//         ),
-//         // addHorizontalSpace((context.screenWidth / 3) + 110),
-//       ],
-//     );
-//   }
-// }
 
 class BannerButtons extends StatelessWidget {
   final VoidCallback onTapMyList;
@@ -78,10 +17,82 @@ class BannerButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _ForSmallerScreens(
-      onTapInfo: onTapInfo,
-      onTapMyList: onTapMyList,
-      onTapPlay: onTapPlay,
+    return isMobile
+        ? _ForSmallerScreens(
+            onTapInfo: onTapInfo,
+            onTapMyList: onTapMyList,
+            onTapPlay: onTapPlay,
+          )
+        : _ForBiggerScreens(
+            onTapMyList: onTapMyList,
+            onTapPlay: onTapPlay,
+            onTapInfo: onTapInfo);
+  }
+}
+
+class _ForBiggerScreens extends StatelessWidget {
+  final VoidCallback onTapMyList;
+  final VoidCallback onTapPlay;
+  final VoidCallback onTapInfo;
+  const _ForBiggerScreens(
+      {required this.onTapMyList,
+      required this.onTapPlay,
+      required this.onTapInfo});
+
+  static const _defaultPadding = MaterialStatePropertyAll(
+    EdgeInsets.fromLTRB(10, 15, 15, 15),
+  );
+
+  static const _defaultIconSize = MaterialStatePropertyAll(30.0);
+
+  static const _defaultShape = MaterialStatePropertyAll(RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(45))));
+
+  @override
+  Widget build(BuildContext context) {
+    final defaultTextStyle =
+        TextStyle(color: context.theme.colorScheme.onSurface, fontSize: 17);
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        Flexible(
+          child: ElevatedButton.icon(
+            style: ButtonStyle(
+                alignment: Alignment.centerLeft,
+                padding: _defaultPadding,
+                overlayColor: MaterialStatePropertyAll(
+                    context.theme.colorScheme.surface.withOpacity(0.2)),
+                iconSize: _defaultIconSize,
+                shape: _defaultShape),
+            onPressed: onTapPlay,
+            icon: Icon(Icons.play_arrow_rounded,
+                color: context.theme.colorScheme.onSurface),
+            label: Text('Watch Now', style: defaultTextStyle),
+          ),
+        ),
+        addHorizontalSpace(10),
+        Flexible(
+          child: ElevatedButton.icon(
+            onPressed: onTapMyList,
+            icon: Icon(
+              Icons.add,
+              color: context.theme.colorScheme.onSurface,
+            ),
+            label: Text('My List',
+                textAlign: TextAlign.start, style: defaultTextStyle),
+            style: ButtonStyle(
+                padding: _defaultPadding,
+                iconSize: _defaultIconSize,
+                backgroundColor: MaterialStatePropertyAll(
+                    context.theme.colorScheme.onSurface.withOpacity(0.2)),
+                overlayColor: MaterialStatePropertyAll(
+                    context.theme.colorScheme.surface.withOpacity(0.2)),
+                shape: _defaultShape),
+          ),
+        )
+      ],
     );
   }
 }
@@ -94,22 +105,6 @@ class _ForSmallerScreens extends StatelessWidget {
       {required this.onTapMyList,
       required this.onTapPlay,
       required this.onTapInfo});
-
-  static const _paddingLeft = EdgeInsets.only(left: 20);
-  static const _paddingRight = EdgeInsets.only(right: 20);
-
-  // Widget _paddedButton(
-  //     {required BuildContext context,
-  //     required Widget child,
-  //     required _ButtonDirection direction}) {
-  //   return Expanded(
-  //     child: Padding(
-  //       padding:
-  //           direction == _ButtonDirection.right ? _paddingLeft : _paddingRight,
-  //       child: child,
-  //     ),
-  //   );
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -171,33 +166,6 @@ class _ForSmallerScreens extends StatelessWidget {
         ],
       );
     });
-    // return SizedBox(
-    //   height: 70,
-    //   width: context.screenWidth,
-    //   child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-    //     _paddedButton(
-    //         context: context,
-    //         child: IconButtonWithText(
-    //           icon: const Icon(Icons.add),
-    //           text: 'My List',
-    //           onTap: onTapMyList,
-    //         ),
-    //         direction: _ButtonDirection.left),
-    //     Center(
-    //       child: Padding(
-    //           padding: const EdgeInsets.only(bottom: 10),
-    //           child: _PlayButton(onTapPlay: onTapPlay)),
-    //     ),
-    //     _paddedButton(
-    //         context: context,
-    //         child: IconButtonWithText(
-    //           icon: const Icon(Icons.info_outline),
-    //           text: 'Info',
-    //           onTap: onTapInfo,
-    //         ),
-    //         direction: _ButtonDirection.right)
-    //   ]),
-    // );
   }
 }
 

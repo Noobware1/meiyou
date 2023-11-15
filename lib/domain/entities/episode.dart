@@ -1,50 +1,20 @@
-import 'package:equatable/equatable.dart';
-
-class EpisodeEntity extends Equatable {
-  final num number;
-
-  final String url;
-  final String? title;
-
-  final String? desc;
-
+class EpisodeEntity {
+  final String data;
+  final String? name;
+  final int? season;
+  final num? episode;
+  final String? posterImage;
   final bool? isFiller;
-  final double? rated;
-
-  final String? thumbnail;
+  final String? description;
+  final DateTime? date;
 
   const EpisodeEntity(
-      {required this.number,
-      this.url = '',
-      this.title,
-      this.desc,
+      {required this.data,
+      this.name,
+      this.season,
+      this.episode,
+      this.posterImage,
+      this.description,
       this.isFiller,
-      this.rated,
-      this.thumbnail});
-
- 
-
-  @override
-  String toString() {
-    return """{
-    'number': $number,
-    'title': $title,
-    'isFiller': $isFiller,
-    'url': $url,
-    'thumbnail': $thumbnail,
-    'desc': $desc,
-    'rated': $rated,
-    }""";
-  }
-
-  @override
-  List<Object?> get props => [
-        number,
-        title,
-        isFiller,
-        url,
-        thumbnail,
-        desc,
-        rated,
-      ];
+      this.date});
 }

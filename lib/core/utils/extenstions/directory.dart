@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:meiyou/core/utils/extenstions/string.dart';
+
 extension DirectoryUtils on Directory {
   void deleteAllEntries([void Function()? callback]) {
     try {
@@ -14,4 +16,19 @@ extension DirectoryUtils on Directory {
       print(s);
     }
   }
+
+  void createIfDontExistSync({bool recursive = false}) {
+    if (!existsSync()) {
+      return createSync(recursive: recursive);
+    }
+  }
+
+  Future<Directory?> createIfDontExist({bool recursive = false}) async {
+    if (await exists()) {
+      return null;
+    }
+    return create(recursive: recursive);
+  }
+
+  String get name => path.substringAfterLast('\\');
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:meiyou/core/constants/animation_duration.dart';
-import 'package:meiyou/core/constants/plaform_check.dart';
+import 'package:meiyou/core/resources/platform_check.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
 import 'package:meiyou/presentation/widgets/add_space.dart';
 

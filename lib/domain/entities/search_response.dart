@@ -1,24 +1,25 @@
-import 'package:equatable/equatable.dart';
+import 'show_type.dart';
 
-class SearchResponseEntity extends Equatable {
+class SearchResponseEntity {
   final String title;
   final String url;
-  final String cover;
-  final String type;
+  final String poster;
+  final ShowType type;
+  final String? description;
+  final List<String>? generes;
+  final double? rating;
+  final int? current;
+  final int? total;
 
-  const SearchResponseEntity(
-      {required this.title,
-      required this.url,
-      required this.cover,
-      required this.type});
-
-  @override
-  List<Object?> get props => [title, url, cover, type];
-
-  static const empty =
-      SearchResponseEntity(title: '', url: '', cover: '', type: '');
-
-  bool get isEmpty =>
-      title.isEmpty && url.isEmpty && cover.isEmpty && type.isEmpty;
-
+  const SearchResponseEntity({
+    required this.title,
+    required this.url,
+    required this.poster,
+    required this.type,
+    this.description,
+    this.generes,
+    this.rating,
+    this.current,
+    this.total,
+  });
 }

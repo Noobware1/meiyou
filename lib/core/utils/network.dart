@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:meiyou/core/resources/expections.dart';
 import 'package:meiyou/core/resources/response_state.dart';
 
 Future<ResponseState<T>> tryWithAsync<T>(Future<T> Function() fun,
@@ -11,8 +12,8 @@ Future<ResponseState<T>> tryWithAsync<T>(Future<T> Function() fun,
       return ResponseSuccess(await fun.call());
     }
     // if (verify != null) assert(verify);
-  } catch (_, __) {
-    return ResponseFailed.defaultError(_, __);
+  } catch (e, s) {
+    return ResponseFailed(MeiyouException(e.toString(),  stackTrace: s));
   }
 }
 
