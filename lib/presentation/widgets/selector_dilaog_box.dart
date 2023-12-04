@@ -156,6 +156,18 @@ class _ArrowSelectorDialogBoxState<T> extends State<ArrowSelectorDialogBox<T>> {
                     //       text: 'Auto',
                     //       onTap: () {
                     //         setState(() {
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
                     //           selected = widget.videoTracks[0];
                     //         });
                     //       }),

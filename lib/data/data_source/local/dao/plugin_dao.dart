@@ -1,8 +1,7 @@
 import 'dart:io';
-
 import 'package:meiyou/core/client.dart';
 import 'package:meiyou/core/resources/isar.dart';
-import 'package:meiyou/core/resources/paths.dart';
+import 'package:meiyou/core/utils/extenstions/directory.dart';
 import 'package:meiyou/core/utils/extenstions/file.dart';
 import 'package:meiyou/core/utils/extenstions/string.dart';
 import 'package:meiyou/data/models/plugin_list.dart';
@@ -18,18 +17,31 @@ class PluginDao {
 
   Future<Plugin> installPlugin(Plugin plugin) async {
     final installedPlugin = await tryAsync(
-        () => PluginInstaller(plugin, _pluginSavePath).install(),
+        () => PluginInstaller(
+              plugin: plugin,
+              path: _pluginSavePath,
+            ).install(),
         log: true);
     if (installedPlugin == null) {
-      throw FailedToInstalledPlugin();
+      throw Exception('Failed to Install Plugin');
     }
-    await isar.writeTxn(() async => await isar.plugins.put(installedPlugin));
+    await _addPlugin(installedPlugin);
     return installedPlugin;
   }
 
-  Future<bool> deletePlugin(Plugin plugin) async {
-    return await isar
-        .writeTxn(() async => await isar.plugins.delete(plugin.id));
+  Future<void> _addPlugin(Plugin plugin) async {
+    await isar.writeTxn(() async => await isar.plugins.put(plugin));
+  }
+
+  Future<void> uninstallPlugin(Plugin plugin) async {
+    await Directory(
+            path_helper.join(_pluginSavePath, plugin.name.toLowerCase()))
+        .delete(recursive: true);
+    await isar.writeTxn(() async => await isar.plugins.delete(plugin.id));
+  }
+
+  Future<Plugin> updatePlugin(Plugin plugin) {
+    return installPlugin(plugin);
   }
 
   Stream<List<Plugin>> getAllInstalledPlugins() {
@@ -49,6 +61,24 @@ class PluginDao {
       await isar.pluginLists.clear();
       await isar.pluginLists.putAll(list);
     });
+  }
+
+  void updateLastUsedPlugin(Plugin previousPlugin, Plugin currentPlugin) {
+    isar.writeTxnSync(() {
+      //Checks if it exists first
+      final prev =
+          isar.plugins.getSync(previousPlugin.id)?.copyWith(lastUsed: false);
+
+      final current =
+          isar.plugins.getSync(currentPlugin.id)?.copyWith(lastUsed: true);
+
+      if (current != null) isar.plugins.putSync(current);
+      if (prev != null) isar.plugins.putSync(prev);
+    });
+  }
+
+  Plugin? getLastUsedPlugin() {
+    return isar.plugins.filter().lastUsedEqualTo(true).findFirstSync();
   }
 }
 
@@ -78,20 +108,20 @@ class PluginInstaller {
   late final _paths = _Paths(savepath: savePath, icon: plugin.icon);
   final Plugin plugin;
 
-  PluginInstaller(this.plugin, String path)
+  PluginInstaller({required this.plugin, required String path})
       : savePath = path_helper.join(path, plugin.name.toLowerCase());
 
   Future<bool> _downloadIcon() async {
-    if (plugin.icon != null) {
-      if (plugin.icon!.startsWith('http')) {
-        await tryAsync(() => client.download(
-            savePath: _paths.iconPath!,
-            deleteOnError: true,
-            url: plugin.icon,
-            timeout: const Duration(minutes: 5)));
-      }
+    if (plugin.icon != null && plugin.icon!.startsWith('http')) {
+      File(_paths.iconPath!).deleteIfExistSync();
+      await tryAsync(() => client.download(
+          savePath: _paths.iconPath!,
+          deleteOnError: true,
+          url: plugin.icon,
+          timeout: const Duration(minutes: 5)));
       return true;
     }
+
     return false;
   }
 
@@ -119,7 +149,7 @@ class PluginInstaller {
   }
 
   Future<void> mabyeCompile(Map<String, String> files) async {
-    final file = File(_paths.codePath)..createSync();
+    final file = File(_paths.codePath)..createIfNotExistSync();
 
     try {
       final bytecode = c.compilerEval({'meiyou': files});
@@ -133,29 +163,32 @@ class PluginInstaller {
   }
 
   Future<Plugin> install() async {
-    final dir = Directory(savePath)..createSync(recursive: true);
+    final dir = Directory(savePath)..createIfDontExistSync(recursive: true);
 
     try {
       final icon = await _downloadIcon();
       await _downloadPlugin();
 
       final installedPlugin = Plugin(
+          id: plugin.id,
           source: _paths.codePath,
           name: plugin.name,
           icon: icon == true ? _paths.iconPath : null,
           version: plugin.version,
           info: plugin.info,
-          dependencies: null);
+          dependencies: null,
+          installed: true);
 
       // final jsonFile = File(_paths.pluginPath)..createSync();
 
       // await jsonFile.writeAsString(installedPlugin.encode);
       print('Successfully installed plugin at $savePath');
       // return installedPlugin;
+
       return installedPlugin;
     } catch (e, s) {
       print('$e\n$s');
-      dir.deleteSync();
+      dir.deleteSync(recursive: true);
       throw Exception('Failed to install plugin!');
     }
   }

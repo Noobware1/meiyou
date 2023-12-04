@@ -1,6 +1,6 @@
 part of 'async_cubit.dart';
 
-sealed class AsyncState<T> extends Equatable {
+class AsyncState<T> extends Equatable {
   final T? data;
   final MeiyouException? error;
   const AsyncState({this.data, this.error});

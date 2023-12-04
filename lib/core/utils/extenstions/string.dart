@@ -68,8 +68,8 @@ extension StringUtils on String {
   }
 
   String toUpperCaseFirst() {
-    final upper = split('')[0].toUpperCase();
-    return upper + substring(1, length);
+    final upper = this[0].toUpperCase();
+    return upper + substring(1, length).toLowerCase();
   }
 
   String substringSafe(int start, [int? end]) {

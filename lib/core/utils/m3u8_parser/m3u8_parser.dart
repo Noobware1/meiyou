@@ -2,17 +2,15 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:meiyou/core/resources/client.dart';
-import 'package:meiyou/core/resources/quailty.dart';
-import 'package:meiyou/core/resources/video_format.dart';
-import 'package:meiyou/core/resources/watch_qualites.dart';
 import 'package:meiyou/core/utils/extenstions/iterable.dart';
 
 import 'package:meiyou/core/utils/extenstions/string.dart';
-// import 'package:meiyou/core/utils/extenstions/uint8list.dart';
 import 'package:meiyou/core/utils/m3u8_parser/models/m3u8_stream.dart';
-import 'package:meiyou/data/models/subtitle.dart';
-import 'package:meiyou/data/models/video.dart';
-import 'package:meiyou/data/models/video_container.dart';
+import 'package:meiyou/data/models/media/video/subtitle.dart';
+import 'package:meiyou/data/models/media/video/video.dart';
+import 'package:meiyou/data/models/media/video/video_format.dart';
+import 'package:meiyou/data/models/media/video/video_quailty.dart';
+import 'package:meiyou/data/models/media/video/video_source.dart';
 import 'package:ok_http_dart/ok_http_dart.dart';
 
 final base64Regex = RegExp(
@@ -20,7 +18,7 @@ final base64Regex = RegExp(
 final _resoultionRegex = RegExp(r'RESOLUTION=(\d+)x(\d+)');
 
 class M3u8Parser {
-  static Future<VideoContainer> generateVideoContainer(
+  static Future<Video> generateVideoContainer(
     String url, {
     Map<String, String>? headers,
     bool? backup,
@@ -28,22 +26,22 @@ class M3u8Parser {
   }) async {
     final videos = await generateVideos(url, headers: headers, backup: backup);
 
-    return VideoContainer(
-        videos: videos, headers: headers, subtitles: subtitles);
+    return Video(
+        videoSources: videos, headers: headers, subtitles: subtitles);
   }
 
-  static Future<List<Video>> generateVideos(
+  static Future<List<VideoSource>> generateVideos(
     String url, {
     bool? backup,
     Map<String, String>? headers,
   }) async {
     final parsed = await parse(url, headers: headers);
     return parsed.mapAsList(
-      (it) => Video(
+      (it) => VideoSource(
         url: it.url,
         quality: it.quality,
-        backup: backup ?? false,
-        fromat: VideoFormat.hls,
+        isBackup: backup ?? false,
+        format: VideoFormat.hls,
       ),
     );
   }
@@ -74,7 +72,7 @@ class M3u8Parser {
   }
 
   static List<M3u8File> parseMaster(String mainUrl, String master) {
-    List<Qualites> quailites = [];
+    List<VideoQuality> quailites = [];
     List<String> urls = [];
     LineSplitter.split(master).forEach((it) {
       if (it.startsWith('#EXT-X-STREAM')) {
@@ -130,10 +128,10 @@ class M3u8Parser {
   }
 }
 
-Qualites parseResolution(String resoultionString) {
+VideoQuality parseResolution(String resoultionString) {
   final group = _resoultionRegex.firstMatch(resoultionString)!.groups([1, 2]);
 
-  return Qualites.getFromString('${group[0]!}x{$group[1]!}');
+  return VideoQuality.getFromString('${group[0]!}x{$group[1]!}');
 }
 
 String _isBase64Encoded(String str) {

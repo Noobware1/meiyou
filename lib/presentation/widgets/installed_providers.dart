@@ -1,11 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:meiyou/core/resources/platform_check.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
-import 'package:meiyou/core/utils/extenstions/iterable.dart';
 import 'package:meiyou/domain/entities/plugin.dart';
-import 'package:meiyou/domain/entities/plugin_list.dart';
-import 'package:meiyou/presentation/blocs/get_installed_plugins.dart';
 import 'package:meiyou/presentation/widgets/add_space.dart';
 
 class ShowInstalledPlugins extends StatelessWidget {
@@ -22,6 +19,9 @@ class ShowInstalledPlugins extends StatelessWidget {
   static const _textStyle =
       TextStyle(fontWeight: FontWeight.w600, fontSize: 18);
 
+  static const _textStyleMobile =
+      TextStyle(fontWeight: FontWeight.w600, fontSize: 16.5);
+
   static const _doneIcon = SizedBox(
     width: 50,
     child: Icon(
@@ -33,6 +33,16 @@ class ShowInstalledPlugins extends StatelessWidget {
     width: 50,
   );
 
+  static const _doneIconMobile = SizedBox(
+    width: 35,
+    child: Icon(
+      Icons.done,
+      size: 30,
+    ),
+  );
+  static const _replacementMobile = SizedBox(
+    width: 30,
+  );
   void _onTap(
     BuildContext context,
     int index,
@@ -48,24 +58,28 @@ class ShowInstalledPlugins extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final icon = isMobile ? _doneIconMobile : _doneIcon;
+    final height = isMobile ? 50.0 : 50.0;
+    final replacement = isMobile ? _replacementMobile : _replacement;
+    final textStyle = isMobile ? _textStyleMobile : _textStyle;
     return SizedBox(
       height: context.screenHeight / 1.3,
       child: ListView(
         children: [
           Material(
+            color: Colors.transparent,
+            type: MaterialType.button,
             child: InkWell(
               onTap: () => _onTap(context, -1),
               child: SizedBox(
-                  height: 50,
+                  height: height,
                   child: Row(children: [
-                    if (plugin == PluginEntity.none)
-                      _doneIcon
-                    else
-                      _replacement,
                     addHorizontalSpace(10),
-                    const Text(
+                    if (plugin == PluginEntity.none) icon else replacement,
+                    addHorizontalSpace(10),
+                    Text(
                       'None',
-                      style: _textStyle,
+                      style: textStyle,
                     ),
                   ])),
             ),
@@ -73,32 +87,35 @@ class ShowInstalledPlugins extends StatelessWidget {
           if (pluginList != null)
             for (var i = 0; i < pluginList!.length; i++)
               Material(
+                color: Colors.transparent,
+                type: MaterialType.button,
                 child: InkWell(
                   onTap: () => _onTap(context, i),
                   child: SizedBox(
-                    height: 50,
+                    height: height,
                     child: Row(
                       children: [
+                        addHorizontalSpace(10),
                         if (pluginList![i].name == plugin.name)
-                          _doneIcon
+                          icon
                         else
-                          _replacement,
+                          replacement,
                         addHorizontalSpace(10),
                         Image.file(File(pluginList![i].icon ?? ''),
-                            height: 50,
-                            width: 50,
+                            height: height,
+                            width: height,
                             fit: BoxFit.fill, errorBuilder: (context, e, s) {
                           return Image.asset(
                             'assets/images/default-poster.jpg',
-                            height: 50,
-                            width: 50,
+                            height: height,
+                            width: height,
                             fit: BoxFit.fill,
                           );
                         }),
-                        addHorizontalSpace(20),
+                        addHorizontalSpace(10),
                         Text(
                           pluginList![i].name,
-                          style: _textStyle,
+                          style: textStyle,
                         )
                       ],
                     ),

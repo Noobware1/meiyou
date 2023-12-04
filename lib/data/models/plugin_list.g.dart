@@ -592,28 +592,38 @@ const EmbedablePluginSchema = Schema(
       name: r'icon',
       type: IsarType.string,
     ),
-    r'info': PropertySchema(
+    r'id': PropertySchema(
       id: 2,
+      name: r'id',
+      type: IsarType.long,
+    ),
+    r'info': PropertySchema(
+      id: 3,
       name: r'info',
       type: IsarType.string,
     ),
+    r'installed': PropertySchema(
+      id: 4,
+      name: r'installed',
+      type: IsarType.bool,
+    ),
     r'lastUsed': PropertySchema(
-      id: 3,
+      id: 5,
       name: r'lastUsed',
       type: IsarType.bool,
     ),
     r'name': PropertySchema(
-      id: 4,
+      id: 6,
       name: r'name',
       type: IsarType.string,
     ),
     r'source': PropertySchema(
-      id: 5,
+      id: 7,
       name: r'source',
       type: IsarType.string,
     ),
     r'version': PropertySchema(
-      id: 6,
+      id: 8,
       name: r'version',
       type: IsarType.string,
     )
@@ -675,11 +685,13 @@ void _embedablePluginSerialize(
     object.dependencies,
   );
   writer.writeString(offsets[1], object.icon);
-  writer.writeString(offsets[2], object.info);
-  writer.writeBool(offsets[3], object.lastUsed);
-  writer.writeString(offsets[4], object.name);
-  writer.writeString(offsets[5], object.source);
-  writer.writeString(offsets[6], object.version);
+  writer.writeLong(offsets[2], object.id);
+  writer.writeString(offsets[3], object.info);
+  writer.writeBool(offsets[4], object.installed);
+  writer.writeBool(offsets[5], object.lastUsed);
+  writer.writeString(offsets[6], object.name);
+  writer.writeString(offsets[7], object.source);
+  writer.writeString(offsets[8], object.version);
 }
 
 EmbedablePlugin _embedablePluginDeserialize(
@@ -696,11 +708,13 @@ EmbedablePlugin _embedablePluginDeserialize(
       Dependency(),
     ),
     icon: reader.readStringOrNull(offsets[1]),
-    info: reader.readStringOrNull(offsets[2]),
-    lastUsed: reader.readBoolOrNull(offsets[3]) ?? false,
-    name: reader.readStringOrNull(offsets[4]) ?? '',
-    source: reader.readStringOrNull(offsets[5]) ?? '',
-    version: reader.readStringOrNull(offsets[6]) ?? '',
+    id: reader.readLongOrNull(offsets[2]) ?? -1,
+    info: reader.readStringOrNull(offsets[3]),
+    installed: reader.readBoolOrNull(offsets[4]) ?? false,
+    lastUsed: reader.readBoolOrNull(offsets[5]) ?? false,
+    name: reader.readStringOrNull(offsets[6]) ?? '',
+    source: reader.readStringOrNull(offsets[7]) ?? '',
+    version: reader.readStringOrNull(offsets[8]) ?? '',
   );
   return object;
 }
@@ -722,14 +736,18 @@ P _embedablePluginDeserializeProp<P>(
     case 1:
       return (reader.readStringOrNull(offset)) as P;
     case 2:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readLongOrNull(offset) ?? -1) as P;
     case 3:
-      return (reader.readBoolOrNull(offset) ?? false) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 4:
-      return (reader.readStringOrNull(offset) ?? '') as P;
+      return (reader.readBoolOrNull(offset) ?? false) as P;
     case 5:
-      return (reader.readStringOrNull(offset) ?? '') as P;
+      return (reader.readBoolOrNull(offset) ?? false) as P;
     case 6:
+      return (reader.readStringOrNull(offset) ?? '') as P;
+    case 7:
+      return (reader.readStringOrNull(offset) ?? '') as P;
+    case 8:
       return (reader.readStringOrNull(offset) ?? '') as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1000,6 +1018,62 @@ extension EmbedablePluginQueryFilter
   }
 
   QueryBuilder<EmbedablePlugin, EmbedablePlugin, QAfterFilterCondition>
+      idEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'id',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<EmbedablePlugin, EmbedablePlugin, QAfterFilterCondition>
+      idGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'id',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<EmbedablePlugin, EmbedablePlugin, QAfterFilterCondition>
+      idLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'id',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<EmbedablePlugin, EmbedablePlugin, QAfterFilterCondition>
+      idBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'id',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<EmbedablePlugin, EmbedablePlugin, QAfterFilterCondition>
       infoIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -1149,6 +1223,16 @@ extension EmbedablePluginQueryFilter
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'info',
         value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<EmbedablePlugin, EmbedablePlugin, QAfterFilterCondition>
+      installedEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'installed',
+        value: value,
       ));
     });
   }

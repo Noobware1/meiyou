@@ -1,9 +1,9 @@
-import 'package:meiyou/core/resources/quailty.dart';
-import 'package:meiyou/core/resources/watch_qualites.dart';
+
+import 'package:meiyou/data/models/media/video/video_quailty.dart';
 
 class M3u8File {
   final String url;
-  final Qualites quality;
+  final VideoQuality quality;
 
   const M3u8File({required this.url, required this.quality});
 

@@ -1,13 +1,12 @@
-
 import 'package:meiyou/core/utils/extenstions/iterable.dart';
 import 'package:meiyou/core/utils/extenstions/string.dart';
 import 'package:meiyou/core/utils/try_catch.dart';
 
 class VideoQuality {
-  final int height;
   final int width;
+  final int height;
 
-  const VideoQuality(this.height, this.width);
+  const VideoQuality(this.width, this.height);
 
   static const VideoQuality unknown = VideoQuality(-1, -1);
 
@@ -35,4 +34,3 @@ class VideoQuality {
     return unknown;
   }
 }
-

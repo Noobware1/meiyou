@@ -9,5 +9,3 @@ const double defaultPosterHeight = 175.0;
 const double defaultPosterBoxHeightDesktop = 220.0;
 
 const double defaultPosterBoxWidthDesktop = 150.0;
-
-const int smallScreenSize = 1000;

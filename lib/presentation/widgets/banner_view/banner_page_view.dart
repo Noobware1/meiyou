@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:meiyou/config/routes/routes.dart';
 import 'package:meiyou/core/resources/platform_check.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
 import 'package:meiyou/domain/entities/homepage.dart';
@@ -124,7 +126,7 @@ class _BannerPageViewState extends State<BannerPageView> {
               end: Alignment(0.0, -1.0),
             )),
           Positioned(
-            right: isMobile ? 0 : width / 2,
+            right: isMobile ? 0 : width / 3.0,
             left: isMobile ? 0 : 50,
             bottom: isMobile ? 20 : 30,
             child: ListenableBuilder(
@@ -139,15 +141,12 @@ class _BannerPageViewState extends State<BannerPageView> {
                     description:
                         row[_bannerPageViewController.page].description,
                     buttons: BannerButtons(
-                        onTapMyList: () {},
-                        onTapPlay: () {
-                          //   context.go('$homeRoute/$watch',
-                          //       extra: bannerRow[_bannerPageViewController.page]);
-                        },
-                        onTapInfo: () {
-                          // context.go('$homeRoute/$watch',
-                          //     extra: bannerRow[_bannerPageViewController.page]);
-                        }),
+                      onTapMyList: () {},
+                      onTapWatchNow: () {
+                        context.go(Routes.info,
+                            extra: row[_bannerPageViewController.page]);
+                      },
+                    ),
                   );
                 }),
           ),

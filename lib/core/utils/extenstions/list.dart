@@ -2,11 +2,20 @@ import 'dart:typed_data';
 
 typedef NullableIterable<T extends Object> = Iterable<T?>;
 
+extension NullableListUtils<T> on List<T>? {
+  bool get isNotNullAndEmpty => this != null && this!.isNotEmpty;
+}
+
 extension ListUtils<T extends Object> on List<T> {
   void addIfNotNull(T? value) {
     if (value != null) {
       add(value);
     }
+  }
+
+  void addAllIfNotNull(Iterable<T?>? value) {
+    if (value == null) return;
+    addAll(value.nonNulls);
   }
 
   void addAllRemoveNulls(NullableIterable<T> iterable) {

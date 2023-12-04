@@ -38,23 +38,28 @@ const PluginSchema = CollectionSchema(
       name: r'info',
       type: IsarType.string,
     ),
-    r'lastUsed': PropertySchema(
+    r'installed': PropertySchema(
       id: 4,
+      name: r'installed',
+      type: IsarType.bool,
+    ),
+    r'lastUsed': PropertySchema(
+      id: 5,
       name: r'lastUsed',
       type: IsarType.bool,
     ),
     r'name': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'name',
       type: IsarType.string,
     ),
     r'source': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'source',
       type: IsarType.string,
     ),
     r'version': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'version',
       type: IsarType.string,
     )
@@ -127,10 +132,11 @@ void _pluginSerialize(
   writer.writeString(offsets[1], object.encode);
   writer.writeString(offsets[2], object.icon);
   writer.writeString(offsets[3], object.info);
-  writer.writeBool(offsets[4], object.lastUsed);
-  writer.writeString(offsets[5], object.name);
-  writer.writeString(offsets[6], object.source);
-  writer.writeString(offsets[7], object.version);
+  writer.writeBool(offsets[4], object.installed);
+  writer.writeBool(offsets[5], object.lastUsed);
+  writer.writeString(offsets[6], object.name);
+  writer.writeString(offsets[7], object.source);
+  writer.writeString(offsets[8], object.version);
 }
 
 Plugin _pluginDeserialize(
@@ -149,10 +155,11 @@ Plugin _pluginDeserialize(
     icon: reader.readStringOrNull(offsets[2]),
     id: id,
     info: reader.readStringOrNull(offsets[3]),
-    lastUsed: reader.readBoolOrNull(offsets[4]) ?? false,
-    name: reader.readString(offsets[5]),
-    source: reader.readString(offsets[6]),
-    version: reader.readString(offsets[7]),
+    installed: reader.readBoolOrNull(offsets[4]) ?? false,
+    lastUsed: reader.readBoolOrNull(offsets[5]) ?? false,
+    name: reader.readString(offsets[6]),
+    source: reader.readString(offsets[7]),
+    version: reader.readString(offsets[8]),
   );
   return object;
 }
@@ -180,10 +187,12 @@ P _pluginDeserializeProp<P>(
     case 4:
       return (reader.readBoolOrNull(offset) ?? false) as P;
     case 5:
-      return (reader.readString(offset)) as P;
+      return (reader.readBoolOrNull(offset) ?? false) as P;
     case 6:
       return (reader.readString(offset)) as P;
     case 7:
+      return (reader.readString(offset)) as P;
+    case 8:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -850,6 +859,16 @@ extension PluginQueryFilter on QueryBuilder<Plugin, Plugin, QFilterCondition> {
     });
   }
 
+  QueryBuilder<Plugin, Plugin, QAfterFilterCondition> installedEqualTo(
+      bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'installed',
+        value: value,
+      ));
+    });
+  }
+
   QueryBuilder<Plugin, Plugin, QAfterFilterCondition> lastUsedEqualTo(
       bool value) {
     return QueryBuilder.apply(this, (query) {
@@ -1298,6 +1317,18 @@ extension PluginQuerySortBy on QueryBuilder<Plugin, Plugin, QSortBy> {
     });
   }
 
+  QueryBuilder<Plugin, Plugin, QAfterSortBy> sortByInstalled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'installed', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Plugin, Plugin, QAfterSortBy> sortByInstalledDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'installed', Sort.desc);
+    });
+  }
+
   QueryBuilder<Plugin, Plugin, QAfterSortBy> sortByLastUsed() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastUsed', Sort.asc);
@@ -1396,6 +1427,18 @@ extension PluginQuerySortThenBy on QueryBuilder<Plugin, Plugin, QSortThenBy> {
     });
   }
 
+  QueryBuilder<Plugin, Plugin, QAfterSortBy> thenByInstalled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'installed', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Plugin, Plugin, QAfterSortBy> thenByInstalledDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'installed', Sort.desc);
+    });
+  }
+
   QueryBuilder<Plugin, Plugin, QAfterSortBy> thenByLastUsed() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastUsed', Sort.asc);
@@ -1467,6 +1510,12 @@ extension PluginQueryWhereDistinct on QueryBuilder<Plugin, Plugin, QDistinct> {
     });
   }
 
+  QueryBuilder<Plugin, Plugin, QDistinct> distinctByInstalled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'installed');
+    });
+  }
+
   QueryBuilder<Plugin, Plugin, QDistinct> distinctByLastUsed() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'lastUsed');
@@ -1524,6 +1573,12 @@ extension PluginQueryProperty on QueryBuilder<Plugin, Plugin, QQueryProperty> {
   QueryBuilder<Plugin, String?, QQueryOperations> infoProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'info');
+    });
+  }
+
+  QueryBuilder<Plugin, bool, QQueryOperations> installedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'installed');
     });
   }
 

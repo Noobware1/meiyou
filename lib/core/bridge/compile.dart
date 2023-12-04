@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:dart_eval/dart_eval.dart';
@@ -36,7 +35,6 @@ import 'package:meiyou/core/bridge/bridge_models/utils_models/iterable.dart';
 import 'package:meiyou/core/bridge/bridge_models/utils_models/list.dart';
 import 'package:meiyou/core/bridge/bridge_models/utils_models/num_utils.dart';
 import 'package:meiyou/core/bridge/bridge_models/utils_models/string.dart';
-import 'package:meiyou/data/models/plugin.dart';
 
 Uint8List compilerEval(Map<String, Map<String, String>> lib) {
   final compiler = Compiler();

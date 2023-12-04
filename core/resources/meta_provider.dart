@@ -1,1 +1,0 @@
-enum MediaProvider { anilist, tmdb }

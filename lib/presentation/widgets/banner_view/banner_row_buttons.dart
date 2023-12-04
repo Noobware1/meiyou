@@ -1,43 +1,40 @@
 import 'package:flutter/material.dart';
-import 'package:meiyou/core/constants/height_and_width.dart'
-    show smallScreenSize;
+import 'package:meiyou/core/constants/screen_size.dart';
 import 'package:meiyou/core/resources/platform_check.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
 import 'package:meiyou/presentation/widgets/add_space.dart';
 
 class BannerButtons extends StatelessWidget {
   final VoidCallback onTapMyList;
-  final VoidCallback onTapPlay;
-  final VoidCallback onTapInfo;
-  const BannerButtons(
-      {super.key,
-      required this.onTapMyList,
-      required this.onTapPlay,
-      required this.onTapInfo});
+  final VoidCallback onTapWatchNow;
+  const BannerButtons({
+    super.key,
+    required this.onTapMyList,
+    required this.onTapWatchNow,
+  });
 
   @override
   Widget build(BuildContext context) {
     return isMobile
         ? _ForSmallerScreens(
-            onTapInfo: onTapInfo,
             onTapMyList: onTapMyList,
-            onTapPlay: onTapPlay,
+            onTapWatchNow: onTapWatchNow,
           )
         : _ForBiggerScreens(
             onTapMyList: onTapMyList,
-            onTapPlay: onTapPlay,
-            onTapInfo: onTapInfo);
+            onTapWatchNow: onTapWatchNow,
+          );
   }
 }
 
 class _ForBiggerScreens extends StatelessWidget {
   final VoidCallback onTapMyList;
-  final VoidCallback onTapPlay;
-  final VoidCallback onTapInfo;
-  const _ForBiggerScreens(
-      {required this.onTapMyList,
-      required this.onTapPlay,
-      required this.onTapInfo});
+  final VoidCallback onTapWatchNow;
+
+  const _ForBiggerScreens({
+    required this.onTapMyList,
+    required this.onTapWatchNow,
+  });
 
   static const _defaultPadding = MaterialStatePropertyAll(
     EdgeInsets.fromLTRB(10, 15, 15, 15),
@@ -66,7 +63,7 @@ class _ForBiggerScreens extends StatelessWidget {
                     context.theme.colorScheme.surface.withOpacity(0.2)),
                 iconSize: _defaultIconSize,
                 shape: _defaultShape),
-            onPressed: onTapPlay,
+            onPressed: onTapWatchNow,
             icon: Icon(Icons.play_arrow_rounded,
                 color: context.theme.colorScheme.onSurface),
             label: Text('Watch Now', style: defaultTextStyle),
@@ -99,17 +96,16 @@ class _ForBiggerScreens extends StatelessWidget {
 
 class _ForSmallerScreens extends StatelessWidget {
   final VoidCallback onTapMyList;
-  final VoidCallback onTapPlay;
-  final VoidCallback onTapInfo;
+  final VoidCallback onTapWatchNow;
+  
   const _ForSmallerScreens(
       {required this.onTapMyList,
-      required this.onTapPlay,
-      required this.onTapInfo});
+  required this.onTapWatchNow});
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
-      final bool bigger = constraints.maxWidth > smallScreenSize;
+      final bool bigger = constraints.maxWidth > mobileScreenSize;
       return Row(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.start,
@@ -125,7 +121,7 @@ class _ForSmallerScreens extends StatelessWidget {
                   iconSize: MaterialStatePropertyAll(bigger ? 30 : 25),
                   shape: MaterialStatePropertyAll(RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(45)))),
-              onPressed: onTapPlay,
+              onPressed: onTapWatchNow,
               icon: Icon(Icons.play_arrow_rounded,
                   color: context.theme.colorScheme.onSurface),
               label: Text(

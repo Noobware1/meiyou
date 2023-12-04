@@ -51,6 +51,10 @@ dependencies:
     git:
       url: https://github.com/Noobware1/crypto_dart.git
       ref: master
+  window_manager:
+    git:
+      url: https://github.com/leanflutter/window_manager.git
+      ref: main
 
   media_kit: # Primary package.
   media_kit_video: # For video rendering.
@@ -62,6 +66,7 @@ dependencies:
   # riverpod_annotation: ^2.3.0
   isar: 3.1.0+1
   isar_flutter_libs: 3.1.0+1
+  audio_video_progress_bar: ^2.0.1
 
 dev_dependencies:
   flutter_test:
@@ -93,7 +98,6 @@ flutter:
   assets:
     - assets/images/default-poster.jpg
     - assets/images/default-banner.png
-    - assets/lol.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

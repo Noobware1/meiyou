@@ -39,11 +39,13 @@ class PluginList extends PluginListEntity {
 
 @embedded
 class EmbedablePlugin extends PluginEntity {
-  EmbedablePlugin({
+  const EmbedablePlugin({
+    super.id = -1,
     super.name = '',
     super.source = '',
     super.version = '',
     super.lastUsed = false,
+    super.installed = false,
     List<Dependency>? dependencies,
     super.icon,
     super.info,
@@ -52,10 +54,12 @@ class EmbedablePlugin extends PluginEntity {
   factory EmbedablePlugin.fromJson(dynamic json) {
     final plugin = Plugin.fromJson(json);
     return EmbedablePlugin(
+      id: plugin.id,
       name: plugin.name,
       source: plugin.source,
       version: plugin.version,
       lastUsed: plugin.lastUsed,
+      installed: plugin.installed,
       dependencies: plugin.dependencies,
       icon: plugin.icon,
       info: plugin.info,

@@ -10,21 +10,24 @@ class ImageButtonWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        child,
-        Positioned.fill(
-          child: Material(
-              type: MaterialType.button,
-              color: Colors.transparent,
-              borderRadius: const BorderRadius.all(Radius.circular(10)),
-              animationDuration: animationDuration,
-              child: InkWell(
+    return SizedBox(
+      width: child.width,
+      child: Stack(
+        children: [
+          child,
+          Positioned.fill(
+            child: Material(
+                type: MaterialType.button,
+                color: Colors.transparent,
                 borderRadius: const BorderRadius.all(Radius.circular(10)),
-                onTap: onTap,
-              )),
-        ),
-      ],
+                animationDuration: animationDuration,
+                child: InkWell(
+                  borderRadius: const BorderRadius.all(Radius.circular(10)),
+                  onTap: onTap,
+                )),
+          ),
+        ],
+      ),
     );
   }
 }

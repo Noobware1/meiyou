@@ -1,21 +1,46 @@
-// import 'package:flutter/material.dart';
-// import 'package:flutter_bloc/flutter_bloc.dart';
-// import 'package:meiyou/domain/repositories/plugin_repository.dart';
-// import 'package:meiyou/domain/usecases/plugin_repository/get_installed_plugins_usecase.dart';
-// import 'package:meiyou/domain/usecases/plugin_repository/load_plugin_usecase.dart';
+import 'package:meiyou/domain/repositories/plugin_repository.dart';
+import 'package:meiyou/domain/usecases/plugin_repository/check_for_plugin_update_usecase.dart';
+import 'package:meiyou/domain/usecases/plugin_repository/get_all_plugins_usecase.dart';
+import 'package:meiyou/domain/usecases/plugin_repository/get_installed_plugins_usecase.dart';
+import 'package:meiyou/domain/usecases/plugin_repository/get_lasted_used_plugin_usecase.dart';
+import 'package:meiyou/domain/usecases/plugin_repository/get_outdated_plugins_usecase.dart';
+import 'package:meiyou/domain/usecases/plugin_repository/install_plugin_usecase.dart';
+import 'package:meiyou/domain/usecases/plugin_repository/load_plugin_usecase.dart';
+import 'package:meiyou/domain/usecases/plugin_repository/uninstall_plugin_usecase.dart';
+import 'package:meiyou/domain/usecases/plugin_repository/update_lasted_used_plugin_usecase.dart';
+import 'package:meiyou/domain/usecases/plugin_repository/update_plugin_usecase.dart';
 
-// class PluginRepositoryUseCaseProvider {
-//   late final GetInstalledPluginsUseCase getInstalledPluginsUseCase;
-//   late final LoadPluginUseCase loadPluginUseCase;
+class PluginRepositoryUseCaseProvider {
+  
+  final GetAllPluginsUseCase getAllPluginsUseCase;
 
-//   PluginRepositoryUseCaseProvider(PluginRepository repository)
-//       : getInstalledPluginsUseCase = GetInstalledPluginsUseCase(repository),
-//         loadPluginUseCase = LoadPluginUseCase(repository);
+  final GetInstalledPluginsUseCase getInstalledPluginsUseCase;
 
-//   Widget createProvider({required Widget child}) {
-//     return RepositoryProvider.value(
-//       value: this,
-//       child: child,
-//     );
-//   }
-// }
+  final InstallPluginUseCase installPluginUseCase;
+
+  final UninstallPluginUseCase uninstallPluginUseCase;
+
+  final CheckForPluginUpdateUseCase checkForPluginUpdateUseCase;
+
+  final UpdatePluginUseCase updatePluginUseCase;
+
+  final GetOutDatedPluginsUseCase getOutDatedPluginsUseCase;
+
+  final LoadPluginUseCase loadPluginUseCase;
+
+  final UpdateLastedUsedPluginUseCase updateLastUsedPluginUseCase;
+
+  final GetLastedUsedPluginUseCase getLastedUsedPluginUseCase;
+
+  PluginRepositoryUseCaseProvider(PluginRepository repository)
+      : getAllPluginsUseCase = GetAllPluginsUseCase(repository),
+        getInstalledPluginsUseCase = GetInstalledPluginsUseCase(repository),
+        installPluginUseCase = InstallPluginUseCase(repository),
+        uninstallPluginUseCase = UninstallPluginUseCase(repository),
+        checkForPluginUpdateUseCase = CheckForPluginUpdateUseCase(repository),
+        updatePluginUseCase = UpdatePluginUseCase(repository),
+        getOutDatedPluginsUseCase = GetOutDatedPluginsUseCase(repository),
+        loadPluginUseCase = LoadPluginUseCase(repository),
+        updateLastUsedPluginUseCase = UpdateLastedUsedPluginUseCase(repository),
+        getLastedUsedPluginUseCase = GetLastedUsedPluginUseCase(repository);
+}

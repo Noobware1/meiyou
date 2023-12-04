@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:meiyou/core/constants/animation_duration.dart';
 import 'package:meiyou/core/constants/height_and_width.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
 import 'package:meiyou/domain/entities/homepage.dart';
 import 'package:meiyou/domain/entities/search_response.dart';
-import 'package:meiyou/presentation/blocs/selected_plugin_api/plugin_manager_bloc.dart';
-import 'package:meiyou/presentation/widgets/add_space.dart';
 import 'package:meiyou/presentation/widgets/image_view/image_button_wrapper.dart';
 import 'image_holder.dart';
 

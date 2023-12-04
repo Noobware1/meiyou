@@ -1,9 +1,12 @@
+import 'package:meiyou/core/utils/extenstions/iterable.dart';
+import 'package:meiyou/core/utils/try_catch.dart';
 import 'package:meiyou/core/utils/unwrap.dart';
 import 'package:meiyou/data/models/actor_data.dart';
 import 'package:meiyou/data/models/external_id.dart';
 import 'package:meiyou/data/models/search_response.dart';
 import 'package:meiyou/domain/entities/actor_data.dart';
 import 'package:meiyou/domain/entities/media_details.dart';
+import 'package:meiyou/domain/entities/search_response.dart';
 import 'package:meiyou/domain/entities/show_type.dart';
 
 class MediaDetails extends MediaDetailsEntity {
@@ -21,21 +24,24 @@ class MediaDetails extends MediaDetailsEntity {
     super.endDate,
     super.duration,
     super.genres,
-    super.recommendations,
-    super.externalIds,
-    super.actorData,
+    List<SearchResponse>? recommendations,
+    List<ExternalId>? externalIds,
+    List<ActorData>? actorData,
     super.mediaItem,
-  });
+  }) : super(
+            recommendations: recommendations,
+            externalIds: externalIds,
+            actorData: actorData);
 
   @override
   List<SearchResponse>? get recommendations =>
-      super.recommendations as List<SearchResponse>?;
+      super.recommendations?.mapAsList((e) => e as SearchResponse);
 
   @override
   List<ExternalId>? get externalIds => super.externalIds as List<ExternalId>?;
 
   @override
-  List<ActorData>? get actorData => super.actorData as List<ActorData>?;
+  List<ActorData>? get actorData => super.actorData?.mapAsList((it) => it as ActorData);
 
   void copyFromSearchResponse(SearchResponse searchResponse) {
     name = searchResponse.title;

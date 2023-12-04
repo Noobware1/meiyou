@@ -14,4 +14,14 @@ extension FileUtils on File {
     }
     return;
   }
+
+  void createIfNotExistSync({bool recursive = false, bool exclusive = false}) {
+    if (!existsSync()) createSync(recursive: recursive, exclusive: exclusive);
+  }
+
+  Future<File?> createIfNotExist(
+      {bool recursive = false, bool exclusive = false}) async {
+    if (await exists()) return null;
+    return await create(recursive: recursive, exclusive: exclusive);
+  }
 }

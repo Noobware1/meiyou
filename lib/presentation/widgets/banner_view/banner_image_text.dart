@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:meiyou/core/resources/platform_check.dart';
-import 'package:meiyou/core/utils/extenstions/context.dart';
-import 'package:meiyou/core/utils/extenstions/double.dart';
 import 'package:meiyou/domain/entities/show_type.dart';
 import 'package:meiyou/presentation/widgets/add_space.dart';
 

@@ -111,17 +111,17 @@ class $ExtractorLink implements ExtractorLink, $Instance {
       case 'url':
         return $String(url);
       case 'referer':
-        return referer != null ? $String(referer!) : $null();
+        return referer != null ? $String(referer!) : const $null();
       case 'headers':
         return headers != null
             ? $Map.wrap(headers!
                 .map((key, value) => MapEntry($String(key), $String(value))))
-            : $null();
+            : const $null();
       case 'extra':
         return extra != null
             ? $Map
                 .wrap(extra!.map((key, value) => MapEntry($String(key), value)))
-            : $null();
+            : const $null();
       default:
         return null;
     }
