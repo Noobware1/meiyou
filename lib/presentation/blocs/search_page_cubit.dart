@@ -1,9 +1,9 @@
 import 'package:meiyou/core/resources/response_state.dart';
-import 'package:meiyou/domain/entities/search_response.dart';
-import 'package:meiyou/domain/usecases/plugin_manager_usecases/search_usecase.dart';
+import 'package:meiyou/domain/usecases/plugin_repository_usecases/search_usecase.dart';
 import 'package:meiyou/presentation/blocs/async_cubit/async_cubit.dart';
+import 'package:meiyou_extenstions/models.dart';
 
-class SearchPageCubit extends AsyncCubit<List<SearchResponseEntity>> {
+class SearchPageCubit extends AsyncCubit<List<SearchResponse>> {
   final LoadSearchUseCase loadSearchUseCase;
   SearchPageCubit(this.loadSearchUseCase) : super(const SearchPageInital());
 
@@ -32,6 +32,6 @@ class SearchPageCubit extends AsyncCubit<List<SearchResponseEntity>> {
   }
 }
 
-class SearchPageInital extends AsyncState<List<SearchResponseEntity>> {
+class SearchPageInital extends AsyncState<List<SearchResponse>> {
   const SearchPageInital();
 }

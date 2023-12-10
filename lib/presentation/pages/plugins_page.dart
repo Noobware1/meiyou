@@ -9,21 +9,23 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meiyou/core/resources/platform_check.dart';
 import 'package:meiyou/core/resources/snackbar.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
-import 'package:meiyou/core/utils/extenstions/string.dart';
 import 'package:meiyou/core/utils/try_catch.dart';
-import 'package:meiyou/domain/entities/plugin.dart';
+import 'package:meiyou/domain/entities/installed_plugin.dart';
 import 'package:meiyou/domain/entities/plugin_list.dart';
-import 'package:meiyou/domain/usecases/plugin_repository/get_outdated_plugins_usecase.dart';
+import 'package:meiyou/domain/usecases/plugin_manager_repository_usecases/get_outdated_plugins_usecase.dart';
 import 'package:meiyou/presentation/blocs/async_cubit/async_cubit.dart';
 import 'package:meiyou/presentation/blocs/plugin_page_cubit.dart';
+import 'package:meiyou/presentation/emoticons_widget.dart';
+import 'package:meiyou/presentation/providers/plugin_manager_repository_usecase_provider.dart';
 import 'package:meiyou/presentation/providers/plugin_repository_usecase_provider.dart';
 import 'package:meiyou/presentation/widgets/add_space.dart';
 import 'package:meiyou/presentation/widgets/error_widget.dart';
+import 'package:meiyou_extenstions/meiyou_extenstions.dart';
 
 const _defaultPadding = EdgeInsets.fromLTRB(20, 10, 20, 10);
 
-class PluginWidget extends StatefulWidget {
-  final PluginEntity plugin;
+class PluginWidget<P> extends StatefulWidget {
+  final P plugin;
   final AsyncCallback onTap;
   final String? version;
   final String buttonText;
@@ -91,7 +93,9 @@ class _PluginWidgetState extends State<PluginWidget> {
       padding: _defaultPadding,
       child: Row(
         children: [
-          _buildImage(widget.plugin.icon),
+          _buildImage(widget.plugin is OnlinePlugin
+              ? (widget.plugin as OnlinePlugin).iconUrl
+              : (widget.plugin as InstalledPluginEntity).iconPath),
           addHorizontalSpace(20),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -103,13 +107,18 @@ class _PluginWidgetState extends State<PluginWidget> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  const Text(
-                    'English',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
+                  Text(
+                    (widget.plugin is OnlinePlugin
+                            ? (widget.plugin as OnlinePlugin).lang
+                            : (widget.plugin as InstalledPluginEntity).lang)
+                        .toUpperCaseFirst(),
+                    style: const TextStyle(
+                        fontSize: 12, fontWeight: FontWeight.w400),
                   ),
                   addHorizontalSpace(5),
                   Text(
-                    widget.version ?? 'v${widget.plugin.version}',
+                    widget.version ??
+                        'v${widget.plugin is OnlinePlugin ? (widget.plugin as OnlinePlugin).version : (widget.plugin as InstalledPluginEntity).version}',
                     style: const TextStyle(
                         fontSize: 12, fontWeight: FontWeight.w400),
                   ),
@@ -152,7 +161,7 @@ class _PluginWidgetState extends State<PluginWidget> {
 }
 
 class _InstalledPluginListView extends StatelessWidget {
-  final AsyncSnapshot<List<PluginEntity>> snapshot;
+  final AsyncSnapshot<List<InstalledPluginEntity>> snapshot;
   final List<PluginListEntity> allPlugins;
 
   const _InstalledPluginListView({
@@ -165,7 +174,7 @@ class _InstalledPluginListView extends StatelessWidget {
   Widget build(BuildContext context) {
     if (snapshot.hasData && snapshot.data!.isNotEmpty) {
       final outdated = context
-          .repository<PluginRepositoryUseCaseProvider>()
+          .repository<PluginManagerRepositoryUseCases>()
           .getOutDatedPluginsUseCase(GetOutDatedPluginsUseCaseParams(
               installedPlugins: snapshot.data!, pluginList: allPlugins));
 
@@ -256,37 +265,40 @@ class _InstalledPluginListView extends StatelessWidget {
     );
   }
 
-  Future<void> _onUpdate(PluginEntity plugin, BuildContext context) async {
+  Future<void> _onUpdate(OnlinePlugin plugin, BuildContext context) async {
     await tryAsync(
         () => context
-            .repository<PluginRepositoryUseCaseProvider>()
+            .repository<PluginManagerRepositoryUseCases>()
             .updatePluginUseCase(plugin),
         onError: (e, s) => showSnackBar(context, text: e.toString()));
   }
 
-  Future<void> _onUpdateAll(Map<PluginEntity, PluginEntity> outdatedPlugins,
+  Future<void> _onUpdateAll(
+      Map<InstalledPluginEntity, OnlinePlugin> outdatedPlugins,
       BuildContext context) async {
     for (var e in outdatedPlugins.values) {
       await tryAsync(
           () => context
-              .repository<PluginRepositoryUseCaseProvider>()
+              .repository<PluginManagerRepositoryUseCases>()
               .updatePluginUseCase(e),
           onError: (e, s) => showSnackBar(context, text: e.toString()));
     }
   }
 
-  Future<void> _onUninstall(PluginEntity plugin, BuildContext context) async {
+  Future<void> _onUninstall(
+      InstalledPluginEntity plugin, BuildContext context) async {
     await tryAsync(
         () => context
-            .repository<PluginRepositoryUseCaseProvider>()
+            .repository<PluginManagerRepositoryUseCases>()
             .uninstallPluginUseCase(plugin),
         onError: (e, s) => showSnackBar(context, text: e.toString()));
   }
 
-  List<PluginEntity> separateOutDatedPlugins(
-      Map<PluginEntity, PluginEntity>? outdated, List<PluginEntity> installed) {
+  List<InstalledPluginEntity> separateOutDatedPlugins(
+      Map<InstalledPluginEntity, OnlinePlugin>? outdated,
+      List<InstalledPluginEntity> installed) {
     if (outdated == null) return installed;
-    final filtered = <PluginEntity>[];
+    final filtered = <InstalledPluginEntity>[];
     for (var i = 0; i < outdated.keys.length; i++) {
       for (var l = 0; l < installed.length; l++) {
         if (outdated.keys.elementAt(i).id != installed[l].id) {
@@ -299,7 +311,7 @@ class _InstalledPluginListView extends StatelessWidget {
 }
 
 class _BuildPluginList extends StatelessWidget {
-  final List<PluginEntity>? installed;
+  final List<InstalledPluginEntity>? installed;
   final PluginListEntity pluginList;
 
   const _BuildPluginList({
@@ -311,6 +323,13 @@ class _BuildPluginList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final filtered = removeInstalled(installed, pluginList.plugins);
+    if (filtered.isEmpty) {
+      return const Center(
+          child: EmoticonsWidget(
+        emoticon: '(◕︿◕✿)',
+        text: 'Awww no plugins found :(',
+      ));
+    }
     return ListView.builder(
       itemBuilder: (context, index) {
         return PluginWidget(
@@ -324,10 +343,10 @@ class _BuildPluginList extends StatelessWidget {
     );
   }
 
-  List<PluginEntity> removeInstalled(
-      List<PluginEntity>? installed, List<PluginEntity> plugins) {
+  List<OnlinePlugin> removeInstalled(
+      List<InstalledPluginEntity>? installed, List<OnlinePlugin> plugins) {
     if (installed == null || installed.isEmpty) return plugins;
-    final newList = <PluginEntity>[];
+    final newList = <OnlinePlugin>[];
 
     for (var installedPlugin in installed) {
       for (var plugin in plugins) {
@@ -340,13 +359,13 @@ class _BuildPluginList extends StatelessWidget {
     return newList;
   }
 
-  Future<void> _onInstall(PluginEntity plugin, BuildContext context) async {
+  Future<void> _onInstall(OnlinePlugin plugin, BuildContext context) async {
     await tryAsync(
         () => context
-            .repository<PluginRepositoryUseCaseProvider>()
+            .repository<PluginManagerRepositoryUseCases>()
             .installPluginUseCase(plugin),
-        onError: (e, s) =>
-            showSnackBar(context, text: e.toString())); //   .then((value) {
+        onError: (e, s) => showSnackBar(context, text: e.toString()),
+        log: true); //   .then((value) {
   }
 }
 
@@ -363,7 +382,7 @@ class _PluginsPageState extends State<PluginsPage> {
   @override
   void initState() {
     _pluginPageCubit = PluginPageCubit(context
-        .repository<PluginRepositoryUseCaseProvider>()
+        .repository<PluginManagerRepositoryUseCases>()
         .getAllPluginsUseCase)
       ..getAllPlugins();
 
@@ -382,7 +401,7 @@ class _PluginsPageState extends State<PluginsPage> {
 
     return StreamBuilder(
         stream: context
-            .repository<PluginRepositoryUseCaseProvider>()
+            .repository<PluginManagerRepositoryUseCases>()
             .getInstalledPluginsUseCase(null),
         builder: (context, snapshot) {
           return BlocConsumer<PluginPageCubit,
@@ -398,7 +417,7 @@ class _PluginsPageState extends State<PluginsPage> {
                           title: const Padding(
                             padding: EdgeInsets.all(10),
                             child: Text(
-                              'Plugins',
+                              'Extenstions',
                               style: TextStyle(
                                   fontSize: 20, fontWeight: FontWeight.w600),
                             ),
@@ -412,7 +431,7 @@ class _PluginsPageState extends State<PluginsPage> {
                             ),
                             ...data.map((e) => Tab(
                                     child: Text(
-                                  e.type.toUpperCaseFirst(),
+                                  e.name.toUpperCaseFirst(),
                                   style: textStyle,
                                 )))
                           ]),

@@ -15,8 +15,6 @@ import 'package:media_kit/media_kit.dart';
 import 'package:meiyou/core/constants/animation_duration.dart';
 import 'package:meiyou/core/constants/play_back_speeds.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
-import 'package:meiyou/core/utils/extenstions/iterable.dart';
-import 'package:meiyou/data/models/media/video/video_quailty.dart';
 import 'package:meiyou/presentation/blocs/player/playback_speed.dart';
 import 'package:meiyou/presentation/blocs/player/selected_video_data.dart';
 import 'package:meiyou/presentation/blocs/player/server_and_video_cubit.dart';
@@ -25,6 +23,8 @@ import 'package:meiyou/presentation/providers/player_provider.dart';
 import 'package:meiyou/presentation/providers/video_player_repository_usecases.dart';
 import 'package:meiyou/presentation/widgets/add_space.dart';
 import 'package:meiyou/presentation/widgets/player/controls/desktop/custom_popup_button.dart';
+import 'package:meiyou_extenstions/extenstions.dart';
+import 'package:meiyou_extenstions/models.dart';
 
 // BUTTON: OPTIONS BUTTON
 
@@ -110,7 +110,7 @@ class _OptionsMenuState extends State<OptionsMenu> {
               label: 'Sources',
               builder: (context, index, data) {
                 final String text;
-                if (data.$2.quality == VideoQuality.hls) {
+                if (data.$2.quality == VideoQuality.hlsMaster) {
                   text = '${data.$1.name} - Multi';
                 } else if (data.$2.quality != VideoQuality.unknown &&
                     data.$2.quality != null) {

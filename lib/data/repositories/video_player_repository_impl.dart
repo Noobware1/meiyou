@@ -4,20 +4,11 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
-import 'package:media_kit/media_kit.dart';
+import 'package:media_kit/media_kit.dart' as media_kit;
 import 'package:media_kit_video/media_kit_video.dart' as vid;
 import 'package:meiyou/core/utils/extenstions/context.dart';
-import 'package:meiyou/core/utils/extenstions/iterable.dart';
-import 'package:meiyou/data/models/media/video/subtitle.dart';
-import 'package:meiyou/data/models/media/video/video.dart';
-import 'package:meiyou/data/models/media/video/video_quailty.dart';
-import 'package:meiyou/data/models/media/video/video_source.dart';
-import 'package:meiyou/data/models/media_item/anime.dart';
-import 'package:meiyou/data/models/media_item/tv_series.dart';
-import 'package:meiyou/domain/entities/episode.dart';
-import 'package:meiyou/domain/entities/media_details.dart';
 import 'package:meiyou/domain/repositories/video_player_repository.dart';
-import 'package:meiyou/domain/usecases/plugin_manager_usecases/load_link_and_media_use_case.dart';
+import 'package:meiyou/domain/usecases/plugin_repository_usecases/load_link_and_media_use_case.dart';
 import 'package:meiyou/presentation/blocs/current_episode_cubit.dart';
 import 'package:meiyou/presentation/blocs/episodes_bloc.dart';
 import 'package:meiyou/presentation/blocs/episodes_selector_cubit.dart';
@@ -26,6 +17,8 @@ import 'package:meiyou/presentation/blocs/player/server_and_video_cubit.dart';
 import 'package:meiyou/presentation/blocs/pluign_manager_usecase_provider_cubit.dart';
 import 'package:meiyou/presentation/blocs/season_cubit.dart';
 import 'package:meiyou/presentation/providers/player_provider.dart';
+import 'package:meiyou_extenstions/extenstions.dart';
+import 'package:meiyou_extenstions/models.dart';
 
 class VideoPlayerRepositoryImpl implements VideoPlayerRepository {
   @override
@@ -40,7 +33,7 @@ class VideoPlayerRepositoryImpl implements VideoPlayerRepository {
     throw UnimplementedError();
   }
 
-  EpisodeEntity getCurrentEpisode(BuildContext context) {
+  Episode getCurrentEpisode(BuildContext context) {
     return context.bloc<EpisodesCubit>().state[context
         .bloc<EpisodesSelectorCubit>()
         .state]![context.bloc<CurrentEpisodeCubit>().state];
@@ -48,10 +41,10 @@ class VideoPlayerRepositoryImpl implements VideoPlayerRepository {
 
   @override
   String? getVideoTitle(BuildContext context) {
-    final mediaItem = context.repository<MediaDetailsEntity>().mediaItem;
+    final mediaItem = context.repository<MediaDetails>().mediaItem;
     if (mediaItem is Anime) {
       final episode = getCurrentEpisode(context);
-      if (episode.name == context.repository<MediaDetailsEntity>().name) {
+      if (episode.name == context.repository<MediaDetails>().name) {
         return null;
       }
       return 'E${episode.episode} - ${episode.name}';
@@ -67,7 +60,7 @@ class VideoPlayerRepositoryImpl implements VideoPlayerRepository {
   @override
   void changeEpisode(
       {required BuildContext context,
-      required EpisodeEntity episode,
+      required Episode episode,
       required int index}) {
     if (context
             .bloc<EpisodesCubit>()
@@ -78,7 +71,7 @@ class VideoPlayerRepositoryImpl implements VideoPlayerRepository {
     context.bloc<SelectedVideoDataCubit>().resetState();
 
     context.bloc<ExtractedVideoDataCubit>().initStream(context
-        .bloc<PluginManagerUseCaseProviderCubit>()
+        .bloc<PluginRepositoryUseCaseProviderCubit>()
         .state
         .provider!
         .loadLinkAndMediaStreamUseCase(
@@ -96,7 +89,7 @@ class VideoPlayerRepositoryImpl implements VideoPlayerRepository {
   @override
   void loadPlayer(
       {required BuildContext context,
-      required Player player,
+      required media_kit.Player player,
       required vid.VideoController videoController,
       Duration? startPostion,
       void Function()? onDoneCallback}) async {
@@ -123,7 +116,7 @@ class VideoPlayerRepositoryImpl implements VideoPlayerRepository {
     return;
   }
 
-  Future<void> _startFrom(Duration? duration, Player player) async {
+  Future<void> _startFrom(Duration? duration, media_kit.Player player) async {
     if (duration == null) {
       player.play();
       return;
@@ -139,7 +132,7 @@ class VideoPlayerRepositoryImpl implements VideoPlayerRepository {
       state.data.indexOf(e),
       e.video,
       e.video.videoSources.indexOf(e.video.videoSources
-              .tryfirstWhere((it) => it.quality == VideoQuality.hls) ??
+              .tryfirstWhere((it) => it.quality == VideoQuality.hlsMaster) ??
           e.video.videoSources.reduce((high, low) =>
               (high.quality?.height ?? 0) > (low.quality?.height ?? 0)
                   ? high
@@ -151,9 +144,9 @@ class VideoPlayerRepositoryImpl implements VideoPlayerRepository {
   Future<void> changeSource(
       {required Video video,
       required int selectedSource,
-      required Player player,
+      required media_kit.Player player,
       Duration? startPostion}) async {
-    await player.open(Media(video.videoSources[selectedSource].url,
+    await player.open(media_kit.Media(video.videoSources[selectedSource].url,
         httpHeaders: video.headers));
 
     // if (source.quality == VideoQuality.hls) {
@@ -163,7 +156,7 @@ class VideoPlayerRepositoryImpl implements VideoPlayerRepository {
     //     .reduce(
     //         (high, low) => (high.h ?? 0) > (low.h ?? 0) ? high : low));
     // }
-    await player.setVideoTrack(VideoTrack.auto());
+    await player.setVideoTrack(media_kit.VideoTrack.auto());
     if (startPostion != null) await _startFrom(startPostion, player);
   }
 }

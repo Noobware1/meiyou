@@ -2,13 +2,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:meiyou/core/resources/platform_check.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
-import 'package:meiyou/domain/entities/plugin.dart';
+import 'package:meiyou/domain/entities/installed_plugin.dart';
 import 'package:meiyou/presentation/widgets/add_space.dart';
 
 class ShowInstalledPlugins extends StatelessWidget {
-  final PluginEntity plugin;
-  final List<PluginEntity>? pluginList;
-  final void Function(PluginEntity plugin) onSelected;
+  final InstalledPluginEntity plugin;
+  final List<InstalledPluginEntity>? pluginList;
+  final void Function(InstalledPluginEntity plugin) onSelected;
   const ShowInstalledPlugins({
     super.key,
     required this.plugin,
@@ -48,7 +48,7 @@ class ShowInstalledPlugins extends StatelessWidget {
     int index,
   ) {
     if (index == -1) {
-      onSelected(PluginEntity.none);
+      onSelected(InstalledPluginEntity.none);
     } else if (pluginList != null &&
         pluginList!.length >= (index - 1) &&
         pluginList![index] != plugin) {
@@ -75,7 +75,10 @@ class ShowInstalledPlugins extends StatelessWidget {
                   height: height,
                   child: Row(children: [
                     addHorizontalSpace(10),
-                    if (plugin == PluginEntity.none) icon else replacement,
+                    if (plugin == InstalledPluginEntity.none)
+                      icon
+                    else
+                      replacement,
                     addHorizontalSpace(10),
                     Text(
                       'None',
@@ -101,7 +104,7 @@ class ShowInstalledPlugins extends StatelessWidget {
                         else
                           replacement,
                         addHorizontalSpace(10),
-                        Image.file(File(pluginList![i].icon ?? ''),
+                        Image.file(File(pluginList![i].iconPath),
                             height: height,
                             width: height,
                             fit: BoxFit.fill, errorBuilder: (context, e, s) {

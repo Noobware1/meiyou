@@ -1,30 +1,19 @@
-import 'package:meiyou/core/plugin/base_plugin_api.dart';
 import 'package:meiyou/core/resources/response_state.dart';
-import 'package:meiyou/domain/entities/plugin.dart';
-import 'package:meiyou/domain/entities/plugin_list.dart';
+import 'package:meiyou_extenstions/models.dart';
 
 abstract class PluginRepository {
-  Future<ResponseState<List<PluginListEntity>>> getAllPlugins();
+  Future<ResponseState<List<HomePage>>> loadFullHomePage();
 
-  Stream<List<PluginEntity>> getInstalledPlugins();
+  Future<ResponseState<HomePage>> loadHomePage(int page, HomePageData data);
 
-  Future<PluginEntity> installPlugin(PluginEntity plugin);
+  Future<ResponseState<List<SearchResponse>>> search(String query);
 
-  Future<void> uninstallPlugin(PluginEntity plugin);
+  Future<ResponseState<MediaDetails>> loadMediaDetails(
+      SearchResponse searchResponse);
 
-  PluginEntity? checkForPluginUpdate(
-      PluginEntity installedPlugin, List<PluginListEntity> plugins);
+  Future<ResponseState<List<ExtractorLink>>> loadLinks(String url);
 
-  Future<PluginEntity> updatePlugin(PluginEntity plugin);
+  Future<ResponseState<Media?>> loadMedia(ExtractorLink link);
 
-  Map<PluginEntity, PluginEntity>? getOutDatedPlugins(
-      List<PluginEntity> installedPlugins, List<PluginListEntity> pluginList);
-
-  Future<BasePluginApi> loadPlugin(PluginEntity plugin);
-
-  void updateLastUsedPlugin(
-      PluginEntity previousPlugin, PluginEntity currentPlugin);
-
-      
-  PluginEntity? getLastedUsedPlugin();
+  Stream<(ExtractorLink, Media)> loadLinkAndMediaStream(String url);
 }

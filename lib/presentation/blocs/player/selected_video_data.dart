@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
-import 'package:meiyou/data/models/media/video/video_source.dart';
-import 'package:meiyou/domain/entities/extractor_link.dart';
 import 'package:meiyou/domain/usecases/video_player_repository_usecases/change_source.dart';
 import 'package:meiyou/presentation/blocs/player/server_and_video_cubit.dart';
 import 'package:meiyou/presentation/providers/player_provider.dart';
 import 'package:meiyou/presentation/providers/video_player_repository_usecases.dart';
+import 'package:meiyou_extenstions/models.dart';
 
 class SelectedVideoDataCubit extends Cubit<SelectedVideoDataState> {
   SelectedVideoDataCubit() : super(SelectedVideoDataStateInital());
@@ -23,7 +22,7 @@ class SelectedVideoDataCubit extends Cubit<SelectedVideoDataState> {
   void setStateFromData(
       BuildContext context,
       ExtractedVideoDataState extractedVideoDataState,
-      (ExtractorLinkEntity, VideoSource) data) {
+      (ExtractorLink, VideoSource) data) {
     final serverIndex =
         extractedVideoDataState.data.indexWhere((e) => e.link == data.$1);
 

@@ -1,20 +1,10 @@
-import 'package:meiyou/domain/entities/plugin.dart';
+import 'package:meiyou_extenstions/models.dart';
 
 class PluginListEntity {
-  final String type;
-  final List<PluginEntity> plugins;
+  final int id;
+  final String name;
+  final List<OnlinePlugin> plugins;
 
-  PluginListEntity({required this.type, required this.plugins});
+  PluginListEntity(
+      {required this.id, required this.name, required this.plugins});
 }
-
-// class EmbedablePluginEntity extends PluginEntity {
-//   EmbedablePluginEntity({
-//     required super.name,
-//     required super.source,
-//     required super.version,
-//     required super.lastUsed,
-//     super.dependencies,
-//     super.icon,
-//     super.info,
-//   });
-// }

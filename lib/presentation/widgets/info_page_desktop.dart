@@ -4,14 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:meiyou/core/constants/assets.dart';
 import 'package:meiyou/core/resources/snackbar.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
-import 'package:meiyou/core/utils/extenstions/date_titme.dart';
-import 'package:meiyou/core/utils/extenstions/iterable.dart';
-import 'package:meiyou/core/utils/extenstions/list.dart';
-import 'package:meiyou/data/models/media_item/anime.dart';
-import 'package:meiyou/data/models/media_item/tv_series.dart';
-import 'package:meiyou/domain/entities/actor_data.dart';
-import 'package:meiyou/domain/entities/media_details.dart';
-import 'package:meiyou/domain/entities/show_status.dart';
 import 'package:meiyou/presentation/blocs/plugin_selector_cubit.dart';
 import 'package:meiyou/presentation/pages/info_page.dart';
 import 'package:meiyou/presentation/widgets/add_space.dart';
@@ -19,6 +11,8 @@ import 'package:meiyou/presentation/widgets/banner_view/banner_image_holder.dart
 import 'package:meiyou/presentation/widgets/gradient.dart';
 import 'package:meiyou/presentation/widgets/image_view/image_holder.dart';
 import 'package:meiyou/presentation/widgets/resizeable_text.dart';
+import 'package:meiyou_extenstions/models.dart';
+import 'package:meiyou_extenstions/extenstions.dart';
 
 class InfoPageDesktop extends StatelessWidget {
   const InfoPageDesktop({super.key});
@@ -27,7 +21,7 @@ class InfoPageDesktop extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final data = context.repository<MediaDetailsEntity>();
+    final data = context.repository<MediaDetails>();
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -158,7 +152,7 @@ class InfoPageDesktop extends StatelessWidget {
     );
   }
 
-  Widget _buildActors(List<ActorDataEntity> data) {
+  Widget _buildActors(List<ActorData> data) {
     return _BuildActors(
       data: data,
     );
@@ -211,7 +205,7 @@ class InfoPageDesktop extends StatelessWidget {
 }
 
 class _BuildActors extends StatefulWidget {
-  final List<ActorDataEntity> data;
+  final List<ActorData> data;
   const _BuildActors({
     // ignore: unused_element
     super.key,
@@ -302,7 +296,7 @@ class _BuildActorsState extends State<_BuildActors> {
 }
 
 class _OtherInfo extends StatelessWidget {
-  final MediaDetailsEntity mediaDetails;
+  final MediaDetails mediaDetails;
   const _OtherInfo({required this.mediaDetails});
 
   static const _titleTextStyle =
@@ -356,7 +350,7 @@ class _OtherInfo extends StatelessWidget {
     });
   }
 
-  Widget? totalEpisodesORSeason(MediaDetailsEntity mediaDetails, double space) {
+  Widget? totalEpisodesORSeason(MediaDetails mediaDetails, double space) {
     final MapEntry<String, int>? entry;
     if (isAnime(mediaDetails)) {
       entry = MapEntry(
@@ -393,14 +387,14 @@ class _OtherInfo extends StatelessWidget {
     );
   }
 
-  bool isAnime(MediaDetailsEntity mediaDetails) {
+  bool isAnime(MediaDetails mediaDetails) {
     if (mediaDetails.mediaItem != null && mediaDetails.mediaItem is Anime) {
       return true;
     }
     return false;
   }
 
-  bool isTv(MediaDetailsEntity mediaDetails) {
+  bool isTv(MediaDetails mediaDetails) {
     if (mediaDetails.mediaItem != null && mediaDetails.mediaItem is TvSeries) {
       return true;
     }

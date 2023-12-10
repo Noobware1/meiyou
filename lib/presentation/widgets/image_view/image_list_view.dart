@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:meiyou/core/constants/height_and_width.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
-import 'package:meiyou/domain/entities/homepage.dart';
-import 'package:meiyou/domain/entities/search_response.dart';
 import 'package:meiyou/presentation/widgets/image_view/image_button_wrapper.dart';
+import 'package:meiyou_extenstions/models.dart';
 import 'image_holder.dart';
 
 class ImageHolderListViewBuilder extends StatefulWidget {
   final double height;
   final double width;
-  final void Function(SearchResponseEntity selected)? onSelected;
-  final HomePageEntity homePage;
+  final void Function(SearchResponse selected)? onSelected;
+  final HomePage homePage;
   final EdgeInsets padding;
-  final ImageHolder Function(BuildContext context, SearchResponseEntity data)
+  final ImageHolder Function(BuildContext context, SearchResponse data)
       builder;
   final String? label;
   final TextStyle? labelTextStyle;

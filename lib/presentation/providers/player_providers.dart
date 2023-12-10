@@ -3,8 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
-import 'package:meiyou/data/models/media_item/movie.dart';
-import 'package:meiyou/domain/entities/media_details.dart';
 import 'package:meiyou/presentation/blocs/player/buffering_cubit.dart';
 import 'package:meiyou/presentation/blocs/player/full_screen_cubit.dart';
 import 'package:meiyou/presentation/blocs/player/playback_speed.dart';

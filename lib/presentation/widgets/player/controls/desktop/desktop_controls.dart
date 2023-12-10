@@ -7,8 +7,6 @@ import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:meiyou/core/constants/default_widgets.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
-import 'package:meiyou/data/models/media_item/movie.dart';
-import 'package:meiyou/domain/entities/media_details.dart';
 import 'package:meiyou/presentation/blocs/current_episode_cubit.dart';
 import 'package:meiyou/presentation/blocs/player/buffering_cubit.dart';
 import 'package:meiyou/presentation/blocs/player/full_screen_cubit.dart';
@@ -27,6 +25,7 @@ import 'package:meiyou/presentation/widgets/player/controls/desktop/episodes_sel
 import 'package:meiyou/presentation/widgets/player/controls/desktop/next_episode.dart';
 import 'package:meiyou/presentation/widgets/player/controls/desktop/options.dart';
 import 'package:meiyou/presentation/widgets/player/controls/desktop/previous_episode_button.dart';
+import 'package:meiyou_extenstions/models.dart';
 import 'play_button.dart' as play_button;
 import 'postion_indicator.dart' as postion_indicator;
 import 'full_screen_button.dart' as full_screen_button;
@@ -345,7 +344,7 @@ class DesktopControls extends StatelessWidget {
                                               const Spacer(),
                                               if (context
                                                   .repository<
-                                                      MediaDetailsEntity>()
+                                                      MediaDetails>()
                                                   .mediaItem is! Movie)
                                                 const EpisodeSelectorButton(),
                                               const MaterialDesktopOptionsButton(),
@@ -494,7 +493,7 @@ class DesktopControls extends StatelessWidget {
                     const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                 textAlign: TextAlign.left,
               ),
-            Text(context.repository<MediaDetailsEntity>().name.trim(),
+            Text(context.repository<MediaDetails>().name.trim(),
                 textAlign: TextAlign.left,
                 style: const TextStyle(
                     color: Colors.grey,

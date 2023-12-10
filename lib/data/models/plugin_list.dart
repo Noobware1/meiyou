@@ -1,75 +1,100 @@
+// ignore_for_file: unnecessary_overrides, unnecessary_this, use_super_parameters
+
 import 'package:isar/isar.dart';
-import 'package:meiyou/core/utils/extenstions/iterable.dart';
-import 'package:meiyou/data/models/plugin.dart';
-import 'package:meiyou/domain/entities/plugin.dart';
 import 'package:meiyou/domain/entities/plugin_list.dart';
+import 'package:meiyou_extenstions/extenstions.dart';
+import 'package:meiyou_extenstions/models.dart';
+
 part 'plugin_list.g.dart';
 
 @collection
 class PluginList extends PluginListEntity {
-  final Id id;
   @override
-  List<EmbedablePlugin> get plugins => super.plugins as List<EmbedablePlugin>;
+  Id get id => super.id;
 
-  PluginList(
-      {this.id = Isar.autoIncrement,
-      required super.type,
-      required List<EmbedablePlugin> plugins})
-      : super(plugins: plugins);
+  @override
+  List<EmbeddedPlugin> get plugins => super.plugins.mapAsList(
+      (it) => it is EmbeddedPlugin ? it : EmbeddedPlugin.fromPlugin(it));
 
-  static List<PluginList> parseExtenstionList(dynamic json,
-      [List<PluginList>? installedPlugins]) {
-    final list = <PluginList>[];
-    json as Map;
+  PluginList({
+    Id id = Isar.autoIncrement,
+    required String name,
+    required List<EmbeddedPlugin> plugins,
+  }) : super(id: id, name: name, plugins: plugins);
 
-    for (var entry in json.entries) {
-      list.add(PluginList(
-          type: entry.key.toString(),
-          plugins: (entry.value as List)
-              .mapAsList((it) => EmbedablePlugin.fromJson(it))));
-    }
-    return list;
+  factory PluginList.fromMap(MapEntry entry) {
+    return PluginList(
+        name: entry.key.toString(),
+        plugins: (entry.value as List)
+            .mapAsList((it) => EmbeddedPlugin.fromJson(it)));
+  }
+
+  static parseIndexJson(dynamic json) {
+    return (json as Map).entries.mapAsList((it) => PluginList.fromMap(it));
   }
 
   @override
   String toString() {
-    return '''PluginList(type: $type, plugins: $plugins)''';
+    return 'PluginList{name: $name, plugins: $plugins';
   }
 }
 
 @embedded
-class EmbedablePlugin extends PluginEntity {
-  const EmbedablePlugin({
-    super.id = -1,
+class EmbeddedPlugin extends OnlinePlugin {
+  EmbeddedPlugin({
+    int id = 0,
     super.name = '',
-    super.source = '',
+    super.type = '',
+    super.author = '',
+    super.description = '',
+    super.lang = '',
+    super.baseUrl = '',
     super.version = '',
-    super.lastUsed = false,
-    super.installed = false,
-    List<Dependency>? dependencies,
-    super.icon,
-    super.info,
-  }) : super(dependencies: dependencies);
+    super.downloadUrl = '',
+    super.iconUrl = '',
+  }) : super(id: id);
 
-  factory EmbedablePlugin.fromJson(dynamic json) {
-    final plugin = Plugin.fromJson(json);
-    return EmbedablePlugin(
-      id: plugin.id,
-      name: plugin.name,
-      source: plugin.source,
-      version: plugin.version,
-      lastUsed: plugin.lastUsed,
-      installed: plugin.installed,
-      dependencies: plugin.dependencies,
-      icon: plugin.icon,
-      info: plugin.info,
-    );
+  factory EmbeddedPlugin.fromPlugin(Plugin plugin) {
+    return plugin.toEmbeddedPlugin();
   }
 
-  Plugin toPlugin() {
-    return Plugin.fromEntity(this);
+  factory EmbeddedPlugin.fromJson(Map<String, dynamic> json) {
+    return OnlinePlugin.fromJson(json).toEmbeddedPlugin();
   }
 
   @override
-  List<Dependency>? get dependencies => super.dependencies as List<Dependency>?;
+  String toString() {
+    return super.toString().replaceFirst('OnlinePlugin', 'EmbeddedPlugin');
+  }
+}
+
+extension on Plugin {
+  EmbeddedPlugin toEmbeddedPlugin() {
+    if (this is OnlinePlugin) {
+      return EmbeddedPlugin(
+        id: this.id,
+        name: this.name,
+        type: this.type,
+        author: this.author,
+        description: this.description,
+        lang: this.lang,
+        baseUrl: this.baseUrl,
+        version: this.version,
+        downloadUrl: this.downloadUrl,
+        iconUrl: (this as OnlinePlugin).iconUrl,
+      );
+    }
+    return EmbeddedPlugin(
+      id: this.id,
+      name: this.name,
+      type: this.type,
+      author: this.author,
+      description: this.description,
+      lang: this.lang,
+      baseUrl: this.baseUrl,
+      version: this.version,
+      downloadUrl: this.downloadUrl,
+      iconUrl: '',
+    );
+  }
 }

@@ -1,17 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meiyou/config/routes/routes.dart';
 import 'package:meiyou/core/resources/snackbar.dart';
-import 'package:meiyou/core/utils/extenstions/context.dart';
-import 'package:meiyou/data/repositories/video_player_repository_impl.dart';
-import 'package:meiyou/domain/entities/media_details.dart';
-import 'package:meiyou/domain/entities/search_response.dart';
-import 'package:meiyou/domain/usecases/plugin_manager_usecases/load_link_and_media_use_case.dart';
-import 'package:meiyou/presentation/blocs/current_episode_cubit.dart';
-import 'package:meiyou/presentation/blocs/player/server_and_video_cubit.dart';
-import 'package:meiyou/presentation/blocs/pluign_manager_usecase_provider_cubit.dart';
-import 'package:meiyou/presentation/pages/home_page.dart';
+import 'package:meiyou/presentation/pages/home_page.dart' as home;
 import 'package:meiyou/presentation/pages/info_page.dart';
 import 'package:meiyou/presentation/pages/libary_page.dart';
 import 'package:meiyou/presentation/pages/player_page.dart';
@@ -19,11 +10,10 @@ import 'package:meiyou/presentation/pages/plugins_page.dart';
 import 'package:meiyou/presentation/pages/search_page.dart';
 import 'package:meiyou/presentation/pages/settings_page.dart';
 import 'package:meiyou/presentation/providers/player_dependencies.dart';
-import 'package:meiyou/presentation/providers/plugin_manager_reposiotry_usecase_provider.dart';
-import 'package:meiyou/presentation/providers/video_player_repository_usecases.dart';
 import 'package:meiyou/presentation/widgets/custom_scaffold.dart';
 import 'package:meiyou/presentation/widgets/navigation_bars/bottom_navigatior.dart';
 import 'package:meiyou/presentation/widgets/navigation_bars/side_navigator.dart';
+import 'package:meiyou_extenstions/models.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey =
     GlobalKey<NavigatorState>(debugLabel: 'root');
@@ -63,7 +53,7 @@ class RouterProvider {
     parentNavigatorKey: _rootNavigatorKey,
     path: RouteNames.info,
     builder: (context, state) {
-      return InfoPage(searchResponse: state.extra as SearchResponseEntity);
+      return InfoPage(searchResponse: state.extra as SearchResponse);
     },
     routes: [
       GoRoute(
@@ -119,7 +109,7 @@ class RouterProvider {
                       // bottom navigation bar.
                       path: Routes.home,
                       builder: (BuildContext context, GoRouterState state) =>
-                          HomePage(key: state.pageKey),
+                          home.HomePage(key: state.pageKey),
                       routes: <RouteBase>[
                         _infoRoute,
                         // _searchRoute,

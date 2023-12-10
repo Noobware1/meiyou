@@ -8,20 +8,17 @@ import 'package:media_kit/media_kit.dart';
 import 'package:meiyou/config/routes/router_provider.dart';
 import 'package:meiyou/config/themes/meiyou_theme.dart';
 import 'package:meiyou/core/resources/isar.dart';
-import 'package:meiyou/core/resources/logger.dart';
 import 'package:meiyou/core/resources/paths.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
-import 'package:meiyou/data/models/plugin.dart';
+import 'package:meiyou/data/models/installed_plugin.dart';
 import 'package:meiyou/data/models/plugin_list.dart';
-import 'package:meiyou/data/repositories/plugin_repository_impl.dart';
+import 'package:meiyou/data/repositories/plugin_manager_repository_impl.dart';
 import 'package:meiyou/presentation/blocs/get_installed_plugin_cubit.dart';
 import 'package:meiyou/presentation/blocs/load_home_page_cubit.dart';
 import 'package:meiyou/presentation/blocs/plugin_selector_cubit.dart';
 import 'package:isar/isar.dart';
 import 'package:meiyou/presentation/blocs/pluign_manager_usecase_provider_cubit.dart';
-import 'package:meiyou/presentation/pages/player_page.dart';
-import 'package:meiyou/presentation/pages/search_page.dart';
-import 'package:meiyou/presentation/providers/plugin_repository_usecase_provider.dart';
+import 'package:meiyou/presentation/providers/plugin_manager_repository_usecase_provider.dart';
 import 'package:meiyou/presentation/widgets/player/controls/mobile/mobile_controls.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -33,7 +30,7 @@ void main() async {
   }
 
   final appDirs = await AppDirectories.getInstance();
-  isar = Isar.openSync([PluginSchema, PluginListSchema],
+  isar = Isar.openSync([InstalledPluginSchema, PluginListSchema],
       directory: appDirs.databaseDirectory.path);
 
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
@@ -42,16 +39,17 @@ void main() async {
     MultiRepositoryProvider(
         providers: [
           RepositoryProvider.value(value: appDirs),
-          RepositoryProvider<PluginRepositoryUseCaseProvider>(
-              create: (context) => PluginRepositoryUseCaseProvider(
-                  PluginRepositoryImpl(appDirs.pluginDirectory.path)))
+          RepositoryProvider<PluginManagerRepositoryUseCases>(
+              create: (context) => PluginManagerRepositoryUseCases(
+                  PluginManagerRepositoryImpl(appDirs.pluginDirectory.path))
+                ..deletePluginListsCache(null))
         ],
         child: MultiBlocProvider(
           providers: [
             BlocProvider(
               create: (context) => InstalledPluginCubit(
                 context
-                    .repository<PluginRepositoryUseCaseProvider>()
+                    .repository<PluginManagerRepositoryUseCases>()
                     .getInstalledPluginsUseCase
                     .call(null),
               ),
@@ -61,9 +59,9 @@ void main() async {
             ),
             BlocProvider(
               lazy: false,
-              create: (context) => PluginManagerUseCaseProviderCubit(
+              create: (context) => PluginRepositoryUseCaseProviderCubit(
                   context
-                      .repository<PluginRepositoryUseCaseProvider>()
+                      .repository<PluginManagerRepositoryUseCases>()
                       .loadPluginUseCase,
                   context.bloc<LoadHomePageCubit>()),
             ),
@@ -71,13 +69,16 @@ void main() async {
               lazy: false,
               create: (context) => PluginSelectorCubit(
                   context
-                      .repository<PluginRepositoryUseCaseProvider>()
+                      .repository<PluginManagerRepositoryUseCases>()
+                      .getInstalledPluginsUseCase(null),
+                  context
+                      .repository<PluginManagerRepositoryUseCases>()
                       .getLastedUsedPluginUseCase
                       .call(null),
                   context
-                      .repository<PluginRepositoryUseCaseProvider>()
+                      .repository<PluginManagerRepositoryUseCases>()
                       .updateLastUsedPluginUseCase,
-                  context.bloc<PluginManagerUseCaseProviderCubit>()),
+                  context.bloc<PluginRepositoryUseCaseProviderCubit>()),
             ),
           ],
           child: const Meiyou(),

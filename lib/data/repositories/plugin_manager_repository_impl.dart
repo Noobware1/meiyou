@@ -1,103 +1,143 @@
-import 'package:meiyou/core/plugin/base_plugin_api.dart';
+import 'dart:async';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
+import 'package:meiyou/core/client.dart';
 import 'package:meiyou/core/resources/response_state.dart';
 import 'package:meiyou/core/utils/try_catch.dart';
-import 'package:meiyou/data/models/extractor_link.dart';
-import 'package:meiyou/data/models/homepage.dart';
-import 'package:meiyou/data/models/media_details.dart';
-import 'package:meiyou/data/models/search_response.dart';
-import 'package:meiyou/domain/entities/extractor_link.dart';
-import 'package:meiyou/domain/entities/homepage.dart';
-import 'package:meiyou/domain/entities/media.dart';
-import 'package:meiyou/domain/entities/search_response.dart';
+import 'package:meiyou/data/data_source/local/dao/plugin_dao.dart';
+import 'package:meiyou/data/models/installed_plugin.dart';
+import 'package:meiyou/data/models/plugin_list.dart';
+import 'package:meiyou/domain/entities/installed_plugin.dart';
+import 'package:meiyou/domain/entities/plugin_list.dart';
 import 'package:meiyou/domain/repositories/plugin_manager_repository.dart';
-import 'package:meiyou/presentation/providers/lol.dart';
+import 'package:meiyou_extenstions/meiyou_extenstions.dart';
+import 'package:meiyou_extenstions/models.dart';
 
 class PluginManagerRepositoryImpl implements PluginManagerRepository {
-  final BasePluginApi api;
+  PluginManagerRepositoryImpl(this._pluginDir);
 
-  PluginManagerRepositoryImpl({required this.api});
+  late final PluginDao _pluginDao = PluginDao(_pluginDir);
+  final String _pluginDir;
 
-  HomePageData getMainPageData(HomePageEntity homePage) {
-    return api.homePage.firstWhere((e) => e.name == homePage.data.name);
+  static const _indexUrl =
+      'https://raw.githubusercontent.com/Noobware1/meiyou_extensions_repo/builds/index.json';
+
+  @override
+  Future<ResponseState<List<PluginList>>> getAllPlugins() {
+    return ResponseState.tryWithAsync(() async {
+      final cache = await _pluginDao.getAllUninstalledPluginsCache();
+      if (cache.isNotEmpty) {
+        return cache;
+      }
+
+      final pluginList = await tryAsync(() async =>
+          (await client.get(_indexUrl)).json(PluginList.parseIndexJson));
+
+      if (pluginList == null) throw Exception('Couldn\'t load plugins list');
+      await _pluginDao.addAllUnInstalledPluginsCache(pluginList);
+      return pluginList;
+    });
   }
 
   @override
-  Future<ResponseState<List<HomePage>>> loadFullHomePage() {
-    return ResponseState.tryWithAsync(() async {
-      final list = <HomePage>[];
-      for (var data in api.homePage) {
-        final homePage = await tryAsync(() => api.loadHomePage(
-            1,
-            HomePageRequest(
-                name: data.name,
-                data: data.data,
-                horizontalImages: data.horizontalImages)));
-        if (homePage != null && homePage.data.data.isNotEmpty) {
-          list.add(homePage);
+  Stream<List<InstalledPlugin>> getInstalledPlugins() {
+    return _pluginDao.getAllInstalledPlugins();
+  }
+
+  @override
+  Future<InstalledPlugin> installPlugin(OnlinePlugin plugin) async {
+    return _pluginDao.installPlugin(plugin);
+  }
+
+  @override
+  Future<void> uninstallPlugin(InstalledPluginEntity plugin) {
+    return _pluginDao.uninstallPlugin(InstalledPlugin.fromEntity(plugin));
+  }
+
+  @override
+  void deletePluginListsCache() {
+    return _pluginDao.deletePluginListsCache();
+  }
+
+  @override
+  InstalledPlugin? checkForPluginUpdate(
+      InstalledPluginEntity installedPlugin, List<PluginListEntity> plugins) {
+    for (var i in plugins) {
+      for (var plugin in i.plugins) {
+        if (installedPlugin.id == plugin.id &&
+            plugin.version.replaceAll('.', '').trim().toInt() >
+                installedPlugin.version.replaceAll('.', '').trim().toInt()) {
+          return InstalledPlugin.fromEntity(installedPlugin);
         }
       }
-      return list.isEmpty ? throw Exception('Could\'t Load HomePage!') : list;
-    });
-  }
-
-  @override
-  Future<ResponseState<List<SearchResponse>>> search(String query) {
-    return ResponseState.tryWithAsync(() {
-      return api.search(query);
-    });
-  }
-
-  @override
-  Future<ResponseState<MediaDetails>> loadMediaDetails(
-      SearchResponseEntity searchResponse) {
-    return ResponseState.tryWithAsync(() {
-      return api.loadMediaDetails(SearchResponse.fromEntity(searchResponse));
-    });
-  }
-
-  @override
-  Future<ResponseState<List<ExtractorLink>>> loadLinks(String url) {
-    return ResponseState.tryWithAsync(() => api.loadLinks(url));
-  }
-
-  @override
-  Future<ResponseState<MediaEntity?>> loadMedia(ExtractorLinkEntity link) {
-    return ResponseState.tryWithAsync(
-        () => api.loadMedia(ExtractorLink.fromEntity(link)));
-  }
-
-  @override
-  Stream<(ExtractorLink, MediaEntity)> loadLinkAndMediaStream(
-      String url) async* {
-    for (var i in videos) {
-      yield ((ExtractorLink.fromEntity(i.link), i.video));
     }
-
-    // final responseLinks = await loadLinks(url);
-
-    // if (responseLinks is ResponseFailed) {
-    //   throw responseLinks.error!;
-    // }
-    // for (var e in responseLinks.data!) {
-    //   final media = await ResponseState.tryWithAsync(() => api.loadMedia(e));
-    //   if (media is ResponseFailed) {
-    //     yield* Stream.error(media.error!);
-    //   } else if (media is ResponseSuccess && media.data != null) {
-    //     yield (e, media.data!);
-    //   }
-    // }
+    return null;
   }
 
-  
+  @override
+  Future<InstalledPlugin> updatePlugin(
+    OnlinePlugin plugin,
+  ) {
+    return _pluginDao.updatePlugin(plugin);
+  }
 
   @override
-  Future<ResponseState<HomePage>> loadHomePage(
-      int page, HomePageDataEntity data) {
-    return ResponseState.tryWithAsync(() => api.loadHomePage(
-        page,
-        HomePageRequest(
-            name: data.name,
-            data: data.data,
-            horizontalImages: data.horizontalImages)));
+  Map<InstalledPlugin, OnlinePlugin>? getOutDatedPlugins(
+      List<InstalledPluginEntity> installedPlugins,
+      List<PluginListEntity> pluginList) {
+    final List<MapEntry<InstalledPlugin, OnlinePlugin>> outDated = [];
+    for (var installedPlugin in installedPlugins) {
+      outDated.addIfNotNull(
+          _getOutdatedAndLatestPlugin(installedPlugin, pluginList));
+    }
+    return outDated.isEmpty ? null : Map.fromEntries(outDated);
+  }
+
+  MapEntry<InstalledPlugin, OnlinePlugin>? _getOutdatedAndLatestPlugin(
+      InstalledPluginEntity installedPlugin,
+      List<PluginListEntity> pluginList) {
+    for (var i in pluginList) {
+      for (var plugin in i.plugins) {
+        if (installedPlugin.id == plugin.id &&
+            plugin.version.replaceAll('.', '').trim().toInt() >
+                installedPlugin.version.replaceAll('.', '').trim().toInt()) {
+          return MapEntry(InstalledPlugin.fromEntity(installedPlugin),
+              plugin as OnlinePlugin);
+        }
+      }
+    }
+    return null;
+  }
+
+  @override
+  Future<BasePluginApi> loadPlugin(InstalledPluginEntity plugin) async {
+    final complied = await File(plugin.sourceCodePath).readAsBytes();
+    final runtime = ExtenstionLoader().runtimeEval(complied);
+    return runtime.executeLib('package:meiyou/main.dart', 'main')
+        as BasePluginApi;
+  }
+
+  @override
+  InstalledPlugin? getLastedUsedPlugin() {
+    return _pluginDao.getLastUsedPlugin();
+  }
+
+  @override
+  void updateLastUsedPlugin(InstalledPluginEntity previousPlugin,
+      InstalledPluginEntity currentPlugin) {
+    return _pluginDao.updateLastUsedPlugin(
+        InstalledPlugin.fromEntity(previousPlugin),
+        InstalledPlugin.fromEntity(currentPlugin));
+  }
+}
+
+class NoPluginsFound implements Exception {
+  final Object? message;
+  NoPluginsFound(this.message);
+
+  @override
+  String toString() {
+    if (message == null) return "NoPluginsFound";
+    return "NoPluginsFound: $message";
   }
 }

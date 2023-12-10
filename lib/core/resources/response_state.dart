@@ -26,8 +26,18 @@ abstract class ResponseState<T> {
 
 class ResponseSuccess<T> extends ResponseState<T> {
   const ResponseSuccess(T data) : super(data: data);
+
+  @override
+  String toString() {
+    return 'ResponseSuccess($data)';
+  }
 }
 
 class ResponseFailed<T> extends ResponseState<T> {
   const ResponseFailed(MeiyouException error) : super(error: error);
+
+  @override
+  String toString() {
+    return 'ResponseFailed($error)';
+  }
 }

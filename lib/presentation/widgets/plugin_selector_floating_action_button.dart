@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
-import 'package:meiyou/domain/entities/plugin.dart';
+import 'package:meiyou/domain/entities/installed_plugin.dart';
 import 'package:meiyou/presentation/blocs/get_installed_plugin_cubit.dart';
 import 'package:meiyou/presentation/blocs/plugin_selector_cubit.dart';
 import 'package:meiyou/presentation/widgets/installed_providers.dart';
@@ -13,11 +13,11 @@ class PluginFloatingActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<InstalledPluginCubit, List<PluginEntity>>(
+    return BlocBuilder<InstalledPluginCubit, List<InstalledPluginEntity>>(
         builder: (context, state) {
       return SizedBox(
         height: 55,
-        child: BlocBuilder<PluginSelectorCubit, PluginEntity>(
+        child: BlocBuilder<PluginSelectorCubit, InstalledPluginEntity>(
           builder: (context, selectedPlugin) {
             return FloatingActionButton.extended(
                 heroTag: heroTag,

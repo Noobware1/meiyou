@@ -1,23 +1,24 @@
-import 'package:meiyou/core/utils/extenstions/iterable.dart';
-import 'package:meiyou/data/models/episode.dart';
-import 'package:meiyou/domain/entities/episode.dart';
+
+
+import 'package:meiyou_extenstions/extenstions.dart';
+import 'package:meiyou_extenstions/models.dart';
 
 class GenerateEpisodesChunks {
-  static Map<String, List<EpisodeEntity>> buildEpisodesResponse(
-      List<EpisodeEntity> episodes) {
+  static Map<String, List<Episode>> buildEpisodesResponse(
+      List<Episode> episodes) {
     final values = splitList(episodes);
     final keys = getChunksLength(values);
 
     return Map.fromIterables(keys, values);
   }
 
-  static List<List<EpisodeEntity>> splitList(List<EpisodeEntity> episodes) {
+  static List<List<Episode>> splitList(List<Episode> episodes) {
     if (episodes.length <= 24 || episodes.length <= 26) {
       return [episodes];
     } else {
       const int chunkSize = 24;
       final int numChunks = (episodes.length / chunkSize).ceil();
-      final List<List<EpisodeEntity>> chunks = List<List<EpisodeEntity>>.generate(
+      final List<List<Episode>> chunks = List<List<Episode>>.generate(
           numChunks,
           (i) => episodes.sublist(
               i * chunkSize,
@@ -28,7 +29,7 @@ class GenerateEpisodesChunks {
     }
   }
 
-  static Iterable<String> getChunksLength(List<List<EpisodeEntity>> chunks) {
+  static Iterable<String> getChunksLength(List<List<Episode>> chunks) {
     if (chunks.length == 1) {
       return chunks.map((ep) => '${ep.length}');
     } else {

@@ -1,10 +1,6 @@
-import 'package:meiyou/data/models/extractor_link.dart';
-import 'package:meiyou/data/models/media/video/video.dart';
-import 'package:meiyou/data/models/media/video/video_format.dart';
-import 'package:meiyou/data/models/media/video/video_quailty.dart';
-import 'package:meiyou/data/models/media/video/video_source.dart';
-import 'package:meiyou/domain/entities/media_type.dart';
+
 import 'package:meiyou/presentation/blocs/player/server_and_video_cubit.dart';
+import 'package:meiyou_extenstions/models.dart';
 
 final videos = [
   ExtractedVideoData(
@@ -22,7 +18,7 @@ final videos = [
             url:
                 "https://www030.vipanicdn.net/streamhls/4b23f9372a28e885ad8f314c143399e4/ep.1.1677680964.m3u8",
             format: VideoFormat.hls,
-            quality: VideoQuality.hls,
+            quality: VideoQuality.hlsMaster,
             title: null,
             isBackup: false,
           ),
@@ -30,7 +26,7 @@ final videos = [
             url:
                 "https://www030.anifastcdn.info/videos/hls/upfeT_TNQu_DDdRquTwJiA/1701538434/103379/4b23f9372a28e885ad8f314c143399e4/ep.1.1677680964.m3u8",
             format: VideoFormat.hls,
-            quality: VideoQuality.hls,
+            quality: VideoQuality.hlsMaster,
             title: null,
             isBackup: false,
           )
@@ -55,7 +51,7 @@ final videos = [
                 "https://www030.vipanicdn.net/streamhls/4b23f9372a28e885ad8f314c143399e4/ep.1.1677680964.m3u8",
             format: VideoFormat.other,
 
-            quality: VideoQuality.hls,
+            quality: VideoQuality.hlsMaster,
             // quality: Instance of 'VideoQuality',
             title: null,
             isBackup: false,
@@ -65,7 +61,7 @@ final videos = [
                 "https://www030.anifastcdn.info/videos/hls/M_eBro4xHgxtjEL7FEUxFw/1701538435/103379/4b23f9372a28e885ad8f314c143399e4/ep.1.1677680964.m3u8",
             format: VideoFormat.hls,
 
-            quality: VideoQuality.hls,
+            quality: VideoQuality.hlsMaster,
             // quality: Instance of 'VideoQuality',
             title: null,
             isBackup: false,
