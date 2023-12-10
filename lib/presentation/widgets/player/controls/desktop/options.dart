@@ -46,7 +46,6 @@ class MaterialDesktopOptionsButton extends StatelessWidget {
     this.iconColor,
   }) : super(key: key);
 
-  
   @override
   Widget build(BuildContext context) {
     return Theme(
@@ -102,35 +101,17 @@ class _OptionsMenuState extends State<OptionsMenu> {
       return BlocBuilder<ExtractedVideoDataCubit, ExtractedVideoDataState>(
         builder: (context, state) {
           return _PopUpItemListBody(
-              defaultValue: (
-                state.data[selected.serverIndex].link,
-                state.data[selected.serverIndex].video
-                    .videoSources[selected.sourceIndex]
-              ),
+              defaultValue: selected.getLinkAndSource(context),
               label: 'Sources',
-              builder: (context, index, data) {
-                final String text;
-                if (data.$2.quality == VideoQuality.hlsMaster) {
-                  text = '${data.$1.name} - Multi';
-                } else if (data.$2.quality != VideoQuality.unknown &&
-                    data.$2.quality != null) {
-                  text = '${data.$1.name} - ${data.$2.quality!.height}p';
-                } else {
-                  text = data.$1.name;
-                }
-
-                return Text(data.$2.isBackup ? '$text (Backup)' : text);
-              },
-              data: state.data
-                  .mapAsList((it) =>
-                      it.video.videoSources.mapAsList((e) => (it.link, e)))
-                  .reduce((value, element) => [...value, ...element]),
+              builder: (context, index, data) => Text(data.toString()),
+              data: context
+                  .repository<VideoPlayerRepositoryUseCases>()
+                  .convertExtractedVideoDataListUseCase(state.data),
               onSelected: (data) {
                 context
                     .bloc<SelectedVideoDataCubit>()
                     .setStateFromData(context, state, data);
 
-                // .setPlaybackSpeed(context, );
                 setChangeFalse();
               },
               onExit: () {

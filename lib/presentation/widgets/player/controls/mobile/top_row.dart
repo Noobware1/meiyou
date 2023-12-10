@@ -1,6 +1,6 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:meiyou/core/constants/default_widgets.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
@@ -21,31 +21,28 @@ class VideoPlayerTopRowMobile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, constraints) {
-      return Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Row(children: [
-              GestureDetector(
-                child: const Icon(Icons.arrow_back_ios_new),
-                onTap: () {
-                  // context.pop();
-                },
-              ),
-              addHorizontalSpace(20),
-              _buildTitle(context),
-              addHorizontalSpace(20),
-            ]),
-          ),
-          Align(
-              alignment: Alignment.centerRight,
-              child: _buildVideoData(context)),
-        ],
-      );
-    });
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Align(
+          alignment: Alignment.centerLeft,
+          child: Row(children: [
+            GestureDetector(
+              child: const Icon(Icons.arrow_back_ios_new),
+              onTap: () {
+                context.pop();
+              },
+            ),
+            addHorizontalSpace(20),
+            _buildTitle(context),
+            addHorizontalSpace(20),
+          ]),
+        ),
+        Align(
+            alignment: Alignment.centerRight, child: _buildVideoData(context)),
+      ],
+    );
   }
 
   Widget _buildVideoData(BuildContext context) {
@@ -72,39 +69,41 @@ class VideoPlayerTopRowMobile extends StatelessWidget {
               return defaultSizedBox;
             }
 
-            return Column(children: [
-              addVerticalSpace(10),
-              BlocBuilder<ExtractedVideoDataCubit, ExtractedVideoDataState>(
-                builder: (context, state) {
-                  return Text(
-                    state.data[selected.serverIndex].link.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                        fontSize: 14.5, fontWeight: FontWeight.w400),
-                  );
-                },
-              ),
-              addVerticalSpace(5),
-              Text(context.bloc<PluginSelectorCubit>().state.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.w700, fontSize: 14.5)),
-              addVerticalSpace(5),
-              BlocBuilder<VideoTrackCubit, VideoTrack>(
-                  builder: (context, track) {
-                return Text(
-                  track == VideoTrack.auto()
-                      ? 'Auto'
-                      : '${track.w} x ${track.h}',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                      fontSize: 13.5, fontWeight: FontWeight.w400),
-                );
-              }),
-            ]);
+            return Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  addVerticalSpace(10),
+                  BlocBuilder<ExtractedVideoDataCubit, ExtractedVideoDataState>(
+                    builder: (context, state) {
+                      return Text(
+                        state.data[selected.serverIndex].link.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                            fontSize: 13.5, fontWeight: FontWeight.w400),
+                      );
+                    },
+                  ),
+                  addVerticalSpace(5),
+                  Text(context.bloc<PluginSelectorCubit>().state.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w700, fontSize: 13.5)),
+                  addVerticalSpace(5),
+                  BlocBuilder<VideoTrackCubit, VideoTrack>(
+                      builder: (context, track) {
+                    return Text(
+                      track == VideoTrack.auto()
+                          ? 'Auto'
+                          : '${track.w} x ${track.h}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                          fontSize: 12.5, fontWeight: FontWeight.w400),
+                    );
+                  }),
+                ]);
           })
         ],
       ),

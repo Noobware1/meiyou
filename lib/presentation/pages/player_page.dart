@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,15 +8,8 @@ import 'package:meiyou/core/resources/platform_check.dart';
 import 'package:meiyou/core/resources/snackbar.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
 import 'package:meiyou/domain/usecases/video_player_repository_usecases/load_player_usecase.dart';
-import 'package:meiyou/presentation/blocs/player/buffering_cubit.dart';
-import 'package:meiyou/presentation/blocs/player/full_screen_cubit.dart';
-import 'package:meiyou/presentation/blocs/player/playback_speed.dart';
-import 'package:meiyou/presentation/blocs/player/playing_cubit.dart';
-import 'package:meiyou/presentation/blocs/player/progress_bar_cubit.dart';
+import 'package:meiyou/presentation/blocs/player/resize_cubit.dart';
 import 'package:meiyou/presentation/blocs/player/server_and_video_cubit.dart';
-import 'package:meiyou/presentation/blocs/player/show_controls_cubit.dart';
-import 'package:meiyou/presentation/blocs/player/video_track_cubit.dart';
-import 'package:meiyou/presentation/providers/player_provider.dart';
 import 'package:meiyou/presentation/providers/player_providers.dart';
 import 'package:meiyou/presentation/providers/video_player_repository_usecases.dart';
 import 'package:meiyou/presentation/widgets/player/controls/desktop/desktop_controls.dart';
@@ -91,19 +82,19 @@ class _PlayerPageState extends State<PlayerPage> {
             }
           },
           child: Stack(children: [
-            Positioned.fill(
-              child: SizedBox(
-                height: videoController.rect.value?.height ?? height,
-                width: videoController.rect.value?.width ?? width,
-                child: Video(
-                    controller: videoController,
-                    controls: (state) {
-                      //   return PlayerDependenciesProvider.getFromContext(context)
-                      //       .injector(providers.create(const DesktopControls()));
-                      return defaultSizedBox;
-                    },
-                    subtitleViewConfiguration:
-                        const SubtitleViewConfiguration(visible: false)),
+            SizedBox.expand(
+              child: _BuildWithResizeMode(
+                child: SizedBox(
+                  height: videoController.rect.value?.height ?? height,
+                  width: videoController.rect.value?.width ?? width,
+                  child: Video(
+                      controller: videoController,
+                      controls: (state) {
+                        return defaultSizedBox;
+                      },
+                      subtitleViewConfiguration:
+                          const SubtitleViewConfiguration(visible: false)),
+                ),
               ),
             ),
             const Positioned.fill(child: MobileControls())
@@ -116,8 +107,29 @@ class _PlayerPageState extends State<PlayerPage> {
   @override
   void dispose() {
     if (isMobile) changeBackOrientation();
-    providers.fullScreenCubit.exitFullScreen();
+    providers.fullScreenCubit?.exitFullScreen();
+
     providers.dispose();
     super.dispose();
+  }
+}
+
+class _BuildWithResizeMode extends StatelessWidget {
+  final Widget child;
+  const _BuildWithResizeMode({
+    super.key,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // if (!isMobile) return child;
+
+    return BlocBuilder<ResizeCubit, ResizeMode>(builder: (context, resizeMode) {
+      return FittedBox(
+        fit: resizeMode.toBoxFit(),
+        child: child,
+      );
+    });
   }
 }

@@ -7,6 +7,9 @@ import 'package:go_router/go_router.dart';
 import 'package:media_kit/media_kit.dart' as media_kit;
 import 'package:media_kit_video/media_kit_video.dart' as vid;
 import 'package:meiyou/core/utils/extenstions/context.dart';
+import 'package:meiyou/data/models/extracted_video_data.dart';
+import 'package:meiyou/data/models/link_and_source.dart';
+import 'package:meiyou/domain/entities/extracted_video_data.dart';
 import 'package:meiyou/domain/repositories/video_player_repository.dart';
 import 'package:meiyou/domain/usecases/plugin_repository_usecases/load_link_and_media_use_case.dart';
 import 'package:meiyou/presentation/blocs/current_episode_cubit.dart';
@@ -17,6 +20,7 @@ import 'package:meiyou/presentation/blocs/player/server_and_video_cubit.dart';
 import 'package:meiyou/presentation/blocs/pluign_manager_usecase_provider_cubit.dart';
 import 'package:meiyou/presentation/blocs/season_cubit.dart';
 import 'package:meiyou/presentation/providers/player_provider.dart';
+import 'package:meiyou_extenstions/dart_eval/dart_eval_bridge.dart';
 import 'package:meiyou_extenstions/extenstions.dart';
 import 'package:meiyou_extenstions/models.dart';
 
@@ -148,15 +152,17 @@ class VideoPlayerRepositoryImpl implements VideoPlayerRepository {
       Duration? startPostion}) async {
     await player.open(media_kit.Media(video.videoSources[selectedSource].url,
         httpHeaders: video.headers));
-
-    // if (source.quality == VideoQuality.hls) {
-    //set to highest resoultion. will try to implement a default option in the future
-    // await player.setVideoTrack(player.state.tracks.video
-    //     .sublist(2)
-    //     .reduce(
-    //         (high, low) => (high.h ?? 0) > (low.h ?? 0) ? high : low));
-    // }
     await player.setVideoTrack(media_kit.VideoTrack.auto());
     if (startPostion != null) await _startFrom(startPostion, player);
+  
+  }
+
+  @override
+  List<LinkAndSource> convertExtractedVideoDataList(
+      List<ExtractedVideoDataEntity> data) {
+    return data
+        .mapAsList((it) => LinkAndSource.fromExtractedVideoData(
+            ExtractedVideoData.fromEntity(it)))
+        .faltten();
   }
 }

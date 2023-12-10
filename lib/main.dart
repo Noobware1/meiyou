@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:meiyou/config/routes/router_provider.dart';
 import 'package:meiyou/config/themes/meiyou_theme.dart';
@@ -20,6 +21,7 @@ import 'package:isar/isar.dart';
 import 'package:meiyou/presentation/blocs/pluign_manager_usecase_provider_cubit.dart';
 import 'package:meiyou/presentation/providers/plugin_manager_repository_usecase_provider.dart';
 import 'package:meiyou/presentation/widgets/player/controls/mobile/mobile_controls.dart';
+import 'package:meiyou/presentation/widgets/selector_dilaog_box.dart';
 import 'package:window_manager/window_manager.dart';
 
 void main() async {
@@ -116,15 +118,10 @@ class _MeiyouState extends State<Meiyou> {
     // );
     return MaterialApp.router(
       routerConfig: routerProvider.router,
-      // home: HomePage(),
       theme: theme.lightTheme,
       darkTheme: theme.darkTheme,
-
       themeMode: ThemeMode.dark,
       debugShowCheckedModeBanner: false,
-      // routeInformationParser: routerProvider.router.routeInformationParser,
-      // routerDelegate: routerProvider.router.routerDelegate,
-      // routeInformationProvider: routerProvider.router.routeInformationProvider,
       title: 'Meiyou',
     );
   }
@@ -135,6 +132,30 @@ class TestWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(body: MobileControls());
+    return Scaffold(
+        body: Center(
+      child: ElevatedButton(
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (context) => Dialog(
+                child: ArrowSelectorDialogBox(
+                    defaultValue: 1,
+                    label: 'Select Bitch',
+                    builder: (context, index, data) {
+                      return data.toString();
+                    },
+                    data: [0, 1, 2, 3, 4, 5, 6, 7],
+                    onApply: (value) {
+                      print(value);
+                    },
+                    onCancel: () {
+                      context.pop();
+                    }),
+              ),
+            );
+          },
+          child: Text('click me!!')),
+    ));
   }
 }

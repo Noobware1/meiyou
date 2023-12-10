@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:media_kit_video/media_kit_video_controls/src/controls/extensions/duration.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
 import 'package:meiyou/presentation/blocs/player/progress_bar_cubit.dart';
+import 'package:meiyou/presentation/providers/player_provider.dart';
 
 class VideoProgressbarMobile extends StatelessWidget {
   const VideoProgressbarMobile({super.key});
@@ -34,7 +35,7 @@ class VideoProgressbarMobile extends StatelessWidget {
                 buffered: state.buffered,
                 total: state.total,
                 onSeek: (duration) {
-                  // playerProvider(context).player.seek(duration);
+                  playerProvider(context).player.seek(duration);
                 },
               ),
             ],

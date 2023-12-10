@@ -21,35 +21,31 @@ class ArrowButton extends StatelessWidget {
       type: MaterialType.transparency,
       child: InkWell(
         onTap: onTap,
-        child: LayoutBuilder(
-            // stream: null,
-            builder: (context, constraints) {
-          return Container(
-            padding: const EdgeInsets.all(10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Visibility(
-                    visible: isSelected,
-                    replacement: const SizedBox(
-                      height: 30,
-                      width: 30,
-                    ),
-                    child: const Align(
-                      alignment: Alignment.bottomLeft,
-                      child: Icon(
-                        Icons.done,
-                        size: 30,
-                      ),
+        child: Container(
+          padding: const EdgeInsets.all(10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Visibility(
+                  visible: isSelected,
+                  replacement: const SizedBox(
+                    height: 25,
+                    width: 25,
+                  ),
+                  child: const Align(
+                    alignment: Alignment.bottomLeft,
+                    child: Icon(
+                      Icons.done,
+                      size: 25,
                     ),
                   ),
                 ),
-                Expanded(flex: 3, child: child)
-              ],
-            ),
-          );
-        }),
+              ),
+              Expanded(flex: 4, child: child)
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -62,6 +58,7 @@ class ArrowSelectorDialogBox<T> extends StatefulWidget {
   final T defaultValue;
 
   final ArrowSelectorTextBuilder<T> builder;
+  final bool Function(T defaultValue, T value)? isSelected;
   final List<T> data;
   final String label;
 
@@ -73,6 +70,7 @@ class ArrowSelectorDialogBox<T> extends StatefulWidget {
       required this.defaultValue,
       required this.label,
       required this.builder,
+      this.isSelected,
       required this.data,
       required this.onApply,
       required this.onCancel});
@@ -97,7 +95,7 @@ class _ArrowSelectorDialogBoxState<T> extends State<ArrowSelectorDialogBox<T>> {
   Widget build(BuildContext context) {
     // print(player(context).state.track.video);
 
-    return Container(
+    return ConstrainedBox(
       constraints: isMobile
           ? const BoxConstraints(maxWidth: 300, maxHeight: 300, minHeight: 20)
           : const BoxConstraints(maxWidth: 350, maxHeight: 350, minHeight: 20),
@@ -105,14 +103,17 @@ class _ArrowSelectorDialogBoxState<T> extends State<ArrowSelectorDialogBox<T>> {
         // crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Padding(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.fromLTRB(10, 10, 10, 5),
             child: Text(
               widget.label,
               style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 18,
+                  fontSize: 19.5,
                   fontWeight: FontWeight.w600),
             ),
+          ),
+          const Divider(
+            thickness: 1,
           ),
           const SizedBox(
             height: 10,
@@ -128,62 +129,27 @@ class _ArrowSelectorDialogBoxState<T> extends State<ArrowSelectorDialogBox<T>> {
                 child: ListView(
                     controller: _controller,
                     shrinkWrap: true,
-                    children: List.generate(
-                        widget.data.length,
-                        (index) => ArrowButton(
-                            isSelected: selected == widget.data[index],
-                            child: Text(
-                              widget.builder(
-                                  context, index, widget.data[index]),
+                    children: List.generate(widget.data.length, (index) {
+                      final bool isSelected = widget.isSelected
+                              ?.call(selected, widget.data[index]) ??
+                          selected == widget.data[index];
+                      return ArrowButton(
+                          isSelected: isSelected,
+                          child: Text(
+                            widget.builder(context, index, widget.data[index]),
 
-                              // textAlign: TextAlign.start,
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  color: selected == widget.data[index]
-                                      ? null
-                                      : Colors.grey,
-                                  fontSize: 18),
-                            ),
-                            onTap: () {
-                              setState(() {
-                                selected = widget.data[index];
-                              });
-                            }))
-
-                    // [
-                    //   ArrowButton(
-                    //       isSelected: selected == widget.videoTracks[0],
-                    //       text: 'Auto',
-                    //       onTap: () {
-                    //         setState(() {
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    //           selected = widget.videoTracks[0];
-                    //         });
-                    //       }),
-                    //   ...widget.videoTracks.sublist(2).map((it) {
-                    //     final isSame = selected == it;
-                    //     return ArrowButton(
-                    //         isSelected: isSame,
-                    //         text: '${it.w}x${it.h}',
-                    //         onTap: () {
-                    //           setState(() {
-                    //             selected = it;
-                    //           });
-                    //         });
-                    //   })
-                    // ],
-                    ),
+                            // textAlign: TextAlign.start,
+                            style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: isSelected ? null : Colors.grey,
+                                fontSize: 16),
+                          ),
+                          onTap: () {
+                            setState(() {
+                              selected = widget.data[index];
+                            });
+                          });
+                    })),
               ),
             ),
           ),
@@ -215,6 +181,8 @@ class ArrowSelectorListView<T> extends StatefulWidget {
 
   final Widget Function(BuildContext context, int index, T element) builder;
   final List<T> data;
+  final bool Function(T defaultValue, T value)? isSelected;
+
   final String? label;
   final void Function(T value) onSelected;
   const ArrowSelectorListView({
@@ -222,6 +190,7 @@ class ArrowSelectorListView<T> extends StatefulWidget {
     required this.defaultValue,
     this.label,
     required this.builder,
+    this.isSelected,
     required this.data,
     required this.onSelected,
   });
@@ -279,18 +248,22 @@ class _ArrowSelectorListViewState<T> extends State<ArrowSelectorListView<T>> {
                 child: ListView(
                     controller: _controller,
                     shrinkWrap: true,
-                    children: List.generate(
-                        widget.data.length,
-                        (index) => ArrowButton(
-                            isSelected: selected == widget.data[index],
-                            child: widget.builder(
-                                context, index, widget.data[index]),
-                            onTap: () {
-                              setState(() {
-                                selected = widget.data[index];
-                                widget.onSelected(selected);
-                              });
-                            }))),
+                    children: List.generate(widget.data.length, (index) {
+                      final bool isSelected = widget.isSelected
+                              ?.call(selected, widget.data[index]) ??
+                          selected == widget.data[index];
+
+                      return ArrowButton(
+                          isSelected: isSelected,
+                          child: widget.builder(
+                              context, index, widget.data[index]),
+                          onTap: () {
+                            setState(() {
+                              selected = widget.data[index];
+                              widget.onSelected(selected);
+                            });
+                          });
+                    })),
               ),
             ),
           ),

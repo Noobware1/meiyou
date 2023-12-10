@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart' as vid;
+import 'package:meiyou/domain/entities/extracted_video_data.dart';
+import 'package:meiyou/domain/entities/link_and_source.dart';
 import 'package:meiyou_extenstions/models.dart';
 
 abstract interface class VideoPlayerRepository {
@@ -28,4 +30,7 @@ abstract interface class VideoPlayerRepository {
       {required BuildContext context,
       required Episode episode,
       required int index});
+
+  List<LinkAndSourceEntity> convertExtractedVideoDataList(
+      List<ExtractedVideoDataEntity> data);
 }

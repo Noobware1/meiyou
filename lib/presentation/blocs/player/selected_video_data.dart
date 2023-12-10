@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
+import 'package:meiyou/domain/entities/link_and_source.dart';
 import 'package:meiyou/domain/usecases/video_player_repository_usecases/change_source.dart';
 import 'package:meiyou/presentation/blocs/player/server_and_video_cubit.dart';
 import 'package:meiyou/presentation/providers/player_provider.dart';
@@ -22,15 +23,16 @@ class SelectedVideoDataCubit extends Cubit<SelectedVideoDataState> {
   void setStateFromData(
       BuildContext context,
       ExtractedVideoDataState extractedVideoDataState,
-      (ExtractorLink, VideoSource) data) {
+      LinkAndSourceEntity data) {
     final serverIndex =
-        extractedVideoDataState.data.indexWhere((e) => e.link == data.$1);
+        extractedVideoDataState.data.indexWhere((e) => e.link == data.link);
 
     final state = SelectedVideoDataState(
         serverIndex: serverIndex,
         sourceIndex: extractedVideoDataState
             .data[serverIndex].video.videoSources
-            .indexOf(data.$2));
+            .indexOf(data.source));
+    emit(state);
 
     context.repository<VideoPlayerRepositoryUseCases>().changeSourceUseCase(
           ChangeSourceUseCaseParams(
@@ -44,8 +46,6 @@ class SelectedVideoDataCubit extends Cubit<SelectedVideoDataState> {
             startPostion: playerProvider(context).player.state.position,
           ),
         );
-
-    emit(state);
   }
 }
 
@@ -55,6 +55,13 @@ class SelectedVideoDataState {
 
   SelectedVideoDataState(
       {required this.serverIndex, required this.sourceIndex});
+
+  LinkAndSourceEntity getLinkAndSource(BuildContext context) {
+    final selected =
+        context.bloc<ExtractedVideoDataCubit>().state.data[serverIndex];
+    return LinkAndSourceEntity(
+        link: selected.link, source: selected.video.videoSources[sourceIndex]);
+  }
 }
 
 class SelectedVideoDataStateInital extends SelectedVideoDataState {

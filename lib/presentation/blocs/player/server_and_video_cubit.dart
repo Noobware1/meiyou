@@ -2,19 +2,8 @@ import 'dart:async';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meiyou/core/resources/expections.dart';
+import 'package:meiyou/domain/entities/extracted_video_data.dart';
 import 'package:meiyou_extenstions/models.dart';
-
-class ExtractedVideoData {
-  final ExtractorLink link;
-  final Video video;
-
-  ExtractedVideoData({required this.link, required this.video});
-
-  @override
-  String toString() {
-    return 'ExtractedVideoData(link: $link, video: $video)';
-  }
-}
 
 class ExtractedVideoDataCubit extends Cubit<ExtractedVideoDataState> {
   StreamSubscription? _subscription;
@@ -42,7 +31,7 @@ class ExtractedVideoDataCubit extends Cubit<ExtractedVideoDataState> {
           if (data.$2 is Video) {
             emit(ExtractedVideoDataState(data: [
               ...state.data,
-              ExtractedVideoData(link: data.$1, video: data.$2 as Video)
+              ExtractedVideoDataEntity(link: data.$1, video: data.$2 as Video)
             ]));
           }
         },
@@ -57,7 +46,7 @@ class ExtractedVideoDataCubit extends Cubit<ExtractedVideoDataState> {
 }
 
 class ExtractedVideoDataState extends Equatable {
-  final List<ExtractedVideoData> data;
+  final List<ExtractedVideoDataEntity> data;
   final MeiyouException? error;
 
   const ExtractedVideoDataState({this.data = const [], this.error});

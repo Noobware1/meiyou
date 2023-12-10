@@ -12,6 +12,8 @@ class PlayerProvider {
   void dispose() {
     player.dispose();
   }
+
+  
 }
 
 PlayerProvider playerProvider(BuildContext context) {
