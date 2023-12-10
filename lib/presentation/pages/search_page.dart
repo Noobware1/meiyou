@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:meiyou/core/constants/default_widgets.dart';
 import 'package:meiyou/core/constants/height_and_width.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
-import 'package:meiyou/domain/entities/search_response.dart';
 import 'package:meiyou/presentation/blocs/async_cubit/async_cubit.dart';
 import 'package:meiyou/presentation/blocs/plugin_selector_cubit.dart';
 import 'package:meiyou/presentation/blocs/pluign_manager_usecase_provider_cubit.dart';
@@ -17,8 +16,9 @@ import 'package:meiyou/presentation/widgets/image_view/image_button_wrapper.dart
 import 'package:meiyou/presentation/widgets/image_view/image_holder.dart';
 import 'package:meiyou/presentation/widgets/plugin_selector_floating_action_button.dart';
 import 'package:meiyou/presentation/widgets/responsive_layout.dart';
+import 'package:meiyou_extenstions/models.dart';
 
-void navigateToInfo(SearchResponseEntity searchResponse, BuildContext context) {
+void navigateToInfo(SearchResponse searchResponse, BuildContext context) {
   return context.go('/search/info', extra: searchResponse);
 }
 
@@ -85,7 +85,7 @@ class _ForMobile extends StatelessWidget {
             if (context.tryBloc<SearchPageCubit>() != null)
               Expanded(
                 child: BlocBuilder<SearchPageCubit,
-                        AsyncState<List<SearchResponseEntity>>>(
+                        AsyncState<List<SearchResponse>>>(
                     builder: (context, state) {
                   if (state is SearchPageInital) {
                     return defaultSizedBox;
@@ -206,7 +206,7 @@ class _ForDesktop extends StatelessWidget {
           if (context.tryBloc<SearchPageCubit>() != null)
             Expanded(
               child: BlocBuilder<SearchPageCubit,
-                      AsyncState<List<SearchResponseEntity>>>(
+                      AsyncState<List<SearchResponse>>>(
                   builder: (context, state) {
                 if (state is SearchPageInital) {
                   return defaultSizedBox;
@@ -276,7 +276,7 @@ class SearchPage extends StatelessWidget {
         resizeToAvoidBottomInset: false,
         floatingActionButton:
             const PluginFloatingActionButton(heroTag: 'search'),
-        body: BlocBuilder<PluginManagerUseCaseProviderCubit,
+        body: BlocBuilder<PluginRepositoryUseCaseProviderCubit,
                 PluginManagerUseCaseProviderState>(
             builder: (context, usecaseProvider) {
           return usecaseProvider.when(
@@ -284,7 +284,7 @@ class SearchPage extends StatelessWidget {
                   error: error.message,
                   onRetry: () {
                     context
-                        .bloc<PluginManagerUseCaseProviderCubit>()
+                        .bloc<PluginRepositoryUseCaseProviderCubit>()
                         .initFromContext(context);
                   }),
               done: (data) {

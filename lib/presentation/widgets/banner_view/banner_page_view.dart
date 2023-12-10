@@ -3,16 +3,15 @@ import 'package:go_router/go_router.dart';
 import 'package:meiyou/config/routes/routes.dart';
 import 'package:meiyou/core/resources/platform_check.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
-import 'package:meiyou/domain/entities/homepage.dart';
-import 'package:meiyou/domain/entities/search_response.dart';
 import 'package:meiyou/presentation/widgets/banner_view/state_management.dart/banner_page_view_controller.dart';
 import 'package:meiyou/presentation/widgets/gradient.dart';
+import 'package:meiyou_extenstions/models.dart';
 import 'banner_image_holder.dart';
 import 'banner_image_text.dart';
 import 'banner_row_buttons.dart';
 
 class BannerPageView extends StatefulWidget {
-  final HomePageEntity homePage;
+  final HomePage homePage;
   final double height;
   const BannerPageView({super.key, required this.homePage, this.height = 400});
 
@@ -24,7 +23,7 @@ class _BannerPageViewState extends State<BannerPageView> {
   late final PageController _controller;
 
   late final BannerPageViewController _bannerPageViewController;
-  late final List<SearchResponseEntity> row;
+  late final List<SearchResponse> row;
 
   @override
   void initState() {

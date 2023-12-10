@@ -2,11 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meiyou/core/resources/snackbar.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
-import 'package:meiyou/data/models/media_item/anime.dart';
-import 'package:meiyou/data/models/media_item/tv_series.dart';
-import 'package:meiyou/domain/entities/media_details.dart';
-import 'package:meiyou/domain/entities/media_item.dart';
-import 'package:meiyou/domain/entities/search_response.dart';
 import 'package:meiyou/presentation/blocs/async_cubit/async_cubit.dart';
 import 'package:meiyou/presentation/blocs/info_page_cubit.dart';
 import 'package:meiyou/presentation/blocs/pluign_manager_usecase_provider_cubit.dart';
@@ -16,9 +11,10 @@ import 'package:meiyou/presentation/providers/init_provider_info_page.dart';
 import 'package:meiyou/presentation/widgets/info_page_desktop.dart';
 import 'package:meiyou/presentation/widgets/info_page_mobile.dart';
 import 'package:meiyou/presentation/widgets/responsive_layout.dart';
+import 'package:meiyou_extenstions/models.dart';
 
 class InfoPage extends StatelessWidget {
-  final SearchResponseEntity searchResponse;
+  final SearchResponse searchResponse;
 
   const InfoPage({super.key, required this.searchResponse});
 
@@ -27,8 +23,8 @@ class InfoPage extends StatelessWidget {
     return Scaffold(
       body: BlocProvider(
         create: (context) => MediaDetailsCubit(searchResponse)
-          ..loadMediaDetails(context.bloc<PluginManagerUseCaseProviderCubit>()),
-        child: BlocConsumer<MediaDetailsCubit, AsyncState<MediaDetailsEntity>>(
+          ..loadMediaDetails(context.bloc<PluginRepositoryUseCaseProviderCubit>()),
+        child: BlocConsumer<MediaDetailsCubit, AsyncState<MediaDetails>>(
             builder: (context, state) {
           return state.when(data: (data) {
             return RepositoryProvider.value(
@@ -46,7 +42,7 @@ class InfoPage extends StatelessWidget {
             return CustomErrorWidget(
               error: error.message,
               onRetry: () => context.bloc<MediaDetailsCubit>().loadMediaDetails(
-                  context.bloc<PluginManagerUseCaseProviderCubit>()),
+                  context.bloc<PluginRepositoryUseCaseProviderCubit>()),
             );
           }, loading: () {
             return const Center(
@@ -63,7 +59,7 @@ class InfoPage extends StatelessWidget {
   }
 }
 
-bool isMediaItemIsNotNullOrEmpty(MediaItemEntity? mediaItem) {
+bool isMediaItemIsNotNullOrEmpty(MediaItem? mediaItem) {
   if (mediaItem == null) return false;
   if (mediaItem is Anime && mediaItem.episodes.isEmpty) return false;
   if (mediaItem is TvSeries && mediaItem.data.isEmpty) return false;
@@ -75,7 +71,7 @@ class WatchView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mediaItem = context.repository<MediaDetailsEntity>().mediaItem;
+    final mediaItem = context.repository<MediaDetails>().mediaItem;
     if (mediaItem is TvSeries) {
       return const TvSeriesView();
     } else if (mediaItem is Anime) {

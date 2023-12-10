@@ -6,14 +6,7 @@ import 'package:meiyou/core/constants/animation_duration.dart';
 import 'package:meiyou/core/constants/default_widgets.dart';
 import 'package:meiyou/core/resources/platform_check.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
-import 'package:meiyou/core/utils/extenstions/iterable.dart';
-import 'package:meiyou/data/models/media_item/movie.dart';
-import 'package:meiyou/data/models/media_item/tv_series.dart';
-import 'package:meiyou/domain/entities/episode.dart';
-import 'package:meiyou/domain/entities/media_details.dart';
-import 'package:meiyou/domain/entities/season_data.dart';
-import 'package:meiyou/domain/entities/season_list.dart';
-import 'package:meiyou/domain/usecases/plugin_manager_usecases/load_link_and_media_use_case.dart';
+import 'package:meiyou/domain/usecases/plugin_repository_usecases/load_link_and_media_use_case.dart';
 import 'package:meiyou/domain/usecases/video_player_repository_usecases/change_episode_usecase.dart';
 import 'package:meiyou/presentation/blocs/episodes_bloc.dart';
 import 'package:meiyou/presentation/blocs/episodes_selector_cubit.dart';
@@ -23,15 +16,17 @@ import 'package:meiyou/presentation/providers/video_player_repository_usecases.d
 import 'package:meiyou/presentation/widgets/add_space.dart';
 import 'package:meiyou/presentation/widgets/episode_holder.dart';
 import 'package:meiyou/presentation/widgets/selector_dilaog_box.dart';
+import 'package:meiyou_extenstions/extenstions.dart';
+import 'package:meiyou_extenstions/models.dart';
 
 class TvSeriesView extends StatelessWidget {
   const TvSeriesView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final mediaDetails = context.repository<MediaDetailsEntity>();
+    final mediaDetails = context.repository<MediaDetails>();
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      BlocBuilder<SeasonCubit, SeasonDataEntity>(builder: (context, state) {
+      BlocBuilder<SeasonCubit, SeasonData>(builder: (context, state) {
         return ElevatedButton(
             style: ButtonStyle(
                 minimumSize: MaterialStatePropertyAll(
@@ -57,7 +52,7 @@ class TvSeriesView extends StatelessWidget {
             ));
       }),
       addVerticalSpace(isMobile ? 10 : 30),
-      BlocBuilder<EpisodesCubit, Map<String, List<EpisodeEntity>>>(
+      BlocBuilder<EpisodesCubit, Map<String, List<Episode>>>(
           builder: (context, state) {
         if (state.keys.length == 1) return defaultSizedBox;
         return Padding(
@@ -66,7 +61,7 @@ class TvSeriesView extends StatelessWidget {
         );
       }),
       addVerticalSpace(isMobile ? 10 : 30),
-      BlocBuilder<EpisodesCubit, Map<String, List<EpisodeEntity>>>(
+      BlocBuilder<EpisodesCubit, Map<String, List<Episode>>>(
           builder: (context, seasonAndEpisodes) {
         return BlocBuilder<EpisodesSelectorCubit, String>(
           builder: (context, key) {
@@ -83,7 +78,7 @@ class TvSeriesView extends StatelessWidget {
   Future showSeasonSelector(
     BuildContext context, {
     required SeasonCubit seasonCubit,
-    required List<SeasonListEntity> data,
+    required List<SeasonList> data,
   }) {
     return showDialog(
         context: context,
@@ -129,7 +124,7 @@ class AnimeView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        BlocBuilder<EpisodesCubit, Map<String, List<EpisodeEntity>>>(
+        BlocBuilder<EpisodesCubit, Map<String, List<Episode>>>(
             builder: (context, state) {
           if (state.keys.length == 1) return defaultSizedBox;
           return Padding(
@@ -138,7 +133,7 @@ class AnimeView extends StatelessWidget {
           );
         }),
         addVerticalSpace(isMobile ? 10 : 30),
-        BlocBuilder<EpisodesCubit, Map<String, List<EpisodeEntity>>>(
+        BlocBuilder<EpisodesCubit, Map<String, List<Episode>>>(
             builder: (context, seasonAndEpisodes) {
           return BlocBuilder<EpisodesSelectorCubit, String>(
             builder: (context, key) {
@@ -159,7 +154,7 @@ class MovieView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mediaDetails = context.repository<MediaDetailsEntity>();
+    final mediaDetails = context.repository<MediaDetails>();
     final movie = mediaDetails.mediaItem as Movie;
     return EpisodeHolder(
       onTap: () {},
@@ -175,13 +170,13 @@ class MovieView extends StatelessWidget {
 }
 
 class _ToEpsiode extends StatelessWidget {
-  final EpisodeEntity episode;
+  final Episode episode;
   final int index;
   const _ToEpsiode({super.key, required this.episode, required this.index});
 
   @override
   Widget build(BuildContext context) {
-    final mediaDetails = context.repository<MediaDetailsEntity>();
+    final mediaDetails = context.repository<MediaDetails>();
     final number = episode.episode ?? index + 1;
     final thumbnail = episode.posterImage ??
         mediaDetails.bannerImage ??
@@ -313,10 +308,10 @@ class _EpisodesSelectorState extends State<EpisodesSelector> {
 }
 
 
-// Widget _toEpisodeForGrid(BuildContext context, int index, EpisodeEntity episode,
-//     MediaDetailsEntity mediaDetails, bool isMobile) {
+// Widget _toEpisodeForGrid(BuildContext context, int index, Episode episode,
+//     MediaDetails mediaDetails, bool isMobile) {
 //   final number = episode.episode ?? index + 1;
-//   return Stack(
+//    Stack(
 //     fit: StackFit.passthrough,
 //     children: [
 //       ImageHolder(

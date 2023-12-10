@@ -1,25 +1,32 @@
 import 'package:meiyou/core/resources/response_state.dart';
-import 'package:meiyou/domain/entities/extractor_link.dart';
-
-import 'package:meiyou/domain/entities/homepage.dart';
-import 'package:meiyou/domain/entities/media.dart';
-import 'package:meiyou/domain/entities/media_details.dart';
-import 'package:meiyou/domain/entities/search_response.dart';
+import 'package:meiyou/domain/entities/installed_plugin.dart';
+import 'package:meiyou/domain/entities/plugin_list.dart';
+import 'package:meiyou_extenstions/models.dart';
 
 abstract interface class PluginManagerRepository {
-  Future<ResponseState<List<HomePageEntity>>> loadFullHomePage();
+  Future<ResponseState<List<PluginListEntity>>> getAllPlugins();
 
-  Future<ResponseState<HomePageEntity>> loadHomePage(
-      int page, HomePageDataEntity data);
+  Stream<List<InstalledPluginEntity>> getInstalledPlugins();
 
-  Future<ResponseState<List<SearchResponseEntity>>> search(String query);
+  Future<InstalledPluginEntity> installPlugin(OnlinePlugin plugin);
 
-  Future<ResponseState<MediaDetailsEntity>> loadMediaDetails(
-      SearchResponseEntity searchResponse);
+  Future<void> uninstallPlugin(InstalledPluginEntity plugin);
 
-  Future<ResponseState<List<ExtractorLinkEntity>>> loadLinks(String url);
+  InstalledPluginEntity? checkForPluginUpdate(
+      InstalledPluginEntity installedPlugin, List<PluginListEntity> plugins);
 
-  Future<ResponseState<MediaEntity?>> loadMedia(ExtractorLinkEntity link);
+  Future<InstalledPluginEntity> updatePlugin(OnlinePlugin plugin);
 
-  Stream<(ExtractorLinkEntity, MediaEntity)> loadLinkAndMediaStream(String url);
+  Map<InstalledPluginEntity, OnlinePlugin>? getOutDatedPlugins(
+      List<InstalledPluginEntity> installedPlugins,
+      List<PluginListEntity> pluginList);
+
+  Future<BasePluginApi> loadPlugin(InstalledPluginEntity plugin);
+
+  void updateLastUsedPlugin(InstalledPluginEntity previousPlugin,
+      InstalledPluginEntity currentPlugin);
+
+  InstalledPluginEntity? getLastedUsedPlugin();
+
+  void deletePluginListsCache();
 }

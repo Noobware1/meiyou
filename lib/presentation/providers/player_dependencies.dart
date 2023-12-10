@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
-import 'package:meiyou/data/models/media_item/anime.dart';
-import 'package:meiyou/data/models/media_item/tv_series.dart';
 import 'package:meiyou/data/repositories/video_player_repository_impl.dart';
-import 'package:meiyou/domain/entities/media_details.dart';
-import 'package:meiyou/domain/entities/media_item.dart';
-import 'package:meiyou/domain/usecases/plugin_manager_usecases/load_link_and_media_use_case.dart';
+import 'package:meiyou/domain/usecases/plugin_repository_usecases/load_link_and_media_use_case.dart';
 import 'package:meiyou/presentation/blocs/current_episode_cubit.dart';
 import 'package:meiyou/presentation/blocs/episodes_bloc.dart';
 import 'package:meiyou/presentation/blocs/episodes_selector_cubit.dart';
@@ -16,6 +12,7 @@ import 'package:meiyou/presentation/blocs/plugin_selector_cubit.dart';
 import 'package:meiyou/presentation/blocs/pluign_manager_usecase_provider_cubit.dart';
 import 'package:meiyou/presentation/blocs/season_cubit.dart';
 import 'package:meiyou/presentation/providers/video_player_repository_usecases.dart';
+import 'package:meiyou_extenstions/models.dart';
 
 class PlayerDependenciesProvider {
   final List<RepositoryProvider> repositories;
@@ -32,14 +29,14 @@ class PlayerDependenciesProvider {
         create: (context) =>
             VideoPlayerRepositoryUseCases(VideoPlayerRepositoryImpl()),
       ),
-      RepositoryProvider<MediaDetailsEntity>.value(
-          value: context.repository<MediaDetailsEntity>()),
+      RepositoryProvider<MediaDetails>.value(
+          value: context.repository<MediaDetails>()),
     ], blocs: [
       BlocProvider<ExtractedVideoDataCubit>(
         lazy: false,
         create: (context) {
           return ExtractedVideoDataCubit(context
-              .bloc<PluginManagerUseCaseProviderCubit>()
+              .bloc<PluginRepositoryUseCaseProviderCubit>()
               .state
               .provider!
               .loadLinkAndMediaStreamUseCase
@@ -48,12 +45,12 @@ class PlayerDependenciesProvider {
       ),
       BlocProvider<SelectedVideoDataCubit>(
           create: (context) => SelectedVideoDataCubit()),
-      BlocProvider<PluginManagerUseCaseProviderCubit>.value(
-          value: context.bloc<PluginManagerUseCaseProviderCubit>()),
+      BlocProvider<PluginRepositoryUseCaseProviderCubit>.value(
+          value: context.bloc<PluginRepositoryUseCaseProviderCubit>()),
       BlocProvider<PluginSelectorCubit>.value(
           value: context.bloc<PluginSelectorCubit>()),
       ..._getBasedOnMediaItem(
-          context, context.repository<MediaDetailsEntity>().mediaItem),
+          context, context.repository<MediaDetails>().mediaItem),
       if (episodeIndex != null)
         BlocProvider<CurrentEpisodeCubit>(
           lazy: false,
@@ -66,19 +63,19 @@ class PlayerDependenciesProvider {
     return PlayerDependenciesProvider(repositories: [
       RepositoryProvider<VideoPlayerRepositoryUseCases>.value(
           value: context.repository<VideoPlayerRepositoryUseCases>()),
-      RepositoryProvider<MediaDetailsEntity>.value(
-          value: context.repository<MediaDetailsEntity>()),
+      RepositoryProvider<MediaDetails>.value(
+          value: context.repository<MediaDetails>()),
     ], blocs: [
       BlocProvider<ExtractedVideoDataCubit>.value(
           value: context.bloc<ExtractedVideoDataCubit>()),
       BlocProvider<SelectedVideoDataCubit>.value(
           value: context.bloc<SelectedVideoDataCubit>()),
-      BlocProvider<PluginManagerUseCaseProviderCubit>.value(
-          value: context.bloc<PluginManagerUseCaseProviderCubit>()),
+      BlocProvider<PluginRepositoryUseCaseProviderCubit>.value(
+          value: context.bloc<PluginRepositoryUseCaseProviderCubit>()),
       BlocProvider<PluginSelectorCubit>.value(
           value: context.bloc<PluginSelectorCubit>()),
       ..._getBasedOnMediaItem(
-          context, context.repository<MediaDetailsEntity>().mediaItem),
+          context, context.repository<MediaDetails>().mediaItem),
       if (context.tryBloc<CurrentEpisodeCubit>() != null)
         BlocProvider<CurrentEpisodeCubit>.value(
           value: context.bloc<CurrentEpisodeCubit>(),
@@ -94,7 +91,7 @@ class PlayerDependenciesProvider {
 }
 
 List<BlocProvider> _getBasedOnMediaItem(
-    BuildContext context, MediaItemEntity? mediaItem) {
+    BuildContext context, MediaItem? mediaItem) {
   if (mediaItem is Anime) {
     return [
       BlocProvider<EpisodesCubit>.value(value: context.bloc<EpisodesCubit>()),

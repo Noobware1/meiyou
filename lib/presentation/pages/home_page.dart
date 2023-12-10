@@ -5,8 +5,6 @@ import 'package:meiyou/core/constants/height_and_width.dart';
 import 'package:meiyou/core/resources/platform_check.dart';
 import 'package:meiyou/core/resources/snackbar.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
-import 'package:meiyou/domain/entities/homepage.dart';
-import 'package:meiyou/domain/entities/search_response.dart';
 import 'package:meiyou/presentation/blocs/load_home_page_cubit.dart';
 import 'package:meiyou/presentation/blocs/plugin_selector_cubit.dart';
 import 'package:meiyou/presentation/blocs/pluign_manager_usecase_provider_cubit.dart';
@@ -17,6 +15,7 @@ import 'package:meiyou/presentation/widgets/error_widget.dart';
 import 'package:meiyou/presentation/widgets/image_view/image_holder.dart';
 import 'package:meiyou/presentation/widgets/image_view/image_list_view.dart';
 import 'package:meiyou/presentation/widgets/plugin_selector_floating_action_button.dart';
+import 'package:meiyou_extenstions/models.dart' as models;
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -37,7 +36,7 @@ class _HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<PluginManagerUseCaseProviderCubit,
+    return BlocConsumer<PluginRepositoryUseCaseProviderCubit,
         PluginManagerUseCaseProviderState>(
       listener: (context, providerState) {
         if (providerState.isCompletedWithError) {
@@ -83,7 +82,7 @@ class _HomePage extends StatelessWidget {
             error: (error) => CustomErrorWidget(
                   error: error.message,
                   onRetry: () => context
-                      .bloc<PluginManagerUseCaseProviderCubit>()
+                      .bloc<PluginRepositoryUseCaseProviderCubit>()
                       .initPluginMangerUseCaseProvider(
                           context.bloc<PluginSelectorCubit>().state),
                 ),
@@ -93,7 +92,7 @@ class _HomePage extends StatelessWidget {
     );
   }
 
-  Widget _forMobile(HomePageEntity homePage, BuildContext context) {
+  Widget _forMobile(models.HomePage homePage, BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 25),
       child: ImageHolderListViewBuilder(
@@ -121,7 +120,7 @@ class _HomePage extends StatelessWidget {
     );
   }
 
-  Widget _forDesktop(BuildContext context, HomePageEntity homePage) {
+  Widget _forDesktop(BuildContext context, models.HomePage homePage) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 15),
       child: ImageHolderListViewBuilder(
@@ -149,7 +148,7 @@ class _HomePage extends StatelessWidget {
     );
   }
 
-  void onSelected(BuildContext context, SearchResponseEntity searchResponse) {
+  void onSelected(BuildContext context, models.SearchResponse searchResponse) {
     context.push('/home/info', extra: searchResponse);
   }
 }

@@ -2,12 +2,10 @@ import 'dart:async';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meiyou/core/resources/expections.dart';
-import 'package:meiyou/data/models/media/video/video.dart';
-import 'package:meiyou/domain/entities/extractor_link.dart';
-import 'package:meiyou/domain/entities/media.dart';
+import 'package:meiyou_extenstions/models.dart';
 
 class ExtractedVideoData {
-  final ExtractorLinkEntity link;
+  final ExtractorLink link;
   final Video video;
 
   ExtractedVideoData({required this.link, required this.video});
@@ -21,7 +19,7 @@ class ExtractedVideoData {
 class ExtractedVideoDataCubit extends Cubit<ExtractedVideoDataState> {
   StreamSubscription? _subscription;
 
-  ExtractedVideoDataCubit(Stream<(ExtractorLinkEntity, MediaEntity)> stream)
+  ExtractedVideoDataCubit(Stream<(ExtractorLink, Media)> stream)
       : super(const ExtractedVideoDataState()) {
     initStream(stream);
   }
@@ -34,7 +32,7 @@ class ExtractedVideoDataCubit extends Cubit<ExtractedVideoDataState> {
             : MeiyouException(error.toString(), stackTrace: stackTrace)));
   }
 
-  void initStream(Stream<(ExtractorLinkEntity, MediaEntity)> stream) {
+  void initStream(Stream<(ExtractorLink, Media)> stream) {
     emit(const ExtractedVideoDataState());
     _subscription?.cancel();
     _subscription = null;

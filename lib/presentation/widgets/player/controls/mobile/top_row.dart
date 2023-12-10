@@ -4,8 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:meiyou/core/constants/default_widgets.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
-import 'package:meiyou/data/models/media_item/movie.dart';
-import 'package:meiyou/domain/entities/media_details.dart';
 import 'package:meiyou/presentation/blocs/current_episode_cubit.dart';
 import 'package:meiyou/presentation/blocs/player/selected_video_data.dart';
 import 'package:meiyou/presentation/blocs/player/server_and_video_cubit.dart';
@@ -14,6 +12,7 @@ import 'package:meiyou/presentation/blocs/plugin_selector_cubit.dart';
 import 'package:meiyou/presentation/providers/video_player_repository_usecases.dart';
 import 'package:meiyou/presentation/widgets/add_space.dart';
 import 'package:meiyou/presentation/widgets/player/controls/desktop/episodes_selector.dart';
+import 'package:meiyou_extenstions/models.dart';
 
 class VideoPlayerTopRowMobile extends StatelessWidget {
   const VideoPlayerTopRowMobile({
@@ -124,7 +123,7 @@ class VideoPlayerTopRowMobile extends StatelessWidget {
                 context
                         .repository<VideoPlayerRepositoryUseCases>()
                         .getVideoTitleUseCase(context) ??
-                    context.repository<MediaDetailsEntity>().name.trim(),
+                    context.repository<MediaDetails>().name.trim(),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 // videoTitle.trim(),
@@ -134,8 +133,8 @@ class VideoPlayerTopRowMobile extends StatelessWidget {
               );
             },
           ),
-          if (context.repository<MediaDetailsEntity>().mediaItem is! Movie)
-            Text(context.repository<MediaDetailsEntity>().name.trim(),
+          if (context.repository<MediaDetails>().mediaItem is! Movie)
+            Text(context.repository<MediaDetails>().name.trim(),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.left,

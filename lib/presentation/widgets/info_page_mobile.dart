@@ -5,15 +5,6 @@ import 'package:meiyou/core/constants/animation_duration.dart';
 import 'package:meiyou/core/constants/assets.dart';
 import 'package:meiyou/core/constants/default_widgets.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
-import 'package:meiyou/core/utils/extenstions/date_titme.dart';
-import 'package:meiyou/core/utils/extenstions/iterable.dart';
-import 'package:meiyou/core/utils/extenstions/list.dart';
-import 'package:meiyou/core/utils/extenstions/string.dart';
-import 'package:meiyou/data/models/media_item/anime.dart';
-import 'package:meiyou/data/models/media_item/tv_series.dart';
-import 'package:meiyou/domain/entities/actor_data.dart';
-import 'package:meiyou/domain/entities/media_details.dart';
-import 'package:meiyou/domain/entities/show_status.dart';
 import 'package:meiyou/presentation/blocs/plugin_selector_cubit.dart';
 import 'package:meiyou/presentation/pages/info_page.dart';
 import 'package:meiyou/presentation/widgets/add_space.dart';
@@ -22,6 +13,8 @@ import 'package:meiyou/presentation/widgets/custom_orientation_builder.dart';
 import 'package:meiyou/presentation/widgets/gradient.dart';
 import 'package:meiyou/presentation/widgets/image_view/image_holder.dart';
 import 'package:meiyou/presentation/widgets/resizeable_text.dart';
+import 'package:meiyou_extenstions/models.dart';
+import 'package:meiyou_extenstions/extenstions.dart';
 
 class InfoPageMobile extends StatelessWidget {
   const InfoPageMobile({super.key});
@@ -30,7 +23,7 @@ class InfoPageMobile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final data = context.repository<MediaDetailsEntity>();
+    final data = context.repository<MediaDetails>();
     return SafeArea(
       left: true,
       right: true,
@@ -217,7 +210,7 @@ class InfoPageMobile extends StatelessWidget {
     );
   }
 
-  Widget _buildInfo(MediaDetailsEntity data) {
+  Widget _buildInfo(MediaDetails data) {
     Widget row(String key, String value) {
       return Flexible(
         child: Row(
@@ -288,7 +281,7 @@ class InfoPageMobile extends StatelessWidget {
     return _wrap(otherTitles, context);
   }
 
-  Widget _buildActors(List<ActorDataEntity> data) {
+  Widget _buildActors(List<ActorData> data) {
     ImageProvider getImage(String? image) {
       if (image == null || image.isEmpty) {
         return const AssetImage(defaultposterImage);
