@@ -5,31 +5,39 @@ abstract class ResponseState<T> {
   final MeiyouException? error;
 
   const ResponseState({this.data, this.error});
+
+  static ResponseState<E> tryWith<E>(E Function() fun) {
+    try {
+      return ResponseSuccess(fun());
+    } catch (e, s) {
+      return ResponseFailed(MeiyouException(e.toString(), stackTrace: s));
+    }
+  }
+
+  static Future<ResponseState<E>> tryWithAsync<E>(
+      Future<E> Function() fun) async {
+    try {
+      return ResponseSuccess(await fun());
+    } catch (e, s) {
+      return ResponseFailed(MeiyouException(e.toString(), stackTrace: s));
+    }
+  }
 }
 
 class ResponseSuccess<T> extends ResponseState<T> {
   const ResponseSuccess(T data) : super(data: data);
+
+  @override
+  String toString() {
+    return 'ResponseSuccess($data)';
+  }
 }
 
 class ResponseFailed<T> extends ResponseState<T> {
   const ResponseFailed(MeiyouException error) : super(error: error);
 
-  factory ResponseFailed.fromTMDB() {
-    return ResponseFailed(MeiyouException.fromTMDB());
-  }
-
-  factory ResponseFailed.fromAnilist() {
-    return ResponseFailed(MeiyouException.fromAnilist());
-  }
-
-  factory ResponseFailed.defaultError(Object expection, StackTrace stackTrace) {
-    return ResponseFailed(MeiyouException(expection.toString(),
-        stackTrace: stackTrace, type: MeiyouExceptionType.other));
-  }
-
-  factory ResponseFailed.onHttpUnSuccesful(String provider) {
-    return ResponseFailed(MeiyouException(
-        'Failed to get data from ${provider.toUpperCase()}',
-        type: MeiyouExceptionType.providerException));
+  @override
+  String toString() {
+    return 'ResponseFailed($error)';
   }
 }

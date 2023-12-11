@@ -1,3 +1,3 @@
-import 'package:ok_http_dart/ok_http_dart.dart';
+import 'package:meiyou_extenstions/ok_http/ok_http.dart';
 
 final OKHttpClient client = OKHttpClient();

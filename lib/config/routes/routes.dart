@@ -1,11 +1,27 @@
-const String homeRoute = '/home';
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
-const String settingsRoute = '/settings';
+class Routes {
+  static const home = '/home';
+  static const info = '/home/info';
+  static const player = '/player';
 
-const String searchRoute = '/search';
+  static const search = '/search';
+  static const libary = '/libary';
+  static const plugins = '/plugins';
+  static const more = '/more';
 
-const String watchRoute = '/watch';
+  static reslovePlayerRoute(BuildContext context) {
+    return GoRouter.of(context).routeInformationProvider.value.uri.path +
+        player;
+  }
+}
 
-const String myListRoute = '/mylist';
-
-const String playerRoute = '/player';
+class RouteNames {
+  static const home = 'home';
+  static const info = 'info';
+  static const player = 'player';
+  static const search = 'search';
+  static const libary = 'libary';
+  static const more = 'more';
+}

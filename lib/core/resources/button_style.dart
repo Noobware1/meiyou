@@ -18,12 +18,12 @@ class MeiyouButtonStyle extends ButtonStyle {
       BorderSide? side,
       OutlinedBorder? shape,
       MouseCursor? mouseCursor,
-      VisualDensity? visualDensity,
-      MaterialTapTargetSize? tapTargetSize,
-      Duration? animationDuration,
-      bool? enableFeedback,
-      AlignmentGeometry? alignment,
-      InteractiveInkFeatureFactory? splashFactory,
+      super.visualDensity,
+      super.tapTargetSize,
+      super.animationDuration,
+      super.enableFeedback,
+      super.alignment,
+      super.splashFactory,
       s
       // /  super.splashFactory,
       })
@@ -44,12 +44,6 @@ class MeiyouButtonStyle extends ButtonStyle {
           side: MaterialStatePropertyAll(side),
           shape: MaterialStatePropertyAll(shape),
           mouseCursor: MaterialStatePropertyAll(mouseCursor),
-          visualDensity: visualDensity,
-          tapTargetSize: tapTargetSize,
-          animationDuration: animationDuration,
-          enableFeedback: enableFeedback,
-          alignment: alignment,
-          splashFactory: splashFactory,
         );
 
   // factory MeiyouButtonStyle.overWriteAllPropertyAsMaterialState({

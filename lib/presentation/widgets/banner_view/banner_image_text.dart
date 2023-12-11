@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:meiyou/core/utils/extenstions/context.dart';
-import 'package:meiyou/core/utils/extenstions/double.dart';
+import 'package:meiyou/core/resources/platform_check.dart';
 import 'package:meiyou/presentation/widgets/add_space.dart';
-import 'package:meiyou/presentation/widgets/layout_builder.dart';
+import 'package:meiyou_extenstions/models.dart';
 
 Icon _getSmilyFace(double score, [double size = 25.0]) {
   if (score <= 3.0) {
@@ -28,143 +27,162 @@ Icon _getSmilyFace(double score, [double size = 25.0]) {
 
 class _ForBiggerScreens extends StatelessWidget {
   final String title;
-  final List<String> genres;
-  final double averageScore;
-  final String description;
+  final List<String>? genres;
+  final ShowType showType;
+  final DateTime? airDate;
+  final String? description;
+  final double? rating;
   final Widget buttons;
   const _ForBiggerScreens(
       {required this.title,
-      required this.genres,
+      required this.showType,
+      this.genres,
+      this.airDate,
+      this.rating,
       required this.buttons,
-      required this.description,
-      required this.averageScore});
+      this.description});
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-        alignment: Alignment.centerLeft,
-        child: Padding(
-          padding: const EdgeInsets.only(left: 70),
-          child: Container(
-              height: 300,
-              // color: Colors.blue,
-              width: context.screenWidth / 2,
-              padding: const EdgeInsets.only(left: 10, right: 10),
-              child: DefaultTextStyle(
-                  style: const TextStyle(),
-                  child: Column(children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        title,
-                        textAlign: TextAlign.start,
-                        style: const TextStyle(
-                          fontSize: 25,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    addVerticalSpace(10),
-                    Row(
-                      children: [
-                        _getSmilyFace(averageScore),
-                        addHorizontalSpace(10),
-                        Text(
-                          '${averageScore.toPercentage()}%',
-                          style: const TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w500),
-                        ),
-                        addHorizontalSpace(10),
-                        Expanded(
-                          child: Wrap(
-                            // alignment: WrapAlignment.center,
-                            crossAxisAlignment: WrapCrossAlignment.center,
-                            // runSpacing: 10,
-                            spacing: 10,
-                            children: List.generate(
-                                genres.length,
-                                (index) => [
-                                      Text(
-                                        genres[index],
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w400,
-                                        ),
-                                      ),
-                                      if (index != genres.length - 1)
-                                        Container(
-                                          height: 5,
-                                          width: 5,
-                                          decoration: const BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              color: Colors.grey),
-                                        ),
-                                    ]).reduce((a, b) => [...a, ...b]),
-                          ),
-                        ),
-                      ],
-                    ),
-                    addVerticalSpace(10),
-                    SingleChildScrollView(
-                      physics: const NeverScrollableScrollPhysics(),
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 10, right: 10),
-                        child: Align(
-                          alignment: Alignment.topLeft,
-                          child: Text(
-                            description.isEmpty
-                                ? 'No Description'
-                                : description,
-                            softWrap: true,
-                            maxLines: 4,
-                            textAlign: TextAlign.start,
-                            overflow: TextOverflow.ellipsis,
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+                fontSize: 28,
+                overflow: TextOverflow.ellipsis,
+                fontWeight: FontWeight.w700),
+            textAlign: TextAlign.start,
+            maxLines: 2,
+          ),
+          addVerticalSpace(5),
+          Row(
+            children: [
+              if (rating != null)
+                if (rating! > 0.0) ...[
+                  _getSmilyFace(rating!, 20),
+                  addHorizontalSpace(3),
+                  Text(
+                    rating.toString(),
+                    style: const TextStyle(
+                        fontSize: 17, fontWeight: FontWeight.w500),
+                  ),
+                  addHorizontalSpace(10),
+                ],
+              const Icon(
+                Icons.tv_rounded,
+                size: 30,
+                color: Colors.grey,
+              ),
+              addHorizontalSpace(5),
+              Text(
+                showType.toString().toUpperCase(),
+                style:
+                    const TextStyle(fontSize: 17, fontWeight: FontWeight.w500),
+              ),
+              if (airDate != null) ...[
+                addHorizontalSpace(10),
+                Text(
+                  airDate!.year.toString(),
+                  style: const TextStyle(
+                      fontSize: 17, fontWeight: FontWeight.w500),
+                ),
+              ],
+            ],
+          ),
+          addVerticalSpace(10),
+          if (genres != null) ...[
+            Flexible(
+              child: Wrap(
+                // alignment: WrapAlignment.center,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                // runSpacing: 10,
+                spacing: 10,
+                children: List.generate(
+                    genres!.length,
+                    (index) => [
+                          Text(
+                            genres![index],
                             style: const TextStyle(
+                              fontSize: 17,
                               fontWeight: FontWeight.w400,
-                              fontSize: 18,
                             ),
                           ),
-                        ),
-                      ),
-                    ),
-                    // addVerticalSpace(10),
-                    Expanded(child: buttons)
-                  ]))),
-        ));
+                          if (index != genres!.length - 1)
+                            Container(
+                              height: 5,
+                              width: 5,
+                              decoration: const BoxDecoration(
+                                  shape: BoxShape.circle, color: Colors.grey),
+                            ),
+                        ]).reduce((a, b) => [...a, ...b]),
+              ),
+            ),
+            addVerticalSpace(10),
+          ],
+          if (description != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 5, bottom: 10),
+              child: Text(
+                description!,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 16),
+              ),
+            ),
+          buttons
+        ],
+      ),
+    );
   }
 }
 
 class BannerImageText extends StatelessWidget {
   final String title;
-  final List<String> genres;
+  final List<String>? genres;
   final Widget buttons;
-  final String mediaType;
-  final DateTime? releaseDate;
-  final double averageScore;
-  final String description;
+  final ShowType showType;
+  final DateTime? airDate;
+  final double? rating;
+  final String? description;
 
   const BannerImageText(
       {super.key,
       required this.title,
-      required this.mediaType,
+      required this.showType,
       required this.genres,
-      this.releaseDate,
+      this.airDate,
       required this.buttons,
-      required this.averageScore,
+      required this.rating,
       required this.description});
 
   @override
   Widget build(BuildContext context) {
     // return ResponsiveBuilder(
-    return _ForSmallScreens(
-      genres: genres,
-      title: title,
-      releaseDate: releaseDate,
-      mediaType: mediaType,
-      score: averageScore,
-      buttons: buttons,
-      description: description,
-    );
+    return isMobile
+        ? _ForSmallScreens(
+            genres: genres,
+            title: title,
+            airDate: airDate,
+            showType: showType,
+            rating: rating,
+            buttons: buttons,
+            description: description,
+          )
+        : _ForBiggerScreens(
+            genres: genres,
+            title: title,
+            airDate: airDate,
+            showType: showType,
+            rating: rating,
+            buttons: buttons,
+            description: description,
+          );
     // forLagerScreen: _ForBiggerScreens(
     //     averageScore: averageScore,
     //     description: description,
@@ -176,21 +194,20 @@ class BannerImageText extends StatelessWidget {
 
 class _ForSmallScreens extends StatelessWidget {
   final String title;
-  final List<String> genres;
-  final String mediaType;
-  final DateTime? releaseDate;
-  final String description;
-  final double score;
+  final List<String>? genres;
+  final ShowType showType;
+  final DateTime? airDate;
+  final String? description;
+  final double? rating;
   final Widget buttons;
   const _ForSmallScreens(
       {required this.title,
-      required this.mediaType,
-      required this.genres,
-      this.releaseDate,
-      required this.score,
+      required this.showType,
+      this.genres,
+      this.airDate,
+      this.rating,
       required this.buttons,
-      // required this.averageScore,
-      required this.description});
+      this.description});
 
   @override
   Widget build(BuildContext context) {
@@ -210,20 +227,20 @@ class _ForSmallScreens extends StatelessWidget {
             textAlign: TextAlign.start,
             maxLines: 2,
           ),
-
           addVerticalSpace(5),
           Row(
             children: [
-              if (score > 0.0) ...[
-                _getSmilyFace(score, 20),
-                addHorizontalSpace(3),
-                Text(
-                  score.toString(),
-                  style: const TextStyle(
-                      fontSize: 14, fontWeight: FontWeight.w500),
-                ),
-              ],
-              addHorizontalSpace(10),
+              if (rating != null)
+                if (rating! > 0.0) ...[
+                  _getSmilyFace(rating!, 20),
+                  addHorizontalSpace(3),
+                  Text(
+                    rating.toString(),
+                    style: const TextStyle(
+                        fontSize: 14, fontWeight: FontWeight.w500),
+                  ),
+                  addHorizontalSpace(10),
+                ],
               const Icon(
                 Icons.tv_rounded,
                 size: 20,
@@ -231,101 +248,60 @@ class _ForSmallScreens extends StatelessWidget {
               ),
               addHorizontalSpace(5),
               Text(
-                mediaType.toUpperCase(),
+                showType.toString().toUpperCase(),
                 style:
                     const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
               ),
-              addHorizontalSpace(10),
-              Text(
-                releaseDate?.year.toString() ?? 'Unknown',
-                style:
-                    const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-              ),
+              if (airDate != null) ...[
+                addHorizontalSpace(10),
+                Text(
+                  airDate!.year.toString(),
+                  style: const TextStyle(
+                      fontSize: 15, fontWeight: FontWeight.w500),
+                ),
+              ],
             ],
           ),
           addVerticalSpace(10),
-          Flexible(
-            child: Wrap(
-              // alignment: WrapAlignment.center,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              // runSpacing: 10,
-              spacing: 10,
-              children: List.generate(
-                  genres.length,
-                  (index) => [
-                        Text(
-                          genres[index],
-                          style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w400,
+          if (genres != null) ...[
+            Flexible(
+              child: Wrap(
+                // alignment: WrapAlignment.center,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                // runSpacing: 10,
+                spacing: 10,
+                children: List.generate(
+                    genres!.length,
+                    (index) => [
+                          Text(
+                            genres![index],
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w400,
+                            ),
                           ),
-                        ),
-                        if (index != genres.length - 1)
-                          Container(
-                            height: 5,
-                            width: 5,
-                            decoration: const BoxDecoration(
-                                shape: BoxShape.circle, color: Colors.grey),
-                          ),
-                      ]).reduce((a, b) => [...a, ...b]),
+                          if (index != genres!.length - 1)
+                            Container(
+                              height: 5,
+                              width: 5,
+                              decoration: const BoxDecoration(
+                                  shape: BoxShape.circle, color: Colors.grey),
+                            ),
+                        ]).reduce((a, b) => [...a, ...b]),
+              ),
             ),
-          ),
-          addVerticalSpace(5),
-          Padding(
-            padding: const EdgeInsets.only(top: 5, bottom: 10),
-            child: Text(
-              description,
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
+            addVerticalSpace(5),
+          ],
+          if (description != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 5, bottom: 10),
+              child: Text(
+                description!,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
-          ),
           buttons
-
-          //   child: Align(
-          //     alignment: Alignment.bottomCenter,
-          //     child: SizedBox(
-          //       height: 140,
-          //       width: 300,
-          //       child: Column(
-          //         mainAxisAlignment: MainAxisAlignment.end,
-          //         children: [
-          //           DefaultTextStyle(
-          //             style: const TextStyle(
-          //               fontSize: 27,
-          //             ),
-          //             child: Text(
-          //               title,
-          //               style: const TextStyle(
-          //                   fontSize: 20,
-          //                   overflow: TextOverflow.ellipsis,
-          //                   fontWeight: FontWeight.w700),
-          //               textAlign: TextAlign.center,
-          //               maxLines: 4,
-          //             ),
-          //           ),
-          //           const SizedBox(
-          //             height: 10,
-          //           ),
-          //           DefaultTextStyle(
-          //             style: const TextStyle(
-          //                 fontSize: 14, overflow: TextOverflow.ellipsis),
-          //             child: Text(
-          //               genres.join(' | '),
-          //               style: const TextStyle(
-          //                 fontSize: 14,
-          //                 fontWeight: FontWeight.w400,
-          //                 overflow: TextOverflow.ellipsis,
-          //               ),
-          //               textAlign: TextAlign.center,
-          //               maxLines: 3,
-          //             ),
-          //           )
-          //         ],
-          //       ),
-          //     ),
-          //   ),
-          // ),
-          // buttons
         ],
       ),
     );

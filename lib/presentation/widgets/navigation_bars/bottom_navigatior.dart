@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:meiyou/config/themes/utils.dart';
-// import 'package:meiyou/config/themes/app_themes/app_theme.dart';
 import 'package:meiyou/core/constants/icons.dart';
 import 'package:meiyou/core/resources/colors.dart';
-import 'package:meiyou/core/utils/extenstions/color.dart';
-import 'package:meiyou/presentation/widgets/app_theme.dart';
+import 'package:meiyou/core/utils/extenstions/context.dart';
 
 class MyBottomNavigationBar extends StatelessWidget {
   final GoRouterState goRouterState;
@@ -18,48 +15,40 @@ class MyBottomNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppTheme.builder(builder: (context, state) {
-      return BottomNavigationBar(
-          currentIndex: statefulNavigationShell.currentIndex,
-          backgroundColor: getTheme(context, state).colorScheme.secondary,
-          useLegacyColorScheme: false,
-          selectedIconTheme: IconThemeData(
-              color: getTheme(context, state).colorScheme.primary),
-          unselectedIconTheme: IconThemeData(
-              color: getBaseColorFromThemeMode(context, state.themeMode)),
-          unselectedLabelStyle: TextStyle(
-              color: getBaseColorFromThemeMode(context, state.themeMode)
-              // color: getTheme(context, state)
-              //     .colorScheme
-              //     .primary
-              //     .resloveBasedOnThemeMode(context, state.themeMode)
-
-              ),
-          selectedLabelStyle:
-              TextStyle(color: getTheme(context, state).colorScheme.primary),
-          onTap: (value) => statefulNavigationShell.goBranch(value),
-          iconSize: 25,
-          showUnselectedLabels: true,
-          showSelectedLabels: true,
-          type: BottomNavigationBarType.fixed,
-          items: [
-            BottomNavigationBarItem(
-              icon: outlinedIcons[0],
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: outlinedIcons[1],
-              label: 'Search',
-            ),
-            BottomNavigationBarItem(
-              icon: outlinedIcons[2],
-              label: 'My List',
-            ),
-            BottomNavigationBarItem(
-              icon: outlinedIcons[3],
-              label: 'Settings',
-            )
-          ]);
-    });
+    return BottomNavigationBar(
+        currentIndex: statefulNavigationShell.currentIndex,
+        backgroundColor: context.theme.colorScheme.secondary,
+        useLegacyColorScheme: false,
+        selectedIconTheme:
+            IconThemeData(color: context.theme.colorScheme.primary),
+        unselectedIconTheme:
+            IconThemeData(color: getBaseColorFromThemeMode(context)),
+        onTap: (value) => statefulNavigationShell.goBranch(value),
+        iconSize: 25,
+        showUnselectedLabels: false,
+        showSelectedLabels: false,
+        type: BottomNavigationBarType.fixed,
+        items: [
+          BottomNavigationBarItem(
+            icon: outlinedIcons[0],
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: outlinedIcons[1],
+            label: 'Search',
+          ),
+          BottomNavigationBarItem(
+            icon: outlinedIcons[2],
+            label: 'Libary',
+          ),
+          BottomNavigationBarItem(
+            icon: outlinedIcons[3],
+            label: 'Plugins',
+          ),
+          BottomNavigationBarItem(
+            icon: outlinedIcons[4],
+            label: 'Settings',
+          )
+        ]);
   }
 }

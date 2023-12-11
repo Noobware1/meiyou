@@ -1,4 +1,7 @@
-import 'package:meiyou/data/models/episode.dart';
+
+
+import 'package:meiyou_extenstions/extenstions.dart';
+import 'package:meiyou_extenstions/models.dart';
 
 class GenerateEpisodesChunks {
   static Map<String, List<Episode>> buildEpisodesResponse(
@@ -30,7 +33,8 @@ class GenerateEpisodesChunks {
     if (chunks.length == 1) {
       return chunks.map((ep) => '${ep.length}');
     } else {
-      return chunks.map((ep) => '${ep.first.number}-${ep.last.number}');
+      return chunks.mapWithIndex((index, ep) =>
+          '${ep.first.episode ?? index + 1}-${ep.last.episode ?? index + 1}');
     }
   }
 }

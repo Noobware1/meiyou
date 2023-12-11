@@ -1,9 +1,5 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:meiyou/config/themes/utils.dart';
-import 'package:meiyou/core/utils/extenstions/context.dart';
-import 'package:meiyou/presentation/widgets/theme/bloc/theme_bloc.dart';
 
 class MeiyouTheme extends Equatable {
   final String name;
@@ -12,8 +8,8 @@ class MeiyouTheme extends Equatable {
 
   late final ThemeData darkTheme;
 
-  ThemeData getFromThemeMode(BuildContext context, ThemeMode mode) =>
-      getThemeFromThemeMode(context, mode, this);
+  // ThemeData getFromThemeMode(BuildContext context, ThemeMode mode) =>
+  //     getThemeFromThemeMode(context, mode, this);
 
   MeiyouTheme convertToAmoled() {
     return MeiyouTheme(

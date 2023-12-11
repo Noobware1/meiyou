@@ -105,3 +105,42 @@ class _ResizeableTextWidgetState extends State<ResizeableTextWidget> {
         ),
       );
 }
+
+class ResizebleTextWidgetNoAnimation extends StatefulWidget {
+  final String text;
+  final int maxLines;
+  final TextStyle style;
+  const ResizebleTextWidgetNoAnimation(
+      {super.key, required this.text,
+      required this.maxLines,
+      this.style = const TextStyle(
+          color: Colors.white, fontSize: 14, fontWeight: FontWeight.w400)});
+
+  @override
+  State<ResizebleTextWidgetNoAnimation> createState() =>
+      __ResizebleTextWidgetNoAnimationState();
+}
+
+class __ResizebleTextWidgetNoAnimationState
+    extends State<ResizebleTextWidgetNoAnimation> {
+  bool showFullText = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => setState(() {
+        if (showFullText) {
+          showFullText = false;
+        } else {
+          showFullText = true;
+        }
+      }),
+      child: Text(
+        widget.text,
+        style: widget.style,
+        maxLines: !showFullText ? widget.maxLines : null,
+        overflow: !showFullText ? TextOverflow.ellipsis : null,
+      ),
+    );
+  }
+}

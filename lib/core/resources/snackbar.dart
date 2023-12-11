@@ -11,7 +11,7 @@ Size calcTextSize(BuildContext context, String text, TextStyle style) {
   return textPainter.size;
 }
 
-void showSnackBAr(BuildContext context, {required String text, double? width}) {
+void showSnackBar(BuildContext context, {required String text, double? width}) {
   final textStyle = TextStyle(
       color: context.theme.colorScheme.onSurface,
       fontWeight: FontWeight.bold,

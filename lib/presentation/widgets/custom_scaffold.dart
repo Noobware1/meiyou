@@ -1,7 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:meiyou/core/constants/default_sized_box.dart';
-import 'package:meiyou/core/utils/extenstions/context.dart';
+import 'package:meiyou/core/constants/default_widgets.dart';
 import 'package:meiyou/presentation/widgets/custom_orientation_builder.dart';
 
 class CustomScaffold extends StatelessWidget {
@@ -320,14 +319,14 @@ class CustomScaffold extends StatelessWidget {
       key: key,
       appBar: appBar,
       body: Row(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.start,
+        // mainAxisSize: MainAxisSize.min,
+        // crossAxisAlignment: CrossAxisAlignment.start,
+        // mainAxisAlignment: MainAxisAlignment.start,
         children: [
           if (sideNavigatonBar != null)
             CustomOrientationBuiler(
                 landscape: sideNavigatonBar!, portrait: defaultSizedBox),
-          Flexible(child: body ?? defaultSizedBox),
+          Expanded(child: body ?? defaultSizedBox),
         ],
       ),
       floatingActionButton: floatingActionButton,
@@ -345,7 +344,7 @@ class CustomScaffold extends StatelessWidget {
           : null,
       bottomSheet: bottomSheet,
       backgroundColor: backgroundColor,
-      resizeToAvoidBottomInset: resizeToAvoidBottomInset,
+      resizeToAvoidBottomInset: false,
       primary: primary,
       drawerDragStartBehavior: drawerDragStartBehavior,
       extendBody: extendBody,

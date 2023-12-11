@@ -1,47 +1,46 @@
+import 'package:flutter/cupertino.dart';
+import 'package:media_kit/media_kit.dart';
+import 'package:media_kit_video/media_kit_video.dart' as vid;
 import 'package:meiyou/core/resources/response_state.dart';
 import 'package:meiyou/core/resources/subtitle_decoders/models/cue.dart';
-import 'package:meiyou/domain/entities/episode.dart';
-import 'package:meiyou/domain/entities/subtitle.dart';
-import 'package:meiyou/domain/entities/video.dart';
-import 'package:meiyou/domain/usecases/provider_use_cases/get_episode_chunks_usecase.dart';
+import 'package:meiyou/domain/entities/extracted_video_data.dart';
+import 'package:meiyou/domain/entities/link_and_source.dart';
+import 'package:meiyou/presentation/blocs/player/subtitle_cubit.dart';
+import 'package:meiyou/presentation/providers/player_providers.dart';
+import 'package:meiyou_extenstions/models.dart';
 
-abstract class VideoPlayerRepository {
-  void initialise();
+abstract interface class VideoPlayerRepository {
+  Subtitle getDefaultSubtitle(List<Subtitle> subtites);
 
-  void dispose();
+  VideoSource getDefaultQuailty(List<VideoSource> sources);
 
-  VideoEntity getVideo(List<VideoEntity> videos);
+  String? getVideoTitle(BuildContext context);
 
-  SubtitleEntity? getSubtitle(List<SubtitleEntity>? subtitles);
+  Future<ResponseState<List<SubtitleCue>>> getSubtitleCues(Subtitle subtitle,
+      {Map<String, String>? headers});
 
-  SeekEpisodeState? seekEpisode({
-    required Map<num, List<EpisodeEntity>> episodeSeasonsMap,
-    required bool forward,
-    required num currentSeason,
-    required String currentEpKey,
-    required int currentEpIndex,
-    required GetEpisodeChunksUseCase getEpisodeChunksUseCase,
+  void loadPlayer({
+    required BuildContext context,
+    required PlayerProviders providers,
+    required Player player,
+    required vid.VideoController videoController,
+    Duration? startPostion,
+    void Function()? onDoneCallback,
   });
 
-  Future<ResponseState<List<SubtitleCue>>> getSubtitleCues(
-      SubtitleEntity subtitle,
-      [Map<String, String>? headers]);
-}
+  Future<void> changeSource(
+      {required Video video,
+      required int selectedSource,
+      required Player player,
+      required SubtitleCubit subtitleCubit,
+      Duration? startPostion});
 
-class SeekEpisodeState {
-  final int currentEpIndex;
-  final num currentSeason;
-  final String currentEpKey;
-  final EpisodeEntity episode;
+  void changeEpisode({
+    required BuildContext context,
+    required Episode episode,
+    required int index,
+  });
 
-  const SeekEpisodeState(
-      {required this.currentEpIndex,
-      required this.currentSeason,
-      required this.episode,
-      required this.currentEpKey});
-
-  @override
-  String toString() {
-    return 'currentSeason: $currentSeason\ncurrentEpKey: $currentEpKey\ncurrentEpIndex: $currentEpIndex';
-  }
+  List<LinkAndSourceEntity> convertExtractedVideoDataList(
+      List<ExtractedVideoDataEntity> data);
 }

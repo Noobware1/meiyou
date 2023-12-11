@@ -1,67 +1,89 @@
-import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:meiyou/config/routes/router_provider.dart';
-// import 'package:meiyou/config/themes/app_themes/app_theme.dart';
-// import 'package:meiyou/config/themes/app_themes/app_theme_data.dart';
-// import 'package:meiyou/config/themes/primary_colors/primary_color.dart';
-import 'package:meiyou/core/resources/paths.dart';
-import 'package:meiyou/core/resources/prefrences.dart';
-import 'package:meiyou/core/usecases_container/cache_repository_usecase_container.dart';
-import 'package:meiyou/core/usecases_container/meta_provider_repository_container.dart';
-import 'package:meiyou/core/usecases_container/provider_list_container.dart';
-import 'package:meiyou/core/usecases_container/video_player_usecase_container.dart';
-import 'package:meiyou/core/utils/extenstions/context.dart';
-import 'package:meiyou/core/utils/extenstions/directory.dart';
-import 'package:meiyou/core/utils/network.dart';
-import 'package:meiyou/data/data_source/providers/meta_providers/anilist.dart';
-import 'package:meiyou/data/data_source/providers/meta_providers/tmdb.dart';
-import 'package:meiyou/data/repositories/cache_repository_impl.dart';
-import 'package:meiyou/data/repositories/meta_provider_repository_impl.dart';
-import 'package:meiyou/data/repositories/providers_repository_impl.dart';
-import 'package:meiyou/data/repositories/video_player_repositoriy_impl.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:media_kit/media_kit.dart';
-import 'package:meiyou/domain/repositories/cache_repository.dart';
-
-import 'presentation/widgets/theme/bloc/theme_bloc.dart' as theme_bloc;
+import 'package:meiyou/config/routes/router_provider.dart';
+import 'package:meiyou/config/themes/meiyou_theme.dart';
+import 'package:meiyou/core/resources/isar.dart';
+import 'package:meiyou/core/resources/paths.dart';
+import 'package:meiyou/core/utils/extenstions/context.dart';
+import 'package:meiyou/data/models/installed_plugin.dart';
+import 'package:meiyou/data/models/plugin_list.dart';
+import 'package:meiyou/data/repositories/plugin_manager_repository_impl.dart';
+import 'package:meiyou/presentation/blocs/get_installed_plugin_cubit.dart';
+import 'package:meiyou/presentation/blocs/load_home_page_cubit.dart';
+import 'package:meiyou/presentation/blocs/plugin_selector_cubit.dart';
+import 'package:isar/isar.dart';
+import 'package:meiyou/presentation/blocs/pluign_manager_usecase_provider_cubit.dart';
+import 'package:meiyou/presentation/providers/plugin_manager_repository_usecase_provider.dart';
+import 'package:meiyou/presentation/widgets/selector_dilaog_box.dart';
+import 'package:window_manager/window_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   MediaKit.ensureInitialized();
+  if (Platform.isWindows) {
+    await windowManager.ensureInitialized();
+  }
 
-  final appdirs = await AppDirectories.getInstance();
-
-  final theme_bloc.MeiyouThemeState? theme = await loadData(
-      savePath: '${appdirs.settingsDirectory.path}/theme.json',
-      transFormer: (json) =>
-          theme_bloc.MeiyouThemeState.fromJson(json as Map<String, dynamic>),
-      onError: print);
-
-  final CacheRespository cacheRespository =
-      CacheRepositoryImpl(appdirs.appCacheDirectory.path);
-
-  appdirs.appCacheDirectory.deleteAllEntries();
+  final appDirs = await AppDirectories.getInstance();
+  isar = Isar.openSync([InstalledPluginSchema, PluginListSchema],
+      directory: appDirs.databaseDirectory.path);
 
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
-  runApp(MultiRepositoryProvider(
-      providers: [
-        RepositoryProvider.value(
-          value: appdirs,
-        ),
-        RepositoryProvider.value(
-          value: cacheRespository,
-        ),
-        // RepositoryProvider.value(value: themeRepo),
-        CacheRepositoryUseCaseContainer(cacheRespository).inject(),
-      ],
-      child: BlocProvider(
-        create: (context) => theme_bloc.ThemeBloc(theme),
-        child: const Meiyou(),
-      )));
+  runApp(
+    MultiRepositoryProvider(
+        providers: [
+          RepositoryProvider.value(value: appDirs),
+          RepositoryProvider<PluginManagerRepositoryUseCases>(
+              create: (context) => PluginManagerRepositoryUseCases(
+                  PluginManagerRepositoryImpl(appDirs.pluginDirectory.path))
+                ..deletePluginListsCache(null))
+        ],
+        child: MultiBlocProvider(
+          providers: [
+            BlocProvider(
+              create: (context) => InstalledPluginCubit(
+                context
+                    .repository<PluginManagerRepositoryUseCases>()
+                    .getInstalledPluginsUseCase
+                    .call(null),
+              ),
+            ),
+            BlocProvider(
+              create: (context) => LoadHomePageCubit(),
+            ),
+            BlocProvider(
+              lazy: false,
+              create: (context) => PluginRepositoryUseCaseProviderCubit(
+                  context
+                      .repository<PluginManagerRepositoryUseCases>()
+                      .loadPluginUseCase,
+                  context.bloc<LoadHomePageCubit>()),
+            ),
+            BlocProvider(
+              lazy: false,
+              create: (context) => PluginSelectorCubit(
+                  context
+                      .repository<PluginManagerRepositoryUseCases>()
+                      .getInstalledPluginsUseCase(null),
+                  context
+                      .repository<PluginManagerRepositoryUseCases>()
+                      .getLastedUsedPluginUseCase
+                      .call(null),
+                  context
+                      .repository<PluginManagerRepositoryUseCases>()
+                      .updateLastUsedPluginUseCase,
+                  context.bloc<PluginRepositoryUseCaseProviderCubit>()),
+            ),
+          ],
+          child: const Meiyou(),
+        )),
+  );
 }
 
 class Meiyou extends StatefulWidget {
@@ -72,55 +94,66 @@ class Meiyou extends StatefulWidget {
 }
 
 class _MeiyouState extends State<Meiyou> {
+  // StreamSubscription<PluginEntity>? _subscription;
+  late final RouterProvider routerProvider;
+
   @override
   void initState() {
-    // context.themeBloc.stream.listen((state) {
-    //   setOverlays(state as theme_bloc.MeiyouThemeState);
-    // });
+    routerProvider = RouterProvider();
     super.initState();
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-  }
+  Widget build(BuildContext context) {
+    final theme = MeiyouTheme.values[2];
 
-  @override
-  void dispose() {
-    // _subscription.cancel();
-    super.dispose();
+    // return MaterialApp(
+    //   debugShowCheckedModeBanner: false,
+    //   theme: theme.lightTheme,
+    //   darkTheme: theme.darkTheme,
+    //   themeMode: ThemeMode.dark,
+    //   home: const TestWidget(),
+    // );
+    return MaterialApp.router(
+      routerConfig: routerProvider.router,
+      theme: theme.lightTheme,
+      darkTheme: theme.darkTheme,
+      themeMode: ThemeMode.dark,
+      debugShowCheckedModeBanner: false,
+      title: 'Meiyou',
+    );
   }
+}
 
-  // This widget is the root of your application.
+class TestWidget extends StatelessWidget {
+  const TestWidget({super.key});
+
   @override
   Widget build(BuildContext context) {
-    // return MultiRepositoryProvider(
-    //   providers: [
-    //     ProvidersRepositoryContainer(ProvidersRepositoryImpl()).inject(),
-    //   ],
-    //   child: BlocProvider.value(
-    //     value: themeBloc,
-    //     child: MaterialApp(
-    //         theme: themeBloc.state.theme.lightTheme,
-    //         darkTheme: themeBloc.state.theme.darkTheme,
-    //     )
-    //   ),
-    // );
-    return MultiRepositoryProvider(
-      providers: [
-        MetaProviderRepositoryContainer(
-                MetaProviderRepositoryImpl(TMDB(), Anilist()))
-            .inject(),
-        ProvidersRepositoryContainer(ProvidersRepositoryImpl()).inject(),
-        VideoPlayerUseCaseContainer(VideoPlayerRepositoryImpl()).inject(),
-      ],
-      child: MaterialApp.router(
-        debugShowCheckedModeBanner: false,
-        routerConfig: RouterProvider().router,
-        themeMode: context.themeBloc.state.themeMode,
-        theme: context.themeBloc.state.theme.lightTheme,
-        darkTheme: context.themeBloc.state.theme.darkTheme,
-      ),
-    );
+    return Scaffold(
+        body: Center(
+      child: ElevatedButton(
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (context) => Dialog(
+                child: ArrowSelectorDialogBox(
+                    defaultValue: 1,
+                    label: 'Select Bitch',
+                    builder: (context, index, data) {
+                      return data.toString();
+                    },
+                    data: const [0, 1, 2, 3, 4, 5, 6, 7],
+                    onApply: (value) {
+                      print(value);
+                    },
+                    onCancel: () {
+                      context.pop();
+                    }),
+              ),
+            );
+          },
+          child: const Text('click me!!')),
+    ));
   }
 }

@@ -9,9 +9,9 @@ class ImageText extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
+      textAlign: TextAlign.left,
       style: textStyle?.copyWith(overflow: TextOverflow.ellipsis) ??
           _defaultTextStyle,
-      textAlign: TextAlign.center,
       maxLines: 2,
     );
   }
