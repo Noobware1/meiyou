@@ -1,4 +1,4 @@
-# Modified version of https://github.com/kodjodevf/mangayomi/blob/main/.github/workflows/release.yml 
+# Modified version of https://github.com/kodjodevf/mangayomi/blob/main/.github/workflows/release.yml
 
 name: Release
 
@@ -12,32 +12,24 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-
   build-and-release-android-apks:
     permissions:
       contents: write
     runs-on: ubuntu-latest
     steps:
-
       - name: checkout branch
         uses: actions/checkout@v3
 
       - name: setup flutter
         uses: subosito/flutter-action@v2.10.0
         with:
-          channel: 'stable'
-  
+          channel: "stable"
+
       - name: Setup Java toolchain (Only Android target)
         uses: actions/setup-java@v3
         with:
           distribution: "zulu"
           java-version: "11"
-
-      - name: Install the CLI tool
-        run: cargo install rinf
-        
-      - name: Generate message files
-        run: rinf message
 
       - name: Setup Android keystore
         run: |
@@ -68,7 +60,6 @@ jobs:
           artifacts: "build/app/outputs/flutter-apk/Meiyou-*.apk"
           allowUpdates: true
 
-
   build-and-release-ios-ipa:
     permissions:
       contents: write
@@ -81,8 +72,8 @@ jobs:
       - name: setup flutter
         uses: subosito/flutter-action@v2.10.0
         with:
-          channel: 'stable'
-      
+          channel: "stable"
+
       - name: flutter pub get
         run: |
           git config --global core.longpaths true
@@ -115,14 +106,13 @@ jobs:
       contents: write
     runs-on: macos-latest
     steps:
-
       - name: checkout branch
         uses: actions/checkout@v3
 
       - name: setup flutter
         uses: subosito/flutter-action@v2.10.0
         with:
-          channel: 'stable'
+          channel: "stable"
 
       - name: flutter pub get
         run: |
@@ -148,13 +138,12 @@ jobs:
         with:
           artifacts: "/Users/runner/work/Meiyou/Meiyou/*.dmg"
           allowUpdates: true
-          
+
   build-and-release-linux-zip:
     permissions:
       contents: write
     runs-on: ubuntu-latest
     steps:
-      
       - name: checkout branch
         uses: actions/checkout@v3
 
@@ -166,20 +155,20 @@ jobs:
       - name: setup flutter
         uses: subosito/flutter-action@v2.10.0
         with:
-          channel: 'stable'
+          channel: "stable"
 
       - name: flutter pub get
         run: flutter pub get
 
       - name: build linux
         run: flutter build linux --verbose
-      - name: Zip 
+      - name: Zip
         uses: thedoctor0/zip-release@master
         with:
           type: "zip"
           filename: Meiyou-${{ github.ref_name }}-linux.zip
           directory: build/linux/x64/release/bundle
-      
+
       - name: upload artifact linux zip
         uses: actions/upload-artifact@v3
         with:
@@ -189,20 +178,19 @@ jobs:
         with:
           artifacts: build/linux/x64/release/bundle/Meiyou-*.zip
           allowUpdates: true
-  
+
   build-and-release-windows-zip:
     permissions:
       contents: write
     runs-on: windows-latest
     steps:
-      
       - name: checkout branch
         uses: actions/checkout@v3
 
       - name: setup flutter
         uses: subosito/flutter-action@v2.10.0
         with:
-          channel: 'stable'
+          channel: "stable"
 
       - name: flutter pub get
         run: |
@@ -214,6 +202,13 @@ jobs:
           flutter build windows --release
           $DestDir = "build\windows\Meiyou-${{ github.ref_name }}-windows"
           $SrcDir = "build\windows\runner\Release"
+
+          # Create source directory if it doesn't exist
+          if (!(Test-Path -Path $SrcDir)) {
+            Write-Host "Source directory $SrcDir does not exist. Creating it."
+            New-Item -Path $SrcDir -ItemType Directory
+          }
+
           New-Item -Path $DestDir -ItemType Directory
           Copy-Item $SrcDir\* -Recurse $DestDir
           Copy-Item -Filter *.dll -Path windows\* -Destination $DestDir -Force
