@@ -1,4 +1,6 @@
-name: Build & Release
+# Modified version of https://github.com/kodjodevf/mangayomi/blob/main/.github/workflows/release.yml 
+
+name: Release
 
 on:
   push:
