@@ -75,8 +75,13 @@ class VideoPlayerTopRowMobile extends StatelessWidget {
                   addVerticalSpace(10),
                   BlocBuilder<ExtractedVideoDataCubit, ExtractedVideoDataState>(
                     builder: (context, state) {
+                      final current =
+                          selected.fromExtractedVideoDataState(state);
+                      selected.getLinkAndSource(context);
                       return Text(
-                        state.data[selected.serverIndex].link.name,
+                        current.source.isBackup
+                            ? '${current.link.name} (Backup)'
+                            : current.link.name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(

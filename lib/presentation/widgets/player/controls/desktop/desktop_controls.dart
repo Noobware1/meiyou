@@ -163,241 +163,211 @@ class DesktopControls extends StatelessWidget {
                   }
                 }
               },
-              child: GestureDetector(
-                onTapUp: (e) {
-                  final now = DateTime.now();
-                  final difference = now.difference(last);
-                  last = now;
-                  if (difference < const Duration(milliseconds: 400)) {
-                    toggleFullscreen(context);
-                  }
-                },
-                onPanUpdate: (e) {
-                  if (e.delta.dy > 0) {
-                    final volume =
-                        playerProvider(context).player.state.volume - 5.0;
-                    playerProvider(context)
-                        .player
-                        .setVolume(volume.clamp(0.0, 100.0));
-                  }
-                  if (e.delta.dy < 0) {
-                    final volume =
-                        playerProvider(context).player.state.volume + 5.0;
-                    playerProvider(context)
-                        .player
-                        .setVolume(volume.clamp(0.0, 100.0));
-                  }
-                },
-                child: MouseRegion(
-                  // onHover: (_) => onHover(),
-                  // onEnter: (_) => onEnter(),
-                  // onExit: (_) => onExit(),
-                  child: Stack(
-                    children: [
-                      BlocBuilder<ShowVideoControlsCubit, bool>(
-                        builder: (context, visible) {
-                          return AnimatedOpacity(
-                            curve: Curves.easeInOut,
-                            opacity: visible ? 1.0 : 0.0,
-                            duration: controlsTransitionDuration,
-                            onEnd: () {
-                              if (!visible) {
-                                context
-                                    .bloc<ShowVideoControlsCubit>()
-                                    .hideControls();
-                              }
-                            },
-                            child: Stack(
-                              clipBehavior: Clip.none,
-                              alignment: Alignment.bottomCenter,
-                              children: [
-                                // Top gradient.
-                                Container(
-                                  decoration: const BoxDecoration(
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topCenter,
-                                      end: Alignment.bottomCenter,
-                                      stops: [
-                                        0.0,
-                                        0.2,
-                                      ],
-                                      colors: [
-                                        Color(0x61000000),
-                                        Color(0x00000000),
-                                      ],
-                                    ),
+              child: MouseRegion(
+                // onHover: (_) => onHover(),
+                // onEnter: (_) => onEnter(),
+                // onExit: (_) => onExit(),
+                child: Stack(
+                  children: [
+                    BlocBuilder<ShowVideoControlsCubit, bool>(
+                      builder: (context, visible) {
+                        return AnimatedOpacity(
+                          curve: Curves.easeInOut,
+                          opacity: visible ? 1.0 : 0.0,
+                          duration: controlsTransitionDuration,
+                          onEnd: () {
+                            if (!visible) {
+                              context
+                                  .bloc<ShowVideoControlsCubit>()
+                                  .hideControls();
+                            }
+                          },
+                          child: Stack(
+                            clipBehavior: Clip.none,
+                            alignment: Alignment.bottomCenter,
+                            children: [
+                              // Top gradient.
+                              Container(
+                                decoration: const BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    stops: [
+                                      0.0,
+                                      0.2,
+                                    ],
+                                    colors: [
+                                      Color(0x61000000),
+                                      Color(0x00000000),
+                                    ],
                                   ),
                                 ),
-                                // Bottom gradient.
-                                Container(
-                                  decoration: const BoxDecoration(
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topCenter,
-                                      end: Alignment.bottomCenter,
-                                      stops: [
-                                        0.5,
-                                        1.0,
-                                      ],
-                                      colors: [
-                                        Color(0x00000000),
-                                        Color(0x61000000),
-                                      ],
-                                    ),
+                              ),
+                              // Bottom gradient.
+                              Container(
+                                decoration: const BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    stops: [
+                                      0.5,
+                                      1.0,
+                                    ],
+                                    colors: [
+                                      Color(0x00000000),
+                                      Color(0x61000000),
+                                    ],
                                   ),
                                 ),
-                                if (visible)
-                                  Padding(
-                                    padding: (
-                                        // Add padding in fullscreen!
-                                        isFullscreen(context)
-                                            ? MediaQuery.of(context).padding
-                                            : EdgeInsets.zero),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.end,
-                                      children: [
-                                        Container(
-                                          height: buttonBarHeight,
-                                          margin: topButtonBarMargin,
-                                          child: const Row(
-                                              mainAxisSize: MainAxisSize.max,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.start,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              children: [] // _theme(context).topButtonBar,
-                                              ),
-                                        ),
-                                        // Only display [primaryButtonBar] if [buffering] is false.
-                                        Expanded(
-                                          child:
-                                              BlocBuilder<BufferingCubit, bool>(
-                                            builder: (context, buffering) {
-                                              return AnimatedOpacity(
-                                                curve: Curves.easeInOut,
-                                                opacity: buffering ? 0.0 : 1.0,
-                                                duration:
-                                                    controlsTransitionDuration,
-                                                child: const Center(
-                                                  child: Row(
-                                                      mainAxisSize:
-                                                          MainAxisSize.min,
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .center,
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .center,
-                                                      children: []),
-                                                ),
-                                              );
-                                            },
-                                          ),
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.only(
-                                              left: 35, right: 35),
-                                          child: BlocBuilder<ProgressBarCubit,
-                                                  ProgressBarState>(
-                                              builder: (context, state) {
-                                            return ProgressBar(
-                                              barHeight: 2.5,
-                                              thumbGlowColor:
-                                                  Colors.transparent,
-                                              timeLabelLocation:
-                                                  TimeLabelLocation.none,
-                                              progress: state.current,
-                                              buffered: state.buffered,
-                                              total: state.total,
-                                              onSeek: (duration) {
-                                                playerProvider(context)
-                                                    .player
-                                                    .seek(duration);
-                                              },
-                                            );
-                                          }),
-                                        ),
-                                        Container(
-                                          height: buttonBarHeight,
-                                          margin: bottomButtonBarMargin,
-                                          child: Row(
+                              ),
+                              if (visible)
+                                Padding(
+                                  padding: (
+                                      // Add padding in fullscreen!
+                                      isFullscreen(context)
+                                          ? MediaQuery.of(context).padding
+                                          : EdgeInsets.zero),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Container(
+                                        height: buttonBarHeight,
+                                        margin: topButtonBarMargin,
+                                        child: const Row(
                                             mainAxisSize: MainAxisSize.max,
                                             mainAxisAlignment:
                                                 MainAxisAlignment.start,
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.center,
-                                            children: [
-                                              const MaterialDesktopPrevEpisodeButton(
-                                                  iconSize: 30),
-                                              const play_button
-                                                  .MaterialDesktopPlayOrPauseButton(
-                                                  iconSize: 30),
-                                              const MaterialDesktopNextEpisodeButton(
-                                                  iconSize: 30),
-                                              const volume_button
-                                                  .MaterialDesktopVolumeButton(),
-                                              const postion_indicator
-                                                  .MaterialDesktopPositionIndicator(),
-                                              const Spacer(),
-                                              if (context
-                                                  .repository<
-                                                      MediaDetails>()
-                                                  .mediaItem is! Movie)
-                                                const EpisodeSelectorButton(),
-                                              const MaterialDesktopOptionsButton(),
-                                              const full_screen_button
-                                                  .MaterialDesktopFullscreenButton(
-                                                  iconSize: 30),
-                                            ],
-                                          ),
+                                            children: [] // _theme(context).topButtonBar,
+                                            ),
+                                      ),
+                                      // Only display [primaryButtonBar] if [buffering] is false.
+                                      Expanded(
+                                        child:
+                                            BlocBuilder<BufferingCubit, bool>(
+                                          builder: (context, buffering) {
+                                            return AnimatedOpacity(
+                                              curve: Curves.easeInOut,
+                                              opacity: buffering ? 0.0 : 1.0,
+                                              duration:
+                                                  controlsTransitionDuration,
+                                              child: const Center(
+                                                child: Row(
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .center,
+                                                    children: []),
+                                              ),
+                                            );
+                                          },
                                         ),
-                                      ],
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                      // Buffering Indicator.
-                      IgnorePointer(
-                        child: Padding(
-                          padding: (
-                              // Add padding in fullscreen!
-                              isFullscreen(context)
-                                  ? MediaQuery.of(context).padding
-                                  : EdgeInsets.zero),
-                          child: Column(
-                            children: [
-                              Container(
-                                height: buttonBarHeight,
-                                margin: topButtonBarMargin,
-                              ),
-                              Expanded(
-                                child: Center(
-                                  child: BlocBuilder<BufferingCubit, bool>(
-                                    builder: (context, buffering) {
-                                      return buffering
-                                          ? const CircularProgressIndicator()
-                                          : defaultSizedBox;
-                                    },
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                            left: 35, right: 35),
+                                        child: BlocBuilder<ProgressBarCubit,
+                                                ProgressBarState>(
+                                            builder: (context, state) {
+                                          return ProgressBar(
+                                            barHeight: 2.5,
+                                            thumbGlowColor: Colors.transparent,
+                                            timeLabelLocation:
+                                                TimeLabelLocation.none,
+                                            progress: state.current,
+                                            buffered: state.buffered,
+                                            total: state.total,
+                                            onSeek: (duration) {
+                                              playerProvider(context)
+                                                  .player
+                                                  .seek(duration);
+                                            },
+                                          );
+                                        }),
+                                      ),
+                                      Container(
+                                        height: buttonBarHeight,
+                                        margin: bottomButtonBarMargin,
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.max,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            const MaterialDesktopPrevEpisodeButton(
+                                                iconSize: 30),
+                                            const play_button
+                                                .MaterialDesktopPlayOrPauseButton(
+                                                iconSize: 30),
+                                            const MaterialDesktopNextEpisodeButton(
+                                                iconSize: 30),
+                                            const volume_button
+                                                .MaterialDesktopVolumeButton(),
+                                            const postion_indicator
+                                                .MaterialDesktopPositionIndicator(),
+                                            const Spacer(),
+                                            if (context
+                                                .repository<MediaDetails>()
+                                                .mediaItem is! Movie)
+                                              const EpisodeSelectorButton(),
+                                            const MaterialDesktopOptionsButton(),
+                                            const full_screen_button
+                                                .MaterialDesktopFullscreenButton(
+                                                iconSize: 30),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                              ),
-                              Container(
-                                height: buttonBarHeight,
-                                margin: bottomButtonBarMargin,
-                              ),
                             ],
                           ),
+                        );
+                      },
+                    ),
+                    // Buffering Indicator.
+                    IgnorePointer(
+                      child: Padding(
+                        padding: (
+                            // Add padding in fullscreen!
+                            isFullscreen(context)
+                                ? MediaQuery.of(context).padding
+                                : EdgeInsets.zero),
+                        child: Column(
+                          children: [
+                            Container(
+                              height: buttonBarHeight,
+                              margin: topButtonBarMargin,
+                            ),
+                            Expanded(
+                              child: Center(
+                                child: BlocBuilder<BufferingCubit, bool>(
+                                  builder: (context, buffering) {
+                                    return buffering
+                                        ? const CircularProgressIndicator()
+                                        : defaultSizedBox;
+                                  },
+                                ),
+                              ),
+                            ),
+                            Container(
+                              height: buttonBarHeight,
+                              margin: bottomButtonBarMargin,
+                            ),
+                          ],
                         ),
                       ),
-                      _buildHeader(context),
-                    ],
-                  ),
+                    ),
+                    _buildHeader(context),
+                  ],
                 ),
               ),
             ),

@@ -1,22 +1,23 @@
-import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:meiyou/core/constants/play_back_speeds.dart';
-import 'package:meiyou/core/resources/snackbar.dart';
+import 'package:meiyou/core/resources/platform_check.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
-import 'package:meiyou/domain/usecases/video_player_repository_usecases/change_source.dart';
 import 'package:meiyou/presentation/blocs/player/resize_cubit.dart';
 import 'package:meiyou/presentation/blocs/player/selected_video_data.dart';
 import 'package:meiyou/presentation/blocs/player/server_and_video_cubit.dart';
+import 'package:meiyou/presentation/blocs/player/subtitle_cubit.dart';
 import 'package:meiyou/presentation/blocs/player/video_track_cubit.dart';
 import 'package:meiyou/presentation/providers/player_provider.dart';
 import 'package:meiyou/presentation/providers/video_player_repository_usecases.dart';
 import 'package:meiyou/presentation/widgets/add_space.dart';
+import 'package:meiyou/presentation/widgets/apply_cancel.dart';
 import 'package:meiyou/presentation/widgets/selector_dilaog_box.dart';
 import 'package:meiyou_extenstions/meiyou_extenstions.dart';
+import 'package:meiyou/core/utils/extenstions/tracks.dart';
 
 class VideoPlayerBottomRowButtonsMobile extends StatelessWidget {
   const VideoPlayerBottomRowButtonsMobile({super.key});
@@ -148,10 +149,137 @@ class VideoPlayerBottomRowButtonsMobile extends StatelessWidget {
             text: 'Qualites',
             icon: Icons.hd_outlined),
         _IconButton(
-            onTap: () {},
+            onTap: () {
+              showDialog(
+                  context: context,
+                  builder: (c) {
+                    return Dialog(
+                        child: RepositoryProvider.value(
+                      value: playerProvider(context),
+                      child: MultiBlocProvider(
+                        providers: [
+                          BlocProvider.value(
+                            value: context.bloc<SubtitleCubit>(),
+                          ),
+                          BlocProvider.value(
+                            value: context.bloc<ExtractedVideoDataCubit>(),
+                          ),
+                          BlocProvider.value(
+                            value: context.bloc<SelectedVideoDataCubit>(),
+                          ),
+                        ],
+                        child: const AudioAndSubtitlesWidget(),
+                      ),
+                    ));
+                  });
+            },
             text: 'Audio & Subtitles',
             icon: Icons.subtitles_outlined),
       ],
+    );
+  }
+}
+
+class AudioAndSubtitlesWidget extends StatefulWidget {
+  const AudioAndSubtitlesWidget({super.key});
+
+  @override
+  State<AudioAndSubtitlesWidget> createState() =>
+      _AudioAndSubtitlesWidgetState();
+}
+
+class _AudioAndSubtitlesWidgetState extends State<AudioAndSubtitlesWidget> {
+  late AudioTrack audioTrack = playerProvider(context).player.state.track.audio;
+  late Subtitle subtitle = context.bloc<SubtitleCubit>().state.current;
+
+  @override
+  Widget build(BuildContext context) {
+    return ConstrainedBox(
+      constraints: isMobile
+          ? const BoxConstraints(maxWidth: 600, maxHeight: 300, minHeight: 20)
+          : const BoxConstraints(maxWidth: 700, maxHeight: 350, minHeight: 20),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: ArrowSelectorListView(
+                  label: 'Audio',
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  defaultValue: audioTrack,
+                  builder: (context, index, audioTrack) {
+                    return audioTrack == AudioTrack.auto()
+                        ? 'Auto'
+                        : '#${audioTrack.id}';
+                  },
+                  data: playerProvider(context)
+                      .player
+                      .state
+                      .tracks
+                      .getFixedAudioTracks,
+                  onSelected: (track) {
+                    setState(() {
+                      audioTrack = track;
+                    });
+                  },
+                ),
+              ),
+              const VerticalDivider(
+                thickness: 1,
+              ),
+              ArrowSelectorListView(
+                label: 'Subtitles',
+                crossAxisAlignment: CrossAxisAlignment.start,
+                defaultValue: subtitle,
+                builder: (context, index, subtitle) {
+                  return 'No Subtitle';
+                },
+                data: context.bloc<SubtitleCubit>().state.subtitles,
+                onSelected: (track) {
+                  setState(() {
+                    subtitle = track;
+                  });
+                },
+              ),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Align(
+              alignment: Alignment.bottomRight,
+              child: Container(
+                width: 200,
+                height: 50,
+                alignment: Alignment.bottomRight,
+                child: Padding(
+                    padding: const EdgeInsets.only(right: 10),
+                    child: AppyCancel(
+                      onApply: () {
+                        if (audioTrack !=
+                            playerProvider(context).player.state.track.audio) {
+                          playerProvider(context)
+                              .player
+                              .setAudioTrack(audioTrack);
+                        }
+
+                        if (subtitle !=
+                            context.bloc<SubtitleCubit>().state.current) {
+                          context
+                              .bloc<SubtitleCubit>()
+                              .changeSubtitle(subtitle);
+                        }
+                        context.pop();
+                      },
+                      onCancel: () {
+                        context.pop();
+                      },
+                    )),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

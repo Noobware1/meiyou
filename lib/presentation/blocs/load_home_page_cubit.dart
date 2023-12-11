@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meiyou/core/resources/expections.dart';
+import 'package:meiyou/core/resources/response_state.dart';
 import 'package:meiyou/domain/usecases/plugin_repository_usecases/load_full_home_page_usecase.dart';
 import 'package:meiyou_extenstions/models.dart';
-
 
 class LoadHomePageCubit extends Cubit<LoadHomePageState> {
   LoadHomePageCubit() : super(const LoadHomePageLoading());
@@ -13,11 +13,11 @@ class LoadHomePageCubit extends Cubit<LoadHomePageState> {
     emit(const LoadHomePageLoading());
     final res = await loadFullHomePageUseCase.call(null);
 
-    // if (res is ResponseSuccess) {
-    //   emit(LoadHomePageSucess(res.data!));
-    // } else {
-    //   emit(LoadHomePageFailed(res.error!));
-    // }
+    if (res is ResponseSuccess) {
+      emit(LoadHomePageSucess(res.data!));
+    } else {
+      emit(LoadHomePageFailed(res.error!));
+    }
   }
 
   void resetState() {

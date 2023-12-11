@@ -10,6 +10,7 @@ import 'package:meiyou/core/utils/extenstions/context.dart';
 import 'package:meiyou/domain/usecases/video_player_repository_usecases/load_player_usecase.dart';
 import 'package:meiyou/presentation/blocs/player/resize_cubit.dart';
 import 'package:meiyou/presentation/blocs/player/server_and_video_cubit.dart';
+import 'package:meiyou/presentation/blocs/player/show_controls_cubit.dart';
 import 'package:meiyou/presentation/providers/player_providers.dart';
 import 'package:meiyou/presentation/providers/video_player_repository_usecases.dart';
 import 'package:meiyou/presentation/widgets/player/controls/desktop/desktop_controls.dart';
@@ -43,15 +44,16 @@ class _PlayerPageState extends State<PlayerPage> {
 
     providers = PlayerProviders.fromContext(context, player, videoController);
 
-    context
-        .repository<VideoPlayerRepositoryUseCases>()
-        .loadPlayerUseCase(LoadPlayerUseCaseParams(
-            context: context,
-            player: player,
-            videoController: videoController,
-            onDoneCallback: () {
-              player.play();
-            }));
+    context.repository<VideoPlayerRepositoryUseCases>().loadPlayerUseCase(
+          LoadPlayerUseCaseParams(
+              context: context,
+              player: player,
+              videoController: videoController,
+              providers: providers,
+              onDoneCallback: () {
+                player.play();
+              }),
+        );
 
     super.initState();
   }
@@ -75,30 +77,45 @@ class _PlayerPageState extends State<PlayerPage> {
 
     return providers.create(
       Scaffold(
+        backgroundColor: Colors.black,
         body: BlocListener<ExtractedVideoDataCubit, ExtractedVideoDataState>(
           listener: (context, state) {
             if (state.error != null) {
               showSnackBar(context, text: state.error!.message);
             }
           },
-          child: Stack(children: [
-            SizedBox.expand(
-              child: _BuildWithResizeMode(
-                child: SizedBox(
-                  height: videoController.rect.value?.height ?? height,
-                  width: videoController.rect.value?.width ?? width,
-                  child: Video(
-                      controller: videoController,
-                      controls: (state) {
-                        return defaultSizedBox;
-                      },
-                      subtitleViewConfiguration:
-                          const SubtitleViewConfiguration(visible: false)),
+          child: GestureDetector(
+            onTap: () {
+              providers.showVideoControlsCubit.toggleShowControls();
+            },
+            child: Stack(children: [
+              SizedBox.expand(
+                child: _BuildWithResizeMode(
+                  child: SizedBox(
+                    height: videoController.rect.value?.height ?? height,
+                    width: videoController.rect.value?.width ?? width,
+                    child: Video(
+                        controller: videoController,
+                        controls: (state) {
+                          return defaultSizedBox;
+                        },
+                        subtitleViewConfiguration:
+                            const SubtitleViewConfiguration(visible: false)),
+                  ),
                 ),
               ),
-            ),
-            const Positioned.fill(child: MobileControls())
-          ]),
+              Positioned.fill(child: BlocBuilder<ShowVideoControlsCubit, bool>(
+                builder: (context, showControls) {
+                  return AnimatedOpacity(
+                      duration: const Duration(milliseconds: 300),
+                      opacity: showControls ? 1.0 : 0.0,
+                      child: isMobile
+                          ? const MobileControls()
+                          : const DesktopControls());
+                },
+              ))
+            ]),
+          ),
         ),
       ),
     );
@@ -117,7 +134,6 @@ class _PlayerPageState extends State<PlayerPage> {
 class _BuildWithResizeMode extends StatelessWidget {
   final Widget child;
   const _BuildWithResizeMode({
-    super.key,
     required this.child,
   });
 

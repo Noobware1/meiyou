@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:meiyou/core/utils/extenstions/context.dart';
-import 'package:meiyou/presentation/blocs/player/show_episode_selector_widget_cubit.dart';
 import 'package:meiyou/presentation/pages/info_page.dart';
 import 'package:meiyou/presentation/providers/player_dependencies.dart';
 import 'package:meiyou/presentation/providers/player_providers.dart';

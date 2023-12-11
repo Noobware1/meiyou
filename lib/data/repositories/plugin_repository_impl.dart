@@ -1,8 +1,6 @@
 import 'package:meiyou/core/resources/response_state.dart';
 import 'package:meiyou/core/utils/try_catch.dart';
-import 'package:meiyou/domain/repositories/plugin_manager_repository.dart';
 import 'package:meiyou/domain/repositories/plugin_repository.dart';
-import 'package:meiyou/presentation/providers/lol.dart';
 import 'package:meiyou_extenstions/models.dart';
 
 class PluginRepositoryImpl implements PluginRepository {
@@ -60,23 +58,20 @@ class PluginRepositoryImpl implements PluginRepository {
 
   @override
   Stream<(ExtractorLink, Media)> loadLinkAndMediaStream(String url) async* {
-    for (var i in videos) {
-      yield ((i.link), i.video);
+  
+    final responseLinks = await loadLinks(url);
+
+    if (responseLinks is ResponseFailed) {
+      throw responseLinks.error!;
     }
-
-    // final responseLinks = await loadLinks(url);
-
-    // if (responseLinks is ResponseFailed) {
-    //   throw responseLinks.error!;
-    // }
-    // for (var e in responseLinks.data!) {
-    //   final media = await ResponseState.tryWithAsync(() => api.loadMedia(e));
-    //   if (media is ResponseFailed) {
-    //     yield* Stream.error(media.error!);
-    //   } else if (media is ResponseSuccess && media.data != null) {
-    //     yield (e, media.data!);
-    //   }
-    // }
+    for (var e in responseLinks.data!) {
+      final media = await ResponseState.tryWithAsync(() => api.loadMedia(e));
+      if (media is ResponseFailed) {
+        yield* Stream.error(media.error!);
+      } else if (media is ResponseSuccess && media.data != null) {
+        yield (e, media.data!);
+      }
+    }
   }
 
   @override

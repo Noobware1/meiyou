@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:meiyou/core/constants/height_and_width.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
+import 'package:meiyou/presentation/widgets/add_space.dart';
 import 'package:meiyou/presentation/widgets/image_view/image_button_wrapper.dart';
 import 'package:meiyou_extenstions/models.dart';
 import 'image_holder.dart';
@@ -11,8 +12,7 @@ class ImageHolderListViewBuilder extends StatefulWidget {
   final void Function(SearchResponse selected)? onSelected;
   final HomePage homePage;
   final EdgeInsets padding;
-  final ImageHolder Function(BuildContext context, SearchResponse data)
-      builder;
+  final ImageHolder Function(BuildContext context, SearchResponse data) builder;
   final String? label;
   final TextStyle? labelTextStyle;
   final EdgeInsets? labelPadding;
@@ -116,7 +116,18 @@ class _ImageHolderListViewBuilderState
                     const EdgeInsets.fromLTRB(0, 0, 0, 0),
                 child: SizedBox(
                   height: widget.labelBoxHeight ?? 40,
-                  child: Text(widget.label!, style: widget.labelTextStyle),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 5,
+                        decoration: BoxDecoration(
+                            color: context.theme.colorScheme.primary,
+                            borderRadius: BorderRadius.circular(15)),
+                      ),
+                      addHorizontalSpace(10),
+                      Text(widget.label!, style: widget.labelTextStyle),
+                    ],
+                  ),
                 ),
               ),
             ),

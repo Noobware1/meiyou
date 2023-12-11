@@ -119,7 +119,7 @@ class EpisodeHolder extends StatelessWidget {
             maxLines: 3,
             style: TextStyle(
               fontSize: isSmall ? 12.8 : 14,
-              color: Color(0xFF5F6267),
+              color: const Color(0xFF5F6267),
               fontWeight: FontWeight.w500,
             ),
           ),

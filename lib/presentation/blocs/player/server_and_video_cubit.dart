@@ -51,6 +51,7 @@ class ExtractedVideoDataState extends Equatable {
 
   const ExtractedVideoDataState({this.data = const [], this.error});
 
+
   @override
   List<Object?> get props => [data, error];
 }

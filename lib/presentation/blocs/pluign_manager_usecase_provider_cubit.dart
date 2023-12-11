@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:meiyou/core/resources/expections.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
-import 'package:meiyou/data/repositories/plugin_manager_repository_impl.dart';
 import 'package:meiyou/data/repositories/plugin_repository_impl.dart';
 import 'package:meiyou/domain/entities/installed_plugin.dart';
 import 'package:meiyou/domain/usecases/plugin_manager_repository_usecases/load_plugin_usecase.dart';

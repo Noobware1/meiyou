@@ -1,5 +1,5 @@
 
-import 'package:meiyou/data/models/media/video/video_quailty.dart';
+import 'package:meiyou_extenstions/meiyou_extenstions.dart';
 
 class M3u8File {
   final String url;

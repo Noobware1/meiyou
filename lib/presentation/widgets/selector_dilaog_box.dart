@@ -179,19 +179,20 @@ class _ArrowSelectorDialogBoxState<T> extends State<ArrowSelectorDialogBox<T>> {
 class ArrowSelectorListView<T> extends StatefulWidget {
   final T defaultValue;
 
-  final Widget Function(BuildContext context, int index, T element) builder;
+  final String Function(BuildContext context, int index, T element) builder;
   final List<T> data;
-  final bool Function(T defaultValue, T value)? isSelected;
 
   final String? label;
+  final CrossAxisAlignment? crossAxisAlignment;
+
   final void Function(T value) onSelected;
   const ArrowSelectorListView({
     super.key,
     required this.defaultValue,
     this.label,
     required this.builder,
-    this.isSelected,
     required this.data,
+    this.crossAxisAlignment,
     required this.onSelected,
   });
 
@@ -213,30 +214,31 @@ class _ArrowSelectorListViewState<T> extends State<ArrowSelectorListView<T>> {
 
   @override
   Widget build(BuildContext context) {
-    // print(player(context).state.track.video);
-
-    return Container(
+    return ConstrainedBox(
       constraints: isMobile
-          ? const BoxConstraints(maxWidth: 300, maxHeight: 300, minHeight: 20)
-          : const BoxConstraints(maxWidth: 350, maxHeight: 350, minHeight: 20),
+          ? const BoxConstraints(maxWidth: 300, maxHeight: 260, minHeight: 20)
+          : const BoxConstraints(maxWidth: 350, maxHeight: 290, minHeight: 20),
       child: Column(
-        // crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: widget.crossAxisAlignment ?? CrossAxisAlignment.end,
         children: [
           if (widget.label != null) ...[
             Padding(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.fromLTRB(10, 10, 10, 5),
               child: Text(
                 widget.label!,
                 style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 18,
+                    fontSize: 19.5,
                     fontWeight: FontWeight.w600),
               ),
             ),
-            const SizedBox(
-              height: 10,
+            const Divider(
+              thickness: 1,
             ),
           ],
+          const SizedBox(
+            height: 10,
+          ),
           Expanded(
             child: ScrollbarTheme(
               data: const ScrollbarThemeData(
@@ -249,19 +251,23 @@ class _ArrowSelectorListViewState<T> extends State<ArrowSelectorListView<T>> {
                     controller: _controller,
                     shrinkWrap: true,
                     children: List.generate(widget.data.length, (index) {
-                      final bool isSelected = widget.isSelected
-                              ?.call(selected, widget.data[index]) ??
-                          selected == widget.data[index];
-
+                      final bool isSelected = selected == widget.data[index];
                       return ArrowButton(
                           isSelected: isSelected,
-                          child: widget.builder(
-                              context, index, widget.data[index]),
+                          child: Text(
+                            widget.builder(context, index, widget.data[index]),
+
+                            // textAlign: TextAlign.start,
+                            style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: isSelected ? null : Colors.grey,
+                                fontSize: 16),
+                          ),
                           onTap: () {
                             setState(() {
                               selected = widget.data[index];
-                              widget.onSelected(selected);
                             });
+                            widget.onSelected(selected);
                           });
                     })),
               ),

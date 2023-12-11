@@ -1,4 +1,3 @@
-import 'dart:ui';
 
 import 'package:flutter/material.dart'
     hide
@@ -15,16 +14,17 @@ import 'package:media_kit/media_kit.dart';
 import 'package:meiyou/core/constants/animation_duration.dart';
 import 'package:meiyou/core/constants/play_back_speeds.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
+import 'package:meiyou/core/utils/extenstions/tracks.dart';
 import 'package:meiyou/presentation/blocs/player/playback_speed.dart';
 import 'package:meiyou/presentation/blocs/player/selected_video_data.dart';
 import 'package:meiyou/presentation/blocs/player/server_and_video_cubit.dart';
+import 'package:meiyou/presentation/blocs/player/subtitle_cubit.dart';
 import 'package:meiyou/presentation/blocs/player/video_track_cubit.dart';
 import 'package:meiyou/presentation/providers/player_provider.dart';
 import 'package:meiyou/presentation/providers/video_player_repository_usecases.dart';
 import 'package:meiyou/presentation/widgets/add_space.dart';
 import 'package:meiyou/presentation/widgets/player/controls/desktop/custom_popup_button.dart';
 import 'package:meiyou_extenstions/extenstions.dart';
-import 'package:meiyou_extenstions/models.dart';
 
 // BUTTON: OPTIONS BUTTON
 
@@ -40,11 +40,11 @@ class MaterialDesktopOptionsButton extends StatelessWidget {
   final Color? iconColor;
 
   const MaterialDesktopOptionsButton({
-    Key? key,
+    super.key,
     this.icon,
     this.iconSize,
     this.iconColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -72,6 +72,7 @@ class MaterialDesktopOptionsButton extends StatelessWidget {
                   BlocProvider.value(value: context.bloc<VideoTrackCubit>()),
                   BlocProvider.value(
                       value: context.bloc<ExtractedVideoDataCubit>()),
+                  BlocProvider.value(value: context.bloc<SubtitleCubit>()),
                   BlocProvider.value(
                       value: context.bloc<SelectedVideoDataCubit>())
                 ], child: const OptionsMenu()),
@@ -121,18 +122,13 @@ class _OptionsMenuState extends State<OptionsMenu> {
       );
     }),
     StreamBuilder<List<VideoTrack>>(
-        initialData: playerProvider(context)
-            .player
-            .state
-            .tracks
-            .video
-            .where((e) => e.id != 'no')
-            .toList(),
+        initialData:
+            playerProvider(context).player.state.tracks.getFixedVideoTracks,
         stream: playerProvider(context)
             .player
             .stream
             .tracks
-            .asyncMap((data) => data.video.where((e) => e.id != 'no').toList()),
+            .asyncMap((e) => e.getFixedVideoTracks),
         builder: (context, snapshot) {
           return BlocBuilder<VideoTrackCubit, VideoTrack>(
               builder: (context, track) {
@@ -171,6 +167,58 @@ class _OptionsMenuState extends State<OptionsMenu> {
             setChangeFalse();
           });
     }),
+    BlocBuilder<SubtitleCubit, SubtitleState>(builder: (context, state) {
+      return _PopUpItemListBody(
+          defaultValue: state.current,
+          label: 'Subtitles',
+          builder: (context, index, subtitle) {
+            return Text(subtitle.langauge ?? 'Auto');
+          },
+          data: state.subtitles,
+          onSelected: (subtitle) {
+            context.bloc<SubtitleCubit>().changeSubtitle(subtitle);
+            setChangeFalse();
+          },
+          onExit: () {
+            setChangeFalse();
+          });
+    }),
+    StreamBuilder<List<AudioTrack>>(
+        initialData:
+            playerProvider(context).player.state.tracks.getFixedAudioTracks,
+        stream: playerProvider(context)
+            .player
+            .stream
+            .tracks
+            .asyncMap((e) => e.getFixedAudioTracks),
+        builder: (context, listSnapshot) {
+          return StreamBuilder<AudioTrack>(
+              initialData: playerProvider(context).player.state.track.audio ==
+                      AudioTrack.no()
+                  ? AudioTrack.auto()
+                  : playerProvider(context).player.state.track.audio,
+              stream: playerProvider(context).player.stream.track.asyncMap(
+                  (e) =>
+                      e.audio == AudioTrack.no() ? AudioTrack.auto() : e.audio),
+              builder: (context, snapshot) {
+                return _PopUpItemListBody(
+                    defaultValue: snapshot.data!,
+                    label: 'Subtitles',
+                    builder: (context, index, audio) {
+                      return Text(audio.id == 'auto'
+                          ? audio.id.toUpperCaseFirst()
+                          : '#${audio.id}');
+                    },
+                    data: listSnapshot.data ?? [AudioTrack.no()],
+                    onSelected: (audio) {
+                      playerProvider(context).player.setAudioTrack(audio);
+                      setChangeFalse();
+                    },
+                    onExit: () {
+                      setChangeFalse();
+                    });
+              });
+        }),
   ];
 
   void setChangeTrue() {
@@ -219,6 +267,28 @@ class _OptionsMenuState extends State<OptionsMenu> {
               icon: Icons.speed_outlined,
               text: speed == 1.0 ? 'Normal' : '${speed}x');
         }),
+        addVerticalSpace(10),
+        BlocBuilder<SubtitleCubit, SubtitleState>(builder: (context, state) {
+          return _builditem(
+              value: 3,
+              label: 'Subtitle',
+              icon: Icons.closed_caption_outlined,
+              text: state.current.langauge ?? 'Auto');
+        }),
+        addVerticalSpace(10),
+        StreamBuilder<AudioTrack>(
+            stream: playerProvider(context).player.stream.track.asyncMap((e) =>
+                e.audio == AudioTrack.no() ? AudioTrack.auto() : e.audio),
+            initialData: playerProvider(context).player.state.track.audio,
+            builder: (context, snapshot) {
+              return _builditem(
+                  value: 4,
+                  label: 'Audio',
+                  icon: Icons.audiotrack_rounded,
+                  text: snapshot.data == AudioTrack.auto()
+                      ? 'Auto'
+                      : '#${snapshot.data!.id}');
+            }),
         addVerticalSpace(10),
       ],
     );
@@ -382,7 +452,6 @@ class _ArrowButton extends StatelessWidget {
 
   final Widget child;
   const _ArrowButton({
-    super.key,
     required this.isSelected,
     required this.child,
     required this.onTap,

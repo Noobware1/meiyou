@@ -14,11 +14,11 @@ class MaterialDesktopPrevEpisodeButton extends StatelessWidget {
   final Color? iconColor;
 
   const MaterialDesktopPrevEpisodeButton({
-    Key? key,
+    super.key,
     this.icon,
     this.iconSize,
     this.iconColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

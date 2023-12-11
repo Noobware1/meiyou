@@ -23,7 +23,7 @@ void navigateToInfo(SearchResponse searchResponse, BuildContext context) {
 }
 
 class _ForMobile extends StatelessWidget {
-  const _ForMobile({super.key});
+  const _ForMobile();
 
   @override
   Widget build(BuildContext context) {
@@ -148,7 +148,7 @@ class _ForMobile extends StatelessWidget {
 }
 
 class _ForDesktop extends StatelessWidget {
-  const _ForDesktop({super.key});
+  const _ForDesktop();
 
   @override
   Widget build(BuildContext context) {

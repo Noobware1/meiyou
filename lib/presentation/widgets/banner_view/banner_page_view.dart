@@ -1,3 +1,5 @@
+// ignore_for_file: unused_element
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meiyou/config/routes/routes.dart';
@@ -201,14 +203,12 @@ class _ArrowButton extends StatefulWidget {
   final VoidCallback onTap;
   final double? width;
   final double? height;
-  // final ShapeBorder? shape;
   const _ArrowButton(
       {super.key,
-      // this.shape,
       required this.icon,
       required this.onTap,
-      this.height,
-      this.width});
+      this.width,
+      this.height});
 
   @override
   State<_ArrowButton> createState() => _ArrowButtonState();

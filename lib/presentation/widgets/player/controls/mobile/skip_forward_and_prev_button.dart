@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class _BuildButton extends StatelessWidget {
   final VoidCallback onTap;
   final IconData iconData;
-  const _BuildButton({super.key, required this.onTap, required this.iconData});
+  const _BuildButton({required this.onTap, required this.iconData});
 
   @override
   Widget build(BuildContext context) {
@@ -11,7 +11,7 @@ class _BuildButton extends StatelessWidget {
       height: 35.0,
       width: 35.0,
       child: IconButton(
-        padding: EdgeInsets.all(0.0),
+        padding: const EdgeInsets.all(0.0),
 
         style:
             const ButtonStyle(shape: MaterialStatePropertyAll(CircleBorder())),

@@ -639,7 +639,7 @@ packages:
     description:
       path: "."
       ref: master
-      resolved-ref: "27ac838482247c958602427ddf16c0cad6377cee"
+      resolved-ref: "51e17953775ae7eb46c2ffc156173d998377f1fd"
       url: "https://github.com/Noobware1/meiyou_extenstions.git"
     source: git
     version: "1.0.0"

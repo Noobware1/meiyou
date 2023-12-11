@@ -10,5 +10,5 @@ class PopMenuState {
 }
 
 class PopMenuCubit extends Cubit<PopMenuState> {
-  PopMenuCubit(PopMenuState state) : super(state);
+  PopMenuCubit(super.state);
 }

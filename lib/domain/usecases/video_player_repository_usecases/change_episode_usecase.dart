@@ -6,7 +6,10 @@ import 'package:meiyou_extenstions/models.dart';
 class ChangeEpisodeUseCaseParams {
   final BuildContext context;
   final Episode episode;
+
   final int index;
+
+  
   ChangeEpisodeUseCaseParams({
     required this.context,
     required this.episode,

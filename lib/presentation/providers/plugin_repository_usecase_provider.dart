@@ -1,4 +1,3 @@
-import 'package:meiyou/domain/repositories/plugin_manager_repository.dart';
 import 'package:meiyou/domain/repositories/plugin_repository.dart';
 import 'package:meiyou/domain/usecases/plugin_repository_usecases/load_full_home_page_usecase.dart';
 import 'package:meiyou/domain/usecases/plugin_repository_usecases/load_home_page_usecase.dart';

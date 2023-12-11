@@ -1,8 +1,6 @@
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,7 +15,6 @@ import 'package:meiyou/presentation/blocs/async_cubit/async_cubit.dart';
 import 'package:meiyou/presentation/blocs/plugin_page_cubit.dart';
 import 'package:meiyou/presentation/emoticons_widget.dart';
 import 'package:meiyou/presentation/providers/plugin_manager_repository_usecase_provider.dart';
-import 'package:meiyou/presentation/providers/plugin_repository_usecase_provider.dart';
 import 'package:meiyou/presentation/widgets/add_space.dart';
 import 'package:meiyou/presentation/widgets/error_widget.dart';
 import 'package:meiyou_extenstions/meiyou_extenstions.dart';
@@ -165,7 +162,6 @@ class _InstalledPluginListView extends StatelessWidget {
   final List<PluginListEntity> allPlugins;
 
   const _InstalledPluginListView({
-    super.key,
     required this.snapshot,
     required this.allPlugins,
   });
@@ -315,7 +311,6 @@ class _BuildPluginList extends StatelessWidget {
   final PluginListEntity pluginList;
 
   const _BuildPluginList({
-    super.key,
     required this.installed,
     required this.pluginList,
   });

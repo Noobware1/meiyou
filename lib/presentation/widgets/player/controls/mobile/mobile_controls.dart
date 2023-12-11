@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:meiyou/core/constants/default_widgets.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
+import 'package:meiyou/presentation/blocs/player/buffering_cubit.dart';
 import 'package:meiyou/presentation/widgets/add_space.dart';
 import 'package:meiyou/presentation/widgets/player/controls/mobile/bottom_row_buttons.dart';
 import 'package:meiyou/presentation/widgets/player/controls/mobile/center_row_buttons.dart';
@@ -14,6 +17,10 @@ class MobileControls extends StatelessWidget {
     return Stack(
       // alignment: Alignment.center,
       children: [
+        Positioned.fill(
+            child: Container(
+          color: Colors.black.withOpacity(0.7),
+        )),
         const Center(
           child: VideoPlayerMainRowButtonsMobile(),
         ),
@@ -36,6 +43,16 @@ class MobileControls extends StatelessWidget {
             ),
           ),
         ),
+        Center(child: BlocBuilder<BufferingCubit, bool>(
+          builder: (context, isBuffering) {
+            if (!isBuffering) return defaultSizedBox;
+            return const SizedBox(
+              height: 35,
+              width: 35,
+              child: CircularProgressIndicator(),
+            );
+          },
+        )),
         Positioned(
             top: 0,
             left: 0,

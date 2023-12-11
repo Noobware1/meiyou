@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -20,7 +19,6 @@ import 'package:meiyou/presentation/blocs/plugin_selector_cubit.dart';
 import 'package:isar/isar.dart';
 import 'package:meiyou/presentation/blocs/pluign_manager_usecase_provider_cubit.dart';
 import 'package:meiyou/presentation/providers/plugin_manager_repository_usecase_provider.dart';
-import 'package:meiyou/presentation/widgets/player/controls/mobile/mobile_controls.dart';
 import 'package:meiyou/presentation/widgets/selector_dilaog_box.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -145,7 +143,7 @@ class TestWidget extends StatelessWidget {
                     builder: (context, index, data) {
                       return data.toString();
                     },
-                    data: [0, 1, 2, 3, 4, 5, 6, 7],
+                    data: const [0, 1, 2, 3, 4, 5, 6, 7],
                     onApply: (value) {
                       print(value);
                     },
@@ -155,7 +153,7 @@ class TestWidget extends StatelessWidget {
               ),
             );
           },
-          child: Text('click me!!')),
+          child: const Text('click me!!')),
     ));
   }
 }

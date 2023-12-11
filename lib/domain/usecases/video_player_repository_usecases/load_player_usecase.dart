@@ -3,16 +3,18 @@ import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:meiyou/core/usecases/usecase.dart';
 import 'package:meiyou/domain/repositories/video_player_repository.dart';
+import 'package:meiyou/presentation/providers/player_providers.dart';
 
 class LoadPlayerUseCaseParams {
   final BuildContext context;
+  final PlayerProviders providers;
   final Player player;
   final VideoController videoController;
   final Duration? startPostion;
   final void Function()? onDoneCallback;
 
-  LoadPlayerUseCaseParams(
-      {required this.context,
+  LoadPlayerUseCaseParams({required this.providers,
+      required this.context,
       required this.player,
       required this.videoController,
       this.startPostion,
@@ -31,6 +33,7 @@ class LoadPlayerUseCase implements UseCase<void, LoadPlayerUseCaseParams> {
         player: params.player,
         videoController: params.videoController,
         startPostion: params.startPostion,
-        onDoneCallback: params.onDoneCallback);
+        onDoneCallback: params.onDoneCallback,
+        providers: params.providers);
   }
 }

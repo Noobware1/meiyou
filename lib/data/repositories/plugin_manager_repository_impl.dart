@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:meiyou/core/client.dart';
 import 'package:meiyou/core/resources/response_state.dart';
 import 'package:meiyou/core/utils/try_catch.dart';
@@ -11,7 +10,6 @@ import 'package:meiyou/domain/entities/installed_plugin.dart';
 import 'package:meiyou/domain/entities/plugin_list.dart';
 import 'package:meiyou/domain/repositories/plugin_manager_repository.dart';
 import 'package:meiyou_extenstions/meiyou_extenstions.dart';
-import 'package:meiyou_extenstions/models.dart';
 
 class PluginManagerRepositoryImpl implements PluginManagerRepository {
   PluginManagerRepositoryImpl(this._pluginDir);
@@ -102,7 +100,7 @@ class PluginManagerRepositoryImpl implements PluginManagerRepository {
             plugin.version.replaceAll('.', '').trim().toInt() >
                 installedPlugin.version.replaceAll('.', '').trim().toInt()) {
           return MapEntry(InstalledPlugin.fromEntity(installedPlugin),
-              plugin as OnlinePlugin);
+              plugin);
         }
       }
     }

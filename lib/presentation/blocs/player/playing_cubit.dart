@@ -13,6 +13,7 @@ class PlayingCubit extends Cubit<bool> {
 
   void stopPlaying() {
     _subscription.pause();
+  
     emit(false);
   }
 

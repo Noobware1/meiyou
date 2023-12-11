@@ -172,7 +172,7 @@ class MovieView extends StatelessWidget {
 class _ToEpsiode extends StatelessWidget {
   final Episode episode;
   final int index;
-  const _ToEpsiode({super.key, required this.episode, required this.index});
+  const _ToEpsiode({required this.episode, required this.index});
 
   @override
   Widget build(BuildContext context) {

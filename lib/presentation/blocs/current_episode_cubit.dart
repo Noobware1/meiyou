@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class CurrentEpisodeCubit extends Cubit<int> {
-  CurrentEpisodeCubit(int index) : super(index);
+  CurrentEpisodeCubit(super.index);
 
   void changeEpisode(int index) {
     emit(index);

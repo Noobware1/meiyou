@@ -111,7 +111,7 @@ class ResizebleTextWidgetNoAnimation extends StatefulWidget {
   final int maxLines;
   final TextStyle style;
   const ResizebleTextWidgetNoAnimation(
-      {required this.text,
+      {super.key, required this.text,
       required this.maxLines,
       this.style = const TextStyle(
           color: Colors.white, fontSize: 14, fontWeight: FontWeight.w400)});
