@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:meiyou/core/resources/client.dart';
 import 'package:meiyou/core/utils/m3u8_parser/models/m3u8_stream.dart';
+import 'package:meiyou_extenstions/extenstions.dart';
 import 'package:meiyou_extenstions/meiyou_extenstions.dart';
 import 'package:meiyou_extenstions/ok_http/ok_http.dart';
 

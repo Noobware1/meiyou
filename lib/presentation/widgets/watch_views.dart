@@ -185,7 +185,12 @@ class _ToEpsiode extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 10),
       child: EpisodeHolder(
         onTap: () {
-          if (!context.currentRoutePath.toString().contains('player')) {
+          if (context.currentRoutePath.toString().endsWith('player')) {
+            context
+                .tryRepository<VideoPlayerRepositoryUseCases>()
+                ?.changeEpisodeUseCase(ChangeEpisodeUseCaseParams(
+                    context: context, episode: episode, index: index));
+          } else {
             context.push(
               Routes.reslovePlayerRoute(context),
               extra: PlayerDependenciesProvider.createFromContext(
@@ -194,11 +199,6 @@ class _ToEpsiode extends StatelessWidget {
                 index,
               ),
             );
-          } else {
-            context
-                .repository<VideoPlayerRepositoryUseCases>()
-                .changeEpisodeUseCase(ChangeEpisodeUseCaseParams(
-                    context: context, episode: episode, index: index));
           }
         },
         number: number,

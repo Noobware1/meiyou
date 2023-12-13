@@ -1,6 +1,7 @@
 import 'package:meiyou/core/utils/from_entity.dart';
 import 'package:meiyou/data/models/extracted_video_data.dart';
 import 'package:meiyou/domain/entities/link_and_source.dart';
+import 'package:meiyou_extenstions/extenstions.dart';
 import 'package:meiyou_extenstions/meiyou_extenstions.dart';
 
 class LinkAndSource extends LinkAndSourceEntity {

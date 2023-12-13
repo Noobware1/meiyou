@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meiyou/core/resources/snackbar.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
+import 'package:meiyou/domain/usecases/plugin_repository_usecases/load_link_and_media_use_case.dart';
 import 'package:meiyou/presentation/blocs/async_cubit/async_cubit.dart';
 import 'package:meiyou/presentation/blocs/info_page_cubit.dart';
 import 'package:meiyou/presentation/blocs/pluign_manager_usecase_provider_cubit.dart';
@@ -20,10 +21,13 @@ class InfoPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+
     return Scaffold(
       body: BlocProvider(
         create: (context) => MediaDetailsCubit(searchResponse)
-          ..loadMediaDetails(context.bloc<PluginRepositoryUseCaseProviderCubit>()),
+          ..loadMediaDetails(
+              context.bloc<PluginRepositoryUseCaseProviderCubit>()),
         child: BlocConsumer<MediaDetailsCubit, AsyncState<MediaDetails>>(
             builder: (context, state) {
           return state.when(data: (data) {

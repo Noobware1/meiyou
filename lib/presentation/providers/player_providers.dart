@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
+import 'package:meiyou/core/resources/platform_check.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
 import 'package:meiyou/presentation/blocs/player/buffering_cubit.dart';
 import 'package:meiyou/presentation/blocs/player/full_screen_cubit.dart';
@@ -26,6 +27,7 @@ class PlayerProviders {
   final VideoTrackCubit videoTrackCubit;
   final SubtitleCubit subtitleCubit;
   final SubtitleCuesCubit subtitleCuesCubit;
+  final CurrentSubtitleCuesCubit currentSubtitleCuesCubit;
   final FullScreenCubit? fullScreenCubit;
   final ResizeCubit? resizeCubit;
 
@@ -39,9 +41,14 @@ class PlayerProviders {
     required this.playbackSpeedCubit,
     required this.subtitleCuesCubit,
     required this.subtitleCubit,
+    CurrentSubtitleCuesCubit? currentSubtitleCuesCubit,
     this.fullScreenCubit,
     this.resizeCubit,
-  });
+  }) : currentSubtitleCuesCubit = currentSubtitleCuesCubit ??
+            CurrentSubtitleCuesCubit(
+              subtitleCuesCubit,
+              playerProvider.player.stream.position,
+            );
 
   factory PlayerProviders.fromContext(
       BuildContext context, Player player, VideoController videoController) {
@@ -55,16 +62,14 @@ class PlayerProviders {
       showVideoControlsCubit: ShowVideoControlsCubit(),
       playbackSpeedCubit: PlaybackSpeedCubit(),
       videoTrackCubit: VideoTrackCubit(),
-      subtitleCuesCubit: SubtitleCuesCubit(context
-          .repository<VideoPlayerRepositoryUseCases>()
-          .getSubtitleCuesUseCase),
+      subtitleCuesCubit: SubtitleCuesCubit(
+        context
+            .repository<VideoPlayerRepositoryUseCases>()
+            .getSubtitleCuesUseCase,
+      ),
       subtitleCubit: SubtitleCubit(),
-      fullScreenCubit:
-          //  isMobile ? null :
-          FullScreenCubit(),
-      resizeCubit:
-          //  !isMobile ? null :
-          ResizeCubit(),
+      fullScreenCubit: isMobile ? null : FullScreenCubit(),
+      resizeCubit: !isMobile ? null : ResizeCubit(),
     );
   }
 
@@ -84,6 +89,7 @@ class PlayerProviders {
             if (resizeCubit != null) BlocProvider.value(value: resizeCubit!),
             BlocProvider.value(value: subtitleCubit),
             BlocProvider.value(value: subtitleCuesCubit),
+            BlocProvider.value(value: currentSubtitleCuesCubit),
           ],
           child: child,
         ));
@@ -106,6 +112,7 @@ class PlayerProviders {
               BlocProvider.value(value: context.bloc<ResizeCubit>()),
             BlocProvider.value(value: context.bloc<SubtitleCubit>()),
             BlocProvider.value(value: context.bloc<SubtitleCuesCubit>()),
+            BlocProvider.value(value: context.bloc<CurrentSubtitleCuesCubit>()),
           ],
           child: child,
         ));
@@ -124,11 +131,14 @@ class PlayerProviders {
       subtitleCuesCubit: context.bloc<SubtitleCuesCubit>(),
       fullScreenCubit: context.tryBloc<FullScreenCubit>(),
       resizeCubit: context.tryBloc<ResizeCubit>(),
+      currentSubtitleCuesCubit: context.bloc<CurrentSubtitleCuesCubit>(),
     );
   }
 
   void dispose() {
     playerProvider.dispose();
+    fullScreenCubit?.exitFullScreen();
+
     playingCubit.close();
     bufferingCubit.close();
     progressBarCubit.close();
@@ -139,5 +149,6 @@ class PlayerProviders {
     resizeCubit?.close();
     subtitleCubit.close();
     subtitleCuesCubit.close();
+    currentSubtitleCuesCubit.close();
   }
 }

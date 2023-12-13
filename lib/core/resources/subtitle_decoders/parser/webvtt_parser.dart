@@ -2,7 +2,7 @@
 import 'package:meiyou/core/resources/subtitle_decoders/exceptions/subtitle_parsing_expection.dart';
 import 'package:meiyou/core/resources/subtitle_decoders/models/cue.dart';
 import 'package:meiyou/core/resources/subtitle_decoders/subtitle_parser.dart';
-import 'package:meiyou_extenstions/meiyou_extenstions.dart';
+import 'package:meiyou_extenstions/extenstions.dart';
 
 class WebVttParser extends SubtitleParser {
   @override

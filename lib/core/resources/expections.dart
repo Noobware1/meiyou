@@ -1,3 +1,29 @@
+class NoLinksFound implements Exception {
+  final String message;
+  final StackTrace? stackTrace;
+
+  const NoLinksFound(this.message, {this.stackTrace});
+
+  @override
+  String toString() {
+    return '$message\nStack Trace\n$stackTrace';
+  }
+}
+
+
+class FailedToExtract implements Exception {
+  final String message;
+  final StackTrace? stackTrace;
+
+  const FailedToExtract(this.message, {this.stackTrace});
+
+  @override
+  String toString() {
+    return '$message\nStack Trace\n$stackTrace';
+  }
+}
+
+
 class MeiyouException implements Exception {
   final String message;
   final StackTrace? stackTrace;

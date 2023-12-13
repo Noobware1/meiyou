@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart'
     hide
         PopupMenuButton,
@@ -294,6 +293,14 @@ class _OptionsMenuState extends State<OptionsMenu> {
     );
   }
 
+  String truncateText(String text, int maxLength) {
+    if (text.length <= maxLength) {
+      return text;
+    } else {
+      return '${text.substring(0, maxLength)}...';
+    }
+  }
+
   _builditem(
       {required int value,
       required String label,
@@ -327,7 +334,7 @@ class _OptionsMenuState extends State<OptionsMenu> {
             ),
             addHorizontalSpace(50),
             Text(
-              text,
+              truncateText(text, 17),
               style: const TextStyle(fontSize: 16),
             ),
             addHorizontalSpace(8),
@@ -384,10 +391,8 @@ class __PopUpItemListBodyState<T> extends State<_PopUpItemListBody<T>> {
 
   @override
   Widget build(BuildContext context) {
-    // print(player(context).state.track.video);
-
     return ConstrainedBox(
-      constraints: const BoxConstraints(maxHeight: 350, minWidth: 300),
+      constraints: const BoxConstraints(maxHeight: 350, minWidth: 360),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

@@ -135,25 +135,31 @@ class VideoPlayerRepositoryImpl implements VideoPlayerRepository {
       required vid.VideoController videoController,
       Duration? startPostion,
       void Function()? onDoneCallback}) async {
+        
     final selectedVideoDataCubit = context.bloc<SelectedVideoDataCubit>();
     late StreamSubscription? subscription;
     (int, Video, int)? best = null;
+
     subscription =
         context.bloc<ExtractedVideoDataCubit>().stream.listen((state) async {
       if (state.data.isNotEmpty) {
+        subscription?.pause();
         best = _getBestVideoSource(state);
+
         selectedVideoDataCubit.setStateByIndexes(best!.$1, best!.$3);
-        subscription?.cancel();
-        subscription = null;
 
         await changeSource(
             video: best!.$2,
             selectedSource: best!.$3,
             player: player,
             subtitleCubit: providers.subtitleCubit);
+        subscription?.cancel();
+        subscription = null;
+
         onDoneCallback?.call();
       }
     }, onDone: () {
+      subscription?.cancel();
       context.bloc<ExtractedVideoDataCubit>().state.data.isEmpty;
       throw Exception('No video sources found');
     });

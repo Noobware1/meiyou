@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meiyou/core/constants/default_widgets.dart';
+import 'package:meiyou/core/resources/platform_check.dart';
 import 'package:meiyou/core/resources/snackbar.dart';
 import 'package:meiyou/core/resources/subtitle_decoders/models/cue.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
@@ -12,8 +13,8 @@ import 'package:meiyou_extenstions/meiyou_extenstions.dart';
 
 class SubtitleRenderer extends StatelessWidget {
   final SubtitleConfigruation subtitleConfigruation;
-  const SubtitleRenderer(
-      {super.key, this.subtitleConfigruation = const SubtitleConfigruation()});
+
+  const SubtitleRenderer({required this.subtitleConfigruation, super.key});
 
   Widget _buildWithBorder(Widget child) {
     if (subtitleConfigruation.showBorder) {
@@ -79,25 +80,25 @@ class SubtitleRenderer extends StatelessWidget {
                   .headers,
             ));
       },
-      child: BlocConsumer<SubtitleCuesCubit, SubtitleCuesState>(
-          builder: (context, state) {
-        if (state is SubtitleCuesDecoded) {
-          return Align(
-            alignment: Alignment.bottomCenter,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 24.0),
-              child: _buildWithBorder(
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                  child: _buildWithHighlight(state.subtitleCues!),
-                ),
-              ),
-            ),
-          );
-        } else {
+      child: BlocListener<SubtitleCuesCubit, SubtitleCuesState>(child:
+          BlocBuilder<CurrentSubtitleCuesCubit, List<SubtitleCue>?>(
+              builder: (context, state) {
+        if (state == null || state.isEmpty) {
           return defaultSizedBox;
         }
-      }, listener: (context, state) {
+        return Align(
+          alignment: Alignment.bottomCenter,
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 24.0),
+            child: _buildWithBorder(
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                child: _buildWithHighlight(state),
+              ),
+            ),
+          ),
+        );
+      }), listener: (context, state) {
         if (state is SubtitleCuesDecodingFailed) {
           showSnackBar(context, text: state.error!.message);
         }
@@ -122,7 +123,7 @@ class SubtitleConfigruation {
       this.highlightColor = Colors.black,
       this.borderRadius = const BorderRadius.all(Radius.zero),
       this.borderColor = const Color(0xB8000000),
-      this.textStyle = forMobile});
+      this.textStyle = forMobileConfig});
 
   SubtitleConfigruation copyWith({
     bool? showBorder,
@@ -143,13 +144,13 @@ class SubtitleConfigruation {
   }
 }
 
-const forDesktop = TextStyle(
+const forDesktopConfig = TextStyle(
   fontSize: 36.0,
   fontWeight: FontWeight.w700,
   color: Colors.white,
 );
 
-const forMobile = TextStyle(
+const forMobileConfig = TextStyle(
   fontSize: 21.0,
   fontWeight: FontWeight.w700,
   color: Colors.white,

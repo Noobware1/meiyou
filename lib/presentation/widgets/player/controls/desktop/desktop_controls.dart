@@ -244,32 +244,6 @@ class DesktopControls extends StatelessWidget {
                                             children: [] // _theme(context).topButtonBar,
                                             ),
                                       ),
-                                      // Only display [primaryButtonBar] if [buffering] is false.
-                                      Expanded(
-                                        child:
-                                            BlocBuilder<BufferingCubit, bool>(
-                                          builder: (context, buffering) {
-                                            return AnimatedOpacity(
-                                              curve: Curves.easeInOut,
-                                              opacity: buffering ? 0.0 : 1.0,
-                                              duration:
-                                                  controlsTransitionDuration,
-                                              child: const Center(
-                                                child: Row(
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .center,
-                                                    children: []),
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                      ),
                                       Padding(
                                         padding: const EdgeInsets.only(
                                             left: 35, right: 35),
@@ -334,38 +308,7 @@ class DesktopControls extends StatelessWidget {
                       },
                     ),
                     // Buffering Indicator.
-                    IgnorePointer(
-                      child: Padding(
-                        padding: (
-                            // Add padding in fullscreen!
-                            isFullscreen(context)
-                                ? MediaQuery.of(context).padding
-                                : EdgeInsets.zero),
-                        child: Column(
-                          children: [
-                            Container(
-                              height: buttonBarHeight,
-                              margin: topButtonBarMargin,
-                            ),
-                            Expanded(
-                              child: Center(
-                                child: BlocBuilder<BufferingCubit, bool>(
-                                  builder: (context, buffering) {
-                                    return buffering
-                                        ? const CircularProgressIndicator()
-                                        : defaultSizedBox;
-                                  },
-                                ),
-                              ),
-                            ),
-                            Container(
-                              height: buttonBarHeight,
-                              margin: bottomButtonBarMargin,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+
                     _buildHeader(context),
                   ],
                 ),

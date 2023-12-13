@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -233,7 +232,7 @@ class _AudioAndSubtitlesWidgetState extends State<AudioAndSubtitlesWidget> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 defaultValue: subtitle,
                 builder: (context, index, subtitle) {
-                  return 'No Subtitle';
+                  return subtitle.langauge ?? 'Auto';
                 },
                 data: context.bloc<SubtitleCubit>().state.subtitles,
                 onSelected: (track) {

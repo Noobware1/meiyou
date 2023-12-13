@@ -607,7 +607,7 @@ class _PopupMenu<T> extends StatelessWidget {
     final Widget child = ConstrainedBox(
       constraints: constraints ??
           const BoxConstraints(
-            maxWidth: 340,
+            maxWidth: 360,
             minWidth: 100,
             // maxWidth: _kMenuMaxWidth,
           ),

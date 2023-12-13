@@ -1,4 +1,4 @@
-import 'package:meiyou_extenstions/meiyou_extenstions.dart';
+import 'package:meiyou_extenstions/extenstions.dart';
 
 class DateTimeFormatter {
   static DateTime? toDateTimeFromTMDBFormat(String? date) {

@@ -253,7 +253,7 @@ class _BuildActorsState extends State<_BuildActors> {
           ),
           addVerticalSpace(10),
           SizedBox(
-            height: 200,
+            height: 160,
             child: Scrollbar(
               controller: controller,
               child: ListView.separated(
@@ -272,13 +272,13 @@ class _BuildActorsState extends State<_BuildActors> {
                           Text(
                             widget.data[index].name,
                             textAlign: TextAlign.center,
-                            maxLines: 3,
+                            maxLines: 2,
                           ),
                           if (widget.data[index].role != null)
                             Text(
                               widget.data[index].role!,
                               textAlign: TextAlign.center,
-                              maxLines: 2,
+                              maxLines: 1,
                               style: const TextStyle(color: Colors.grey),
                             ),
                         ],

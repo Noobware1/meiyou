@@ -25,7 +25,6 @@ class ExtractedVideoDataCubit extends Cubit<ExtractedVideoDataState> {
     emit(const ExtractedVideoDataState());
     _subscription?.cancel();
     _subscription = null;
-
     _subscription = stream.listen(
         (data) {
           if (data.$2 is Video) {
@@ -37,9 +36,9 @@ class ExtractedVideoDataCubit extends Cubit<ExtractedVideoDataState> {
         },
         cancelOnError: false,
         onDone: () {
+          state.copyWith(isDone: true);
           _subscription?.cancel();
           _subscription = null;
-          print(state.data.toString());
         },
         onError: _onError);
   }
@@ -48,10 +47,28 @@ class ExtractedVideoDataCubit extends Cubit<ExtractedVideoDataState> {
 class ExtractedVideoDataState extends Equatable {
   final List<ExtractedVideoDataEntity> data;
   final MeiyouException? error;
+  final bool isDone;
 
-  const ExtractedVideoDataState({this.data = const [], this.error});
-
+  const ExtractedVideoDataState(
+      {this.isDone = false, this.data = const [], this.error});
 
   @override
   List<Object?> get props => [data, error];
+
+  ExtractedVideoDataState copyWith({
+    List<ExtractedVideoDataEntity>? data,
+    MeiyouException? error,
+    bool? isDone,
+  }) {
+    return ExtractedVideoDataState(
+      data: data ?? this.data,
+      error: error ?? this.error,
+      isDone: isDone ?? this.isDone,
+    );
+  }
+
+  @override
+  String toString() {
+    return 'ExtractedVideoDataState(data: $data, error: $error, isDone: $isDone)';
+  }
 }

@@ -11,7 +11,6 @@ class MediaDetailsCubit extends AsyncCubit<MediaDetails> {
   Future<void> loadMediaDetails(
       PluginRepositoryUseCaseProviderCubit provider) async {
     emit(const AsyncStateLoading());
-    // emit(AsyncStateSuccess(mediaDetails));
 
     final res =
         await provider.state.provider!.loadMediaDetailsUseCase(_searchResponse);

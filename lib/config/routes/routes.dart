@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:meiyou/core/utils/extenstions/context.dart';
 
 class Routes {
   static const home = '/home';
@@ -12,8 +13,7 @@ class Routes {
   static const more = '/more';
 
   static reslovePlayerRoute(BuildContext context) {
-    return GoRouter.of(context).routeInformationProvider.value.uri.path +
-        player;
+    return context.currentRoutePath.toString() + player;
   }
 }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:meiyou/core/constants/default_widgets.dart';
@@ -8,6 +9,7 @@ import 'package:meiyou/core/resources/platform_check.dart';
 import 'package:meiyou/core/resources/snackbar.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
 import 'package:meiyou/domain/usecases/video_player_repository_usecases/load_player_usecase.dart';
+import 'package:meiyou/presentation/blocs/player/buffering_cubit.dart';
 import 'package:meiyou/presentation/blocs/player/resize_cubit.dart';
 import 'package:meiyou/presentation/blocs/player/server_and_video_cubit.dart';
 import 'package:meiyou/presentation/blocs/player/show_controls_cubit.dart';
@@ -15,6 +17,7 @@ import 'package:meiyou/presentation/providers/player_providers.dart';
 import 'package:meiyou/presentation/providers/video_player_repository_usecases.dart';
 import 'package:meiyou/presentation/widgets/player/controls/desktop/desktop_controls.dart';
 import 'package:meiyou/presentation/widgets/player/controls/mobile/mobile_controls.dart';
+import 'package:meiyou/presentation/widgets/subtitle_renderer.dart';
 
 class PlayerPage extends StatefulWidget {
   const PlayerPage({super.key});
@@ -76,45 +79,78 @@ class _PlayerPageState extends State<PlayerPage> {
     final width = context.screenWidth;
 
     return providers.create(
-      Scaffold(
-        backgroundColor: Colors.black,
-        body: BlocListener<ExtractedVideoDataCubit, ExtractedVideoDataState>(
-          listener: (context, state) {
-            if (state.error != null) {
-              showSnackBar(context, text: state.error!.message);
-            }
-          },
-          child: GestureDetector(
-            onTap: () {
-              providers.showVideoControlsCubit.toggleShowControls();
+      BlocListener<ExtractedVideoDataCubit, ExtractedVideoDataState>(
+        listener: (context, state) {
+          print(state.isDone);
+          if (state.data.isEmpty || state.data.isEmpty) {
+            showSnackBar(context,
+                text: state.error?.message ?? 'Failed to extract videos');
+            context.pop();
+          } else if (state.error != null) {
+            showSnackBar(context, text: state.error!.message);
+          }
+        },
+        child: Scaffold(
+          backgroundColor: Colors.black,
+          body: BlocListener<ExtractedVideoDataCubit, ExtractedVideoDataState>(
+            listener: (context, state) {
+              if (state.error != null) {
+                showSnackBar(context, text: state.error!.message);
+              }
             },
-            child: Stack(children: [
-              SizedBox.expand(
-                child: _BuildWithResizeMode(
-                  child: SizedBox(
-                    height: videoController.rect.value?.height ?? height,
-                    width: videoController.rect.value?.width ?? width,
-                    child: Video(
-                        controller: videoController,
-                        controls: (state) {
-                          return defaultSizedBox;
-                        },
-                        subtitleViewConfiguration:
-                            const SubtitleViewConfiguration(visible: false)),
+            child: GestureDetector(
+              onTap: () {
+                providers.showVideoControlsCubit.toggleShowControls();
+              },
+              child: Stack(children: [
+                SizedBox.expand(
+                  child: _BuildWithResizeMode(
+                    child: SizedBox(
+                      height: videoController.rect.value?.height ?? height,
+                      width: videoController.rect.value?.width ?? width,
+                      child: Video(
+                          controller: videoController,
+                          controls: (state) {
+                            return defaultSizedBox;
+                          },
+                          subtitleViewConfiguration:
+                              const SubtitleViewConfiguration(visible: false)),
+                    ),
                   ),
                 ),
-              ),
-              Positioned.fill(child: BlocBuilder<ShowVideoControlsCubit, bool>(
-                builder: (context, showControls) {
-                  return AnimatedOpacity(
-                      duration: const Duration(milliseconds: 300),
-                      opacity: showControls ? 1.0 : 0.0,
-                      child: isMobile
-                          ? const MobileControls()
-                          : const DesktopControls());
-                },
-              ))
-            ]),
+                SubtitleRenderer(
+                    subtitleConfigruation: SubtitleConfigruation(
+                        textStyle:
+                            isMobile ? forMobileConfig : forDesktopConfig)),
+                Positioned.fill(
+                    child: BlocBuilder<ShowVideoControlsCubit, bool>(
+                  builder: (context, showControls) {
+                    return AnimatedOpacity(
+                        duration: const Duration(milliseconds: 300),
+                        opacity: showControls ? 1.0 : 0.0,
+                        child: IgnorePointer(
+                          ignoring: !showControls,
+                          child: isMobile
+                              ? const MobileControls()
+                              : const DesktopControls(),
+                        ));
+                  },
+                )),
+                Center(child: BlocBuilder<BufferingCubit, bool>(
+                  builder: (context, isBuffering) {
+                    if (!isBuffering) return defaultSizedBox;
+                    return isMobile
+                        ? const SizedBox(
+                            height: 35,
+                            width: 35,
+                            child: CircularProgressIndicator(),
+                          )
+                        : const CircularProgressIndicator();
+                    ;
+                  },
+                )),
+              ]),
+            ),
           ),
         ),
       ),
@@ -124,7 +160,7 @@ class _PlayerPageState extends State<PlayerPage> {
   @override
   void dispose() {
     if (isMobile) changeBackOrientation();
-    providers.fullScreenCubit?.exitFullScreen();
+    player.dispose();
 
     providers.dispose();
     super.dispose();
@@ -139,7 +175,7 @@ class _BuildWithResizeMode extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // if (!isMobile) return child;
+    if (!isMobile) return child;
 
     return BlocBuilder<ResizeCubit, ResizeMode>(builder: (context, resizeMode) {
       return FittedBox(

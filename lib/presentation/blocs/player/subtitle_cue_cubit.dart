@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meiyou/core/resources/expections.dart';
 import 'package:meiyou/core/resources/response_state.dart';
@@ -5,20 +7,72 @@ import 'package:meiyou/core/resources/subtitle_decoders/models/cue.dart';
 import 'package:meiyou/domain/usecases/video_player_repository_usecases/get_subtitle_cues_usecase.dart';
 import 'package:meiyou_extenstions/meiyou_extenstions.dart';
 
+class CurrentSubtitleCuesCubit extends Cubit<List<SubtitleCue>?> {
+  final List<StreamSubscription> _subscriptions = [];
+  List<SubtitleCue>? cues;
+  Duration? duration;
+  List<SubtitleCue>? _currentCues;
+
+  CurrentSubtitleCuesCubit(
+      SubtitleCuesCubit subtitleCuesCubit, Stream<Duration> durationStream)
+      : super(null) {
+    _subscriptions.addAll([
+      subtitleCuesCubit.stream.listen((data) {
+        cues = null;
+        if (data is SubtitleCuesDecoded) {
+          cues = data.subtitleCues;
+        }
+        emitCues();
+      }),
+      durationStream.listen((pos) {
+        duration = pos;
+        emitCues();
+      }),
+    ]);
+  }
+
+  void emitCues() {
+    if (cues != null && duration != null) {
+      _currentCues = [];
+      for (final cue in cues!) {
+        if (cue.start <= duration! && cue.end >= duration!) {
+          _currentCues?.add(cue);
+        }
+      }
+
+      emit(_currentCues);
+    } else {
+      emit(null);
+    }
+  }
+
+  @override
+  Future<void> close() {
+    for (final subcription in _subscriptions) {
+      subcription.cancel();
+    }
+
+    cues = null;
+    _currentCues = null;
+    duration = null;
+    return super.close();
+  }
+}
+
 class SubtitleCuesCubit extends Cubit<SubtitleCuesState> {
-  final GetSubtitleCuesUseCase useCase;
-  SubtitleCuesCubit(this.useCase) : super(const NoSubtitle());
+  final GetSubtitleCuesUseCase _useCase;
+  SubtitleCuesCubit(this._useCase) : super(const NoSubtitle());
 
   void loadSubtitles(GetSubtitleCuesUseCaseParams params) async {
     if (params.subtitle == Subtitle.noSubtitle) return emit(const NoSubtitle());
     emit(const SubtitleCuesDecoding());
-    final res = await useCase.call(params);
+    final res = await _useCase.call(params);
 
     if (res is ResponseSuccess) return emit(SubtitleCuesDecoded(res.data!));
     return emit(SubtitleCuesDecodingFailed(res.error!));
   }
 
-  void emitNoSubtitle() => emit(const NoSubtitle());  
+  void emitNoSubtitle() => emit(const NoSubtitle());
 }
 
 sealed class SubtitleCuesState {

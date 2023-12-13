@@ -1,3 +1,4 @@
+import 'package:meiyou/core/resources/expections.dart';
 import 'package:meiyou/core/resources/response_state.dart';
 import 'package:meiyou/core/utils/try_catch.dart';
 import 'package:meiyou/domain/repositories/plugin_repository.dart';
@@ -28,6 +29,7 @@ class PluginRepositoryImpl implements PluginRepository {
         }
       }
       return list.isEmpty ? throw Exception('Could\'t Load HomePage!') : list;
+
     });
   }
 
@@ -58,14 +60,16 @@ class PluginRepositoryImpl implements PluginRepository {
 
   @override
   Stream<(ExtractorLink, Media)> loadLinkAndMediaStream(String url) async* {
-  
     final responseLinks = await loadLinks(url);
 
     if (responseLinks is ResponseFailed) {
-      throw responseLinks.error!;
+      throw NoLinksFound(responseLinks.error!.message,
+          stackTrace: responseLinks.error!.stackTrace);
     }
     for (var e in responseLinks.data!) {
-      final media = await ResponseState.tryWithAsync(() => api.loadMedia(e));
+      final media = await ResponseState.tryWithAsync(() => api.loadMedia(e))
+          .timeout(const Duration(minutes: 1));
+
       if (media is ResponseFailed) {
         yield* Stream.error(media.error!);
       } else if (media is ResponseSuccess && media.data != null) {

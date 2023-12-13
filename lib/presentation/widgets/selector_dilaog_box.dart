@@ -93,7 +93,6 @@ class _ArrowSelectorDialogBoxState<T> extends State<ArrowSelectorDialogBox<T>> {
 
   @override
   Widget build(BuildContext context) {
-    // print(player(context).state.track.video);
 
     return ConstrainedBox(
       constraints: isMobile
@@ -216,14 +215,14 @@ class _ArrowSelectorListViewState<T> extends State<ArrowSelectorListView<T>> {
   Widget build(BuildContext context) {
     return ConstrainedBox(
       constraints: isMobile
-          ? const BoxConstraints(maxWidth: 300, maxHeight: 260, minHeight: 20)
+          ? const BoxConstraints(maxWidth: 300, maxHeight: 240, minHeight: 20)
           : const BoxConstraints(maxWidth: 350, maxHeight: 290, minHeight: 20),
       child: Column(
         crossAxisAlignment: widget.crossAxisAlignment ?? CrossAxisAlignment.end,
         children: [
           if (widget.label != null) ...[
             Padding(
-              padding: const EdgeInsets.fromLTRB(10, 10, 10, 5),
+              padding: const EdgeInsets.fromLTRB(15, 10, 15, 5),
               child: Text(
                 widget.label!,
                 style: const TextStyle(

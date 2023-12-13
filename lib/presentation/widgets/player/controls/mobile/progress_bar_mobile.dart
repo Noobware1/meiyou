@@ -33,6 +33,9 @@ class VideoProgressbarMobile extends StatelessWidget {
                 timeLabelLocation: TimeLabelLocation.none,
                 progress: state.current,
                 buffered: state.buffered,
+                bufferedBarColor: Colors.white,
+                baseBarColor: const Color(0x3DFFFFFF),
+                progressBarColor: context.theme.colorScheme.primary,
                 total: state.total,
                 onSeek: (duration) {
                   playerProvider(context).player.seek(duration);

@@ -14,7 +14,7 @@ class ResponsiveLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
-      // print(constraints.maxWidth);
+ 
       if (constraints.maxWidth <= diff) return forSmallScreen;
       return forBiggerScreen;
     });

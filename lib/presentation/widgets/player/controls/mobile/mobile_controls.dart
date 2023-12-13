@@ -43,16 +43,7 @@ class MobileControls extends StatelessWidget {
             ),
           ),
         ),
-        Center(child: BlocBuilder<BufferingCubit, bool>(
-          builder: (context, isBuffering) {
-            if (!isBuffering) return defaultSizedBox;
-            return const SizedBox(
-              height: 35,
-              width: 35,
-              child: CircularProgressIndicator(),
-            );
-          },
-        )),
+      
         Positioned(
             top: 0,
             left: 0,
