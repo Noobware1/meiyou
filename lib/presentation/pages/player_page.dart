@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,6 +13,7 @@ import 'package:meiyou/core/utils/extenstions/context.dart';
 import 'package:meiyou/domain/usecases/video_player_repository_usecases/load_player_usecase.dart';
 import 'package:meiyou/presentation/blocs/player/buffering_cubit.dart';
 import 'package:meiyou/presentation/blocs/player/resize_cubit.dart';
+import 'package:meiyou/presentation/blocs/player/selected_video_data.dart';
 import 'package:meiyou/presentation/blocs/player/server_and_video_cubit.dart';
 import 'package:meiyou/presentation/blocs/player/show_controls_cubit.dart';
 import 'package:meiyou/presentation/providers/player_providers.dart';
@@ -18,6 +21,7 @@ import 'package:meiyou/presentation/providers/video_player_repository_usecases.d
 import 'package:meiyou/presentation/widgets/player/controls/desktop/desktop_controls.dart';
 import 'package:meiyou/presentation/widgets/player/controls/mobile/mobile_controls.dart';
 import 'package:meiyou/presentation/widgets/subtitle_renderer.dart';
+import 'package:meiyou_extensions_lib/models.dart' as models;
 
 class PlayerPage extends StatefulWidget {
   const PlayerPage({super.key});
@@ -30,7 +34,7 @@ class _PlayerPageState extends State<PlayerPage> {
   late final Player player;
   late final VideoController videoController;
   late final PlayerProviders providers;
-
+  late final StreamSubscription loadPlayer;
   @override
   void initState() {
     if (isMobile) {
@@ -47,9 +51,13 @@ class _PlayerPageState extends State<PlayerPage> {
 
     providers = PlayerProviders.fromContext(context, player, videoController);
 
-    context.repository<VideoPlayerRepositoryUseCases>().loadPlayerUseCase(
+    loadPlayer = context
+        .repository<VideoPlayerRepositoryUseCases>()
+        .loadPlayerUseCase(
           LoadPlayerUseCaseParams(
-              context: context,
+              extractedMediaCubit:
+                  context.bloc<ExtractedMediaCubit<models.Video>>(),
+              selectedVideoDataCubit: context.bloc<SelectedVideoDataCubit>(),
               player: player,
               videoController: videoController,
               providers: providers,
@@ -79,10 +87,9 @@ class _PlayerPageState extends State<PlayerPage> {
     final width = context.screenWidth;
 
     return providers.create(
-      BlocListener<ExtractedVideoDataCubit, ExtractedVideoDataState>(
+      BlocListener<ExtractedMediaCubit<models.Video>, ExtractedMediaState>(
         listener: (context, state) {
-          print(state.isDone);
-          if (state.data.isEmpty || state.data.isEmpty) {
+          if (state.data.isEmpty && state.isDone) {
             showSnackBar(context,
                 text: state.error?.message ?? 'Failed to extract videos');
             context.pop();
@@ -92,10 +99,15 @@ class _PlayerPageState extends State<PlayerPage> {
         },
         child: Scaffold(
           backgroundColor: Colors.black,
-          body: BlocListener<ExtractedVideoDataCubit, ExtractedVideoDataState>(
+          body: BlocListener<ExtractedMediaCubit<models.Video>,
+              ExtractedMediaState>(
             listener: (context, state) {
               if (state.error != null) {
                 showSnackBar(context, text: state.error!.message);
+              }
+              if (state.isDone && state.data.isEmpty) {
+                showSnackBar(context, text: 'Failed to extract videos');
+                context.pop();
               }
             },
             child: GestureDetector(
@@ -159,6 +171,7 @@ class _PlayerPageState extends State<PlayerPage> {
 
   @override
   void dispose() {
+    loadPlayer.cancel();
     if (isMobile) changeBackOrientation();
     player.dispose();
 

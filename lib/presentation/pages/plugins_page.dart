@@ -18,8 +18,8 @@ import 'package:meiyou/presentation/emoticons_widget.dart';
 import 'package:meiyou/presentation/providers/plugin_manager_repository_usecase_provider.dart';
 import 'package:meiyou/presentation/widgets/add_space.dart';
 import 'package:meiyou/presentation/widgets/error_widget.dart';
-import 'package:meiyou_extenstions/extenstions.dart';
-import 'package:meiyou_extenstions/meiyou_extenstions.dart';
+import 'package:meiyou_extensions_lib/extenstions.dart';
+import 'package:meiyou_extensions_lib/meiyou_extensions_lib.dart';
 
 const _defaultPadding = EdgeInsets.fromLTRB(20, 10, 20, 10);
 

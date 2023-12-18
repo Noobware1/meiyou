@@ -2,7 +2,7 @@ import 'package:media_kit/media_kit.dart';
 import 'package:meiyou/core/usecases/usecase.dart';
 import 'package:meiyou/domain/repositories/video_player_repository.dart';
 import 'package:meiyou/presentation/blocs/player/subtitle_cubit.dart';
-import 'package:meiyou_extenstions/models.dart' as vid show Video;
+import 'package:meiyou_extensions_lib/models.dart' as vid show Video;
 
 class ChangeSourceUseCaseParams {
   final vid.Video video;

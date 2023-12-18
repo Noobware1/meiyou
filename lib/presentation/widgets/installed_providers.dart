@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:meiyou/core/resources/platform_check.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
 import 'package:meiyou/domain/entities/installed_plugin.dart';
+import 'package:meiyou/presentation/blocs/plugin_selector_cubit.dart';
+import 'package:meiyou/presentation/providers/plugin_manager_repository_usecase_provider.dart';
 import 'package:meiyou/presentation/widgets/add_space.dart';
 
 class ShowInstalledPlugins extends StatelessWidget {

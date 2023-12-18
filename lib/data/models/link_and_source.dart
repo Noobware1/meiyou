@@ -1,16 +1,17 @@
 import 'package:meiyou/core/utils/from_entity.dart';
-import 'package:meiyou/data/models/extracted_video_data.dart';
+import 'package:meiyou/data/models/extracted_media.dart';
 import 'package:meiyou/domain/entities/link_and_source.dart';
-import 'package:meiyou_extenstions/extenstions.dart';
-import 'package:meiyou_extenstions/meiyou_extenstions.dart';
+import 'package:meiyou_extensions_lib/extenstions.dart';
+import 'package:meiyou_extensions_lib/meiyou_extensions_lib.dart';
 
 class LinkAndSource extends LinkAndSourceEntity {
   LinkAndSource({required super.link, required super.source});
 
   static List<LinkAndSource> fromExtractedVideoData(
-      ExtractedVideoData extractedVideoData) {
-    return extractedVideoData.video.videoSources.mapAsList((source) =>
-        LinkAndSource(link: extractedVideoData.link, source: source));
+      ExtractedMedia extractedVideoData) {
+    return (extractedVideoData.media as Video).videoSources.mapAsList(
+        (source) =>
+            LinkAndSource(link: extractedVideoData.link, source: source));
   }
 
   factory LinkAndSource.fromEntity(LinkAndSourceEntity entity) {

@@ -9,8 +9,8 @@ import 'package:meiyou/data/models/plugin_list.dart';
 import 'package:meiyou/domain/entities/installed_plugin.dart';
 import 'package:meiyou/domain/entities/plugin_list.dart';
 import 'package:meiyou/domain/repositories/plugin_manager_repository.dart';
-import 'package:meiyou_extenstions/extenstions.dart';
-import 'package:meiyou_extenstions/meiyou_extenstions.dart';
+import 'package:meiyou_extensions_lib/extenstions.dart';
+import 'package:meiyou_extensions_lib/meiyou_extensions_lib.dart';
 
 class PluginManagerRepositoryImpl implements PluginManagerRepository {
   PluginManagerRepositoryImpl(this._pluginDir);
@@ -100,8 +100,7 @@ class PluginManagerRepositoryImpl implements PluginManagerRepository {
         if (installedPlugin.id == plugin.id &&
             plugin.version.replaceAll('.', '').trim().toInt() >
                 installedPlugin.version.replaceAll('.', '').trim().toInt()) {
-          return MapEntry(InstalledPlugin.fromEntity(installedPlugin),
-              plugin);
+          return MapEntry(InstalledPlugin.fromEntity(installedPlugin), plugin);
         }
       }
     }

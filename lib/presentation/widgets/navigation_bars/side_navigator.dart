@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meiyou/core/constants/default_widgets.dart';
 import 'package:meiyou/core/constants/icons.dart';
-import 'package:meiyou/core/resources/colors.dart';
 import 'package:meiyou/core/resources/platform_check.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
 
@@ -25,7 +24,8 @@ class SideNavigatonBar extends StatelessWidget {
         selectedIndex: statefulNavigationShell.currentIndex,
         backgroundColor: context.theme.colorScheme.secondary,
         unselectedIconTheme: IconThemeData(
-          color: getBaseColorFromThemeMode(context),
+          color: Colors.white54,
+          // color: getBaseColorFromThemeMode(context),
         ),
         // unselectedLabelTextStyle:
         //     TextStyle(color: getBaseColorFromThemeMode(context)),

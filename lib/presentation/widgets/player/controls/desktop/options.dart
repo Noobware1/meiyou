@@ -23,7 +23,8 @@ import 'package:meiyou/presentation/providers/player_provider.dart';
 import 'package:meiyou/presentation/providers/video_player_repository_usecases.dart';
 import 'package:meiyou/presentation/widgets/add_space.dart';
 import 'package:meiyou/presentation/widgets/player/controls/desktop/custom_popup_button.dart';
-import 'package:meiyou_extenstions/extenstions.dart';
+import 'package:meiyou_extensions_lib/extenstions.dart';
+import 'package:meiyou_extensions_lib/models.dart';
 
 // BUTTON: OPTIONS BUTTON
 
@@ -70,7 +71,7 @@ class MaterialDesktopOptionsButton extends StatelessWidget {
                   BlocProvider.value(value: context.bloc<PlaybackSpeedCubit>()),
                   BlocProvider.value(value: context.bloc<VideoTrackCubit>()),
                   BlocProvider.value(
-                      value: context.bloc<ExtractedVideoDataCubit>()),
+                      value: context.bloc<ExtractedMediaCubit<Video>>()),
                   BlocProvider.value(value: context.bloc<SubtitleCubit>()),
                   BlocProvider.value(
                       value: context.bloc<SelectedVideoDataCubit>())
@@ -98,7 +99,7 @@ class _OptionsMenuState extends State<OptionsMenu> {
   late List<Widget> children = [
     BlocBuilder<SelectedVideoDataCubit, SelectedVideoDataState>(
         builder: (context, selected) {
-      return BlocBuilder<ExtractedVideoDataCubit, ExtractedVideoDataState>(
+      return BlocBuilder<ExtractedMediaCubit<Video>, ExtractedMediaState>(
         builder: (context, state) {
           return _PopUpItemListBody(
               defaultValue: selected.getLinkAndSource(context),
@@ -171,7 +172,7 @@ class _OptionsMenuState extends State<OptionsMenu> {
           defaultValue: state.current,
           label: 'Subtitles',
           builder: (context, index, subtitle) {
-            return Text(subtitle.langauge ?? 'Auto');
+            return Text(subtitle.language ?? 'Auto');
           },
           data: state.subtitles,
           onSelected: (subtitle) {
@@ -238,7 +239,7 @@ class _OptionsMenuState extends State<OptionsMenu> {
         addVerticalSpace(10),
         BlocBuilder<SelectedVideoDataCubit, SelectedVideoDataState>(
             builder: (context, selected) {
-          return BlocBuilder<ExtractedVideoDataCubit, ExtractedVideoDataState>(
+          return BlocBuilder<ExtractedMediaCubit<Video>, ExtractedMediaState>(
             builder: (context, state) {
               return _builditem(
                   value: 0,
@@ -272,7 +273,7 @@ class _OptionsMenuState extends State<OptionsMenu> {
               value: 3,
               label: 'Subtitle',
               icon: Icons.closed_caption_outlined,
-              text: state.current.langauge ?? 'Auto');
+              text: state.current.language ?? 'Auto');
         }),
         addVerticalSpace(10),
         StreamBuilder<AudioTrack>(

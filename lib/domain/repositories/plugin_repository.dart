@@ -1,5 +1,6 @@
 import 'package:meiyou/core/resources/response_state.dart';
-import 'package:meiyou_extenstions/models.dart';
+import 'package:meiyou/domain/entities/extracted_media.dart';
+import 'package:meiyou_extensions_lib/models.dart';
 
 abstract class PluginRepository {
   Future<ResponseState<List<HomePage>>> loadFullHomePage();
@@ -15,5 +16,5 @@ abstract class PluginRepository {
 
   Future<ResponseState<Media?>> loadMedia(ExtractorLink link);
 
-  Stream<(ExtractorLink, Media)> loadLinkAndMediaStream(String url);
+  Stream<ExtractedMediaEntity> loadExtractedMediaStream(String url);
 }

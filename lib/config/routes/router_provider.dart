@@ -13,7 +13,7 @@ import 'package:meiyou/presentation/providers/player_dependencies.dart';
 import 'package:meiyou/presentation/widgets/custom_scaffold.dart';
 import 'package:meiyou/presentation/widgets/navigation_bars/bottom_navigatior.dart';
 import 'package:meiyou/presentation/widgets/navigation_bars/side_navigator.dart';
-import 'package:meiyou_extenstions/models.dart';
+import 'package:meiyou_extensions_lib/models.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey =
     GlobalKey<NavigatorState>(debugLabel: 'root');

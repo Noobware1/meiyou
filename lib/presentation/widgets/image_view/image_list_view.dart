@@ -3,7 +3,7 @@ import 'package:meiyou/core/constants/height_and_width.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
 import 'package:meiyou/presentation/widgets/add_space.dart';
 import 'package:meiyou/presentation/widgets/image_view/image_button_wrapper.dart';
-import 'package:meiyou_extenstions/models.dart';
+import 'package:meiyou_extensions_lib/models.dart';
 import 'image_holder.dart';
 
 class ImageHolderListViewBuilder extends StatefulWidget {

@@ -4,7 +4,7 @@ import 'package:meiyou/core/utils/extenstions/context.dart';
 import 'package:meiyou/presentation/blocs/episodes_bloc.dart';
 import 'package:meiyou/presentation/blocs/episodes_selector_cubit.dart';
 import 'package:meiyou/presentation/blocs/season_cubit.dart';
-import 'package:meiyou_extenstions/models.dart';
+import 'package:meiyou_extensions_lib/models.dart';
 
 Widget initProvidersForInfoPage(
     {required MediaDetails mediaDetails, required Widget child}) {

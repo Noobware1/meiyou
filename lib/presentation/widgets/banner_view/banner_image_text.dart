@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:meiyou/core/resources/platform_check.dart';
 import 'package:meiyou/presentation/widgets/add_space.dart';
-import 'package:meiyou_extenstions/models.dart';
+import 'package:meiyou_extensions_lib/models.dart';
 
 Icon _getSmilyFace(double score, [double size = 25.0]) {
   if (score <= 3.0) {

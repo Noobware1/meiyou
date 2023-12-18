@@ -6,7 +6,7 @@ import 'package:meiyou/core/constants/animation_duration.dart';
 import 'package:meiyou/core/constants/default_widgets.dart';
 import 'package:meiyou/core/resources/platform_check.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
-import 'package:meiyou/domain/usecases/plugin_repository_usecases/load_link_and_media_use_case.dart';
+import 'package:meiyou/domain/usecases/plugin_repository_usecases/load_extracted_media_usecase.dart';
 import 'package:meiyou/domain/usecases/video_player_repository_usecases/change_episode_usecase.dart';
 import 'package:meiyou/presentation/blocs/episodes_bloc.dart';
 import 'package:meiyou/presentation/blocs/episodes_selector_cubit.dart';
@@ -16,8 +16,8 @@ import 'package:meiyou/presentation/providers/video_player_repository_usecases.d
 import 'package:meiyou/presentation/widgets/add_space.dart';
 import 'package:meiyou/presentation/widgets/episode_holder.dart';
 import 'package:meiyou/presentation/widgets/selector_dilaog_box.dart';
-import 'package:meiyou_extenstions/extenstions.dart';
-import 'package:meiyou_extenstions/models.dart';
+import 'package:meiyou_extensions_lib/extenstions.dart';
+import 'package:meiyou_extensions_lib/models.dart';
 
 class TvSeriesView extends StatelessWidget {
   const TvSeriesView({super.key});
@@ -195,7 +195,7 @@ class _ToEpsiode extends StatelessWidget {
               Routes.reslovePlayerRoute(context),
               extra: PlayerDependenciesProvider.createFromContext(
                 context,
-                LoadLinkAndMediaStreamUseCaseParams(episode.data),
+                LoadExtractedMediaStreamUseCaseParams(episode.data),
                 index,
               ),
             );

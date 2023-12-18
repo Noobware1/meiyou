@@ -1,4 +1,4 @@
-import 'package:meiyou_extenstions/models.dart';
+import 'package:meiyou_extensions_lib/models.dart';
 
 class PluginListEntity {
   final int id;

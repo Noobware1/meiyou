@@ -15,7 +15,7 @@ import 'package:meiyou/presentation/providers/video_player_repository_usecases.d
 import 'package:meiyou/presentation/widgets/add_space.dart';
 import 'package:meiyou/presentation/widgets/apply_cancel.dart';
 import 'package:meiyou/presentation/widgets/selector_dilaog_box.dart';
-import 'package:meiyou_extenstions/meiyou_extenstions.dart';
+import 'package:meiyou_extensions_lib/meiyou_extensions_lib.dart';
 import 'package:meiyou/core/utils/extenstions/tracks.dart';
 
 class VideoPlayerBottomRowButtonsMobile extends StatelessWidget {
@@ -64,8 +64,8 @@ class VideoPlayerBottomRowButtonsMobile extends StatelessWidget {
               showDialog(
                   context: context,
                   builder: (secondContext) => BlocBuilder<
-                          ExtractedVideoDataCubit, ExtractedVideoDataState>(
-                        bloc: context.bloc<ExtractedVideoDataCubit>(),
+                          ExtractedMediaCubit<Video>, ExtractedMediaState>(
+                        bloc: context.bloc<ExtractedMediaCubit<Video>>(),
                         builder: (thirdContext, state) {
                           return Dialog(
                             child: ArrowSelectorDialogBox(
@@ -161,7 +161,7 @@ class VideoPlayerBottomRowButtonsMobile extends StatelessWidget {
                             value: context.bloc<SubtitleCubit>(),
                           ),
                           BlocProvider.value(
-                            value: context.bloc<ExtractedVideoDataCubit>(),
+                            value: context.bloc<ExtractedMediaCubit<Video>>(),
                           ),
                           BlocProvider.value(
                             value: context.bloc<SelectedVideoDataCubit>(),
@@ -232,7 +232,7 @@ class _AudioAndSubtitlesWidgetState extends State<AudioAndSubtitlesWidget> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 defaultValue: subtitle,
                 builder: (context, index, subtitle) {
-                  return subtitle.langauge ?? 'Auto';
+                  return subtitle.language ?? 'Auto';
                 },
                 data: context.bloc<SubtitleCubit>().state.subtitles,
                 onSelected: (track) {

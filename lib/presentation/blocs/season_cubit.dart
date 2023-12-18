@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meiyou/presentation/blocs/episodes_bloc.dart';
-import 'package:meiyou_extenstions/models.dart';
+import 'package:meiyou_extensions_lib/models.dart';
 
 class SeasonCubit extends Cubit<SeasonData> {
   final EpisodesCubit _episodesCubit;

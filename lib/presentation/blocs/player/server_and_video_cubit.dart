@@ -2,65 +2,74 @@ import 'dart:async';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meiyou/core/resources/expections.dart';
-import 'package:meiyou/domain/entities/extracted_video_data.dart';
-import 'package:meiyou_extenstions/models.dart';
+import 'package:meiyou/domain/entities/extracted_media.dart';
+import 'package:meiyou_extensions_lib/models.dart';
 
-class ExtractedVideoDataCubit extends Cubit<ExtractedVideoDataState> {
+class ExtractedMediaCubit<T extends Media> extends Cubit<ExtractedMediaState> {
   StreamSubscription? _subscription;
 
-  ExtractedVideoDataCubit(Stream<(ExtractorLink, Media)> stream)
-      : super(const ExtractedVideoDataState()) {
+  ExtractedMediaCubit(Stream<ExtractedMediaEntity> stream)
+      : super(const ExtractedMediaState()) {
     initStream(stream);
   }
 
   void _onError(dynamic error, StackTrace stackTrace) {
-    emit(ExtractedVideoDataState(
+    print('There was an error: $error');
+    if (isClosed) return;
+
+    emit(ExtractedMediaState(
         data: state.data,
         error: error is MeiyouException
             ? error
             : MeiyouException(error.toString(), stackTrace: stackTrace)));
   }
 
-  void initStream(Stream<(ExtractorLink, Media)> stream) {
-    emit(const ExtractedVideoDataState());
+  void initStream(Stream<ExtractedMediaEntity> stream) {
+    emit(const ExtractedMediaState());
     _subscription?.cancel();
     _subscription = null;
     _subscription = stream.listen(
-        (data) {
-          if (data.$2 is Video) {
-            emit(ExtractedVideoDataState(data: [
-              ...state.data,
-              ExtractedVideoDataEntity(link: data.$1, video: data.$2 as Video)
-            ]));
-          }
-        },
-        cancelOnError: false,
-        onDone: () {
-          state.copyWith(isDone: true);
+      (data) {
+        if (isClosed) {
           _subscription?.cancel();
-          _subscription = null;
-        },
-        onError: _onError);
+          return;
+        }
+
+        if (data.media is T) {
+          emit(ExtractedMediaState(data: [
+            ...state.data,
+            ExtractedMediaEntity(link: data.link, media: data.media as T)
+          ]));
+        }
+      },
+      cancelOnError: false,
+      onDone: () {
+        state.copyWith(isDone: true);
+        _subscription?.cancel();
+        _subscription = null;
+      },
+      onError: _onError,
+    );
   }
 }
 
-class ExtractedVideoDataState extends Equatable {
-  final List<ExtractedVideoDataEntity> data;
+class ExtractedMediaState extends Equatable {
+  final List<ExtractedMediaEntity> data;
   final MeiyouException? error;
   final bool isDone;
 
-  const ExtractedVideoDataState(
+  const ExtractedMediaState(
       {this.isDone = false, this.data = const [], this.error});
 
   @override
-  List<Object?> get props => [data, error];
+  List<Object?> get props => [data, error, isDone];
 
-  ExtractedVideoDataState copyWith({
-    List<ExtractedVideoDataEntity>? data,
+  ExtractedMediaState copyWith({
+    List<ExtractedMediaEntity>? data,
     MeiyouException? error,
     bool? isDone,
   }) {
-    return ExtractedVideoDataState(
+    return ExtractedMediaState(
       data: data ?? this.data,
       error: error ?? this.error,
       isDone: isDone ?? this.isDone,
@@ -69,6 +78,6 @@ class ExtractedVideoDataState extends Equatable {
 
   @override
   String toString() {
-    return 'ExtractedVideoDataState(data: $data, error: $error, isDone: $isDone)';
+    return 'ExtractedMediaState(data: $data, error: $error, isDone: $isDone)';
   }
 }

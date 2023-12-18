@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:meiyou_extenstions/extenstions.dart';
+import 'package:meiyou_extensions_lib/extenstions.dart';
 
 extension DirectoryUtils on Directory {
   void deleteAllEntries([void Function()? callback]) {

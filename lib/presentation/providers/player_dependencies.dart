@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
 import 'package:meiyou/data/repositories/video_player_repository_impl.dart';
-import 'package:meiyou/domain/usecases/plugin_repository_usecases/load_link_and_media_use_case.dart';
+import 'package:meiyou/domain/usecases/plugin_repository_usecases/load_extracted_media_usecase.dart';
 import 'package:meiyou/presentation/blocs/current_episode_cubit.dart';
 import 'package:meiyou/presentation/blocs/episodes_bloc.dart';
 import 'package:meiyou/presentation/blocs/episodes_selector_cubit.dart';
@@ -12,7 +12,7 @@ import 'package:meiyou/presentation/blocs/plugin_selector_cubit.dart';
 import 'package:meiyou/presentation/blocs/pluign_manager_usecase_provider_cubit.dart';
 import 'package:meiyou/presentation/blocs/season_cubit.dart';
 import 'package:meiyou/presentation/providers/video_player_repository_usecases.dart';
-import 'package:meiyou_extenstions/models.dart';
+import 'package:meiyou_extensions_lib/models.dart';
 
 class PlayerDependenciesProvider {
   final List<RepositoryProvider> repositories;
@@ -21,7 +21,7 @@ class PlayerDependenciesProvider {
   PlayerDependenciesProvider({required this.repositories, required this.blocs});
 
   factory PlayerDependenciesProvider.createFromContext(
-      BuildContext context, LoadLinkAndMediaStreamUseCaseParams params,
+      BuildContext context, LoadExtractedMediaStreamUseCaseParams params,
       [int? episodeIndex]) {
     return PlayerDependenciesProvider(repositories: [
       RepositoryProvider<VideoPlayerRepositoryUseCases>(
@@ -32,14 +32,14 @@ class PlayerDependenciesProvider {
       RepositoryProvider<MediaDetails>.value(
           value: context.repository<MediaDetails>()),
     ], blocs: [
-      BlocProvider<ExtractedVideoDataCubit>(
+      BlocProvider<ExtractedMediaCubit<Video>>(
         lazy: false,
         create: (context) {
-          return ExtractedVideoDataCubit(context
+          return ExtractedMediaCubit<Video>(context
               .bloc<PluginRepositoryUseCaseProviderCubit>()
               .state
               .provider!
-              .loadLinkAndMediaStreamUseCase
+              .loadExtractedMediaStreamUseCase
               .call(params));
         },
       ),
@@ -66,8 +66,8 @@ class PlayerDependenciesProvider {
       RepositoryProvider<MediaDetails>.value(
           value: context.repository<MediaDetails>()),
     ], blocs: [
-      BlocProvider<ExtractedVideoDataCubit>.value(
-          value: context.bloc<ExtractedVideoDataCubit>()),
+      BlocProvider<ExtractedMediaCubit<Video>>.value(
+          value: context.bloc<ExtractedMediaCubit<Video>>()),
       BlocProvider<SelectedVideoDataCubit>.value(
           value: context.bloc<SelectedVideoDataCubit>()),
       BlocProvider<PluginRepositoryUseCaseProviderCubit>.value(

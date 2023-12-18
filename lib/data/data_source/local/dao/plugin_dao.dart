@@ -5,7 +5,7 @@ import 'package:meiyou/core/resources/isar.dart';
 import 'package:meiyou/core/utils/extenstions/directory.dart';
 import 'package:meiyou/data/models/installed_plugin.dart';
 import 'package:meiyou/data/models/plugin_list.dart';
-import 'package:meiyou_extenstions/models.dart';
+import 'package:meiyou_extensions_lib/models.dart';
 import 'package:path/path.dart' as path_helper;
 import 'package:isar/isar.dart';
 

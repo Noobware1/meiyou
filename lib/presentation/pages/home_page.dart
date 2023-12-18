@@ -15,7 +15,7 @@ import 'package:meiyou/presentation/widgets/error_widget.dart';
 import 'package:meiyou/presentation/widgets/image_view/image_holder.dart';
 import 'package:meiyou/presentation/widgets/image_view/image_list_view.dart';
 import 'package:meiyou/presentation/widgets/plugin_selector_floating_action_button.dart';
-import 'package:meiyou_extenstions/models.dart' as models;
+import 'package:meiyou_extensions_lib/models.dart' as models;
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});

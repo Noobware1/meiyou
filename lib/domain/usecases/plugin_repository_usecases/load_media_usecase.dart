@@ -1,7 +1,7 @@
 import 'package:meiyou/core/resources/response_state.dart';
 import 'package:meiyou/core/usecases/usecase.dart';
 import 'package:meiyou/domain/repositories/plugin_repository.dart';
-import 'package:meiyou_extenstions/models.dart';
+import 'package:meiyou_extensions_lib/models.dart';
 
 class LoadMediaUseCase
     implements UseCase<Future<ResponseState<Media?>>, ExtractorLink> {

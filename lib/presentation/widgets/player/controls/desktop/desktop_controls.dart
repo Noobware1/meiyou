@@ -8,7 +8,6 @@ import 'package:media_kit_video/media_kit_video.dart';
 import 'package:meiyou/core/constants/default_widgets.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
 import 'package:meiyou/presentation/blocs/current_episode_cubit.dart';
-import 'package:meiyou/presentation/blocs/player/buffering_cubit.dart';
 import 'package:meiyou/presentation/blocs/player/full_screen_cubit.dart';
 import 'package:meiyou/presentation/blocs/player/progress_bar_cubit.dart';
 import 'package:meiyou/presentation/blocs/player/selected_video_data.dart';
@@ -25,7 +24,7 @@ import 'package:meiyou/presentation/widgets/player/controls/desktop/episodes_sel
 import 'package:meiyou/presentation/widgets/player/controls/desktop/next_episode.dart';
 import 'package:meiyou/presentation/widgets/player/controls/desktop/options.dart';
 import 'package:meiyou/presentation/widgets/player/controls/desktop/previous_episode_button.dart';
-import 'package:meiyou_extenstions/models.dart';
+import 'package:meiyou_extensions_lib/models.dart' as models;
 import 'play_button.dart' as play_button;
 import 'postion_indicator.dart' as postion_indicator;
 import 'full_screen_button.dart' as full_screen_button;
@@ -289,8 +288,9 @@ class DesktopControls extends StatelessWidget {
                                                 .MaterialDesktopPositionIndicator(),
                                             const Spacer(),
                                             if (context
-                                                .repository<MediaDetails>()
-                                                .mediaItem is! Movie)
+                                                .repository<
+                                                    models.MediaDetails>()
+                                                .mediaItem is! models.Movie)
                                               const EpisodeSelectorButton(),
                                             const MaterialDesktopOptionsButton(),
                                             const full_screen_button
@@ -356,8 +356,8 @@ class DesktopControls extends StatelessWidget {
         if (selected is SelectedVideoDataStateInital) {
           return defaultSizedBox;
         }
-        return BlocBuilder<ExtractedVideoDataCubit, ExtractedVideoDataState>(
-            builder: (context, state) {
+        return BlocBuilder<ExtractedMediaCubit<models.Video>,
+            ExtractedMediaState>(builder: (context, state) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -406,7 +406,7 @@ class DesktopControls extends StatelessWidget {
                     const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                 textAlign: TextAlign.left,
               ),
-            Text(context.repository<MediaDetails>().name.trim(),
+            Text(context.repository<models.MediaDetails>().name.trim(),
                 textAlign: TextAlign.left,
                 style: const TextStyle(
                     color: Colors.grey,

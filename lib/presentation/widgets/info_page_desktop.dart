@@ -11,8 +11,8 @@ import 'package:meiyou/presentation/widgets/banner_view/banner_image_holder.dart
 import 'package:meiyou/presentation/widgets/gradient.dart';
 import 'package:meiyou/presentation/widgets/image_view/image_holder.dart';
 import 'package:meiyou/presentation/widgets/resizeable_text.dart';
-import 'package:meiyou_extenstions/models.dart';
-import 'package:meiyou_extenstions/extenstions.dart';
+import 'package:meiyou_extensions_lib/models.dart';
+import 'package:meiyou_extensions_lib/extenstions.dart';
 
 class InfoPageDesktop extends StatelessWidget {
   const InfoPageDesktop({super.key});

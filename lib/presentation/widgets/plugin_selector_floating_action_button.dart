@@ -13,52 +13,52 @@ class PluginFloatingActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<InstalledPluginCubit, List<InstalledPluginEntity>>(
-        builder: (context, state) {
-      return SizedBox(
-        height: 55,
-        child: BlocBuilder<PluginSelectorCubit, InstalledPluginEntity>(
-          builder: (context, selectedPlugin) {
-            return FloatingActionButton.extended(
-                heroTag: heroTag,
-                elevation: 10.0,
-                icon: Icon(Icons.view_headline_rounded,
-                    color:
-                        context.theme.colorScheme.brightness == Brightness.dark
-                            ? Colors.white
-                            : Colors.black),
-                extendedPadding: const EdgeInsets.fromLTRB(15, 50, 15, 50),
-                label: Text(selectedPlugin.name,
-                    style: TextStyle(
-                        color: context.theme.colorScheme.brightness ==
-                                Brightness.dark
-                            ? Colors.white
-                            : Colors.black)),
-                backgroundColor: context.theme.scaffoldBackgroundColor,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15)),
-                onPressed: () {
-                  showModalBottomSheet(
-                    context: context,
-                    builder: (context) {
-                      return Scaffold(
-                          body: ShowInstalledPlugins(
-                        onSelected: (plugin) {
-                          context
-                              .bloc<PluginSelectorCubit>()
-                              .selectPlugin(plugin);
+    return SizedBox(
+      height: 55,
+      child: BlocBuilder<PluginSelectorCubit, InstalledPluginEntity>(
+        builder: (context, selectedPlugin) {
+          return FloatingActionButton.extended(
+              heroTag: heroTag,
+              elevation: 10.0,
+              icon: Icon(Icons.view_headline_rounded,
+                  color: context.theme.colorScheme.brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.black),
+              extendedPadding: const EdgeInsets.fromLTRB(15, 50, 15, 50),
+              label: Text(selectedPlugin.name,
+                  style: TextStyle(
+                      color: context.theme.colorScheme.brightness ==
+                              Brightness.dark
+                          ? Colors.white
+                          : Colors.black)),
+              backgroundColor: context.theme.scaffoldBackgroundColor,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15)),
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  builder: (context) {
+                    return Scaffold(body: BlocBuilder<InstalledPluginCubit,
+                        List<InstalledPluginEntity>>(
+                      builder: (context, state) {
+                        return ShowInstalledPlugins(
+                          onSelected: (plugin) {
+                            context
+                                .bloc<PluginSelectorCubit>()
+                                .selectPlugin(plugin);
 
-                          context.pop(context);
-                        },
-                        plugin: selectedPlugin,
-                        pluginList: state,
-                      ));
-                    },
-                  );
-                });
-          },
-        ),
-      );
-    });
+                            context.pop(context);
+                          },
+                          plugin: selectedPlugin,
+                          pluginList: state,
+                        );
+                      },
+                    ));
+                  },
+                );
+              });
+        },
+      ),
+    );
   }
 }

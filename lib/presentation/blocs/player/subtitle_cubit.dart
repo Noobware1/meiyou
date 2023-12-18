@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:meiyou_extenstions/meiyou_extenstions.dart';
-import 'package:meiyou_extenstions/extenstions.dart';
+import 'package:meiyou_extensions_lib/meiyou_extensions_lib.dart';
+import 'package:meiyou_extensions_lib/extenstions.dart';
 
 class SubtitleState {
   final List<Subtitle> subtitles;

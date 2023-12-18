@@ -42,7 +42,7 @@ packages:
     source: hosted
     version: "2.4.2"
   async:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: async
       sha256: "947bfcf187f74dbc5e146c9eb9c0f10c9f8b30743e341481c1e2ed3ecc18c20c"
@@ -101,10 +101,10 @@ packages:
     dependency: transitive
     description:
       name: build_resolvers
-      sha256: "64e12b0521812d1684b1917bc80945625391cb9bdd4312536b1d69dcb6133ed8"
+      sha256: "339086358431fa15d7eca8b6a36e5d783728cf025e559b834f4609a1fcfb7b0a"
       url: "https://pub.dev"
     source: hosted
-    version: "2.4.1"
+    version: "2.4.2"
   build_runner:
     dependency: "direct dev"
     description:
@@ -189,10 +189,10 @@ packages:
     dependency: transitive
     description:
       name: cli_util
-      sha256: b8db3080e59b2503ca9e7922c3df2072cf13992354d5e944074ffa836fba43b7
+      sha256: c05b7406fdabc7a49a3929d4af76bcaccbbffcbcdcf185b082e1ae07da323d19
       url: "https://pub.dev"
     source: hosted
-    version: "0.4.0"
+    version: "0.4.1"
   clock:
     dependency: transitive
     description:
@@ -205,10 +205,10 @@ packages:
     dependency: transitive
     description:
       name: code_builder
-      sha256: b2151ce26a06171005b379ecff6e08d34c470180ffe16b8e14b6d52be292b55f
+      sha256: feee43a5c05e7b3199bb375a86430b8ada1b04104f2923d0e03cc01ca87b6d84
       url: "https://pub.dev"
     source: hosted
-    version: "4.8.0"
+    version: "4.9.0"
   collection:
     dependency: transitive
     description:
@@ -271,7 +271,7 @@ packages:
     description:
       path: "."
       ref: master
-      resolved-ref: "3889842c2067b9353ba53629da86c8ee6d315e7d"
+      resolved-ref: e58fcedad79210df57741231ae69161dfe80b592
       url: "https://github.com/Noobware1/dart_eval.git"
     source: git
     version: "0.7.2"
@@ -634,13 +634,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.4"
-  meiyou_extenstions:
+  meiyou_extensions_lib:
     dependency: "direct main"
     description:
       path: "."
       ref: master
-      resolved-ref: "0da6f8f06146f6578b69c2c02bd1e75abb90c3a8"
-      url: "https://github.com/Noobware1/meiyou_extenstions.git"
+      resolved-ref: "9384ee1bb7eb4a2c1b8e045fdfef42a5acc87b29"
+      url: "https://github.com/Noobware1/meiyou_extensions_lib.git"
     source: git
     version: "1.0.0"
   meta:
@@ -933,10 +933,10 @@ packages:
     dependency: transitive
     description:
       name: source_gen
-      sha256: fc0da689e5302edb6177fdd964efcb7f58912f43c28c2047a808f5bfff643d16
+      sha256: "14658ba5f669685cd3d63701d01b31ea748310f7ab854e471962670abcf57832"
       url: "https://pub.dev"
     source: hosted
-    version: "1.4.0"
+    version: "1.5.0"
   source_span:
     dependency: transitive
     description:

@@ -5,7 +5,7 @@ import 'package:meiyou/core/resources/expections.dart';
 import 'package:meiyou/core/resources/response_state.dart';
 import 'package:meiyou/core/resources/subtitle_decoders/models/cue.dart';
 import 'package:meiyou/domain/usecases/video_player_repository_usecases/get_subtitle_cues_usecase.dart';
-import 'package:meiyou_extenstions/meiyou_extenstions.dart';
+import 'package:meiyou_extensions_lib/meiyou_extensions_lib.dart';
 
 class CurrentSubtitleCuesCubit extends Cubit<List<SubtitleCue>?> {
   final List<StreamSubscription> _subscriptions = [];

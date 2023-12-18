@@ -1,7 +1,7 @@
 import 'package:meiyou/core/resources/response_state.dart';
 import 'package:meiyou/domain/entities/installed_plugin.dart';
 import 'package:meiyou/domain/entities/plugin_list.dart';
-import 'package:meiyou_extenstions/models.dart';
+import 'package:meiyou_extensions_lib/models.dart';
 
 abstract interface class PluginManagerRepository {
   Future<ResponseState<List<PluginListEntity>>> getAllPlugins();

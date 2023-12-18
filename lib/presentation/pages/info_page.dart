@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meiyou/core/resources/snackbar.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
-import 'package:meiyou/domain/usecases/plugin_repository_usecases/load_link_and_media_use_case.dart';
 import 'package:meiyou/presentation/blocs/async_cubit/async_cubit.dart';
 import 'package:meiyou/presentation/blocs/info_page_cubit.dart';
 import 'package:meiyou/presentation/blocs/pluign_manager_usecase_provider_cubit.dart';
@@ -12,7 +11,7 @@ import 'package:meiyou/presentation/providers/init_provider_info_page.dart';
 import 'package:meiyou/presentation/widgets/info_page_desktop.dart';
 import 'package:meiyou/presentation/widgets/info_page_mobile.dart';
 import 'package:meiyou/presentation/widgets/responsive_layout.dart';
-import 'package:meiyou_extenstions/models.dart';
+import 'package:meiyou_extensions_lib/models.dart';
 
 class InfoPage extends StatelessWidget {
   final SearchResponse searchResponse;
@@ -21,8 +20,6 @@ class InfoPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-
     return Scaffold(
       body: BlocProvider(
         create: (context) => MediaDetailsCubit(searchResponse)

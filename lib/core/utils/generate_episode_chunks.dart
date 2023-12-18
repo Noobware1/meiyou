@@ -1,7 +1,5 @@
-
-
-import 'package:meiyou_extenstions/extenstions.dart';
-import 'package:meiyou_extenstions/models.dart';
+import 'package:meiyou_extensions_lib/extenstions.dart';
+import 'package:meiyou_extensions_lib/models.dart';
 
 class GenerateEpisodesChunks {
   static Map<String, List<Episode>> buildEpisodesResponse(

@@ -12,7 +12,7 @@ import 'package:meiyou/presentation/blocs/plugin_selector_cubit.dart';
 import 'package:meiyou/presentation/providers/video_player_repository_usecases.dart';
 import 'package:meiyou/presentation/widgets/add_space.dart';
 import 'package:meiyou/presentation/widgets/player/controls/desktop/episodes_selector.dart';
-import 'package:meiyou_extenstions/models.dart';
+import 'package:meiyou_extensions_lib/models.dart';
 
 class VideoPlayerTopRowMobile extends StatelessWidget {
   const VideoPlayerTopRowMobile({
@@ -73,7 +73,7 @@ class VideoPlayerTopRowMobile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   addVerticalSpace(10),
-                  BlocBuilder<ExtractedVideoDataCubit, ExtractedVideoDataState>(
+                  BlocBuilder<ExtractedMediaCubit<Video>, ExtractedMediaState>(
                     builder: (context, state) {
                       final current =
                           selected.fromExtractedVideoDataState(state);

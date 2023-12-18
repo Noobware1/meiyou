@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:meiyou/core/constants/default_widgets.dart';
 import 'package:meiyou/core/constants/height_and_width.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
+import 'package:meiyou/domain/entities/installed_plugin.dart';
 import 'package:meiyou/presentation/blocs/async_cubit/async_cubit.dart';
 import 'package:meiyou/presentation/blocs/plugin_selector_cubit.dart';
 import 'package:meiyou/presentation/blocs/pluign_manager_usecase_provider_cubit.dart';
@@ -16,7 +17,7 @@ import 'package:meiyou/presentation/widgets/image_view/image_button_wrapper.dart
 import 'package:meiyou/presentation/widgets/image_view/image_holder.dart';
 import 'package:meiyou/presentation/widgets/plugin_selector_floating_action_button.dart';
 import 'package:meiyou/presentation/widgets/responsive_layout.dart';
-import 'package:meiyou_extenstions/models.dart';
+import 'package:meiyou_extensions_lib/models.dart';
 
 void navigateToInfo(SearchResponse searchResponse, BuildContext context) {
   return context.go('/search/info', extra: searchResponse);
@@ -42,13 +43,16 @@ class _ForMobile extends StatelessWidget {
                   style: textStyle,
                 ),
                 addHorizontalSpace(10),
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                      color: context.theme.colorScheme.primary,
-                      borderRadius: BorderRadius.circular(8)),
-                  child: Text(context.bloc<PluginSelectorCubit>().state.name,
-                      style: textStyle),
+                BlocBuilder<PluginSelectorCubit, InstalledPluginEntity>(
+                  builder: (context, state) {
+                    return Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                          color: context.theme.colorScheme.primary,
+                          borderRadius: BorderRadius.circular(8)),
+                      child: Text(state.name, style: textStyle),
+                    );
+                  },
                 )
               ],
             ),
@@ -165,13 +169,16 @@ class _ForDesktop extends StatelessWidget {
                 style: textStyle,
               ),
               addHorizontalSpace(10),
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                    color: context.theme.colorScheme.primary,
-                    borderRadius: BorderRadius.circular(8)),
-                child: Text(context.bloc<PluginSelectorCubit>().state.name,
-                    style: textStyle),
+              BlocBuilder<PluginSelectorCubit, InstalledPluginEntity>(
+                builder: (context, state) {
+                  return Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                        color: context.theme.colorScheme.primary,
+                        borderRadius: BorderRadius.circular(8)),
+                    child: Text(state.name, style: textStyle),
+                  );
+                },
               )
             ],
           ),
@@ -206,8 +213,7 @@ class _ForDesktop extends StatelessWidget {
           if (context.tryBloc<SearchPageCubit>() != null)
             Expanded(
               child: BlocBuilder<SearchPageCubit,
-                      AsyncState<List<SearchResponse>>>(
-                  builder: (context, state) {
+                  AsyncState<List<SearchResponse>>>(builder: (context, state) {
                 if (state is SearchPageInital) {
                   return defaultSizedBox;
                 }

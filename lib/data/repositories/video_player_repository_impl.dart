@@ -15,11 +15,11 @@ import 'package:meiyou/core/resources/subtitle_decoders/parser/subrip_parser.dar
 import 'package:meiyou/core/resources/subtitle_decoders/parser/webvtt_parser.dart';
 import 'package:meiyou/core/resources/subtitle_decoders/subtitle_parser.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
-import 'package:meiyou/data/models/extracted_video_data.dart';
+import 'package:meiyou/data/models/extracted_media.dart';
 import 'package:meiyou/data/models/link_and_source.dart';
-import 'package:meiyou/domain/entities/extracted_video_data.dart';
+import 'package:meiyou/domain/entities/extracted_media.dart';
 import 'package:meiyou/domain/repositories/video_player_repository.dart';
-import 'package:meiyou/domain/usecases/plugin_repository_usecases/load_link_and_media_use_case.dart';
+import 'package:meiyou/domain/usecases/plugin_repository_usecases/load_extracted_media_usecase.dart';
 import 'package:meiyou/presentation/blocs/current_episode_cubit.dart';
 import 'package:meiyou/presentation/blocs/episodes_bloc.dart';
 import 'package:meiyou/presentation/blocs/episodes_selector_cubit.dart';
@@ -30,8 +30,8 @@ import 'package:meiyou/presentation/blocs/pluign_manager_usecase_provider_cubit.
 import 'package:meiyou/presentation/blocs/season_cubit.dart';
 import 'package:meiyou/presentation/providers/player_provider.dart';
 import 'package:meiyou/presentation/providers/player_providers.dart';
-import 'package:meiyou_extenstions/extenstions.dart';
-import 'package:meiyou_extenstions/models.dart';
+import 'package:meiyou_extensions_lib/extenstions.dart';
+import 'package:meiyou_extensions_lib/models.dart';
 
 class VideoPlayerRepositoryImpl implements VideoPlayerRepository {
   @override
@@ -44,7 +44,7 @@ class VideoPlayerRepositoryImpl implements VideoPlayerRepository {
   Subtitle getDefaultSubtitle(List<Subtitle> subtites) {
     assert(subtites.isNotEmpty);
     return subtites.tryfirstWhere(
-            (e) => e.langauge.toString().toLowerCase().contains('en')) ??
+            (e) => e.language.toString().toLowerCase().contains('en')) ??
         subtites.first;
   }
 
@@ -110,16 +110,17 @@ class VideoPlayerRepositoryImpl implements VideoPlayerRepository {
     context.bloc<CurrentEpisodeCubit>().changeEpisode(index);
     context.bloc<SelectedVideoDataCubit>().resetState();
 
-    context.bloc<ExtractedVideoDataCubit>().initStream(context
+    context.bloc<ExtractedMediaCubit<Video>>().initStream(context
         .bloc<PluginRepositoryUseCaseProviderCubit>()
         .state
         .provider!
-        .loadLinkAndMediaStreamUseCase(
-          LoadLinkAndMediaStreamUseCaseParams(episode.data),
+        .loadExtractedMediaStreamUseCase(
+          LoadExtractedMediaStreamUseCaseParams(episode.data),
         ));
 
     loadPlayer(
-        context: context,
+        extractedMediaCubit: context.bloc<ExtractedMediaCubit<Video>>(),
+        selectedVideoDataCubit: context.bloc<SelectedVideoDataCubit>(),
         player: playerProvider(context).player,
         videoController: playerProvider(context).controller,
         providers: PlayerProviders.getFromContext(context));
@@ -128,20 +129,18 @@ class VideoPlayerRepositoryImpl implements VideoPlayerRepository {
   }
 
   @override
-  void loadPlayer(
-      {required BuildContext context,
+  StreamSubscription loadPlayer(
+      {required ExtractedMediaCubit<Video> extractedMediaCubit,
+      required SelectedVideoDataCubit selectedVideoDataCubit,
       required PlayerProviders providers,
       required media_kit.Player player,
       required vid.VideoController videoController,
       Duration? startPostion,
-      void Function()? onDoneCallback}) async {
-        
-    final selectedVideoDataCubit = context.bloc<SelectedVideoDataCubit>();
+      void Function()? onDoneCallback}) {
     late StreamSubscription? subscription;
     (int, Video, int)? best = null;
 
-    subscription =
-        context.bloc<ExtractedVideoDataCubit>().stream.listen((state) async {
+    subscription = extractedMediaCubit.stream.listen((state) async {
       if (state.data.isNotEmpty) {
         subscription?.pause();
         best = _getBestVideoSource(state);
@@ -151,6 +150,7 @@ class VideoPlayerRepositoryImpl implements VideoPlayerRepository {
         await changeSource(
             video: best!.$2,
             selectedSource: best!.$3,
+            startPostion: startPostion,
             player: player,
             subtitleCubit: providers.subtitleCubit);
         subscription?.cancel();
@@ -160,12 +160,49 @@ class VideoPlayerRepositoryImpl implements VideoPlayerRepository {
       }
     }, onDone: () {
       subscription?.cancel();
-      context.bloc<ExtractedVideoDataCubit>().state.data.isEmpty;
-      throw Exception('No video sources found');
     });
 
-    return;
+    return subscription!;
   }
+
+  // @override
+  // void loadPlayer(
+  //     {required BuildContext context,
+  //     required PlayerProviders providers,
+  //     required media_kit.Player player,
+  //     required vid.VideoController videoController,
+  //     Duration? startPostion,
+  //     void Function()? onDoneCallback}) async {
+  //   final selectedVideoDataCubit = context.bloc<SelectedVideoDataCubit>();
+  //   late StreamSubscription? subscription;
+  //   (int, Video, int)? best = null;
+
+  //   subscription =
+  //       context.bloc<ExtractedMediaCubit<Video>>().stream.listen((state) async {
+  //     if (state.data.isNotEmpty) {
+  //       subscription?.pause();
+  //       best = _getBestVideoSource(state);
+
+  //       selectedVideoDataCubit.setStateByIndexes(best!.$1, best!.$3);
+
+  //       await changeSource(
+  //           video: best!.$2,
+  //           selectedSource: best!.$3,
+  //           player: player,
+  //           subtitleCubit: providers.subtitleCubit);
+  //       subscription?.cancel();
+  //       subscription = null;
+
+  //       onDoneCallback?.call();
+  //     }
+  //   }, onDone: () {
+  //     subscription?.cancel();
+  //     context.bloc<ExtractedMediaCubit<Video>>().state.data.isEmpty;
+  //     throw Exception('No video sources found');
+  //   });
+
+  //   return;
+  // }
 
   Future<void> _startFrom(Duration? duration, media_kit.Player player) async {
     if (duration == null) {
@@ -175,14 +212,16 @@ class VideoPlayerRepositoryImpl implements VideoPlayerRepository {
     await player.seek(duration);
   }
 
-  (int, Video, int) _getBestVideoSource(ExtractedVideoDataState state) {
+  (int, Video, int) _getBestVideoSource(ExtractedMediaState state) {
     final e = state.data.first;
+
     return (
       state.data.indexOf(e),
-      e.video,
-      e.video.videoSources.indexOf(e.video.videoSources
+      (e.media as Video),
+      (e.media as Video).videoSources.indexOf((e.media as Video)
+              .videoSources
               .tryfirstWhere((it) => it.quality == VideoQuality.hlsMaster) ??
-          e.video.videoSources.reduce((high, low) =>
+          (e.media as Video).videoSources.reduce((high, low) =>
               (high.quality?.height ?? 0) > (low.quality?.height ?? 0)
                   ? high
                   : low))
@@ -217,10 +256,10 @@ class VideoPlayerRepositoryImpl implements VideoPlayerRepository {
 
   @override
   List<LinkAndSource> convertExtractedVideoDataList(
-      List<ExtractedVideoDataEntity> data) {
+      List<ExtractedMediaEntity> data) {
     return data
-        .mapAsList((it) => LinkAndSource.fromExtractedVideoData(
-            ExtractedVideoData.fromEntity(it)))
+        .mapAsList((it) =>
+            LinkAndSource.fromExtractedVideoData(ExtractedMedia.fromEntity(it)))
         .faltten();
   }
 }
@@ -229,7 +268,7 @@ extension on List<Subtitle> {
   List<media_kit.SubtitleTrack> toSubtitleTracks() {
     return mapWithIndex((index, it) => media_kit.SubtitleTrack.uri(
           it.url,
-          language: it.langauge ?? index.toString(),
+          language: it.language ?? index.toString(),
         ));
   }
 }

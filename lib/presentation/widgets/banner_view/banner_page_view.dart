@@ -7,7 +7,7 @@ import 'package:meiyou/core/resources/platform_check.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
 import 'package:meiyou/presentation/widgets/banner_view/state_management.dart/banner_page_view_controller.dart';
 import 'package:meiyou/presentation/widgets/gradient.dart';
-import 'package:meiyou_extenstions/models.dart';
+import 'package:meiyou_extensions_lib/models.dart';
 import 'banner_image_holder.dart';
 import 'banner_image_text.dart';
 import 'banner_row_buttons.dart';
@@ -22,23 +22,23 @@ class BannerPageView extends StatefulWidget {
 }
 
 class _BannerPageViewState extends State<BannerPageView> {
-  late final PageController _controller;
+  late final PageController _pageController;
 
-  late final BannerPageViewController _bannerPageViewController;
+  late final BannerPageViewController _controller;
   late final List<SearchResponse> row;
 
   @override
   void initState() {
     row = widget.homePage.data.data;
-    _controller = PageController();
-    _bannerPageViewController = BannerPageViewController();
+    _pageController = PageController();
+    _controller = BannerPageViewController();
     super.initState();
   }
 
   @override
   void dispose() {
+    _pageController.dispose();
     _controller.dispose();
-    _bannerPageViewController.dispose();
 
     super.dispose();
   }
@@ -51,19 +51,12 @@ class _BannerPageViewState extends State<BannerPageView> {
     return DecoratedBox(
       position: DecorationPosition.foreground,
       decoration: BoxDecoration(
-        // border: Border.all(strokeAlign: -0.050),
+        border: Border.all(
+            strokeAlign: -0.050, color: context.theme.scaffoldBackgroundColor),
         gradient: LinearGradient(
           begin: const Alignment(0.0, 1.0), // Adjust the begin point
           end: const Alignment(0.0, -1.0),
-          // begin: Alignment.topCenter,
-          // end: Alignment.bottomCenter,
-          colors: [
-            context.theme.scaffoldBackgroundColor,
-            Colors.transparent
-            // Color.fromARGB(255, 0, 0, 0), // Dark color at the bottom
-            // Color.fromARGB(120, 0, 0, 0), // Slightly lighter
-            // Color.fromARGB(0, 0, 0, 0), // Transparent in the middle
-          ],
+          colors: [context.theme.scaffoldBackgroundColor, Colors.transparent],
         ),
       ),
       child: _buildPageView(),
@@ -73,8 +66,8 @@ class _BannerPageViewState extends State<BannerPageView> {
   Widget _buildPageView() {
     return PageView.builder(
       itemCount: row.length,
-      controller: _controller,
-      onPageChanged: _bannerPageViewController.onPageChanged,
+      controller: _pageController,
+      onPageChanged: _controller.onPageChanged,
       scrollDirection: Axis.horizontal,
       itemBuilder: (context, index) => BannerImageHolder(
           height: 400, imageUrl: row[index].poster.replaceFirst("'", "")),
@@ -94,8 +87,7 @@ class _BannerPageViewState extends State<BannerPageView> {
       ),
       child: Stack(
         children: [
-          Positioned.fill(
-              child: isMobile ? pageViewWithDecoratedBox() : _buildPageView()),
+          Positioned.fill(child: pageViewWithDecoratedBox()),
           const Positioned(
             top: 0,
             right: 0,
@@ -119,33 +111,24 @@ class _BannerPageViewState extends State<BannerPageView> {
                     end: Alignment.centerRight),
               ),
             ),
-          if (!isMobile)
-            const Positioned.fill(
-                child: DrawGradient(
-              height: 80,
-              begin: Alignment(0.0, 1.0), // Adjust the begin point
-              end: Alignment(0.0, -1.0),
-            )),
           Positioned(
             right: isMobile ? 0 : width / 3.0,
             left: isMobile ? 0 : 50,
             bottom: isMobile ? 20 : 30,
             child: ListenableBuilder(
-                listenable: _bannerPageViewController,
+                listenable: _controller,
                 builder: (context, child) {
                   return BannerImageText(
-                    showType: row[_bannerPageViewController.page].type,
+                    showType: row[_controller.page].type,
                     airDate: null,
-                    title: row[_bannerPageViewController.page].title,
-                    genres: row[_bannerPageViewController.page].generes,
-                    rating: row[_bannerPageViewController.page].rating,
-                    description:
-                        row[_bannerPageViewController.page].description,
+                    title: row[_controller.page].title,
+                    genres: row[_controller.page].generes,
+                    rating: row[_controller.page].rating,
+                    description: row[_controller.page].description,
                     buttons: BannerButtons(
                       onTapMyList: () {},
                       onTapWatchNow: () {
-                        context.go(Routes.info,
-                            extra: row[_bannerPageViewController.page]);
+                        context.go(Routes.info, extra: row[_controller.page]);
                       },
                     ),
                   );
@@ -162,12 +145,12 @@ class _BannerPageViewState extends State<BannerPageView> {
                     size: 25,
                   ),
                   onTap: () {
-                    if (_controller.page?.round() == 0) {
-                      _controller.jumpTo(
+                    if (_pageController.page?.round() == 0) {
+                      _pageController.jumpTo(
                         row.length - 1,
                       );
                     } else {
-                      _controller.previousPage(
+                      _pageController.previousPage(
                           duration: _duration, curve: _curve);
                     }
                   }),
@@ -183,12 +166,13 @@ class _BannerPageViewState extends State<BannerPageView> {
                     size: 25,
                   ),
                   onTap: () {
-                    if (_controller.page == row.length - 1) {
-                      _controller.jumpTo(
+                    if (_pageController.page == row.length - 1) {
+                      _pageController.jumpTo(
                         0,
                       );
                     } else {
-                      _controller.nextPage(duration: _duration, curve: _curve);
+                      _pageController.nextPage(
+                          duration: _duration, curve: _curve);
                     }
                   }),
             )

@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:meiyou/core/resources/client.dart';
 import 'package:meiyou/core/utils/m3u8_parser/models/m3u8_stream.dart';
-import 'package:meiyou_extenstions/extenstions.dart';
-import 'package:meiyou_extenstions/meiyou_extenstions.dart';
-import 'package:meiyou_extenstions/ok_http/ok_http.dart';
+import 'package:meiyou_extensions_lib/extenstions.dart';
+import 'package:meiyou_extensions_lib/meiyou_extensions_lib.dart';
+import 'package:meiyou_extensions_lib/ok_http/ok_http.dart';
 
 final base64Regex = RegExp(
     r'^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{4})$');
@@ -20,8 +20,7 @@ class M3u8Parser {
   }) async {
     final videos = await generateVideos(url, headers: headers, backup: backup);
 
-    return Video(
-        videoSources: videos, headers: headers, subtitles: subtitles);
+    return Video(videoSources: videos, headers: headers, subtitles: subtitles);
   }
 
   static Future<List<VideoSource>> generateVideos(
