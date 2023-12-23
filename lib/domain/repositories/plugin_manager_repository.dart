@@ -6,7 +6,7 @@ import 'package:meiyou_extensions_lib/models.dart';
 abstract interface class PluginManagerRepository {
   Future<ResponseState<List<PluginListEntity>>> getAllPlugins();
 
-  Stream<List<InstalledPluginEntity>> getInstalledPlugins();
+  Stream<List<InstalledPluginEntity>> getInstalledPlugins(String type);
 
   Future<InstalledPluginEntity> installPlugin(OnlinePlugin plugin);
 

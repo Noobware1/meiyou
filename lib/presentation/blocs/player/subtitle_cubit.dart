@@ -1,6 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meiyou_extensions_lib/meiyou_extensions_lib.dart';
-import 'package:meiyou_extensions_lib/extenstions.dart';
 
 class SubtitleState {
   final List<Subtitle> subtitles;
@@ -23,13 +22,9 @@ class SubtitleState {
 class SubtitleCubit extends Cubit<SubtitleState> {
   SubtitleCubit() : super(SubtitleState.noSubtitle);
 
-  // Subtitle get current => state.subtitles[state.selectedIndex];
-
   void addSubtitles(List<Subtitle>? subtitles) {
-    if (!subtitles.isNotNullAndEmpty) return;
-
     emit(SubtitleState(
-        subtitles: [Subtitle.noSubtitle, ...subtitles!], selectedIndex: 0));
+        subtitles: [Subtitle.noSubtitle, ...?subtitles], selectedIndex: 0));
   }
 
   void changeSubtitle(Subtitle subtitle) {

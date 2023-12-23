@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:meiyou/core/constants/screen_size.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
-import 'package:meiyou/presentation/emoticons_widget.dart';
+import 'package:meiyou/presentation/widgets/emoticons_widget.dart';
 import 'package:meiyou/presentation/widgets/add_space.dart';
 
 class CustomErrorWidget extends StatelessWidget {

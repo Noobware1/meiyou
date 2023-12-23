@@ -23,6 +23,7 @@ import 'package:meiyou/domain/usecases/plugin_repository_usecases/load_extracted
 import 'package:meiyou/presentation/blocs/current_episode_cubit.dart';
 import 'package:meiyou/presentation/blocs/episodes_bloc.dart';
 import 'package:meiyou/presentation/blocs/episodes_selector_cubit.dart';
+import 'package:meiyou/presentation/blocs/player/playing_cubit.dart';
 import 'package:meiyou/presentation/blocs/player/selected_video_data.dart';
 import 'package:meiyou/presentation/blocs/player/server_and_video_cubit.dart';
 import 'package:meiyou/presentation/blocs/player/subtitle_cubit.dart';
@@ -49,11 +50,11 @@ class VideoPlayerRepositoryImpl implements VideoPlayerRepository {
   }
 
   @override
-  Future<ResponseState<List<SubtitleCue>>> getSubtitleCues(Subtitle subtitle,
-      {Map<String, String>? headers}) {
+  Future<ResponseState<List<SubtitleCue>>> getSubtitleCues(Subtitle subtitle) {
     return ResponseState.tryWithAsync(() async {
-      final String subtitleData = utf8
-          .decode((await client.get(subtitle.url, headers: headers)).bodyBytes);
+      final String subtitleData = utf8.decode(
+          (await client.get(subtitle.url, headers: subtitle.headers))
+              .bodyBytes);
 
       final SubtitleParser parser;
       switch (subtitle.format) {
@@ -102,30 +103,34 @@ class VideoPlayerRepositoryImpl implements VideoPlayerRepository {
     required Episode episode,
     required int index,
   }) {
-    if (context
-            .bloc<EpisodesCubit>()
-            .state[context.bloc<EpisodesSelectorCubit>().state]![index] ==
-        getCurrentEpisode(context)) return;
+    final isPlaying = context.bloc<PlayingCubit>().state;
+    playerProvider(context).player.stop().then((value) {
+      if (context
+              .bloc<EpisodesCubit>()
+              .state[context.bloc<EpisodesSelectorCubit>().state]![index] ==
+          getCurrentEpisode(context)) return null;
 
-    context.bloc<CurrentEpisodeCubit>().changeEpisode(index);
-    context.bloc<SelectedVideoDataCubit>().resetState();
+      context.bloc<CurrentEpisodeCubit>().changeEpisode(index);
+      context.bloc<SelectedVideoDataCubit>().resetState();
 
-    context.bloc<ExtractedMediaCubit<Video>>().initStream(context
-        .bloc<PluginRepositoryUseCaseProviderCubit>()
-        .state
-        .provider!
-        .loadExtractedMediaStreamUseCase(
-          LoadExtractedMediaStreamUseCaseParams(episode.data),
-        ));
+      context.bloc<ExtractedMediaCubit<Video>>().initStream(context
+          .bloc<PluginRepositoryUseCaseProviderCubit>()
+          .state
+          .provider!
+          .loadExtractedMediaStreamUseCase(
+            LoadExtractedMediaStreamUseCaseParams(episode.data),
+          ));
 
-    loadPlayer(
-        extractedMediaCubit: context.bloc<ExtractedMediaCubit<Video>>(),
-        selectedVideoDataCubit: context.bloc<SelectedVideoDataCubit>(),
-        player: playerProvider(context).player,
-        videoController: playerProvider(context).controller,
-        providers: PlayerProviders.getFromContext(context));
-
-    context.pop();
+      return loadPlayer(
+          extractedMediaCubit: context.bloc<ExtractedMediaCubit<Video>>(),
+          selectedVideoDataCubit: context.bloc<SelectedVideoDataCubit>(),
+          player: playerProvider(context).player,
+          videoController: playerProvider(context).controller,
+          providers: PlayerProviders.getFromContext(context),
+          onDoneCallback: () {
+            if (isPlaying) playerProvider(context).player.play();
+          });
+    });
   }
 
   @override
@@ -148,11 +153,13 @@ class VideoPlayerRepositoryImpl implements VideoPlayerRepository {
         selectedVideoDataCubit.setStateByIndexes(best!.$1, best!.$3);
 
         await changeSource(
-            video: best!.$2,
-            selectedSource: best!.$3,
-            startPostion: startPostion,
-            player: player,
-            subtitleCubit: providers.subtitleCubit);
+          video: best!.$2,
+          selectedSource: best!.$3,
+          startPostion: startPostion,
+          player: player,
+          subtitleCubit: providers.subtitleCubit,
+        );
+
         subscription?.cancel();
         subscription = null;
 
@@ -164,45 +171,6 @@ class VideoPlayerRepositoryImpl implements VideoPlayerRepository {
 
     return subscription!;
   }
-
-  // @override
-  // void loadPlayer(
-  //     {required BuildContext context,
-  //     required PlayerProviders providers,
-  //     required media_kit.Player player,
-  //     required vid.VideoController videoController,
-  //     Duration? startPostion,
-  //     void Function()? onDoneCallback}) async {
-  //   final selectedVideoDataCubit = context.bloc<SelectedVideoDataCubit>();
-  //   late StreamSubscription? subscription;
-  //   (int, Video, int)? best = null;
-
-  //   subscription =
-  //       context.bloc<ExtractedMediaCubit<Video>>().stream.listen((state) async {
-  //     if (state.data.isNotEmpty) {
-  //       subscription?.pause();
-  //       best = _getBestVideoSource(state);
-
-  //       selectedVideoDataCubit.setStateByIndexes(best!.$1, best!.$3);
-
-  //       await changeSource(
-  //           video: best!.$2,
-  //           selectedSource: best!.$3,
-  //           player: player,
-  //           subtitleCubit: providers.subtitleCubit);
-  //       subscription?.cancel();
-  //       subscription = null;
-
-  //       onDoneCallback?.call();
-  //     }
-  //   }, onDone: () {
-  //     subscription?.cancel();
-  //     context.bloc<ExtractedMediaCubit<Video>>().state.data.isEmpty;
-  //     throw Exception('No video sources found');
-  //   });
-
-  //   return;
-  // }
 
   Future<void> _startFrom(Duration? duration, media_kit.Player player) async {
     if (duration == null) {
@@ -229,26 +197,25 @@ class VideoPlayerRepositoryImpl implements VideoPlayerRepository {
   }
 
   @override
-  Future<void> changeSource(
-      {required Video video,
-      required int selectedSource,
-      required media_kit.Player player,
-      required SubtitleCubit subtitleCubit,
-      Duration? startPostion}) async {
+  Future<void> changeSource({
+    required Video video,
+    required int selectedSource,
+    required media_kit.Player player,
+    required SubtitleCubit subtitleCubit,
+    Duration? startPostion,
+  }) async {
     await player.open(
-        media_kit.Media(video.videoSources[selectedSource].url,
-            httpHeaders: video.headers),
-        play: false);
+      media_kit.Media(video.videoSources[selectedSource].url,
+          httpHeaders: video.headers),
+      play: false,
+    );
     await player.setVideoTrack(media_kit.VideoTrack.auto());
     await player.setAudioTrack(media_kit.AudioTrack.auto());
-    if (video.subtitles != null) {
+    if (video.subtitles.isNotNullAndEmpty) {
       subtitleCubit.addSubtitles(video.subtitles);
       subtitleCubit.changeSubtitle(getDefaultSubtitle(video.subtitles!));
     }
 
-    // if (video.subtitles != null) {
-    // player.state.tracks.subtitle.add()
-    // }
     await player.setSubtitleTrack(media_kit.SubtitleTrack.no());
 
     if (startPostion != null) await _startFrom(startPostion, player);
@@ -261,14 +228,5 @@ class VideoPlayerRepositoryImpl implements VideoPlayerRepository {
         .mapAsList((it) =>
             LinkAndSource.fromExtractedVideoData(ExtractedMedia.fromEntity(it)))
         .faltten();
-  }
-}
-
-extension on List<Subtitle> {
-  List<media_kit.SubtitleTrack> toSubtitleTracks() {
-    return mapWithIndex((index, it) => media_kit.SubtitleTrack.uri(
-          it.url,
-          language: it.language ?? index.toString(),
-        ));
   }
 }

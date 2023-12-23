@@ -39,8 +39,8 @@ class PluginManagerRepositoryImpl implements PluginManagerRepository {
   }
 
   @override
-  Stream<List<InstalledPlugin>> getInstalledPlugins() {
-    return _pluginDao.getAllInstalledPlugins();
+  Stream<List<InstalledPlugin>> getInstalledPlugins(String type) {
+    return _pluginDao.getAllInstalledPlugins(type);
   }
 
   @override

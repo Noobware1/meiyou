@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:meiyou/core/constants/assets.dart';
 import 'package:meiyou/core/constants/height_and_width.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
 import 'image_text.dart';
@@ -255,7 +256,7 @@ class ImageHolder extends StatelessWidget {
 Widget fallbackAssetImage(
     {required double height, required double width, BoxFit? fit}) {
   return Image.asset(
-    'assets/images/default-poster.jpg',
+    defaultposterImage,
     height: height,
     width: width,
     fit: fit ?? BoxFit.fill,

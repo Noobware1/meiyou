@@ -36,9 +36,16 @@ class PluginFloatingActionButton extends StatelessWidget {
                   borderRadius: BorderRadius.circular(15)),
               onPressed: () {
                 showModalBottomSheet(
+                  showDragHandle: true,
+                  enableDrag: true,
+                  isDismissible: true,
+                  shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(25),
+                          topRight: Radius.circular(25))),
                   context: context,
                   builder: (context) {
-                    return Scaffold(body: BlocBuilder<InstalledPluginCubit,
+                    return Scaffold(body: BlocBuilder<InstalledVideoPluginCubit,
                         List<InstalledPluginEntity>>(
                       builder: (context, state) {
                         return ShowInstalledPlugins(

@@ -20,8 +20,9 @@ abstract interface class VideoPlayerRepository {
 
   String? getVideoTitle(BuildContext context);
 
-  Future<ResponseState<List<SubtitleCue>>> getSubtitleCues(Subtitle subtitle,
-      {Map<String, String>? headers});
+  Future<ResponseState<List<SubtitleCue>>> getSubtitleCues(
+    Subtitle subtitle,
+  );
 
   // void loadPlayer({
   //   required BuildContext context,

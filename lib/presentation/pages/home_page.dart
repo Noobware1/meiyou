@@ -8,7 +8,7 @@ import 'package:meiyou/core/utils/extenstions/context.dart';
 import 'package:meiyou/presentation/blocs/load_home_page_cubit.dart';
 import 'package:meiyou/presentation/blocs/plugin_selector_cubit.dart';
 import 'package:meiyou/presentation/blocs/pluign_manager_usecase_provider_cubit.dart';
-import 'package:meiyou/presentation/no_plugin.dart';
+import 'package:meiyou/presentation/widgets/no_plugin.dart';
 import 'package:meiyou/presentation/widgets/add_space.dart';
 import 'package:meiyou/presentation/widgets/banner_view/banner_page_view.dart';
 import 'package:meiyou/presentation/widgets/error_widget.dart';

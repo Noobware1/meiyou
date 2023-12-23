@@ -15,7 +15,7 @@ class MediaDetailsCubit extends AsyncCubit<MediaDetails> {
     try {
       final res = await provider.state.provider!
           .loadMediaDetailsUseCase(_searchResponse);
-      print(res);
+   
       emit(res is ResponseSuccess
           ? AsyncStateSuccess(res.data!)
           : AsyncStateFailed(res.error!));

@@ -116,6 +116,22 @@ class VideoPlayerTopRowMobile extends StatelessWidget {
   }
 
   Widget _buildTitle(BuildContext context) {
+    if (context.repository<MediaDetails>().mediaItem is Movie) {
+      return SizedBox(
+        width: context.screenWidth * 0.6,
+        child: Text(
+          context
+                  .repository<VideoPlayerRepositoryUseCases>()
+                  .getVideoTitleUseCase(context) ??
+              context.repository<MediaDetails>().name.trim(),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          // videoTitle.trim(),
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+          textAlign: TextAlign.left,
+        ),
+      );
+    }
     return SizedBox(
       width: context.screenWidth * 0.6,
       child: Column(
@@ -137,15 +153,14 @@ class VideoPlayerTopRowMobile extends StatelessWidget {
               );
             },
           ),
-          if (context.repository<MediaDetails>().mediaItem is! Movie)
-            Text(context.repository<MediaDetails>().name.trim(),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.left,
-                style: const TextStyle(
-                    color: Colors.grey,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400)),
+          Text(context.repository<MediaDetails>().name.trim(),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.left,
+              style: const TextStyle(
+                  color: Colors.grey,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400)),
         ],
       ),
     );

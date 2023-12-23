@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:meiyou/core/constants/assets.dart';
 
 class BannerImageHolder extends StatelessWidget {
   final double height;
@@ -95,7 +96,7 @@ class BannerImageHolder extends StatelessWidget {
         fit: BoxFit.cover,
         width: width ?? MediaQuery.of(context).size.width,
         errorWidget: (context, url, error) => Image.asset(
-          'assets/images/default-banner.png',
+          defaultbannerImage,
           height: height,
           width: bannerWidth,
           fit: BoxFit.cover,

@@ -4,28 +4,15 @@ import 'package:meiyou/core/usecases/usecase.dart';
 import 'package:meiyou/domain/repositories/video_player_repository.dart';
 import 'package:meiyou_extensions_lib/models.dart';
 
-class GetSubtitleCuesUseCaseParams {
-  final Subtitle subtitle;
-  final Map<String, String>? headers;
-
-  GetSubtitleCuesUseCaseParams({
-    required this.subtitle,
-    required this.headers,
-  });
-}
-
-class GetSubtitleCuesUseCase
-    implements UseCase<void, GetSubtitleCuesUseCaseParams> {
+class GetSubtitleCuesUseCase implements UseCase<void, Subtitle> {
   final VideoPlayerRepository _videoPlayerRepository;
 
   GetSubtitleCuesUseCase(this._videoPlayerRepository);
 
   @override
-  Future<ResponseState<List<SubtitleCue>>> call(
-      GetSubtitleCuesUseCaseParams params) {
+  Future<ResponseState<List<SubtitleCue>>> call(Subtitle params) {
     return _videoPlayerRepository.getSubtitleCues(
-      params.subtitle,
-      headers: params.headers,
+      params,
     );
   }
 }

@@ -5,6 +5,8 @@ import 'package:media_kit/media_kit.dart';
 import 'package:meiyou/core/constants/play_back_speeds.dart';
 import 'package:meiyou/core/resources/platform_check.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
+import 'package:meiyou/core/utils/try_catch.dart';
+import 'package:meiyou/domain/entities/link_and_source.dart';
 import 'package:meiyou/presentation/blocs/player/resize_cubit.dart';
 import 'package:meiyou/presentation/blocs/player/selected_video_data.dart';
 import 'package:meiyou/presentation/blocs/player/server_and_video_cubit.dart';
@@ -69,18 +71,24 @@ class VideoPlayerBottomRowButtonsMobile extends StatelessWidget {
                         builder: (thirdContext, state) {
                           return Dialog(
                             child: ArrowSelectorDialogBox(
-                                defaultValue: context
-                                    .bloc<SelectedVideoDataCubit>()
-                                    .state
-                                    .getLinkAndSource(context),
+                                defaultValue: AppUtils.trySync(() => context
+                                        .bloc<SelectedVideoDataCubit>()
+                                        .state
+                                        .getLinkAndSource(context)) ??
+                                    LinkAndSourceEntity(
+                                      link: ExtractorLink(name: '', url: ''),
+                                      source: VideoSource(),
+                                    ),
                                 label: 'Change Source',
                                 builder: (context, index, data) {
                                   return data.toString();
                                 },
-                                data: context
-                                    .repository<VideoPlayerRepositoryUseCases>()
-                                    .convertExtractedVideoDataListUseCase(
-                                        state.data),
+                                data: trySync(() => context
+                                        .repository<
+                                            VideoPlayerRepositoryUseCases>()
+                                        .convertExtractedVideoDataListUseCase(
+                                            state.data)) ??
+                                    [],
                                 onApply: (data) {
                                   context
                                       .bloc<SelectedVideoDataCubit>()

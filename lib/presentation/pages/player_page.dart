@@ -16,6 +16,7 @@ import 'package:meiyou/presentation/blocs/player/resize_cubit.dart';
 import 'package:meiyou/presentation/blocs/player/selected_video_data.dart';
 import 'package:meiyou/presentation/blocs/player/server_and_video_cubit.dart';
 import 'package:meiyou/presentation/blocs/player/show_controls_cubit.dart';
+import 'package:meiyou/presentation/providers/player_provider.dart';
 import 'package:meiyou/presentation/providers/player_providers.dart';
 import 'package:meiyou/presentation/providers/video_player_repository_usecases.dart';
 import 'package:meiyou/presentation/widgets/player/controls/desktop/desktop_controls.dart';
@@ -62,6 +63,7 @@ class _PlayerPageState extends State<PlayerPage> {
               videoController: videoController,
               providers: providers,
               onDoneCallback: () {
+                print('fuck you');
                 player.play();
               }),
         );
@@ -83,9 +85,6 @@ class _PlayerPageState extends State<PlayerPage> {
 
   @override
   Widget build(BuildContext context) {
-    final height = context.screenHeight;
-    final width = context.screenWidth;
-
     return providers.create(
       BlocListener<ExtractedMediaCubit<models.Video>, ExtractedMediaState>(
         listener: (context, state) {
@@ -115,21 +114,7 @@ class _PlayerPageState extends State<PlayerPage> {
                 providers.showVideoControlsCubit.toggleShowControls();
               },
               child: Stack(children: [
-                SizedBox.expand(
-                  child: _BuildWithResizeMode(
-                    child: SizedBox(
-                      height: videoController.rect.value?.height ?? height,
-                      width: videoController.rect.value?.width ?? width,
-                      child: Video(
-                          controller: videoController,
-                          controls: (state) {
-                            return defaultSizedBox;
-                          },
-                          subtitleViewConfiguration:
-                              const SubtitleViewConfiguration(visible: false)),
-                    ),
-                  ),
-                ),
+                const _BuildVideo(),
                 SubtitleRenderer(
                     subtitleConfigruation: SubtitleConfigruation(
                         textStyle:
@@ -158,7 +143,6 @@ class _PlayerPageState extends State<PlayerPage> {
                             child: CircularProgressIndicator(),
                           )
                         : const CircularProgressIndicator();
-                    ;
                   },
                 )),
               ]),
@@ -180,21 +164,74 @@ class _PlayerPageState extends State<PlayerPage> {
   }
 }
 
-class _BuildWithResizeMode extends StatelessWidget {
-  final Widget child;
-  const _BuildWithResizeMode({
-    required this.child,
+class _BuildVideo extends StatelessWidget {
+  const _BuildVideo({
+    super.key,
   });
 
   @override
   Widget build(BuildContext context) {
-    if (!isMobile) return child;
-
-    return BlocBuilder<ResizeCubit, ResizeMode>(builder: (context, resizeMode) {
-      return FittedBox(
-        fit: resizeMode.toBoxFit(),
-        child: child,
-      );
-    });
+    final height = context.screenHeight;
+    final width = context.screenWidth;
+    return SizedBox.expand(
+      child: !isMobile
+          ? SizedBox(
+              height: context
+                      .repository<PlayerProvider>()
+                      .controller
+                      .rect
+                      .value
+                      ?.height ??
+                  height,
+              width: context
+                      .repository<PlayerProvider>()
+                      .controller
+                      .rect
+                      .value
+                      ?.width ??
+                  width,
+              child: Video(
+                  controller: context.repository<PlayerProvider>().controller,
+                  controls: (state) {
+                    return defaultSizedBox;
+                  },
+                  subtitleViewConfiguration:
+                      const SubtitleViewConfiguration(visible: false)),
+            )
+          : BlocConsumer<ResizeCubit, ResizeMode>(
+              builder: (context, resizeMode) {
+                return FittedBox(
+                  fit: resizeMode.toBoxFit(),
+                  child: SizedBox(
+                    height: context
+                            .repository<PlayerProvider>()
+                            .controller
+                            .rect
+                            .value
+                            ?.height ??
+                        height,
+                    width: context
+                            .repository<PlayerProvider>()
+                            .controller
+                            .rect
+                            .value
+                            ?.width ??
+                        width,
+                    child: Video(
+                        controller:
+                            context.repository<PlayerProvider>().controller,
+                        controls: (state) {
+                          return defaultSizedBox;
+                        },
+                        subtitleViewConfiguration:
+                            const SubtitleViewConfiguration(visible: false)),
+                  ),
+                );
+              },
+              listener: (context, state) {
+                showSnackBar(context, text: state.toString());
+              },
+            ),
+    );
   }
 }

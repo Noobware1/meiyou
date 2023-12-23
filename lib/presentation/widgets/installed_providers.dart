@@ -1,10 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:meiyou/core/constants/assets.dart';
 import 'package:meiyou/core/resources/platform_check.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
 import 'package:meiyou/domain/entities/installed_plugin.dart';
-import 'package:meiyou/presentation/blocs/plugin_selector_cubit.dart';
-import 'package:meiyou/presentation/providers/plugin_manager_repository_usecase_provider.dart';
 import 'package:meiyou/presentation/widgets/add_space.dart';
 
 class ShowInstalledPlugins extends StatelessWidget {
@@ -61,74 +60,81 @@ class ShowInstalledPlugins extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final icon = isMobile ? _doneIconMobile : _doneIcon;
-    final height = isMobile ? 50.0 : 50.0;
+    const height = 50.0;
     final replacement = isMobile ? _replacementMobile : _replacement;
     final textStyle = isMobile ? _textStyleMobile : _textStyle;
+    final unselectedTextStyle = textStyle.copyWith(
+      color: context.theme.colorScheme.onSurface.withOpacity(0.7),
+    );
     return SizedBox(
       height: context.screenHeight / 1.3,
-      child: ListView(
-        children: [
-          Material(
-            color: Colors.transparent,
-            type: MaterialType.button,
-            child: InkWell(
-              onTap: () => _onTap(context, -1),
-              child: SizedBox(
-                  height: height,
-                  child: Row(children: [
-                    addHorizontalSpace(10),
-                    if (plugin == InstalledPluginEntity.none)
-                      icon
-                    else
-                      replacement,
-                    addHorizontalSpace(10),
-                    Text(
-                      'None',
-                      style: textStyle,
-                    ),
-                  ])),
-            ),
-          ),
-          if (pluginList != null)
-            for (var i = 0; i < pluginList!.length; i++)
-              Material(
+      child: ListView.separated(
+          separatorBuilder: (context, index) => addVerticalSpace(8),
+          itemCount: pluginList!.length + 1,
+          itemBuilder: (context, index) {
+            if (index == 0) {
+              return Material(
                 color: Colors.transparent,
                 type: MaterialType.button,
                 child: InkWell(
-                  onTap: () => _onTap(context, i),
+                  onTap: () => _onTap(context, -1),
                   child: SizedBox(
-                    height: height,
-                    child: Row(
-                      children: [
+                      height: height,
+                      child: Row(children: [
                         addHorizontalSpace(10),
-                        if (pluginList![i].name == plugin.name)
+                        if (plugin == InstalledPluginEntity.none)
                           icon
                         else
                           replacement,
                         addHorizontalSpace(10),
-                        Image.file(File(pluginList![i].iconPath),
-                            height: height,
-                            width: height,
-                            fit: BoxFit.fill, errorBuilder: (context, e, s) {
-                          return Image.asset(
-                            'assets/images/default-poster.jpg',
-                            height: height,
-                            width: height,
-                            fit: BoxFit.fill,
-                          );
-                        }),
-                        addHorizontalSpace(10),
                         Text(
-                          pluginList![i].name,
-                          style: textStyle,
-                        )
-                      ],
-                    ),
+                          'None',
+                          style: plugin == InstalledPluginEntity.none
+                              ? textStyle
+                              : unselectedTextStyle,
+                        ),
+                      ])),
+                ),
+              );
+            }
+            final i = index - 1;
+
+            return Material(
+              color: Colors.transparent,
+              type: MaterialType.button,
+              child: InkWell(
+                onTap: () => _onTap(context, i),
+                child: SizedBox(
+                  height: height,
+                  child: Row(
+                    children: [
+                      addHorizontalSpace(10),
+                      if (pluginList![i].id == plugin.id) icon else replacement,
+                      addHorizontalSpace(10),
+                      Image.file(File(pluginList![i].iconPath),
+                          height: 40,
+                          width: 40,
+                          fit: BoxFit.fill, errorBuilder: (context, e, s) {
+                        return Image.asset(
+                          defaultposterImage,
+                          height: height,
+                          width: height,
+                          fit: BoxFit.fill,
+                        );
+                      }),
+                      addHorizontalSpace(10),
+                      Text(
+                        pluginList![i].name,
+                        style: pluginList![i].id == plugin.id
+                            ? textStyle
+                            : unselectedTextStyle,
+                      )
+                    ],
                   ),
                 ),
               ),
-        ],
-      ),
+            );
+          }),
     );
   }
 }

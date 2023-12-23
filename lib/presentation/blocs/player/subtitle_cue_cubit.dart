@@ -63,10 +63,10 @@ class SubtitleCuesCubit extends Cubit<SubtitleCuesState> {
   final GetSubtitleCuesUseCase _useCase;
   SubtitleCuesCubit(this._useCase) : super(const NoSubtitle());
 
-  void loadSubtitles(GetSubtitleCuesUseCaseParams params) async {
-    if (params.subtitle == Subtitle.noSubtitle) return emit(const NoSubtitle());
+  void loadSubtitles(Subtitle subtitle) async {
+    if (subtitle == Subtitle.noSubtitle) return emit(const NoSubtitle());
     emit(const SubtitleCuesDecoding());
-    final res = await _useCase.call(params);
+    final res = await _useCase.call(subtitle);
 
     if (res is ResponseSuccess) return emit(SubtitleCuesDecoded(res.data!));
     return emit(SubtitleCuesDecodingFailed(res.error!));

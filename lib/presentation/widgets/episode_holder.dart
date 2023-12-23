@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:meiyou/core/constants/assets.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
 import 'package:meiyou/presentation/widgets/add_space.dart';
 import 'package:meiyou/presentation/widgets/resizeable_text.dart';
@@ -153,7 +154,7 @@ class EpisodeHolder extends StatelessWidget {
           width: isSmall ? 170 : 200,
           fit: BoxFit.cover,
           errorWidget: (context, url, error) => Image.asset(
-            'assets/images/default_banner_image.png',
+            defaultbannerImage,
             height: isSmall ? 100 : 120,
             width: isSmall ? 170 : 200,
             fit: BoxFit.cover,

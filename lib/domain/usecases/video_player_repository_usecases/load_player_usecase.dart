@@ -38,12 +38,13 @@ class LoadPlayerUseCase
   @override
   StreamSubscription call(LoadPlayerUseCaseParams params) {
     return _videoPlayerRepository.loadPlayer(
-        extractedMediaCubit: params.extractedMediaCubit,
-        selectedVideoDataCubit: params.selectedVideoDataCubit,
-        player: params.player,
-        videoController: params.videoController,
-        startPostion: params.startPostion,
-        onDoneCallback: params.onDoneCallback,
-        providers: params.providers);
+      extractedMediaCubit: params.extractedMediaCubit,
+      selectedVideoDataCubit: params.selectedVideoDataCubit,
+      player: params.player,
+      videoController: params.videoController,
+      startPostion: params.startPostion,
+      onDoneCallback: params.onDoneCallback,
+      providers: params.providers,
+    );
   }
 }

@@ -157,7 +157,16 @@ class MovieView extends StatelessWidget {
     final mediaDetails = context.repository<MediaDetails>();
     final movie = mediaDetails.mediaItem as Movie;
     return EpisodeHolder(
-      onTap: () {},
+      onTap: () {
+        context.push(
+          Routes.reslovePlayerRoute(context),
+          extra: PlayerDependenciesProvider.createFromContext(
+            context,
+            LoadExtractedMediaStreamUseCaseParams(movie.url),
+            null,
+          ),
+        );
+      },
       number: 0,
       desc: movie.description ?? mediaDetails.description,
       rated: mediaDetails.rating,

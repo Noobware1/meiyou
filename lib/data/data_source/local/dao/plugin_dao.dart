@@ -45,12 +45,14 @@ class PluginDao {
     return installPlugin(plugin);
   }
 
-  Stream<List<InstalledPlugin>> getAllInstalledPlugins() {
+  Stream<List<InstalledPlugin>> getAllInstalledPlugins(String type) {
     return isar.installedPlugins
         .filter()
         .savedPathIsNotEmpty()
         .nameIsNotEmpty()
-        .watch(fireImmediately: true);
+        .typeEqualTo(type, caseSensitive: false)
+        .watch(fireImmediately: true)
+        .asBroadcastStream();
   }
 
   Future<List<PluginList>> getAllUninstalledPluginsCache() {

@@ -19,6 +19,7 @@ enum ResizeMode {
         return BoxFit.fill;
       case ResizeMode.Normal:
       default:
+     
         return BoxFit.contain;
     }
   }
@@ -45,6 +46,6 @@ class ResizeCubit extends Cubit<ResizeMode> {
         break;
       default:
     }
-    showSnackBar(context, text: state.toString());
+    return;
   }
 }

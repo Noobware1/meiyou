@@ -4,8 +4,6 @@ import 'package:meiyou/core/constants/default_widgets.dart';
 import 'package:meiyou/core/resources/snackbar.dart';
 import 'package:meiyou/core/resources/subtitle_decoders/models/cue.dart';
 import 'package:meiyou/core/utils/extenstions/context.dart';
-import 'package:meiyou/domain/usecases/video_player_repository_usecases/get_subtitle_cues_usecase.dart';
-import 'package:meiyou/presentation/blocs/player/selected_video_data.dart';
 import 'package:meiyou/presentation/blocs/player/subtitle_cubit.dart';
 import 'package:meiyou/presentation/blocs/player/subtitle_cue_cubit.dart';
 import 'package:meiyou_extensions_lib/meiyou_extensions_lib.dart';
@@ -71,16 +69,7 @@ class SubtitleRenderer extends StatelessWidget {
           context.bloc<SubtitleCuesCubit>().emitNoSubtitle();
           return;
         }
-        context
-            .bloc<SubtitleCuesCubit>()
-            .loadSubtitles(GetSubtitleCuesUseCaseParams(
-              subtitle: state.current,
-              headers: context
-                  .bloc<SelectedVideoDataCubit>()
-                  .extractedMedia(context)
-                  .media
-                  .headers,
-            ));
+        context.bloc<SubtitleCuesCubit>().loadSubtitles(state.current);
       },
       child: BlocListener<SubtitleCuesCubit, SubtitleCuesState>(child:
           BlocBuilder<CurrentSubtitleCuesCubit, List<SubtitleCue>?>(

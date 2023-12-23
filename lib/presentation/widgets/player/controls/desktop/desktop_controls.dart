@@ -24,6 +24,7 @@ import 'package:meiyou/presentation/widgets/player/controls/desktop/episodes_sel
 import 'package:meiyou/presentation/widgets/player/controls/desktop/next_episode.dart';
 import 'package:meiyou/presentation/widgets/player/controls/desktop/options.dart';
 import 'package:meiyou/presentation/widgets/player/controls/desktop/previous_episode_button.dart';
+import 'package:meiyou_extensions_lib/meiyou_extensions_lib.dart';
 import 'package:meiyou_extensions_lib/models.dart' as models;
 import 'play_button.dart' as play_button;
 import 'postion_indicator.dart' as postion_indicator;
@@ -390,6 +391,13 @@ class DesktopControls extends StatelessWidget {
   }
 
   Widget _buildTitle(BuildContext context) {
+    if (context.repository<MediaDetails>().mediaItem is Movie) {
+      return Text(
+        context.repository<MediaDetails>().name.trim(),
+        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+        textAlign: TextAlign.left,
+      );
+    }
     return BlocBuilder<CurrentEpisodeCubit, int>(
       builder: (context, state) {
         final videoTitle = context

@@ -271,7 +271,7 @@ packages:
     description:
       path: "."
       ref: master
-      resolved-ref: e58fcedad79210df57741231ae69161dfe80b592
+      resolved-ref: "480ce14c62f5f42e4f90c97d1568e10a7cbbc019"
       url: "https://github.com/Noobware1/dart_eval.git"
     source: git
     version: "0.7.2"
@@ -639,7 +639,7 @@ packages:
     description:
       path: "."
       ref: master
-      resolved-ref: "9384ee1bb7eb4a2c1b8e045fdfef42a5acc87b29"
+      resolved-ref: c092f09006992e20dc56cb1121b2e90107d80788
       url: "https://github.com/Noobware1/meiyou_extensions_lib.git"
     source: git
     version: "1.0.0"
@@ -1005,10 +1005,10 @@ packages:
     dependency: transitive
     description:
       name: synchronized
-      sha256: "5fcbd27688af6082f5abd611af56ee575342c30e87541d0245f7ff99faa02c60"
+      sha256: "539ef412b170d65ecdafd780f924e5be3f60032a1128df156adad6c5b373d558"
       url: "https://pub.dev"
     source: hosted
-    version: "3.1.0"
+    version: "3.1.0+1"
   term_glyph:
     dependency: transitive
     description:

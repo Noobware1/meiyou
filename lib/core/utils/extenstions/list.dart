@@ -8,4 +8,12 @@ extension MeiyouListExtension<E> on Iterable<E> {
     }
     return list;
   }
+
+  E getElementAtOrDefault(int index, E defaultValue) {
+    try {
+      return elementAt(index);
+    } catch (e) {
+      return defaultValue;
+    }
+  }
 }
