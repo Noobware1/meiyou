@@ -1,2 +1,1 @@
-const defaultposterImage = 'assets/images/default-poster.jpg';
-const defaultbannerImage = 'assets/images/default-banner.png';
+const defaultImage = 'assets/image/default-image.png';
