@@ -1,8 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 
-class StateFlow<T> {
+class StateFlow<T> extends Disposable {
   StateFlow(T initalData) : _state = initalData;
 
   factory StateFlow.stream(
@@ -36,6 +37,11 @@ class StateFlow<T> {
 
   Future<void> close() async {
     await _controller.close();
+  }
+
+  @override
+  Future<void> onDispose() async {
+    await close();
   }
 }
 

@@ -1,6 +1,7 @@
-import 'package:expandable_text/expandable_text.dart';
+// import 'package:expandable_text/expandable_text.dart';
 import 'package:flutter/material.dart' hide Gradient;
 import 'package:meiyou/core/utils/extensions/context.dart';
+import 'package:meiyou/presentation/core/expandable_text.dart';
 import 'package:meiyou/presentation/core/gradient.dart';
 
 class ResizableText extends StatefulWidget {
@@ -35,30 +36,33 @@ class _ResizableTextState extends State<ResizableText> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      alignment: Alignment.bottomCenter,
-      children: [
-        ExpandableText(
-          widget.text,
-          expandText: '',
-          style: widget.textStyle,
-          animation: widget.animation,
-          maxLines: widget.maxLines,
-          expanded: expanded,
-          onExpandedChanged: onExpandedChanged,
-          collapseOnTextTap: true,
-          expandOnTextTap: true,
-          animationDuration: animationDuration,
-        ),
-        if (!expanded)
-          Positioned(
-              right: 0,
-              left: 0,
-              child: IgnorePointer(
-                  child: gradient(context.theme.scaffoldBackgroundColor))),
-        if (widget.button) IgnorePointer(child: _button()),
-      ],
+    return ExpandableText(
+      text: widget.text,
+      style: widget.textStyle,
+      animation: widget.animation,
+      maxLines: widget.maxLines,
+      // expanded: expanded,
+      animationDuration: animationDuration,
+      // onExpandedChanged: onExpandedChanged,
     );
+    // return Stack(
+    //   children: [
+    //     ExpandableText(
+    //       text: widget.text,
+    //       style: widget.textStyle,
+    //       animation: widget.animation,
+    //       maxLines: widget.maxLines,
+    //       expanded: expanded,
+    //       animationDuration: animationDuration,
+    //     ),
+    //     ElevatedButton(
+    //       onPressed: () {
+    //         onExpandedChanged();
+    //       },
+    //       child: Text('Read more'),
+    //     )
+    //   ],
+    // );
   }
 
   Widget _button() {

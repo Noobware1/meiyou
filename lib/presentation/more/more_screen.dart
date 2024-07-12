@@ -2,9 +2,9 @@ library more;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:meiyou/core/config/routes/routes.dart';
 import 'package:meiyou/core/constants/font_size.dart';
-import 'package:meiyou/core/utils/extensions/context.dart';
-import 'package:meiyou/core/utils/extensions/double.dart';
+import 'package:meiyou/core/utils/resources/screen_size.dart';
 
 part 'more_screen_mobile.dart';
 part 'more_screen_desktop.dart';
@@ -17,7 +17,7 @@ class MoreScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isMobile = context.width.screenSize.isMobile;
+    final bool isMobile = context.screenSize.isMobile;
     if (isMobile) return mobile;
     return desktop;
   }

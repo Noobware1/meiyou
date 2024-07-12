@@ -2,7 +2,10 @@ part of banner_button;
 
 class _BannerButtonMobile extends BannerButton {
   const _BannerButtonMobile(
-      {super.key, required super.onItemSelected, required super.onAddToList});
+      {super.key,
+      required super.isInLibrary,
+      required super.onItemSelected,
+      required super.onAddToList});
 
   double get defaultPadding => 20.0;
   double get iconSize => 25.0;
@@ -31,41 +34,16 @@ class _BannerButtonMobile extends BannerButton {
     );
   }
 
-  ButtonStyle addToListButtonStyle(BuildContext context) {
-    return ButtonStyle(
-      fixedSize: MaterialStatePropertyAll(addToListbuttonSize),
-      iconSize: MaterialStatePropertyAll(iconSize),
-      backgroundColor: MaterialStatePropertyAll(backgroundColor(context)),
-      overlayColor: MaterialStatePropertyAll(overlayColor(context)),
-      shape: const MaterialStatePropertyAll(
-        RoundedRectangleBorder(borderRadius: borderRadius),
-      ),
-    );
-  }
-
   @override
   Widget buildAddToListButton(BuildContext context) {
     final baseColor = addToListTextIconColor(context);
     return Flexible(
-      child: ElevatedButton.icon(
+      child: OutlinedButton.icon(
         onPressed: onAddToList,
         icon: addToListIcon(baseColor),
         label: addToListLabel(baseColor),
-        style: addToListButtonStyle(context),
       ),
     );
-  }
-
-  ButtonStyle mainButtonStyle(BuildContext context) {
-    return ButtonStyle(
-        fixedSize: MaterialStatePropertyAll(mainButtonSize),
-        alignment: Alignment.centerLeft,
-        backgroundColor:
-            MaterialStatePropertyAll(context.theme.colorScheme.primary),
-        overlayColor: MaterialStatePropertyAll(overlayColor(context)),
-        iconSize: MaterialStatePropertyAll(iconSize),
-        shape: const MaterialStatePropertyAll(
-            RoundedRectangleBorder(borderRadius: borderRadius)));
   }
 
   @override
@@ -73,8 +51,7 @@ class _BannerButtonMobile extends BannerButton {
     final baseColor = mainButtonTextIconColor(context);
 
     return Flexible(
-      child: ElevatedButton.icon(
-        style: mainButtonStyle(context),
+      child: FilledButton.icon(
         onPressed: onItemSelected,
         icon: mainButtonIcon(baseColor),
         label: mainButtonLabel(baseColor),

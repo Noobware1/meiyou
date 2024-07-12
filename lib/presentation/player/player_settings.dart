@@ -6,6 +6,10 @@ class PlayerSettingskButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-        onPressed: () {}, icon: const Icon(Icons.more_vert_rounded));
+        onPressed: () {},
+        icon: const Icon(
+          Icons.more_vert_rounded,
+          color: Colors.white,
+        ));
   }
 }

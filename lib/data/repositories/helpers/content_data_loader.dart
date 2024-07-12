@@ -1,4 +1,4 @@
-import 'package:injecktor/injecktor.dart';
+import 'package:meiyou/core/utils/resources/get_it/get_it.dart';
 import 'package:meiyou/core/utils/resources/logger.dart';
 import 'package:meiyou/domain/repositories/source_repository.dart';
 import 'package:meiyou_extensions_lib/models.dart';
@@ -9,7 +9,7 @@ typedef LinkAndData<T extends ContentData> = Pair<ContentDataLink, T>;
 class ContentDataLoader<T extends ContentData> {
   static const maxCacheSize = 100;
 
-  final SourceRepository _sourceRepository = InjectKtor.get();
+  final SourceRepository _sourceRepository = getIt.get();
   final Map<String, List<LinkAndData<T>>> _cache = {};
 
   Stream<List<LinkAndData<T>>> getContentDataStream(
@@ -33,6 +33,7 @@ class ContentDataLoader<T extends ContentData> {
         }
         return [];
       }).add(linkAndData);
+
       yield _cache[url]!;
     }
   }
@@ -41,5 +42,3 @@ class ContentDataLoader<T extends ContentData> {
     _cache.clear();
   }
 }
-
-

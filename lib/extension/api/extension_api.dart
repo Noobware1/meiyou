@@ -1,6 +1,6 @@
 // ignore_for_file: unused_import, constant_identifier_names
 
-import 'package:injecktor/injecktor.dart';
+import 'package:meiyou/core/utils/resources/get_it/get_it.dart';
 import 'package:meiyou/core/utils/resources/logger.dart';
 import 'dart:convert';
 
@@ -13,12 +13,12 @@ import 'package:meiyou_extensions_lib/okhttp_extensions.dart';
 import 'package:nice_dart/nice_dart.dart';
 
 class ExtensionApi {
-  final SourcePreferences _sourcePreferences = InjectKtor.get();
+  final SourcePreferences _sourcePreferences = getIt.get();
 
   static const OFFICAL_REPO =
       "https://raw.githubusercontent.com/Noobware1/meiyou-extensions/repo";
 
-  final NetworkHelper networkSevice = InjectKtor.get();
+  final NetworkHelper networkSevice = getIt.get();
 
   Future<List<AvailableExtension>> findExtensions(ExtensionType extensionType) {
     return getExtensions(OFFICAL_REPO, extensionType).then((value) async {

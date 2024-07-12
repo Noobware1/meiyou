@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:injecktor/injecktor.dart';
 
 import 'package:meiyou/core/utils/resources/flow.dart';
+import 'package:meiyou/core/utils/resources/get_it/get_it.dart';
 import 'package:meiyou/core/utils/resources/locale_helper.dart';
 import 'package:meiyou/extension/models/entension_type.dart';
 import 'package:meiyou/domain/models/source.dart';
@@ -14,58 +14,24 @@ import 'package:nice_dart/nice_dart.dart';
 typedef InstalledSources = Map<String, List<InstalledSource>>;
 typedef OnSourceSelected = void Function(InstalledSource);
 
-class InstalledExtensionTab extends StatelessWidget
-    implements ExtensionTab<InstalledSource> {
+class InstalledExtensionTab extends ExtensionTab<InstalledSource> {
   final OnSourceSelected onSourceSelected;
   final ExtensionType type;
-  final ScrollController? scrollController;
   const InstalledExtensionTab({
     super.key,
     required this.type,
-    this.scrollController,
     required this.onSourceSelected,
   });
 
   @override
-  Widget build(BuildContext context) {
-    return StateFlowBuilder(
-        flow: GetInstalledSources(InjectKtor.get()).flow(type),
-        builder: (context, value) {
-          return ListView.builder(
-              controller: scrollController,
-              itemCount: value.keys.length,
-              itemBuilder: (context, index) =>
-                  itemBuilder(context, index, value));
-        });
+  StateFlow<Map<String, List<InstalledSource>>> getFlow() {
+    return GetInstalledSources(getIt.get()).flow(type);
   }
 
   @override
-  Widget itemBuilder(BuildContext context, int index, InstalledSources state) {
-    final entry = state.entries.get(index);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: children(entry),
-    );
-  }
-
-  @override
-  List<Widget> children(MapEntry<String, List<InstalledSource>> entry) {
-    return [
-      header(entry.key),
-      ...entry.value.map(extensionItem),
-    ];
-  }
-
-  @override
-  Widget header(String language) {
-    return Padding(
-      padding: ExtensionTab.headerPadding,
-      child: Text(language, style: ExtensionTab.titleTextStyle()),
-    );
-  }
-
-  Widget extensionItem(InstalledSource source) {
-    return _InstalledSourceTitle(source: source, onPressed: onSourceSelected);
+  Widget itemBuilder(
+      BuildContext context, String language, InstalledSource value) {
+    return _InstalledSourceTitle(source: value, onPressed: onSourceSelected);
   }
 }
 
@@ -87,7 +53,9 @@ class _InstalledSourceTitle extends ExtensionTile {
   }
 
   @override
-  Widget icon() {
+  Widget icon({
+    required Size size,
+  }) {
     return ImageHolderMemory(height: 50, width: 50, bytes: source.icon);
   }
 
@@ -95,18 +63,22 @@ class _InstalledSourceTitle extends ExtensionTile {
   void onPressed() => _onPressed(source);
 
   @override
-  Widget subtitle() {
+  Widget subtitle({
+    required TextStyle subtitleTextStyle,
+  }) {
     return Text(
       LocaleHelper.getSourceDisplayName(source.lang),
-      style: subtitleTextStyle(),
+      style: subtitleTextStyle,
     );
   }
 
   @override
-  Widget title() {
+  Widget title({
+    required TextStyle titleTextStyle,
+  }) {
     return Text(
       source.name,
-      style: titleTextStyle(),
+      style: titleTextStyle,
     );
   }
 }

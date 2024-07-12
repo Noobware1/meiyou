@@ -2,7 +2,10 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/src/foundation/diagnostics.dart';
 import 'package:meiyou/core/utils/extensions/context.dart';
+import 'package:meiyou/core/utils/resources/platform.dart';
+import 'package:meiyou/core/utils/resources/screen_size.dart';
 import 'package:meiyou/presentation/core/default_sized_box.dart';
 
 class MultiNavScaffold extends StatelessWidget {
@@ -19,8 +22,8 @@ class MultiNavScaffold extends StatelessWidget {
     this.onDrawerChanged,
     this.endDrawer,
     this.onEndDrawerChanged,
-    required this.sideNavigatonBar,
-    required this.bottomNavigationBar,
+    this.sideNavigatonBar,
+    this.bottomNavigationBar,
     this.bottomSheet,
     this.backgroundColor,
     this.resizeToAvoidBottomInset,
@@ -204,7 +207,7 @@ class MultiNavScaffold extends StatelessWidget {
   /// The [bottomNavigationBar] is rendered below the [persistentFooterButtons]
   /// and the [body].
 
-  final Widget bottomNavigationBar;
+  final Widget? bottomNavigationBar;
 
   /// The persistent bottom sheet to display.
   ///
@@ -334,21 +337,23 @@ class MultiNavScaffold extends StatelessWidget {
   /// [Scaffold]:
   ///
 
-  final Widget sideNavigatonBar;
+  final Widget? sideNavigatonBar;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: key,
-      appBar: appBar,
-      body: Row(
-        children: [
-          _DissapperingSideNavigationBar(
-            sideNavigatonBar: sideNavigatonBar,
-          ),
-          Expanded(child: body ?? defaultSizedBox),
-        ],
-      ),
+      appBar: appBar != null ? _PaddedAppBar(appBar: appBar!) : null,
+      body: sideNavigatonBar == null
+          ? body
+          : Row(
+              children: [
+                _DissapperingSideNavigationBar(
+                  sideNavigatonBar: sideNavigatonBar!,
+                ),
+                Expanded(child: body ?? defaultSizedBox),
+              ],
+            ),
       floatingActionButton: floatingActionButton,
       floatingActionButtonLocation: floatingActionButtonLocation,
       floatingActionButtonAnimator: floatingActionButtonAnimator,
@@ -358,8 +363,10 @@ class MultiNavScaffold extends StatelessWidget {
       onDrawerChanged: onDrawerChanged,
       endDrawer: endDrawer,
       onEndDrawerChanged: onEndDrawerChanged,
-      bottomNavigationBar: _DissapperingBottomNavigationBar(
-          bottomNavigationBar: bottomNavigationBar),
+      bottomNavigationBar: bottomNavigationBar == null
+          ? null
+          : _DissapperingBottomNavigationBar(
+              bottomNavigationBar: bottomNavigationBar!),
       bottomSheet: bottomSheet,
       backgroundColor: backgroundColor,
       resizeToAvoidBottomInset: false,
@@ -376,56 +383,38 @@ class MultiNavScaffold extends StatelessWidget {
   }
 }
 
-class _DissapperingBottomNavigationBar extends StatefulWidget {
-  final Widget bottomNavigationBar;
+class _PaddedAppBar extends StatefulWidget implements PreferredSizeWidget {
+  final PreferredSizeWidget appBar;
 
-  const _DissapperingBottomNavigationBar({
-    required this.bottomNavigationBar,
+  const _PaddedAppBar({
+    required this.appBar,
   });
 
   @override
-  State<_DissapperingBottomNavigationBar> createState() =>
-      __DissapperingBottomNavigationBarState();
+  State<StatefulWidget> createState() => _PaddedAppBarState();
+
+  @override
+  Size get preferredSize => appBar.preferredSize;
 }
 
-class __DissapperingBottomNavigationBarState
-    extends State<_DissapperingBottomNavigationBar> {
-  bool isSmallScreen = false;
+class _PaddedAppBarState extends State<_PaddedAppBar> {
+  late ScreenSize screenSize = ScreenSize.Mobile;
 
   @override
   void didChangeDependencies() {
-    isSmallScreen = context.isSmallScreen;
+    screenSize = context.screenSize;
     super.didChangeDependencies();
   }
 
   @override
   Widget build(BuildContext context) {
-    return isSmallScreen ? widget.bottomNavigationBar : defaultSizedBox;
-  }
-}
-
-class _DissapperingSideNavigationBar extends StatefulWidget {
-  final Widget sideNavigatonBar;
-  const _DissapperingSideNavigationBar({
-    required this.sideNavigatonBar,
-  });
-
-  @override
-  State<_DissapperingSideNavigationBar> createState() =>
-      __DissapperingSideNavigationBarState();
-}
-
-class __DissapperingSideNavigationBarState
-    extends State<_DissapperingSideNavigationBar> {
-  bool wideScreen = false;
-  @override
-  void didChangeDependencies() {
-    wideScreen = context.isWideScreen;
-    super.didChangeDependencies();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return wideScreen ? widget.sideNavigatonBar : defaultSizedBox;
+    return screenSize.isMobile
+        ? widget.appBar
+        : Padding(
+            padding: const EdgeInsets.only(
+              left: 90,
+            ),
+            child: widget.appBar,
+          );
   }
 }

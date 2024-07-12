@@ -1,15 +1,24 @@
+import 'dart:math';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:injecktor/injecktor.dart';
+import 'package:get_it/get_it.dart';
+import 'package:media_kit_video/media_kit_video_controls/media_kit_video_controls.dart';
+import 'package:media_kit_video/media_kit_video_controls/src/controls/adaptive.dart';
+import 'package:meiyou/core/utils/resources/get_it/get_it.dart';
+import 'package:meiyou/notifers/state_notifer.dart';
+
 import 'package:meiyou/presentation/core/default_sized_box.dart';
-import 'package:meiyou/presentation/core/injectktor_widget.dart';
+import 'package:meiyou/presentation/core/getIt_widget.dart';
 import 'package:meiyou/presentation/core/space.dart';
-import 'package:meiyou/presentation/info/services/info_screen_cubit.dart';
-import 'package:meiyou/presentation/player/cubits/player_cubit.dart';
-import 'package:meiyou/presentation/player/cubits/show_controls_cubit.dart';
+import 'package:meiyou/presentation/core/state_listenable_builder.dart';
+import 'package:meiyou/presentation/info/services/info_screen_notifer.dart';
+import 'package:meiyou/presentation/player/fast_forward_button.dart';
+import 'package:meiyou/presentation/player/notifers/buffering_notifer.dart';
+import 'package:meiyou/presentation/player/notifers/player_state_notifer.dart';
+import 'package:meiyou/presentation/player/notifers/show_controls_cubit.dart';
 import 'package:meiyou/presentation/player/episodes_button.dart';
 import 'package:meiyou/presentation/player/lock_button.dart';
 import 'package:meiyou/presentation/player/next_previous_button.dart';
@@ -18,6 +27,7 @@ import 'package:meiyou/presentation/player/player_settings.dart';
 import 'package:meiyou/presentation/player/player_title.dart';
 import 'package:meiyou/presentation/player/resize_button.dart';
 import 'package:meiyou/presentation/player/seek_bar.dart';
+import 'package:meiyou/presentation/player/selected_video.dart';
 import 'package:meiyou/presentation/player/subtitle_view.dart';
 import 'package:meiyou/presentation/player/video_settings.dart';
 import 'package:meiyou/presentation/player/skip_button.dart';
@@ -27,19 +37,20 @@ import 'package:media_kit/media_kit.dart' hide PlayerState;
 import 'package:media_kit_video/media_kit_video.dart' as media_kit_video;
 import 'package:meiyou/core/utils/resources/logger.dart';
 import 'package:meiyou/domain/repositories/player_repository.dart';
-import 'package:meiyou/presentation/common/cubits/link_and_data_cubit.dart';
+import 'package:meiyou/presentation/common/notifers/link_and_data_notifer.dart';
 import 'package:meiyou_extensions_lib/models.dart';
+import 'package:nice_dart/nice_dart.dart';
 
 typedef VideoStateKey = GlobalKey<media_kit_video.VideoState>;
 
-extension PlayerInjectKtorExtensions on InjectKtorInterface {
-  PlayerCubit get playerCubit => get<PlayerCubit>();
+extension PlayerGetItExtensions on GetIt {
+  PlayerStateNotifer get playerNotifer => get<PlayerStateNotifer>();
 
   PlayerRepository get playerRepository => get<PlayerRepository>();
 
   VideoStateKey get videoStateKey => get<VideoStateKey>();
 
-  InfoPage get infoPage => get<InfoScreenCubit>().state.value!;
+  InfoPage get infoPage => get<InfoScreenNotifer>().state.value!;
 }
 
 extension on Content {
@@ -58,13 +69,13 @@ class _PlayerScreenState extends State<PlayerScreen> {
 
   late final media_kit_video.VideoController videoController;
 
-  late final PlayerCubit playerCubit;
+  late final PlayerStateNotifer playerNotifer;
 
-  late final ShowPlayerControlsCubit showPlayerControlsCubit;
+  late final ShowPlayerControlsNotifer showPlayerControlsNotifer;
 
   late final VideoStateKey _key;
 
-  final PlayerRepository playerRepository = InjectKtor.get();
+  final PlayerRepository playerRepository = getIt.get();
 
   void onError(Exception error) {
     if (mounted) {
@@ -75,7 +86,9 @@ class _PlayerScreenState extends State<PlayerScreen> {
     }
   }
 
-  late final LinkAndVideoCubit linkAndDataCubit;
+  late final LinkAndVideoNotifer linkAndDataNotifer;
+
+  late final BufferingNotifer bufferingNotifer;
 
   @override
   void initState() {
@@ -83,38 +96,35 @@ class _PlayerScreenState extends State<PlayerScreen> {
 
     changeOrientation();
 
-    _key = InjectKtor.addSingleton<VideoStateKey>(GlobalKey());
+    _key = getIt.registerSingleton<VideoStateKey>(GlobalKey());
 
-    playerCubit = InjectKtor.addSingleton(PlayerCubit(
+    playerNotifer = getIt.registerSingleton(PlayerStateNotifer(
       onLoaded: () {
-        playerCubit.loaded();
-        // player.stream.duration.first.then((value) {
-        //   playerRepository.playOrPause();
-        //   // if (mounted) {
-        //   //   setState(() {});
-        //   // }
-        // });
+        playerNotifer.loaded();
       },
       onError: onError,
     ));
 
-    showPlayerControlsCubit =
-        InjectKtor.addSingleton(ShowPlayerControlsCubit());
+    showPlayerControlsNotifer =
+        getIt.registerSingleton(ShowPlayerControlsNotifer());
 
-    player = InjectKtor.addSingleton(Player(
+    player = getIt.registerSingleton(Player(
       configuration: const PlayerConfiguration(bufferSize: 32 * 1024 * 1024),
     ));
 
-    videoController = InjectKtor.addSingleton(media_kit_video.VideoController(
+    videoController = getIt.registerSingleton(media_kit_video.VideoController(
       player,
       configuration: const media_kit_video.VideoControllerConfiguration(
           androidAttachSurfaceAfterVideoParameters: false),
     ));
 
-    linkAndDataCubit = InjectKtor.addSingleton<LinkAndVideoCubit>(
-        LinkAndDataCubit<Video>(onError));
+    linkAndDataNotifer = getIt.registerSingleton<LinkAndVideoNotifer>(
+        LinkAndDataNotifer.video(onError));
 
-    playerCubit.load();
+    bufferingNotifer = getIt.registerSingleton<BufferingNotifer>(
+        BufferingNotifer(playerRepository.isBufferingStream()));
+
+    playerNotifer.load();
   }
 
   Widget video() {
@@ -124,77 +134,65 @@ class _PlayerScreenState extends State<PlayerScreen> {
       controls: (state) {
         return defaultSizedBox;
       },
+      subtitleViewConfiguration:
+          const media_kit_video.SubtitleViewConfiguration(visible: false),
     );
   }
 
-  // Widget topBar() {
-  //   return const Positioned(
-  //     top: 0,
-  //     right: 0,
-  //     left: 0,
-  //     child: ,
-  //   );
-  // }
-
   Widget centerControls() {
-    return const ToggleControls(
-      child: Center(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            PlayerPreviousButton(),
-            HorizontalSpace(10),
-            PlayerPlayPause(),
-            HorizontalSpace(10),
-            PlayerNextButton(),
-          ],
+    return const Center(
+      child: ToggleControls(
+        child: SizedBox(
+          height: 70,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              PlayerPreviousButton(),
+              HorizontalSpace(35),
+              PlayerPlayPause(),
+              HorizontalSpace(35),
+              PlayerNextButton(),
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget bottomControls() {
-    return const Positioned(
-      bottom: 0,
-      right: 0,
-      left: 0,
-      child: ToggleControls(
-        child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            mainAxisAlignment: MainAxisAlignment.end,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              PlayerSkipButton(),
-              VerticalSpace(10),
-              PlayerSeekBar(),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      VideoSettingsButton(),
-                      ChangeVideoSourceButton()
-                    ],
-                  ),
-                  PlayerResizeButton(),
-                ],
-              ),
-            ]),
-      ),
+    return const ToggleControls(
+      child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            PlayerSkipButton(),
+            VerticalSpace(10),
+            PlayerSeekBar(),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [VideoSettingsButton(), ChangeVideoSourceButton()],
+                ),
+                PlayerResizeButton(),
+              ],
+            ),
+          ]),
     );
   }
 
   Widget loadingIndicator() {
-    return BlocBuilder<PlayerCubit, PlayerState>(
-      bloc: playerCubit,
+    return GetItListenableBuilder<PlayerStateNotifer, PlayerState>(
+      notifer: playerNotifer,
       builder: (context, state) {
         return IgnorePointer(
-          child: StreamBuilder(
-              initialData: InjectKtor.playerRepository.isBuffering(),
-              stream: InjectKtor.playerRepository.isBufferingStream(),
-              builder: (context, snapshot) {
-                if (state == PlayerState.loading || snapshot.data!) {
+          child: StateListenableBuilder(
+              stateListenable: bufferingNotifer,
+              builder: (context, isBuffering, child) {
+                if (state == PlayerState.loading || isBuffering) {
                   return const Center(
                     child: SizedBox(
                       height: 35,
@@ -211,67 +209,119 @@ class _PlayerScreenState extends State<PlayerScreen> {
   }
 
   Widget topControls() {
-    return BlocBuilder<PlayerCubit, PlayerState>(
-      bloc: playerCubit,
-      builder: (context, state) {
-        if (state.isLoading) return const BackButton();
-        return ToggleControls(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const BackButton(),
-              const Padding(
-                padding: EdgeInsets.only(top: 10),
-                child: PlayerTitle(),
-              ),
-              const Spacer(),
-              if (InjectKtor.infoPage.content!.isEpisodic)
-                const ShowEpisodesButton(),
-              const PlayerLockButton(),
-              const PlayerSettingskButton(),
-            ],
+    return ToggleControls(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const BackButton(),
+          const Padding(
+            padding: EdgeInsets.only(top: 10),
+            child: PlayerTitle(),
           ),
-        );
-      },
+          const Spacer(),
+          if (getIt.infoPage.content!.isEpisodic) const ShowEpisodesButton(),
+          const PlayerLockButton(),
+          const PlayerSettingskButton(),
+        ],
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    EdgeInsets padding =
+        MediaQuery.paddingOf(context).let((it) => EdgeInsets.only(
+              left: max(it.left, 8.0),
+              top: max(
+                it.top,
+                8.0,
+              ),
+              right: max(it.right, 8.0),
+              bottom: max(it.bottom, 8.0),
+            ));
+
+    // final SafeArea
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(60),
         child: Align(
           alignment: Alignment.centerLeft,
-          child: topControls(),
+          child: Padding(
+            padding: padding.copyWith(bottom: 0),
+            child: topControls(),
+          ),
         ),
       ),
       extendBodyBehindAppBar: true,
-      body: SafeArea(
-        minimum: const EdgeInsets.all(8.0),
-        child: GestureDetector(
-          onTap: () {
-            showPlayerControlsCubit.toggle();
-          },
-          child: Stack(children: [
-            video(),
-            const CustomSubtitleView(),
-            background(),
-            centerControls(),
-            bottomControls(),
-            loadingIndicator(),
-          ]),
-        ),
+      body: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          showPlayerControlsNotifer.toggle();
+        },
+        child: Stack(children: [
+          video(),
+          const Positioned(
+              bottom: 0, right: 0, left: 0, child: SubtitleRenderer()),
+          background(),
+          Positioned(
+              top: kToolbarHeight,
+              right: padding.right + 20,
+              child: const ToggleControls(child: SelectedVideo())),
+          fastforwardAndRewind(),
+          centerControls(),
+          Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Padding(padding: padding, child: bottomControls())),
+          loadingIndicator(),
+        ]),
       ),
     );
+  }
+
+  Widget fastforwardAndRewind() {
+    return StateListenableBuilder(
+        stateListenable: playerNotifer,
+        builder: (context, state, child) {
+          if (state != PlayerState.loaded) {
+            return defaultSizedBox;
+          }
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              RewindButton(onTap: () {
+                bufferingNotifer.forceBuffering();
+                showPlayerControlsNotifer.forceHide();
+              }, onFinished: (seconds) {
+                showPlayerControlsNotifer.reset();
+                playerRepository.rewind(seconds).then((_) {
+                  bufferingNotifer.resetBuffering();
+                });
+              }),
+              FastForwardButton(
+                onTap: () {
+                  bufferingNotifer.forceBuffering();
+                  showPlayerControlsNotifer.forceHide();
+                },
+                onFinished: (seconds) {
+                  showPlayerControlsNotifer.reset();
+                  playerRepository.fastforward(seconds).then((_) {
+                    bufferingNotifer.resetBuffering();
+                  });
+                },
+              ),
+            ],
+          );
+        });
   }
 
   Widget background() {
     return Positioned.fill(
       child: ToggleControls(
-        child: Container(color: const Color(0x66000000)),
+        child: Container(color: Colors.black.withOpacity(0.6)),
       ),
     );
   }
@@ -290,12 +340,15 @@ class _PlayerScreenState extends State<PlayerScreen> {
 
   @override
   void dispose() {
-    player.dispose();
-    InjectKtor.remove<PlayerCubit>();
-    InjectKtor.remove<ShowPlayerControlsCubit>();
-    InjectKtor.remove<Player>();
-    InjectKtor.remove<media_kit_video.VideoController>();
-    InjectKtor.remove<LinkAndDataCubit<Video>>();
+    playerRepository.saveProgress();
+    player.dispose().then((value) => getIt.unregister<Player>());
+    getIt.unregister<PlayerStateNotifer>();
+    getIt.unregister<ShowPlayerControlsNotifer>();
+    getIt.unregister<media_kit_video.VideoController>();
+    getIt.unregister<LinkAndVideoNotifer>();
+    getIt.unregister<VideoStateKey>();
+    getIt.unregister<BufferingNotifer>();
+
     playerRepository.unloadPlayer();
     changeBackOrientation();
     super.dispose();
@@ -309,18 +362,14 @@ class ToggleControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InjecktorBlocBuilder<ShowPlayerControlsCubit, bool>(
+    return GetItListenableBuilder<ShowPlayerControlsNotifer, bool>(
       builder: (context, state) {
         return IgnorePointer(
           ignoring: !state,
           child: AnimatedOpacity(
-            opacity: state ? 1 : 0,
             duration: const Duration(milliseconds: 300),
-            child: AnimatedOpacity(
-              duration: const Duration(milliseconds: 300),
-              opacity: state ? 1 : 0,
-              child: child,
-            ),
+            opacity: state ? 1 : 0,
+            child: child,
           ),
         );
       },

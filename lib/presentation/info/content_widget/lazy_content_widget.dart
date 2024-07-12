@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:injecktor/injecktor.dart';
-
 import 'package:meiyou/core/utils/extensions/result.dart';
-import 'package:meiyou/core/utils/resources/async_cubit.dart';
+import 'package:meiyou/core/utils/resources/get_it/get_it.dart';
+import 'package:meiyou/core/utils/resources/logger.dart';
+
+import 'package:meiyou/domain/models/progress.dart';
 import 'package:meiyou/domain/repositories/source_repository.dart';
+import 'package:meiyou/notifers/async_notifer.dart';
 import 'package:meiyou/presentation/info/content_widget/content_widget.dart';
-import 'package:meiyou/presentation/info/services/info_screen_cubit.dart';
+import 'package:meiyou/presentation/info/services/info_screen_notifer.dart';
 import 'package:meiyou_extensions_lib/models.dart';
 
 class LazyContentWidget extends StatefulWidget implements ContentWidget {
@@ -16,6 +18,9 @@ class LazyContentWidget extends StatefulWidget implements ContentWidget {
 
   @override
   final LazyContent content;
+
+  @override
+  ContentProgress? get contentProgress => null;
 
   @override
   State<LazyContentWidget> createState() => _LazyContentState();
@@ -31,14 +36,15 @@ class _LazyContentState extends State<LazyContentWidget> {
   }
 
   void _load() async {
-    final results = await InjectKtor.get<SourceRepository>()
-        .loadLazyContent(widget.content);
+    final results =
+        await getIt.get<SourceRepository>().loadLazyContent(widget.content);
     results.when(success: (content) {
-      InjectKtor.get<InfoScreenCubit>().addContent(content);
+      getIt.get<InfoScreenNotifer>().addContent(content);
     }, error: (exception) {
       setState(() {
         state = AsyncValue.error(exception, StackTrace.current);
       });
+      logRat.logError(exception.toString(), exception);
     });
   }
 

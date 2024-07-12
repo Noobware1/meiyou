@@ -1,45 +1,47 @@
 import 'package:flutter/material.dart';
+
 import 'package:meiyou/core/utils/extensions/context.dart';
-import 'package:meiyou/presentation/core/injectktor_widget.dart';
-import 'package:meiyou/presentation/home/source_selector/selected_source.dart';
+import 'package:meiyou/core/utils/resources/get_it/get_it.dart';
+import 'package:meiyou/domain/source/source_manager.dart';
+import 'package:meiyou/extension/models/entension_type.dart';
+import 'package:meiyou/presentation/core/floating_action_button.dart';
 import 'package:meiyou/presentation/home/source_selector/source_selector.dart';
 import 'package:meiyou_extensions_lib/models.dart';
 
 class SourceSelectorButton extends StatelessWidget {
+  final Source? source;
+  final void Function(ExtensionType type, Source?) onSourceSelected;
+
   const SourceSelectorButton({
     super.key,
+    this.source,
+    required this.onSourceSelected,
   });
 
   static const _noSourceSelected = "None";
-
-  static const _buttonIcon = Icon(
-    Icons.view_headline_rounded,
-  );
-
-  static const _buttonShape = RoundedRectangleBorder(
-    borderRadius: BorderRadius.all(Radius.circular(15)),
-  );
-
-  static const _buttonElevation = 10.0;
-
-  static const _buttonExtendedPadding = EdgeInsets.fromLTRB(15, 50, 15, 50);
-
   @override
   Widget build(BuildContext context) {
-    return InjecktorBlocBuilder<SelectedSource, Source?>(
-      builder: (context, state) {
-        return FloatingActionButton.extended(
-          elevation: _buttonElevation,
-          icon: _buttonIcon,
-          extendedPadding: _buttonExtendedPadding,
-          label: Text(state?.name ?? _noSourceSelected),
-          backgroundColor: context.theme.scaffoldBackgroundColor,
-          shape: _buttonShape,
-          onPressed: () {
-            SourceSelector.showBottomSheet(context);
-          },
-        );
+    final sourceName = source?.name ?? _noSourceSelected;
+    return OkFloatActionButton(
+      heroTag: 'sourceSelectorbtn',
+      title: sourceName,
+      onTap: () {
+        SourceSelector.showBottomSheet(context, (type, installedSource) {
+          final source =
+              getIt.get<SourceManager>().getSource(type, installedSource.id);
+          onSourceSelected(type, source);
+        });
       },
     );
+    // return FloatingActionButton.extended(
+    //   elevation: _buttonElevation,
+    //   icon: _buttonIcon,
+    //   extendedPadding: _buttonExtendedPadding,
+    //   label: Text(sourceName),
+    //   backgroundColor: context.theme.scaffoldBackgroundColor,
+    //   shape: _buttonShape,
+    //   onPressed: () {
+    //   },
+    // );
   }
 }

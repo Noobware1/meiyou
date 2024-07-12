@@ -10,8 +10,12 @@ part 'banner_button_desktop.dart';
 abstract class BannerButton extends StatelessWidget {
   final VoidCallback onItemSelected;
   final VoidCallback onAddToList;
+  final bool isInLibrary;
   const BannerButton(
-      {super.key, required this.onItemSelected, required this.onAddToList});
+      {super.key,
+      required this.isInLibrary,
+      required this.onItemSelected,
+      required this.onAddToList});
 
   // Main button
 
@@ -44,7 +48,7 @@ abstract class BannerButton extends StatelessWidget {
 
   Icon addToListIcon(Color color) {
     return Icon(
-      Icons.add,
+      isInLibrary ? Icons.done : Icons.add,
       color: color,
     );
   }
@@ -73,13 +77,20 @@ abstract class BannerButton extends StatelessWidget {
   }
 
   factory BannerButton.forScreenSize(ScreenSize screenSize,
-      {required void Function() onItemSelected,
+      {required bool isInLibrary,
+      required void Function() onItemSelected,
       required void Function() onAddToList}) {
     switch (screenSize) {
       case ScreenSize.Mobile:
-        return BannerButton.mobile(onItemSelected: onItemSelected, onAddToList: () {});
+        return BannerButton.mobile(
+            isInLibrary: isInLibrary,
+            onItemSelected: onItemSelected,
+            onAddToList: onAddToList);
       case ScreenSize.Desktop:
-        return BannerButton.desktop(onItemSelected: onItemSelected, onAddToList: () {});
+        return BannerButton.desktop(
+            isInLibrary: isInLibrary,
+            onItemSelected: onItemSelected,
+            onAddToList: onAddToList);
       default:
         throw Exception('Invalid screen type');
     }
@@ -87,18 +98,26 @@ abstract class BannerButton extends StatelessWidget {
 
   factory BannerButton.mobile(
       {Key? key,
+      required bool isInLibrary,
       required VoidCallback onItemSelected,
       required VoidCallback onAddToList}) {
     return _BannerButtonMobile(
-        key: key, onItemSelected: onItemSelected, onAddToList: onAddToList);
+        key: key,
+        isInLibrary: isInLibrary,
+        onItemSelected: onItemSelected,
+        onAddToList: onAddToList);
   }
 
   factory BannerButton.desktop(
       {Key? key,
+      required bool isInLibrary,
       required VoidCallback onItemSelected,
       required VoidCallback onAddToList}) {
     return _BannerButtonDesktop(
-        key: key, onItemSelected: onItemSelected, onAddToList: onAddToList);
+        key: key,
+        isInLibrary: isInLibrary,
+        onItemSelected: onItemSelected,
+        onAddToList: onAddToList);
   }
 }
 

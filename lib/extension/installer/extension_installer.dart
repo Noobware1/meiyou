@@ -2,14 +2,14 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:injecktor/injecktor.dart';
 import 'package:meiyou/core/utils/extensions/io.dart';
+import 'package:meiyou/core/utils/resources/get_it/get_it.dart';
 import 'package:meiyou/core/utils/resources/logger.dart';
+import 'package:meiyou/core/utils/resources/network.dart';
 import 'package:meiyou/extension/models/entension_type.dart';
 import 'package:meiyou/extension/utils/extension_folder_provider.dart';
 import 'package:meiyou/extension/models/install_step.dart';
-import 'package:meiyou/extension/utils/extension_loader.dart'
-    as ext_loader;
+import 'package:meiyou/extension/utils/extension_loader.dart' as ext_loader;
 import 'package:meiyou_extensions_lib/models.dart';
 import 'package:meiyou_extensions_lib/network.dart';
 import 'package:nice_dart/nice_dart.dart';
@@ -26,7 +26,7 @@ abstract class ExtensionInstallerListener {
 class ExtensionInstaller {
   ExtensionInstaller(this._listener);
   final ExtensionInstallerListener _listener;
-  final NetworkHelper _networkService = InjectKtor.get();
+  final NetworkHelper _networkService = getIt.get();
   final ExtensionsFolderProvider _folderProvider = ExtensionsFolderProvider();
 
   Stream<InstallStep> downloadAndinstall(
@@ -35,12 +35,16 @@ class ExtensionInstaller {
   ) async* {
     try {
       yield InstallStep.Downloading;
+
       final response =
           await _networkService.client.newCall(GET(pluginUrl)).execute();
-      yield InstallStep.Installing;
-      final dir = _folderProvider.getFolderFromType(type);
+
       final plugin = Plugin.decode(Uint8List.fromList(response.body.bytes));
 
+      yield InstallStep.Installing;
+
+      final dir = _folderProvider.getFolderFromType(type);
+      print(dir.path);
       final result = plugin.saveAndGet(dir.path);
 
       if (result.isFailure) {
@@ -50,13 +54,18 @@ class ExtensionInstaller {
         (dir.path + Platform.pathSeparator + plugin.metadata.pkgName)
             .toDirectory()
             .takeIf((it) => it.existsSync())
-            ?.let((it) => it.deleteSync());
+            ?.let((it) => it.deleteSync(
+                  recursive: true,
+                ));
       } else {
         _listener.onExtensionInstalled(type, result.getOrNull()!);
 
         yield InstallStep.Installed;
       }
-    } catch (_) {
+    } catch (e, s) {
+      print(e);
+      print(s);
+      logRat.logcatch(LogPriority.error, e, StackTrace.current);
       yield InstallStep.Error;
     } finally {
       yield InstallStep.Idle;

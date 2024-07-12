@@ -1,13 +1,15 @@
 // ignore_for_file: unused_element
 
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Gradient;
+import 'package:meiyou/core/utils/resources/get_it/get_it.dart';
+import 'package:meiyou/domain/library/library_repository.dart';
+import 'package:meiyou/extension/models/entension_type.dart';
 import 'package:meiyou_extensions_lib/models.dart';
 import 'package:meiyou/core/utils/extensions/context.dart';
-import 'package:meiyou/core/utils/extensions/double.dart';
 import 'package:meiyou/core/utils/resources/screen_size.dart';
 import 'package:meiyou/presentation/core/image_holder.dart';
-
 import 'package:meiyou/presentation/core/gradient.dart';
 import 'package:meiyou/presentation/home/banner/banner_button/banner_button.dart';
 import 'package:meiyou/presentation/home/banner/banner_page_controller.dart';
@@ -17,10 +19,14 @@ import 'package:nice_dart/nice_dart.dart';
 class BannerView extends StatefulWidget {
   final HomePageRequest request;
   final HomePage homepage;
+  final Source source;
+  final ExtensionType type;
   final void Function(ContentItem) onItemSelected;
-  final void Function(ContentItem) onAddToLibrary;
+  final Future<void> Function(ContentItem) onAddToLibrary;
   const BannerView({
     super.key,
+    required this.source,
+    required this.type,
     required this.request,
     required this.homepage,
     required this.onItemSelected,
@@ -48,20 +54,6 @@ class _BannerViewState extends State<BannerView> {
     super.dispose();
   }
 
-  Widget topGrandient({required double width}) {
-    return Positioned(
-      top: 0,
-      right: 0,
-      left: 0,
-      child: Gradient(
-        height: 60,
-        begin: const Alignment(0, 1.0),
-        end: const Alignment(0.0, -0.5),
-        colors: [Colors.transparent, context.theme.scaffoldBackgroundColor],
-      ),
-    );
-  }
-
   Widget sideGradient({required double width}) {
     return Container(
       alignment: Alignment.centerRight,
@@ -86,7 +78,7 @@ class _BannerViewState extends State<BannerView> {
         gradient: LinearGradient(
           begin: const Alignment(0.0, 1.0), // Adjust the begin point
           end: const Alignment(0.0, -1.0),
-          colors: [context.theme.scaffoldBackgroundColor, Colors.transparent],
+          colors: [context.theme.colorScheme.background, Colors.transparent],
         ),
       ),
       child: PageView.builder(
@@ -105,22 +97,24 @@ class _BannerViewState extends State<BannerView> {
   }
 
   Widget bannerText(
-      {required ScreenSize screenSize, required Iterable<ContentItem> items}) {
-    return ListenableBuilder(
-      listenable: controller,
-      builder: (context, child) {
-        final item = items.get(controller.currentPage);
-        return BannerText.forScreenSize(item: item, screenSize: screenSize);
-      },
+      {required ScreenSize screenSize, required ContentItem item}) {
+    return IgnorePointer(
+      child: BannerText.forScreenSize(item: item, screenSize: screenSize),
     );
   }
 
   Widget bannerButton({
     required ScreenSize screenSize,
+    required ContentItem item,
     required void Function() onItemSelected,
     required void Function() onAddToList,
   }) {
+    final bool isInLibrary = getIt
+            .get<LibraryRepository>()
+            .getFromLibrary(widget.source, widget.type, item.title) !=
+        null;
     return BannerButton.forScreenSize(
+      isInLibrary: isInLibrary,
       screenSize,
       onItemSelected: onItemSelected,
       onAddToList: onAddToList,
@@ -130,7 +124,7 @@ class _BannerViewState extends State<BannerView> {
   Widget bannerContent({
     required ScreenSize screenSize,
     required double width,
-    required Iterable<ContentItem> items,
+    required List<ContentItem> items,
   }) {
     final isMobile = screenSize.isMobile;
 
@@ -141,33 +135,40 @@ class _BannerViewState extends State<BannerView> {
         bottom: isMobile ? 20 : 30,
       ),
       alignment: Alignment.bottomLeft,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.end,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          bannerText(screenSize: screenSize, items: items),
-          bannerButton(
-            screenSize: screenSize,
-            onItemSelected: () {
-              widget.onItemSelected(items.get(controller.currentPage));
-            },
-            onAddToList: () {
-              widget.onAddToLibrary(items.get(controller.currentPage));
-            },
-          )
-        ],
+      child: ListenableBuilder(
+        listenable: controller,
+        builder: (context, child) {
+          final item = items[controller.currentPage];
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              bannerText(screenSize: screenSize, item: item),
+              bannerButton(
+                screenSize: screenSize,
+                item: item,
+                onItemSelected: () {
+                  widget.onItemSelected(item);
+                },
+                onAddToList: () {
+                  widget.onAddToLibrary(item).then((value) => setState(() {}));
+                },
+              )
+            ],
+          );
+        },
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final items = widget.homepage.data.map((e) => e.items).flattened;
+    final items = widget.homepage.data.map((e) => e.items).flattened.toList();
     return LayoutBuilder(builder: (context, boxConstraints) {
       final width = boxConstraints.maxWidth;
 
-      final screenSize = width.screenSize;
+      final screenSize = ScreenSize.fromWidth(width);
       return SizedBox(
         height: height,
         width: width,
@@ -177,7 +178,7 @@ class _BannerViewState extends State<BannerView> {
               items: items,
               width: width,
             ),
-            topGrandient(width: width),
+            // topGrandient(width: width),
             if (screenSize.isDesktop) sideGradient(width: width),
             bannerContent(screenSize: screenSize, width: width, items: items),
           ],

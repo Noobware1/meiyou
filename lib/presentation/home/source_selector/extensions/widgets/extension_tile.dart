@@ -1,56 +1,59 @@
 import 'package:flutter/material.dart';
-import 'package:meiyou/core/constants/font_size.dart';
-import 'package:meiyou/core/utils/resources/platform.dart';
+import 'package:meiyou/core/utils/extensions/context.dart';
+import 'package:meiyou/core/utils/resources/screen_size.dart';
 
-abstract class ExtensionTile extends StatelessWidget {
-  static const titleTextStyleMobile = TextStyle(
-    fontSize: MobileFontSize.normal,
-    fontWeight: FontWeight.w500,
-  );
+class ExtensionTileTheme {
+  ExtensionTileTheme._(BuildContext context)
+      : _theme = context.theme,
+        isMobile = context.screenSize.isMobile;
 
-  static const subtitleTextStyleMobile = TextStyle(
-    fontSize: MobileFontSize.small,
-    fontWeight: FontWeight.w400,
-  );
+  late final ThemeData _theme;
+  late final bool isMobile;
+  late final TextTheme _textTheme = _theme.textTheme;
 
-  static const titleTextStyleDesktop = TextStyle(
-    fontSize: MobileFontSize.normal,
-    fontWeight: FontWeight.w500,
-  );
+  TextStyle? get titleTextStyle =>
+      isMobile ? _textTheme.titleSmall : _textTheme.titleMedium;
 
-  static const subtitleTextStyleDesktop = TextStyle(
-    fontSize: MobileFontSize.small,
-    fontWeight: FontWeight.w400,
-  );
+  TextStyle? get subtitleTextStyle =>
+      isMobile ? _textTheme.bodySmall : _textTheme.bodyMedium;
 
-  TextStyle titleTextStyle() {
-    return isMobile ? titleTextStyleMobile : titleTextStyleDesktop;
+  Size get iconSize => const Size(50, 50);
+
+  static of(BuildContext context) {
+    return ExtensionTileTheme._(context);
   }
+}
 
-  TextStyle subtitleTextStyle() {
-    return isMobile ? subtitleTextStyleMobile : subtitleTextStyleDesktop;
-  }
+class BaseBrowseItem extends StatelessWidget {
+  const BaseBrowseItem({
+    super.key,
+    required this.actions,
+    required this.name,
+    required this.icon,
+    required this.onPressed,
+    required this.onLongPress,
+    required this.subtitle,
+  });
 
-  const ExtensionTile({super.key});
+  final String name;
+  final Widget icon;
+  final VoidCallback onPressed;
+  final VoidCallback onLongPress;
+  final List<Widget> actions;
+  final Widget subtitle;
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: title(),
-      subtitle: subtitle(),
-      leading: icon(),
-      trailing: button(),
+      title: Text(name),
+      subtitle: subtitle,
+      leading: icon,
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: actions,
+      ),
       onTap: onPressed,
+      onLongPress: onLongPress,
     );
   }
-
-  Widget title();
-
-  Widget subtitle();
-
-  void onPressed();
-
-  Widget icon();
-
-  Widget button();
 }

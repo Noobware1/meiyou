@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:injecktor/injecktor.dart';
-// import 'package:media_kit/media_kit.dart';
-import 'package:meiyou/presentation/core/injectktor_widget.dart';
-import 'package:meiyou/presentation/player/cubits/player_cubit.dart';
-import 'package:meiyou/presentation/player/player_screen.dart';
+import 'package:meiyou/core/utils/resources/get_it/get_it.dart';
 
-abstract class _Button extends StatefulWidget {
+// import 'package:media_kit/media_kit.dart';
+import 'package:meiyou/presentation/core/getIt_widget.dart';
+import 'package:meiyou/presentation/player/notifers/player_state_notifer.dart';
+import 'package:meiyou/presentation/player/player_screen.dart';
+import 'package:nice_dart/nice_dart.dart';
+
+abstract class _Button extends StatelessWidget {
   const _Button({
     super.key,
   });
@@ -17,29 +19,32 @@ abstract class _Button extends StatefulWidget {
     shape: MaterialStatePropertyAll(CircleBorder()),
   );
 
-  @override
-  State<_Button> createState() => _ButtonState();
+  // @override
+  // State<_Button> createState() => _ButtonState();
 
   IconData iconData();
 
   void onPressed();
 
   bool get enabled;
-}
+// }
 
-class _ButtonState extends State<_Button> {
+// class _ButtonState extends State<_Button> {
   @override
   Widget build(BuildContext context) {
     return SizedBox.fromSize(
-      size: _Button.buttonSize,
-      child: InjecktorBlocListener<PlayerCubit, PlayerState>(
-        listener: (context, state) => setState(() {}),
-        child: IconButton(
-            style: _Button.style,
-            onPressed: !widget.enabled ? null : widget.onPressed,
-            icon: Icon(widget.iconData())),
-      ),
-    );
+        size: _Button.buttonSize,
+        child: GetItListenableBuilder<PlayerStateNotifer, PlayerState>(
+          builder: (context, _) {
+            return IconButton(
+                style: _Button.style,
+                onPressed: !enabled ? null : onPressed,
+                icon: Icon(
+                  iconData(),
+                  color: Colors.white,
+                ));
+          },
+        ));
   }
 }
 
@@ -51,11 +56,14 @@ class PlayerNextButton extends _Button {
 
   @override
   void onPressed() {
-    InjectKtor.playerRepository.nextEpisode();
+    getIt.playerRepository.let<void>((it) {
+      it.saveProgress();
+      it.nextEpisode();
+    });
   }
 
   @override
-  bool get enabled => InjectKtor.playerRepository.isNextEpisodeAvailable();
+  bool get enabled => getIt.playerRepository.isNextEpisodeAvailable();
 }
 
 class PlayerPreviousButton extends _Button {
@@ -66,9 +74,12 @@ class PlayerPreviousButton extends _Button {
 
   @override
   void onPressed() {
-    InjectKtor.playerRepository.previousEpisode();
+    getIt.playerRepository.let<void>((it) {
+      it.saveProgress();
+      it.previousEpisode();
+    });
   }
 
   @override
-  bool get enabled => InjectKtor.playerRepository.isPreviousEpisodeAvailable();
+  bool get enabled => getIt.playerRepository.isPreviousEpisodeAvailable();
 }

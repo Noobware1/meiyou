@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:meiyou/core/constants/font_size.dart';
 import 'package:meiyou/core/utils/extensions/context.dart';
+import 'package:meiyou/core/utils/extensions/target_platfrom.dart';
 import 'package:meiyou/core/utils/resources/platform.dart';
+import 'package:meiyou/core/utils/resources/screen_size.dart';
 import 'package:meiyou/presentation/onboard/steps/onboarding_step.dart';
 import 'package:meiyou/presentation/core/space.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -36,6 +39,13 @@ class PermissionStepWidget extends OnBoardingStepWidget {
 class _PermissionStepState extends State<PermissionStepWidget> {
   bool manageExternalStoragePermission = false;
 
+@override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+ ;
+  }
+
+
   void run<T>(Future<T> fun, void Function(T value) callback) {
     fun.then((value) {
       callback(value);
@@ -46,8 +56,8 @@ class _PermissionStepState extends State<PermissionStepWidget> {
     });
   }
 
-  Future<bool> _getStoragePermission() {
-    if (!isMobile) return Future.value(true);
+  Future<bool> _getStoragePermission(bool platfromIsMobile) {
+    if (!platfromIsMobile) return Future.value(true);
     const permission = Permission.manageExternalStorage;
     return permission.isDenied.then((isDenied) async {
       if (!isDenied) return true;
@@ -57,11 +67,12 @@ class _PermissionStepState extends State<PermissionStepWidget> {
 
   @override
   Widget build(BuildContext context) {
+final bool platfromIsMobile  =  context.theme.platform.isMobile;
     return Column(children: [
       _BuildPermission(
         isGranted: manageExternalStoragePermission,
         onPressed: () {
-          run(_getStoragePermission(), (value) {
+          run(_getStoragePermission(platfromIsMobile), (value) {
             manageExternalStoragePermission = value;
           });
         },
@@ -116,16 +127,14 @@ class PermissionText extends StatelessWidget {
       children: [
         Text(label,
             style: TextStyle(
-              fontSize: 15,
+              fontSize: MobileFontSize.normal,
               color: context.theme.colorScheme.onBackground,
               fontWeight: FontWeight.w600,
             )),
         const VerticalSpace(8.0),
         Text(description,
-            style: TextStyle(
-              fontSize: 12.5,
-              color: context.theme.colorScheme.onSecondary,
-            )),
+            style: context.theme.textTheme.bodyMedium!
+                .copyWith(color: context.theme.colorScheme.onSurfaceVariant)),
       ],
     );
   }
@@ -138,25 +147,7 @@ class _GrantButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textStyle = TextStyle(
-      color: isGranted
-          ? context.theme.colorScheme.onPrimary
-          : context.theme.colorScheme.primary,
-    );
-
-    return ElevatedButton(
-        style: ButtonStyle(
-          backgroundColor: MaterialStatePropertyAll(
-            isGranted ? context.theme.colorScheme.primary : Colors.transparent,
-          ),
-          side: MaterialStatePropertyAll(isGranted
-              ? null
-              : BorderSide(color: context.theme.colorScheme.onSecondary)),
-          elevation: MaterialStatePropertyAll(isGranted ? null : 0.0),
-        ),
-        onPressed: onPressed,
-        child: isGranted
-            ? Text('Granted', style: textStyle)
-            : Text('Grant', style: textStyle));
+    return OutlinedButton(
+        onPressed: onPressed, child: Text(isGranted ? 'Granted' : 'Grant'));
   }
 }

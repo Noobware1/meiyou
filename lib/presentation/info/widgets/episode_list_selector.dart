@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:injecktor/injecktor.dart';
 
 import 'package:meiyou/core/utils/extensions/context.dart';
+import 'package:meiyou/core/utils/resources/get_it/get_it.dart';
 import 'package:meiyou/core/utils/resources/platform.dart';
-import 'package:meiyou/presentation/core/injectktor_widget.dart';
+import 'package:meiyou/core/utils/resources/screen_size.dart';
+import 'package:meiyou/presentation/core/getIt_widget.dart';
 import 'package:meiyou/presentation/core/space.dart';
 import 'package:meiyou/presentation/info/services/episode_list_selector.dart';
 import 'package:nice_dart/nice_dart.dart';
@@ -24,7 +25,7 @@ class _EpisodeListSelectorState extends State<EpisodeListSelector> {
 
   static const HorizontalSpace space = HorizontalSpace(10);
 
-  static const double height = 50;
+  static const double height = 40;
 
   static const borderRadius = BorderRadius.all(Radius.circular(15));
 
@@ -35,25 +36,24 @@ class _EpisodeListSelectorState extends State<EpisodeListSelector> {
 
   static const textStyle = TextStyle(fontWeight: FontWeight.bold);
 
-  late final ScrollController? _controller;
+  late final ScrollController _controller;
 
   @override
   void initState() {
     super.initState();
-    if (!isMobile) {
-      _controller = ScrollController();
-    } else {
-      _controller = null;
-    }
+    _controller = ScrollController();
   }
 
   @override
   Widget build(BuildContext context) {
-    final episodesKeyAndIndexes = InjectKtor.get<EpisodeListSelectorCubit>()
-        .episodesKeyAndIndexes
-        .entries;
+    final episodesKeyAndIndexes =
+        getIt.get<EpisodeListSelectorNotifer>().episodesKeyAndIndexes.entries;
 
-    return InjecktorBlocBuilder<EpisodeListSelectorCubit, Pair<int, int>>(
+    if (episodesKeyAndIndexes.length <= 1) {
+      return const SizedBox();
+    }
+
+    return GetItListenableBuilder<EpisodeListSelectorNotifer, Pair<int, int>>(
       builder: (context, state) {
         return Padding(
           padding: selectorPadding,
@@ -71,7 +71,7 @@ class _EpisodeListSelectorState extends State<EpisodeListSelector> {
   }
 
   Widget srollBar({required Widget child}) {
-    if (isMobile) return child;
+    if (context.screenSize.isMobile) return child;
     return ScrollbarTheme(
       data: scrollbarTheme,
       child: Scrollbar(
@@ -118,33 +118,12 @@ class _EpisodeListSelectorState extends State<EpisodeListSelector> {
         ),
       ),
       onPressed: () {
-        InjectKtor.get<EpisodeListSelectorCubit>().select(entry.value);
-  
+        getIt.get<EpisodeListSelectorNotifer>().select(entry.value);
       },
-      child: Text(entry.key, style: textStyle),
+      child: Text(entry.key,
+          style: textStyle.copyWith(
+              color:
+                  !isNotSelected ? context.theme.colorScheme.onPrimary : null)),
     );
   }
-  // return Material(
-  //   color: color,
-  //   animationDuration: animationDuration,
-  //   borderRadius: borderRadius,
-  //   child: InkWell(
-  //     splashColor: context.theme.colorScheme.primary,
-  //     borderRadius: borderRadius,
-  //     onTap: () {
-  //       if (isNotSelected) {
-  //         InjectKtor.get<EpisodeListSelectorCubit>().select(entry.value);
-  //       }
-  //     },
-  //     child: Container(
-  //       alignment: Alignment.center,
-  //       padding: buttonPadding,
-  //       decoration: BoxDecoration(
-  //         borderRadius: borderRadius,
-  //         border: Border.all(color: boderColor, width: 2),
-  //       ),
-  //       child: Text(entry.key, style: textStyle),
-  //     ),
-  //   ),
-  // );
 }

@@ -2,7 +2,10 @@ part of banner_button;
 
 class _BannerButtonDesktop extends _BannerButtonMobile {
   const _BannerButtonDesktop(
-      {super.key, required super.onItemSelected, required super.onAddToList});
+      {super.key,
+      required super.isInLibrary,
+      required super.onItemSelected,
+      required super.onAddToList});
 
   @override
   double get defaultSpace => 20.0;

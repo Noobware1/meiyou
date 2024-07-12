@@ -6,6 +6,10 @@ class PlayerLockButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-        onPressed: () {}, icon: const Icon(Icons.lock_outline_rounded));
+        onPressed: () {},
+        icon: const Icon(
+          Icons.lock_outline_rounded,
+          color: Colors.white,
+        ));
   }
 }

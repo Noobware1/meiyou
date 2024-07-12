@@ -1,7 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:injecktor/injecktor.dart';
+import 'package:meiyou/core/utils/resources/get_it/get_it.dart';
+import 'package:meiyou/presentation/core/getIt_widget.dart';
+import 'package:meiyou/presentation/player/notifers/buffering_notifer.dart';
+import 'package:meiyou/presentation/player/notifers/player_state_notifer.dart';
+
 import 'package:meiyou/presentation/player/player_screen.dart';
 import 'package:nice_dart/nice_dart.dart';
 
@@ -32,10 +36,10 @@ class _PlayerPlayPauseState extends State<PlayerPlayPause>
         reverseDuration: const Duration(milliseconds: 300))
       ..forward();
 
-    InjectKtor.playerRepository.let((it) {
-      moveAnimation(InjectKtor.playerRepository.isPlaying());
+    getIt.playerRepository.let((it) {
+      moveAnimation(getIt.playerRepository.isPlaying());
       _subscription =
-          InjectKtor.playerRepository.isPlayingStream().listen((playing) {
+          getIt.playerRepository.isPlayingStream().listen((playing) {
         moveAnimation(playing);
       });
     });
@@ -59,27 +63,28 @@ class _PlayerPlayPauseState extends State<PlayerPlayPause>
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder(
-        initialData: InjectKtor.playerRepository.isBuffering(),
-        stream: InjectKtor.playerRepository.isBufferingStream(),
-        builder: (context, snapshot) {
-          return SizedBox.fromSize(
-            size: buttonSize,
-            child: !InjectKtor.playerCubit.isLoaded || snapshot.data!
-                ? null
-                : IconButton(
-                    style: style,
-                    onPressed: () {
-                      InjectKtor.playerRepository.playOrPause();
-                    },
-                    icon: AnimatedIcon(
-                      icon: AnimatedIcons.play_pause,
-                      size: 55.0,
-                      progress: _animationController,
-                      // progress: _animationController,
-                    ),
+    return GetItListenableBuilder<PlayerStateNotifer, PlayerState>(
+        builder: (context, state) {
+      return GetItListenableBuilder<BufferingNotifer, bool>(
+          builder: (context, isBuffering) {
+        return SizedBox.fromSize(
+          size: buttonSize,
+          child: (state == PlayerState.loading || isBuffering)
+              ? null
+              : IconButton(
+                  style: style,
+                  onPressed: () {
+                    getIt.playerRepository.playOrPause();
+                  },
+                  icon: AnimatedIcon(
+                    icon: AnimatedIcons.play_pause,
+                    size: 55.0,
+                    progress: _animationController,
+                    color: Colors.white,
                   ),
-          );
-        });
+                ),
+        );
+      });
+    });
   }
 }

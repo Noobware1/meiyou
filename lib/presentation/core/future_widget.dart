@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:meiyou/core/utils/resources/async_cubit.dart';
+import 'package:meiyou/notifers/async_notifer.dart';
 
 abstract class FutureWidget<T> extends StatefulWidget
     with _FutureWidgetMixin<T> {

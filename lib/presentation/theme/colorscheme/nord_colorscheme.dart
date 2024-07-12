@@ -1,0 +1,57 @@
+import 'package:flutter/material.dart';
+import 'package:meiyou/presentation/theme/colorscheme/base_colorscheme.dart';
+
+class NordColorScheme extends BaseColorScheme {
+  @override
+  final darkScheme = const ColorScheme.dark(
+    primary: Color(0xFF88C0D0),
+    onPrimary: Color(0xFF2E3440),
+    primaryContainer: Color(0xFF88C0D0),
+    onPrimaryContainer: Color(0xFF2E3440),
+    inversePrimary: Color(0xFF397E91),
+    secondary: Color(0xFF81A1C1),
+    onSecondary: Color(0xFF2E3440),
+    secondaryContainer: Color(0xFF81A1C1),
+    onSecondaryContainer: Color(0xFF2E3440),
+    tertiary: Color(0xFF5E81AC),
+    onTertiary: Color(0xFF000000),
+    tertiaryContainer: Color(0xFF5E81AC),
+    onTertiaryContainer: Color(0xFF000000),
+    background: Color(0xFF2E3440),
+    onBackground: Color(0xFFECEFF4),
+    surface: Color(0xFF3B4252),
+    onSurface: Color(0xFFECEFF4),
+    surfaceVariant: Color(0xFF2E3440),
+    onSurfaceVariant: Color(0xFFECEFF4),
+    surfaceTint: Color(0xFF88C0D0),
+    inverseSurface: Color(0xFFD8DEE9),
+    onInverseSurface: Color(0xFF2E3440),
+    outline: Color(0xFF6d717b),
+  );
+  @override
+  final lightScheme = const ColorScheme.light(
+    primary: Color(0xFF5E81AC),
+    onPrimary: Color(0xFF000000),
+    primaryContainer: Color(0xFF5E81AC),
+    onPrimaryContainer: Color(0xFF000000),
+    inversePrimary: Color(0xFF8CA8CD),
+    secondary: Color(0xFF81A1C1),
+    onSecondary: Color(0xFF2E3440),
+    secondaryContainer: Color(0xFF81A1C1),
+    onSecondaryContainer: Color(0xFF2E3440),
+    tertiary: Color(0xFF88C0D0),
+    onTertiary: Color(0xFF2E3440),
+    tertiaryContainer: Color(0xFF88C0D0),
+    onTertiaryContainer: Color(0xFF2E3440),
+    background: Color(0xFFECEFF4),
+    onBackground: Color(0xFF2E3440),
+    surface: Color(0xFFE5E9F0),
+    onSurface: Color(0xFF2E3440),
+    surfaceVariant: Color(0xFFffffff),
+    onSurfaceVariant: Color(0xFF2E3440),
+    surfaceTint: Color(0xFF5E81AC),
+    inverseSurface: Color(0xFF3B4252),
+    onInverseSurface: Color(0xFFECEFF4),
+    outline: Color(0xFF2E3440),
+  );
+}

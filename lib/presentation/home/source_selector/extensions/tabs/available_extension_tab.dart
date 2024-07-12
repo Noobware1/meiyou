@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:injecktor/injecktor.dart';
+import 'package:get_it/get_it.dart';
+import 'package:meiyou/core/config/routes/routes.dart';
 
 import 'package:meiyou/core/utils/extensions/string_buffer.dart';
 
 import 'package:meiyou/core/utils/resources/flow.dart';
+import 'package:meiyou/core/utils/resources/get_it/get_it.dart';
+import 'package:meiyou/core/utils/resources/locale_helper.dart';
 import 'package:meiyou/extension/extension_manager.dart';
 import 'package:meiyou/extension/models/entension_type.dart';
 import 'package:meiyou/extension/models/install_step.dart';
 import 'package:meiyou/domain/source/get_language_with_extensions.dart';
+import 'package:meiyou/presentation/core/grouped_list_view.dart';
 import 'package:meiyou/presentation/core/image_holder.dart';
 import 'package:meiyou/presentation/home/source_selector/extensions/tabs/extension_tab.dart';
 import 'package:meiyou/presentation/home/source_selector/extensions/widgets/extension_tile.dart';
@@ -16,57 +20,38 @@ import 'package:nice_dart/nice_dart.dart';
 
 typedef LanguageWithAvailableExtensions = Map<String, List<AvailableExtension>>;
 
-class AvailableExtensionTab extends StatelessWidget
-    implements ExtensionTab<AvailableExtension> {
+class AvailableExtensionTab extends ExtensionTab<Extension> {
   final ExtensionType type;
-  final ScrollController? scrollController;
-  const AvailableExtensionTab(
-      {super.key, required this.type, this.scrollController});
+  const AvailableExtensionTab({super.key, required this.type});
 
-  @override
-  Widget build(BuildContext context) {
-    return StateFlowBuilder(
-        flow: GetLanguageWithAvailableExtensions(InjectKtor.get()).flow(type),
-        builder: (context, value) {
-          return ListView.builder(
-              controller: scrollController,
-              itemCount: value.keys.length,
-              itemBuilder: (context, index) =>
-                  itemBuilder(context, index, value));
-        });
-  }
-
-  @override
-  Widget itemBuilder(
-      BuildContext context, int index, LanguageWithAvailableExtensions state) {
-    final entry = state.entries.get(index);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: children(entry),
+  Widget installedExtensionTile(BuildContext context, Extension extension) {
+    return _InstalledExtensionTile(
+      extension: extension as InstalledExtension,
+      onPressed: () {
+        context.goToExtensionInfoScreen(extension, type);
+      },
     );
   }
 
-  @override
-  List<Widget> children(MapEntry<String, List<AvailableExtension>> entry) {
-    return [
-      header(entry.key),
-      ...entry.value.map(extensionItem),
-    ];
-  }
-
-  @override
-  Widget header(String language) {
-    return Padding(
-        padding: ExtensionTab.headerPadding,
-        child: Text(language, style: ExtensionTab.titleTextStyle()));
-  }
-
-  Widget extensionItem(AvailableExtension extension) {
+  Widget extensionItem(Extension extension) {
     return _ExtensionItem(
-      extension: extension,
+      extension: extension as AvailableExtension,
       type: type,
       needUpdate: false,
     );
+  }
+
+  @override
+  StateFlow<Map<String, List<Extension>>> getFlow() {
+    return GetLanguageWithAvailableExtensions(getIt.get()).flow(type);
+  }
+
+  @override
+  Widget itemBuilder(BuildContext context, String language, Extension value) {
+    if (language == 'Installed') {
+      return installedExtensionTile(context, value);
+    }
+    return extensionItem(value);
   }
 }
 
@@ -110,7 +95,8 @@ class _ExtensionItemState extends State<_ExtensionItem> {
       setState(() {
         flow = StateFlow.stream(
           flow.state,
-          InjectKtor.get<ExtensionManager>()
+          getIt
+              .get<ExtensionManager>()
               .installExtension(widget.type, widget.extension),
           onDone: () {
             flow.update(InstallStep.Idle);
@@ -119,6 +105,71 @@ class _ExtensionItemState extends State<_ExtensionItem> {
         );
       });
     }
+  }
+}
+
+class _InstalledExtensionTile extends ExtensionTile {
+  final InstalledExtension extension;
+  final VoidCallback _onPressed;
+
+  const _InstalledExtensionTile({
+    super.key,
+    required this.extension,
+    required VoidCallback onPressed,
+  }) : _onPressed = onPressed;
+
+  @override
+  Widget button() {
+    return IconButton(
+      onPressed: onPressed,
+      icon: const Icon(Icons.settings_outlined),
+    );
+  }
+
+  @override
+  Widget icon({
+    required Size size,
+  }) {
+    return ImageHolderMemory(
+      height: 50,
+      width: 50,
+      bytes: extension.icon,
+      fit: BoxFit.fill,
+    );
+  }
+
+  @override
+  void onPressed() => _onPressed();
+
+  @override
+  Widget subtitle({
+    required TextStyle subtitleTextStyle,
+  }) {
+    final subtitleText = getSubtitleText();
+    return Text(
+      subtitleText,
+      style: subtitleTextStyle,
+    );
+  }
+
+  String getSubtitleText() {
+    return buildString((it) {
+      if (extension.lang != null) {
+        it.write(LocaleHelper.getLocalizedDisplayName(extension.lang));
+      }
+      it.write(' ');
+      it.write(extension.versionName);
+    });
+  }
+
+  @override
+  Widget title({
+    required TextStyle titleTextStyle,
+  }) {
+    return Text(
+      extension.name,
+      style: titleTextStyle,
+    );
   }
 }
 
@@ -145,21 +196,24 @@ class _AvailableExtensionTile extends ExtensionTile {
   }
 
   @override
-  Widget icon() {
-    return SizedBox(
-      height: 50,
-      width: 50,
+  Widget icon({
+    required Size size,
+  }) {
+    return SizedBox.fromSize(
+      size: size,
       child: Stack(
         children: [
           ImageHolder(
-            height: 50,
-            width: 50,
+            height: size.height,
+            width: size.width,
             imageUrl: extension.iconUrl,
             fit: BoxFit.fill,
           ),
           if (!step.isCompleted)
-            const SizedBox(
-                height: 50, width: 50, child: CircularProgressIndicator())
+            SizedBox(
+                height: size.height,
+                width: size.width,
+                child: const CircularProgressIndicator())
         ],
       ),
     );
@@ -169,11 +223,13 @@ class _AvailableExtensionTile extends ExtensionTile {
   void onPressed() => _onPressed();
 
   @override
-  Widget subtitle() {
+  Widget subtitle({
+    required TextStyle subtitleTextStyle,
+  }) {
     final subtitleText = getSubtitleText();
     return Text(
       subtitleText,
-      style: subtitleTextStyle(),
+      style: subtitleTextStyle,
     );
   }
 
@@ -197,10 +253,12 @@ class _AvailableExtensionTile extends ExtensionTile {
   }
 
   @override
-  Widget title() {
+  Widget title({
+    required TextStyle titleTextStyle,
+  }) {
     return Text(
       extension.name,
-      style: titleTextStyle(),
+      style: titleTextStyle,
     );
   }
 }

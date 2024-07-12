@@ -1,40 +1,27 @@
-import 'dart:async';
-
-import 'package:meiyou/core/utils/resources/async_cubit.dart';
+import 'package:meiyou/core/utils/resources/get_it/get_it.dart';
 import 'package:meiyou/domain/repositories/source_repository.dart';
-import 'package:meiyou/presentation/home/source_selector/selected_source.dart';
+import 'package:meiyou/notifers/async_notifer.dart';
 import 'package:meiyou_extensions_lib/models.dart';
 import 'package:nice_dart/nice_dart.dart';
 
-class HomeScreenCubit extends AsyncCubit<HomeScreenData> {
-  late final StreamSubscription<Source?> _streamSubscription;
-  HomeScreenCubit(
-    SelectedSource selectedSource,
-    SourceRepository repository,
-  ) : super.loading() {
-    _streamSubscription = selectedSource.stream.listen(
-      (source) => _load(source, repository),
-    );
-    _load(selectedSource.state, repository);
-  }
+class HomeScreenNotifer extends AsyncStateNotifier<HomeScreenData> {
+  HomeScreenNotifer(
+    Source? source,
+  ) : super.loading();
 
-  void _load(Source? source, SourceRepository repository) {
+  void load(Source? source) {
     if (source == null) {
-      emitError(const NoSourceSelected());
+      setError(const NoSourceSelected());
       return;
     }
     if (!source.supportsHomePage) {
-      emitError(const HomePageNotSupported());
+      setError(const HomePageNotSupported());
       return;
     }
-    future(() =>
-        repository.getFullHomePage(source).then((value) => value.getOrThrow()));
-  }
-
-  @override
-  Future<void> close() async {
-    await _streamSubscription.cancel();
-    return super.close();
+    setFuture(() => getIt
+        .get<SourceRepository>()
+        .getFullHomePage(source)
+        .then((value) => value.getOrThrow()));
   }
 }
 

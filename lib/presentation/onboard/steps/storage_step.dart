@@ -1,6 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:injecktor/injecktor.dart';
+import 'package:meiyou/core/utils/resources/get_it/get_it.dart';
 
 import 'package:meiyou_extensions_lib/preference.dart';
 import 'package:meiyou/core/utils/resources/storage/storage_preferences.dart';
@@ -41,7 +41,7 @@ class _StorageStepState extends State<StorageStepWidget> {
 
   @override
   void initState() {
-    storagePref = InjectKtor.get<StoragePreferences>().baseStorageDirectory();
+    storagePref = getIt.get<StoragePreferences>().baseStorageDirectory();
     super.initState();
   }
 

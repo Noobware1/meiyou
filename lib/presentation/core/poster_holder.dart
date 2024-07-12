@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:meiyou/presentation/core/space.dart';
 import 'package:meiyou_extensions_lib/models.dart';
 import 'package:meiyou/core/constants/font_size.dart';
 import 'package:meiyou/core/utils/extensions/context.dart';
@@ -6,12 +7,13 @@ import 'package:meiyou/presentation/core/image_holder.dart';
 
 class ClickablePosterHolder extends StatelessWidget {
   final VoidCallback onTap;
+  final VoidCallback onLongPress;
   final PosterHolder holder;
-  const ClickablePosterHolder({
-    super.key,
-    required this.onTap,
-    required this.holder,
-  });
+  const ClickablePosterHolder(
+      {super.key,
+      required this.onTap,
+      required this.holder,
+      required this.onLongPress});
 
   static const _defaultDuration = Duration(milliseconds: 200);
 
@@ -19,22 +21,23 @@ class ClickablePosterHolder extends StatelessWidget {
   Widget build(BuildContext context) {
     final borderRadius =
         holder.borderRadius ?? PosterHolder._defaultBorderRadius;
+
     return SizedBox(
       height: holder.height,
       width: holder.width,
       child: Stack(
         children: [
           holder,
-          Positioned.fill(
-            child: Material(
-                type: MaterialType.button,
-                color: Colors.transparent,
-                borderRadius: borderRadius,
-                animationDuration: _defaultDuration,
-                child: InkWell(
-                  borderRadius: borderRadius,
-                  onTap: onTap,
-                )),
+          Material(
+            type: MaterialType.button,
+            color: Colors.transparent,
+            borderRadius: borderRadius,
+            animationDuration: _defaultDuration,
+            child: InkWell(
+              borderRadius: borderRadius,
+              onTap: onTap,
+              onLongPress: onLongPress,
+            ),
           ),
         ],
       ),
@@ -100,58 +103,6 @@ class PosterHolder extends ImageHolder {
   }
 }
 
-class PosterHolderWithContentItem extends PosterHolderWithTitle {
-  final TextStyle infoTextStyle;
-  final int? total;
-  final int? current;
-
-  PosterHolderWithContentItem({
-    super.key,
-    required super.height,
-    required super.width,
-    super.backgroundColor,
-    super.borderRadius,
-    super.fit,
-    required ContentItem contentItem,
-    required TextStyle titleTextStyle,
-    required this.infoTextStyle,
-  })  : total = contentItem.totalCount,
-        current = contentItem.currentCount,
-        super(
-          imageUrl: contentItem.poster,
-          title: contentItem.title,
-          textStyle: titleTextStyle,
-        );
-
-  @override
-  List<Widget> _buildColumnChildren(BuildContext context) {
-    return super._buildColumnChildren(context)
-      ..add(Align(
-        alignment: Alignment.topRight,
-        child: RichText(
-          text: TextSpan(children: [
-            TextSpan(
-              text: current == null || current! < 0 ? '~' : current!.toString(),
-              style: infoTextStyle.copyWith(
-                  color: context.theme.colorScheme.primary),
-            ),
-            TextSpan(
-              text: ' | ',
-              style: infoTextStyle.copyWith(
-                  color: context.theme.colorScheme.secondary),
-            ),
-            TextSpan(
-              text: total == null || total! < 0 ? '~' : total!.toString(),
-              style: infoTextStyle.copyWith(
-                color: context.theme.colorScheme.secondary,
-              ),
-            ),
-          ]),
-        ),
-      ));
-  }
-}
-
 class PosterHolderWithTitle extends PosterHolder {
   final String title;
   final TextStyle textStyle;
@@ -173,6 +124,7 @@ class PosterHolderWithTitle extends PosterHolder {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: _buildColumnChildren(context),
       ),
     );
@@ -181,9 +133,7 @@ class PosterHolderWithTitle extends PosterHolder {
   List<Widget> _buildColumnChildren(BuildContext context) {
     return [
       super.build(context),
-      const SizedBox(
-        height: 5,
-      ),
+      const VerticalSpace(5),
       SizedBox(
         width: width,
         child: Align(

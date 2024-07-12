@@ -12,16 +12,21 @@ const double _minFlingVelocity = 700.0;
 const double _closeProgressThreshold = 0.5;
 const double _defaultScrollControlDisabledMaxHeightRatio = 0.8;
 
-Future<T?> showCustomBottomSheet<T>(
-  BuildContext context,
-  WidgetBuilder builder,
-) {
+Future<T?> showCustomBottomSheet<T>(BuildContext context, WidgetBuilder builder,
+    {double? scrollControlDisabledMaxHeightRatio,
+    Clip? clipBehaviour,
+    bool? showDragHandle}) {
   return Navigator.of(context).push(
     ModalBottomSheetRoute<T>(
       builder: builder,
       isScrollControlled: false,
       enableDrag: true,
       isDismissible: true,
+      showDragHandle: showDragHandle,
+      scrollControlDisabledMaxHeightRatio:
+          scrollControlDisabledMaxHeightRatio ??
+              _defaultScrollControlDisabledMaxHeightRatio,
+      clipBehavior: clipBehaviour ?? Clip.hardEdge,
     ),
   );
 }
@@ -702,6 +707,18 @@ class _BottomSheetState extends State<BottomSheet> {
     }
   }
 
+  void _handleDragHandleHover(bool hovering) {
+    if (hovering != dragHandleMaterialState.contains(MaterialState.hovered)) {
+      setState(() {
+        if (hovering) {
+          dragHandleMaterialState.add(MaterialState.hovered);
+        } else {
+          dragHandleMaterialState.remove(MaterialState.hovered);
+        }
+      });
+    }
+  }
+
   bool extentChanged(DraggableScrollableNotification notification) {
     if (notification.extent == notification.minExtent &&
         notification.shouldCloseOnMinExtent) {
@@ -737,6 +754,20 @@ class _BottomSheetState extends State<BottomSheet> {
         widget.shape ?? bottomSheetTheme.shape ?? defaults.shape;
     final Clip clipBehavior =
         widget.clipBehavior ?? bottomSheetTheme.clipBehavior ?? Clip.none;
+    final bool showDragHandle = widget.showDragHandle ?? false;
+    final Widget? dragHandle;
+
+    if (showDragHandle) {
+      dragHandle = _DragHandle(
+        onSemanticsTap: widget.onClosing,
+        handleHover: _handleDragHandleHover,
+        materialState: dragHandleMaterialState,
+        dragHandleColor: widget.dragHandleColor,
+        dragHandleSize: widget.dragHandleSize,
+      );
+    } else {
+      dragHandle = null;
+    }
 
     Widget bottomSheet = Material(
       key: _childKey,
@@ -747,7 +778,20 @@ class _BottomSheetState extends State<BottomSheet> {
       shape: shape,
       clipBehavior: clipBehavior,
       child: NotificationListener<DraggableScrollableNotification>(
-          onNotification: extentChanged, child: widget.builder(context)),
+          onNotification: extentChanged,
+          child: !showDragHandle
+              ? widget.builder(context)
+              : Stack(
+                  alignment: Alignment.topCenter,
+                  children: [
+                    dragHandle!,
+                    Padding(
+                      padding:
+                          const EdgeInsets.only(top: kMinInteractiveDimension),
+                      child: widget.builder(context),
+                    ),
+                  ],
+                )),
     );
 
     if (constraints != null) {
@@ -766,6 +810,60 @@ class _BottomSheetState extends State<BottomSheet> {
       onVerticalDragUpdate: _handleDragUpdate,
       onVerticalDragEnd: _handleDragEnd,
       child: bottomSheet,
+    );
+  }
+}
+
+class _DragHandle extends StatelessWidget {
+  const _DragHandle({
+    required this.onSemanticsTap,
+    required this.handleHover,
+    required this.materialState,
+    this.dragHandleColor,
+    this.dragHandleSize,
+  });
+
+  final VoidCallback? onSemanticsTap;
+  final ValueChanged<bool> handleHover;
+  final Set<MaterialState> materialState;
+  final Color? dragHandleColor;
+  final Size? dragHandleSize;
+
+  @override
+  Widget build(BuildContext context) {
+    final BottomSheetThemeData bottomSheetTheme =
+        Theme.of(context).bottomSheetTheme;
+    final BottomSheetThemeData m3Defaults = _BottomSheetDefaultsM3(context);
+    final Size handleSize = dragHandleSize ??
+        bottomSheetTheme.dragHandleSize ??
+        m3Defaults.dragHandleSize!;
+
+    return MouseRegion(
+      onEnter: (PointerEnterEvent event) => handleHover(true),
+      onExit: (PointerExitEvent event) => handleHover(false),
+      child: Semantics(
+        label: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+        container: true,
+        onTap: onSemanticsTap,
+        child: SizedBox(
+          height: kMinInteractiveDimension,
+          width: kMinInteractiveDimension,
+          child: Center(
+            child: Container(
+              height: handleSize.height,
+              width: handleSize.width,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(handleSize.height / 2),
+                color: MaterialStateProperty.resolveAs<Color?>(
+                        dragHandleColor, materialState) ??
+                    MaterialStateProperty.resolveAs<Color?>(
+                        bottomSheetTheme.dragHandleColor, materialState) ??
+                    m3Defaults.dragHandleColor,
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

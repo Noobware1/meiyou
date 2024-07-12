@@ -1,25 +1,26 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:injecktor/injecktor.dart';
+import 'package:meiyou/core/utils/resources/get_it/get_it.dart';
+import 'package:meiyou/notifers/state_notifer.dart';
+
 import 'package:meiyou/presentation/info/services/episode_list_selector.dart';
-import 'package:meiyou/presentation/info/services/info_screen_cubit.dart';
+import 'package:meiyou/presentation/info/services/info_screen_notifer.dart';
 import 'package:meiyou_extensions_lib/models.dart';
 
-class SeasonSelectorCubit extends Cubit<int> {
-  SeasonSelectorCubit() : super(0);
+class SeasonSelectorNotifer extends StateNotifer<int> {
+  SeasonSelectorNotifer(int? lastSeen) : super(lastSeen ?? 0);
 
   void select(int season) {
     if (season == state) return;
-    emit(season);
-    episodeListSelector.initEpisodes(episodes(season));
+    setState(season);
+    episodeListSelector.initEpisodes(null, episodes(season));
   }
 
   SeasonList season(Series series) => series.data[state];
 
-  EpisodeListSelectorCubit get episodeListSelector =>
-      InjectKtor.get<EpisodeListSelectorCubit>();
+  EpisodeListSelectorNotifer get episodeListSelector =>
+      getIt.get<EpisodeListSelectorNotifer>();
 
   List<Episode> episodes(int season) {
-    return InjectKtor.get<InfoScreenCubit>()
+    return getIt.get<InfoScreenNotifer>()
         .state
         .value!
         .content

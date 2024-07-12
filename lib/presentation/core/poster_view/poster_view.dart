@@ -70,16 +70,10 @@ class _PosterViewState<T extends PosterView> extends State<T> {
 
   ListView buildListView() {
     return ListView.separated(
+      padding: EdgeInsets.only(left: widget.padding ?? 0.0),
       controller: controller,
       scrollDirection: Axis.horizontal,
-      itemBuilder: (context, index) {
-        if (index == 0 && widget.padding != null) {
-          return Padding(
-              padding: EdgeInsets.only(left: widget.padding!),
-              child: widget.itemBuilder(context, index));
-        }
-        return widget.itemBuilder(context, index);
-      },
+      itemBuilder: (context, index) => widget.itemBuilder(context, index),
       separatorBuilder: (context, index) => SizedBox(width: widget.spacing),
       itemCount: itemCount,
     );

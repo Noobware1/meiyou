@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:injecktor/injecktor.dart';
+import 'package:meiyou/core/utils/resources/get_it/get_it.dart';
+import 'package:meiyou/domain/library/library_preferences.dart';
 
 import 'package:meiyou/presentation/core/future_widget.dart';
 import 'package:meiyou/presentation/home/services/homepage_row_service.dart';
@@ -9,22 +10,23 @@ import 'package:meiyou_extensions_lib/models.dart';
 import 'package:meiyou/core/constants/font_size.dart';
 import 'package:meiyou/core/constants/size_constants.dart';
 import 'package:meiyou/core/utils/extensions/context.dart';
-import 'package:meiyou/core/utils/extensions/double.dart';
 import 'package:meiyou/core/utils/resources/screen_size.dart';
 import 'package:meiyou/presentation/core/poster_holder.dart';
 import 'package:meiyou/presentation/core/poster_view/poster_view.dart';
 import 'package:meiyou/presentation/core/space.dart';
 
 class HomePageRow extends FutureWidget<HomePage> {
-  final HomePageRequest request;
+  final HomePageRequest? request;
   final void Function(ContentItem) onItemSelected;
   final void Function(ContentItem) onAddToLibrary;
+  final bool endlessScroll;
   const HomePageRow({
     super.key,
     required super.initialData,
-    required this.request,
+    this.request,
     required this.onItemSelected,
     required this.onAddToLibrary,
+    this.endlessScroll = true,
   });
 
   static const defaultLabelTextStyleMobile = TextStyle(
@@ -37,7 +39,7 @@ class HomePageRow extends FutureWidget<HomePage> {
     fontWeight: FontWeight.w700,
   );
 
-  static const labelBoxSize = 30.0;
+  static const labelBoxSize = 32.0;
 
   static const spacing = 10.0;
 
@@ -48,19 +50,24 @@ class HomePageRow extends FutureWidget<HomePage> {
 }
 
 class _HomePageRowState extends FutureState<HomePage, HomePageRow> {
-  late final HomePageRowService service;
+  late final HomePageRowService? service;
 
   @override
   void initState() {
     super.initState();
-    service = HomePageRowService(InjectKtor.get(), widget.request);
+    if (widget.endlessScroll) {
+      service = HomePageRowService(getIt.get(), widget.request!);
+    } else {
+      service = null;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final double width = context.width;
-    final ScreenSize screenSize = width.screenSize;
+    final ScreenSize screenSize = ScreenSize.fromWidth(width);
     final bool isMobile = screenSize.isMobile;
+    final textTheme = context.theme.textTheme;
     final double posterHeight =
         isMobile ? defaultPosterHeightMobile : defaultPosterHeightDesktop;
     final double posterWidth =
@@ -77,9 +84,10 @@ class _HomePageRowState extends FutureState<HomePage, HomePageRow> {
         ? defaultPosterWithSearchResponseHeightMobile
         : defaultPosterWithSearchResponseHeightDesktop;
 
-    final labelTextStyle = isMobile
-        ? HomePageRow.defaultLabelTextStyleMobile
-        : HomePageRow.defaultLabelTextStyleDesktop;
+    final labelTextStyle =
+        (isMobile ? textTheme.titleLarge : textTheme.headlineSmall)!.copyWith(
+      fontWeight: FontWeight.bold,
+    );
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -115,8 +123,9 @@ class _HomePageRowState extends FutureState<HomePage, HomePageRow> {
   }
 
   void onScrollEnd() {
-    resetFuture(service.loadNextPage(
-        InjectKtor.get<SelectedSource>().state!, state.value!));
+    if (service == null) return;
+    resetFuture(service!
+        .loadNextPage(getIt.get<SelectedSource>().source!, state.value!));
   }
 }
 
@@ -197,12 +206,14 @@ class _BuildPosterView extends StatelessWidget {
             onTap: () {
               onItemSelected(homePageData.items[index]);
             },
-            holder: PosterHolderWithContentItem(
+            onLongPress: () {
+              onAddToLibary(homePageData.items[index]);
+            },
+            holder: PosterHolderWithTitle(
               height: posterHeight,
               width: posterWidth,
-              contentItem: homePageData.items[index],
-              titleTextStyle: titleTextStyle,
-              infoTextStyle: infoTextStyle,
+              title: homePageData.items[index].title,
+              textStyle: titleTextStyle,
               fit: BoxFit.fill,
             ),
           );

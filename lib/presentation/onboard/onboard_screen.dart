@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:injecktor/injecktor.dart';
+import 'package:meiyou/core/config/routes/routes.dart';
 
 import 'package:meiyou/core/utils/extensions/context.dart';
+import 'package:meiyou/core/utils/resources/get_it/get_it.dart';
 import 'package:meiyou/core/utils/resources/meiyou_core.dart';
 import 'package:meiyou/core/utils/resources/modules/base_preferences.dart';
 import 'package:meiyou/presentation/core/info_screen.dart';
@@ -9,6 +10,7 @@ import 'package:meiyou/presentation/onboard/steps/guides_step.dart';
 import 'package:meiyou/presentation/onboard/steps/onboarding_step.dart';
 import 'package:meiyou/presentation/onboard/steps/permission_step.dart';
 import 'package:meiyou/presentation/onboard/steps/storage_step.dart';
+import 'package:meiyou/presentation/onboard/steps/theme_step.dart';
 import 'package:nice_dart/nice_dart.dart';
 
 class OnBoardingScreen extends StatefulWidget {
@@ -24,6 +26,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
   }
 
   late final steps = <OnBoardingStep>[
+    ThemeStep(),
     StorageStep(rebuild),
     PermissionStep(rebuild),
     GuidesStep(),
@@ -32,7 +35,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
   int currentIndex = 0;
 
   void onCompleted(BuildContext context) {
-    InjectKtor.get<BasePreferences>().shownOnboardingFlow().set(true);
+    getIt.get<BasePreferences>().shownOnboardingFlow().set(true);
     context.goToHomeScreen();
   }
 

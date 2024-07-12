@@ -29,7 +29,7 @@ class ExtensionManager {
     init();
   }
 
-  getExtensions() {}
+  geInstalledtExtensions() {}
 
   ExtensionsFlow<AvailableExtension> getAvailableExtensionsFlow(
       ExtensionType type) {

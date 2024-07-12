@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:injecktor/injecktor.dart';
+
 import 'package:meiyou/core/constants/font_size.dart';
 import 'package:meiyou/core/utils/extensions/context.dart';
-import 'package:meiyou/presentation/core/injectktor_widget.dart';
-import 'package:meiyou/presentation/info/services/episode_cubit.dart';
-import 'package:meiyou/presentation/info/services/info_screen_cubit.dart';
+import 'package:meiyou/core/utils/resources/get_it/get_it.dart';
+import 'package:meiyou/presentation/core/getIt_widget.dart';
+import 'package:meiyou/presentation/info/services/episode_notifer.dart';
+import 'package:meiyou/presentation/info/services/info_screen_notifer.dart';
 import 'package:meiyou_extensions_lib/models.dart';
 import 'package:nice_dart/nice_dart.dart';
 
@@ -16,7 +17,7 @@ class PlayerTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: context.width * 0.5,
-      child: InjectKtor.get<InfoScreenCubit>().state.value!.let(
+      child: getIt.get<InfoScreenNotifer>().state.value!.let(
             (it) => it.content!.when(
               anime: (_) {
                 return whenEpisodic(it);
@@ -39,26 +40,31 @@ class PlayerTitle extends StatelessWidget {
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
       style: const TextStyle(
-          fontSize: MobileFontSize.semiMedium, fontWeight: FontWeight.w600),
+          fontSize: MobileFontSize.normal,
+          fontWeight: FontWeight.w600,
+          color: Colors.white),
       textAlign: TextAlign.left,
     );
   }
 
   Widget whenEpisodic(InfoPage infoPage) {
-    return InjecktorBlocBuilder<EpisodeCubit, int>(
+    return GetItListenableBuilder<EpisodeNotifer, int>(
       builder: (_, __) {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              InjectKtor.get<EpisodeCubit>()
+              getIt
+                  .get<EpisodeNotifer>()
                   .episode(infoPage.content!)
                   .let((it) => it.name ?? 'Episode ${it.number}'),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
-                  fontSize: MobileFontSize.semiMedium,
-                  fontWeight: FontWeight.w600),
+                fontSize: MobileFontSize.normal,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
               textAlign: TextAlign.left,
             ),
             Text(infoPage.name,
@@ -67,7 +73,7 @@ class PlayerTitle extends StatelessWidget {
                 textAlign: TextAlign.left,
                 style: const TextStyle(
                     color: Colors.grey,
-                    fontSize: MobileFontSize.semiMedium,
+                    fontSize: MobileFontSize.small,
                     fontWeight: FontWeight.w400)),
           ],
         );

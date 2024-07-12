@@ -13,19 +13,19 @@ import 'package:nice_dart/nice_dart.dart';
 
 typedef InstalledSources = Map<String, List<InstalledSource>>;
 
-typedef AvailableSources = Map<String, List<AvailableExtension>>;
+typedef AvailableSources = Map<String, List<Extension>>;
 
 class SourceManager {
-  final SourcePreferences _sourcePreferences;
-  final ExtensionManager _manager;
-
   SourceManager(
       {required SourcePreferences sourcePreferences,
       required ExtensionManager manager})
       : _sourcePreferences = sourcePreferences,
         _manager = manager;
 
-  Stream<Source?> selectedSourceStream() {
+  final SourcePreferences _sourcePreferences;
+  final ExtensionManager _manager;
+
+  Stream<(ExtensionType, Source?)> selectedSourceStream() {
     return CombineStream.combine4(
       _sourcePreferences.lastUsedExtensionType().changes(),
       _sourcePreferences.lastUsedVideoSource().changes(),
@@ -37,16 +37,12 @@ class SourceManager {
       initalDataD: _sourcePreferences.lastUsedNovelSource().get(),
       (type, videoSource, mangaSource, novelSource) {
         return type.when(
-          video: () => getSource(type, videoSource),
-          manga: () => getSource(type, mangaSource),
-          novel: () => getSource(type, novelSource),
+          video: () => (type, getSource(type, videoSource)),
+          manga: () => (type, getSource(type, mangaSource)),
+          novel: () => (type, getSource(type, novelSource)),
         );
       },
     );
-  }
-
-  Source? getCurrentSource() {
-    return getSource(ExtensionType.Manga, -1);
   }
 
   Source? getSource(ExtensionType type, int id) {
@@ -76,60 +72,6 @@ class SourceManager {
               initalDataB: _sourcePreferences.lastUsedSourceByType(type).get(),
               initalDataC: it.state,
             )));
-  }
-
-  static Map<String, List<InstalledSource>> _installedSourcesMap(
-      List<String> enabledLanguages,
-      int lastUsedSource,
-      List<InstalledSource> extensions) {
-    final lastUsed = lastUsedSource == -1
-        ? null
-        : extensions.firstWhereOrNull((e) => e.id == lastUsedSource);
-
-    if (lastUsed != null) {
-      extensions.remove(lastUsed);
-    }
-
-    return extensions
-        .where((ext) => enabledLanguages.any((element) => element == ext.lang))
-        .groupListsBy((element) => element.lang)
-        .map((lang, exts) =>
-            MapEntry(LocaleHelper.getSourceDisplayName(lang), exts))
-        .let((it) {
-      if (lastUsed == null) return it;
-      return {
-        'Last Used': [lastUsed]
-      }..addAll(it);
-    });
-  }
-
-  StateFlow<AvailableSources> getAvaiableSourcesFlow(ExtensionType type) {
-    return StateFlow.stream(
-        _availableSourcesMap(
-          _sourcePreferences.enabledLanguages().get(),
-          _manager.getInstalledExtensionsFlow(type).state,
-          _manager.getAvailableExtensionsFlow(type).state,
-        ),
-        CombineStream.combine3(
-          _sourcePreferences.enabledLanguages().changes(),
-          _manager.getInstalledExtensionsFlow(type).stream,
-          _manager.getAvailableExtensionsFlow(type).stream,
-          _availableSourcesMap,
-          initalDataA: _sourcePreferences.enabledLanguages().get(),
-          initalDataB: _manager.getInstalledExtensionsFlow(type).state,
-          initalDataC: _manager.getAvailableExtensionsFlow(type).state,
-        ));
-  }
-
-  static AvailableSources _availableSourcesMap(List<String> enabledLanguages,
-      List<InstalledExtension> installed, List<AvailableExtension> available) {
-    return available
-        .where((ext) => !installed.any((it) =>
-            it.pkgName == ext.pkgName &&
-            enabledLanguages.any((element) => element == ext.lang)))
-        .groupListsBy((element) => element.lang)
-        .map((lang, exts) =>
-            MapEntry(LocaleHelper.getSourceDisplayName(lang), exts));
   }
 }
 

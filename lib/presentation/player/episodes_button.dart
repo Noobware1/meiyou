@@ -1,9 +1,16 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:injecktor/injecktor.dart';
+import 'package:meiyou/core/utils/extensions/context.dart';
+import 'package:meiyou/core/utils/resources/get_it/get_it.dart';
+
 import 'package:meiyou/presentation/core/adaptive_sheet.dart';
+import 'package:meiyou/presentation/core/space.dart';
 import 'package:meiyou/presentation/info/content_widget/content_widget.dart';
+import 'package:meiyou/presentation/info/services/info_screen_notifer.dart';
 import 'package:meiyou/presentation/player/player_screen.dart';
+import 'package:nice_dart/nice_dart.dart';
 
 class ShowEpisodesButton extends StatelessWidget {
   const ShowEpisodesButton({super.key});
@@ -12,16 +19,19 @@ class ShowEpisodesButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButton(
         onPressed: () {
-          InjectKtor.playerRepository.pause();
+          getIt.playerRepository.pause();
           showCustomBottomSheet(
             context,
-            (context) => SingleChildScrollView(
-              child: Container(
-                padding: EdgeInsets.all(10),
+            showDragHandle: true,
+            (context) => Container(
+              // width: context.width / 1.6,
+              padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+              child: SingleChildScrollView(
                 child: ContentWidget(
-                  content: InjectKtor.infoPage.content!,
+                  content: getIt.infoPage.content!,
+                  contentProgress: getIt.infoPage.getContentProgress(),
                   onSelected: () {
-                    InjectKtor.playerRepository.playEpisode();
+                    getIt.playerRepository.playEpisode();
                     context.pop();
                   },
                 ),
@@ -29,6 +39,9 @@ class ShowEpisodesButton extends StatelessWidget {
             ),
           );
         },
-        icon: const Icon(Icons.video_library_rounded));
+        icon: const Icon(
+          Icons.video_library_rounded,
+          color: Colors.white,
+        ));
   }
 }

@@ -2,12 +2,12 @@
 
 import 'dart:io';
 
-import 'package:injecktor/injecktor.dart';
 import 'package:meiyou/core/utils/resources/folder_provider/folder_provider.dart';
+import 'package:meiyou/core/utils/resources/get_it/get_it.dart';
 import 'package:meiyou/core/utils/resources/storage/storage_preferences.dart';
 
 class StorageFolderProvider implements FolderProvider {
-  StorageFolderProvider() : _storagePreferences = InjectKtor.get();
+  StorageFolderProvider() : _storagePreferences = getIt.get();
 
   late final StoragePreferences _storagePreferences;
 

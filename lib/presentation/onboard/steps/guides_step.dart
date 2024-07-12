@@ -35,10 +35,7 @@ class GuidesStepWidget extends StatelessWidget {
           text: 'Getting started guide',
         ),
         const VerticalSpace(10),
-        Divider(
-          height: 2,
-          color: context.theme.colorScheme.onSecondary,
-        ),
+        Divider(height: 2, color: context.theme.colorScheme.onSurfaceVariant),
         const VerticalSpace(10),
         const Text('Reinstalling Meiyou?'),
         const VerticalSpace(10),

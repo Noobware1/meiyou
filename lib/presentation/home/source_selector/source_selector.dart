@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
 import 'package:go_router/go_router.dart';
-import 'package:injecktor/injecktor.dart';
+
 import 'package:meiyou/core/utils/extensions/context.dart';
+import 'package:meiyou/core/utils/resources/get_it/get_it.dart';
+import 'package:meiyou/core/utils/resources/screen_size.dart';
 import 'package:meiyou/extension/models/entension_type.dart';
 import 'package:meiyou/domain/models/source.dart' hide Source;
 import 'package:meiyou/domain/source/source_preferences.dart';
@@ -19,7 +21,10 @@ class SourceSelector extends StatelessWidget {
   const SourceSelector({super.key, required OnSourceSelected onSourceSelected})
       : _onSourceSelected = onSourceSelected;
 
-  static Future showBottomSheet(BuildContext context) {
+  static Future showBottomSheet(
+    BuildContext context,
+    OnSourceSelected onSourceSelected,
+  ) {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -29,6 +34,7 @@ class SourceSelector extends StatelessWidget {
       builder: (context) {
         return SourceSelector(onSourceSelected: (type, source) {
           SourceSelector.onSourceSelected(context, type, source);
+          onSourceSelected(type, source);
         });
       },
     );
@@ -36,7 +42,7 @@ class SourceSelector extends StatelessWidget {
 
   static void onSourceSelected(
       BuildContext context, ExtensionType type, InstalledSource source) {
-    final sourcePreferences = InjectKtor.get<SourcePreferences>();
+    final sourcePreferences = getIt.get<SourcePreferences>();
     if (sourcePreferences.lastUsedSourceByType(type).get() == source.id) {
       return;
     }
@@ -51,18 +57,6 @@ class SourceSelector extends StatelessWidget {
     topRight: Radius.circular(25),
   );
 
-  static const _textStyleDesktop =
-      TextStyle(fontSize: DesktopFontSize.medium, fontWeight: FontWeight.w500);
-
-  static const _textStyleMobile =
-      TextStyle(fontSize: MobileFontSize.medium, fontWeight: FontWeight.w500);
-
-  static const _titleTextStyleDesktop =
-      TextStyle(fontSize: DesktopFontSize.large, fontWeight: FontWeight.w600);
-
-  static const _titleTextStyleMobile =
-      TextStyle(fontSize: MobileFontSize.large, fontWeight: FontWeight.w600);
-
   static const tabBarSize = Size.fromHeight(50);
 
   static const tabBarPadding = EdgeInsets.only(top: 20);
@@ -71,17 +65,31 @@ class SourceSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.theme;
+    final isMobile = context.screenSize.isMobile;
+    final textTheme = theme.textTheme;
+
+    // final titleTextStyle = textTheme.titleLarge;
+    final textStyle = isMobile ? textTheme.titleMedium : textTheme.titleLarge;
+
     return DefaultTabController(
       length: 6,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          tabBar(context),
+          tabBar(context, textStyle: textStyle!),
           Expanded(
-            child: Padding(
-              padding: tabBarViewPadding,
-              child: TabBarView(
-                children: tabViews(),
+            child: Theme(
+              data: theme.copyWith(
+                listTileTheme: theme.listTileTheme.copyWith(
+                  iconColor: theme.colorScheme.onSurface,
+                ),
+              ),
+              child: Padding(
+                padding: tabBarViewPadding,
+                child: TabBarView(
+                  children: tabViews(),
+                ),
               ),
             ),
           ),
@@ -90,15 +98,10 @@ class SourceSelector extends StatelessWidget {
     );
   }
 
-  TextStyle textStyle() {
-    return isMobile ? _textStyleMobile : _textStyleDesktop;
-  }
-
-  TextStyle titleTextStyle() {
-    return isMobile ? _titleTextStyleMobile : _titleTextStyleDesktop;
-  }
-
-  Widget tabBar(BuildContext context) {
+  Widget tabBar(
+    BuildContext context, {
+    required TextStyle textStyle,
+  }) {
     return TabBar(
       tabAlignment: TabAlignment.start,
       indicatorColor: context.theme.colorScheme.primary,
@@ -109,13 +112,15 @@ class SourceSelector extends StatelessWidget {
       padding: tabBarPadding,
       dividerColor: Colors.grey,
       isScrollable: true,
-      tabs: tabs(),
+      tabs: tabs(
+        textStyle: textStyle,
+      ),
     );
   }
 
-  List<Tab> tabs() {
-    final textStyle = this.textStyle();
-
+  List<Tab> tabs({
+    required TextStyle textStyle,
+  }) {
     return [
       tab(
         'Video Sources',

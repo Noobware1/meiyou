@@ -11,12 +11,13 @@ class ResizeableTabBar extends StatefulWidget {
     super.key,
     required this.children,
     required this.tabs,
-    this.animationDuration = const Duration(milliseconds: 400),
+    this.animationDuration = const Duration(milliseconds: 300),
   });
 
   static Future<void> show(
       BuildContext context, ResizeableTabBar tabBar) async {
-    showCustomBottomSheet(context, (_) => tabBar);
+    showCustomBottomSheet(context, (_) => tabBar,
+        scrollControlDisabledMaxHeightRatio: 0.6);
   }
 
   @override
@@ -42,6 +43,7 @@ class ResizeableTabBarState<T extends ResizeableTabBar> extends State<T>
       length: len,
       vsync: this,
     )..addListener(listener);
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() {
         for (int i = 0; i < len; i++) {
@@ -89,10 +91,7 @@ class ResizeableTabBarState<T extends ResizeableTabBar> extends State<T>
         duration: widget.animationDuration,
         height: sizes[index].height,
         width: sizes[index].width,
-        child: TabBarView(controller: tabController, children: widget.children
-            // .mapList((e) => SingleChildScrollView(child: e)),
-
-            ),
+        child: TabBarView(controller: tabController, children: widget.children),
       ),
     );
   }

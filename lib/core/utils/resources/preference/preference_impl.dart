@@ -28,6 +28,13 @@ abstract class PreferenceImpl<T> extends Preference<T> {
   T get() => read(_preferences, _key, _defaultValue);
 
   @override
+  T getAndSet(T value) {
+    final result = get();
+    set(value);
+    return result;
+  }
+
+  @override
   void set(T value) => write(_preferences, _key, value);
 
   @override
@@ -44,7 +51,6 @@ abstract class PreferenceImpl<T> extends Preference<T> {
     return _keyFlow.where((key) => key == _key).map((_) => get());
   }
 }
-
 
 class DoublePrimitive extends PreferenceImpl<double> {
   DoublePrimitive({

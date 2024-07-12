@@ -13,6 +13,22 @@ class SourcePreferences {
   Preference<List<String>> enabledLanguages() => _store.getStringList(
       "source_languages", LocaleHelper.getDefaultEnabledLanguages().toList());
 
+  Preference<List<String>> disabledSourcesForType(ExtensionType type) =>
+      type.when(
+        video: () => disabledVideoSources(),
+        manga: () => disabledMangaSources(),
+        novel: () => disabledNovelSources(),
+      );
+
+  Preference<List<String>> disabledVideoSources() =>
+      _store.getStringList('hidden_video_catalogues', []);
+
+  Preference<List<String>> disabledMangaSources() =>
+      _store.getStringList('hidden_manga_catalogues', []);
+
+  Preference<List<String>> disabledNovelSources() =>
+      _store.getStringList('hidden_novel_catalogues', []);
+
   Preference<int> lastUsedSourceByType(ExtensionType type) {
     switch (type) {
       case ExtensionType.Video:

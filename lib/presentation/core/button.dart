@@ -32,30 +32,24 @@ class Button extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final backgroundColor = color ?? context.theme.colorScheme.primary;
     final fixedSize = Size(width ?? context.width, height ?? 40);
 
-    return ElevatedButton(
+    return FilledButton(
       onPressed: !enabled ? null : (onPressed ?? () {}),
       onLongPress: !enabled ? null : (onLongPress ?? () {}),
       style: style?.copyWith(
-            backgroundColor: MaterialStateProperty.all(backgroundColor),
-            fixedSize: MaterialStateProperty.all(fixedSize),
+            backgroundColor: MaterialStatePropertyAll(color),
+            fixedSize: MaterialStatePropertyAll(fixedSize),
           ) ??
           ButtonStyle(
-            backgroundColor: MaterialStateProperty.all(backgroundColor),
-            fixedSize: MaterialStateProperty.all(fixedSize),
+            backgroundColor: MaterialStatePropertyAll(color),
+            fixedSize: MaterialStatePropertyAll(fixedSize),
           ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: enabled
-              ? (textColor ?? context.theme.colorScheme.onPrimary)
-              : disabledColor,
-          fontSize: textSize,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
+      child: Text(text,
+          style: TextStyle(
+            fontSize: textSize,
+            fontWeight: FontWeight.w600,
+          )),
     );
   }
 }

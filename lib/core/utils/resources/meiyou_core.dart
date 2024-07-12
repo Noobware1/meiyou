@@ -1,11 +1,12 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:media_kit/media_kit.dart';
+import 'package:meiyou/core/utils/resources/get_it/get_it.dart';
 import 'package:meiyou/core/utils/resources/modules/app_module.dart';
 import 'package:meiyou/core/utils/resources/modules/domain_module.dart';
 import 'package:meiyou/core/utils/resources/modules/preference_module.dart';
-import 'package:meiyou/core/utils/resources/modules/providers_module.dart';
 import 'package:meiyou_extensions_lib/extensions_lib.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:window_manager/window_manager.dart';
@@ -23,13 +24,13 @@ class MeiyouCore {
     ExtensionlibOverrides.sharedPreferencesDir =
         await getApplicationSupportDirectory().then((dir) => dir.path);
 
-    PreferenceModule().inject();
+    getIt = GetIt.instance;
 
-    AppModule().inject();
+    PreferenceModule().register();
 
-    ProvidersModule().inject();
+    await AppModule().register();
 
-    DomainModule().inject();
+    DomainModule().register();
 
     debugPrint('MeiyouCore initialized');
   }
