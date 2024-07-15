@@ -17,9 +17,9 @@ import 'package:meiyou/shared/domain/models/extension_category.dart';
 import 'package:meiyou/shared/domain/models/extension_list.dart';
 import 'package:meiyou/shared/domain/models/install_step.dart';
 import 'package:meiyou/shared/extension_manager/extension_manger.dart';
-import 'package:meiyou/shared/utils/comparator/case_insensitive_comparator.dart';
-import 'package:meiyou/shared/utils/stream_utils/comnine_stream.dart';
-import 'package:meiyou/shared/utils/stream_utils/state_stream.dart';
+import 'package:meiyou/core/utils/comparator/case_insensitive_comparator.dart';
+import 'package:meiyou/core/utils/stream_utils/comnine_stream.dart';
+import 'package:meiyou/core/utils/stream_utils/state_stream.dart';
 import 'package:meiyou_extensions_lib/models.dart';
 import 'package:meiyou_extensions_lib/network.dart';
 import 'package:nice_dart/nice_dart.dart';
@@ -32,10 +32,7 @@ class ExtensionManagerImpl implements ExtensionManager {
       {required SourcePreferences sourcePreferences,
       required NetworkHelper network})
       : _sourcePreferences = sourcePreferences,
-        _network = network {
-    _init();
-  }
-
+        _network = network;
   @override
   StateStream<ExtensionList> getExtensionList(ExtensionCategory category) {
     final enabledLanguages = _sourcePreferences.enabledLanguages();
@@ -46,7 +43,6 @@ class ExtensionManagerImpl implements ExtensionManager {
         List<String> enabledLanguages,
         List<InstalledExtension> installedExts,
         List<AvailableExtension> availableExts) {
-
       final (updates, installed) = (installedExts
             ..sort((a, b) => CaseInsensitiveComparator.compare(a.name, b.name)))
           .parition((e) => e.hasUpdate);
@@ -188,6 +184,9 @@ class ExtensionManagerImpl implements ExtensionManager {
 
   bool _isInitialized = false;
 
+  @override
+  bool get isInitialized => _isInitialized;
+
   final _installedVideoExtStream = _ExtensionsStream<InstalledExtension>();
 
   final _installedMangaExtStream = _ExtensionsStream<InstalledExtension>();
@@ -216,10 +215,10 @@ class ExtensionManagerImpl implements ExtensionManager {
         novel: () => _installedNovelExtStream,
       );
 
-  Future<void> _init() async {
+  Future<void> init() async {
     try {
-      _findAllInstalledExtensions();
-      await _findAllAvailableExtensions();
+      await _findAllInstalledExtensions();
+      // await _findAllAvailableExtensions();
       _isInitialized = true;
     } catch (_, s) {
       _isInitialized = false;
@@ -234,8 +233,8 @@ class ExtensionManagerImpl implements ExtensionManager {
         _findInstalledExtensions(ExtensionCategory.manga),
         _findInstalledExtensions(ExtensionCategory.novel),
       ]);
-    } catch (e) {
-      logger.severe('Failed to load installed extension list', e);
+    } catch (e, s) {
+      logger.severe('Failed to load installed extension list', e, s);
     }
   }
 
@@ -319,7 +318,6 @@ class ExtensionManagerImpl implements ExtensionManager {
   }
 
   void _unregisterExtension(ExtensionCategory category, String pkgName) {
-    
     final extensionListNotifier = _getInstalledExtensionsStream(category);
 
     final extensionList = extensionListNotifier.state;

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:meiyou/features/browse/presentation/screens/extensions_screen.dart';
-import 'package:meiyou/features/browse/presentation/screens/sources_screen.dart';
-import 'package:meiyou/features/browse/presentation/view_models/extensions_screen_view_model.dart';
-import 'package:meiyou/features/browse/presentation/view_models/sources_screen_view_model.dart';
+import 'package:meiyou/features/browse/presentation/screens/extensions/extensions_screen.dart';
+import 'package:meiyou/features/browse/presentation/screens/extensions/extensions_screen_view_model.dart';
+import 'package:meiyou/features/browse/presentation/screens/sources/sources_screen.dart';
+import 'package:meiyou/features/browse/presentation/screens/sources/sources_screen_view_model.dart';
+import 'package:meiyou/shared/data/data_sources/preferences/source_preferences.dart';
 import 'package:meiyou/shared/domain/models/extension_category.dart';
+import 'package:meiyou/shared/domain/models/source.dart';
 import 'package:meiyou/shared/domain/usecases/source_repository_usecases/get_enabled_intalled_sources.dart';
 import 'package:meiyou/shared/extension_manager/extension_manger.dart';
 import 'package:meiyou/shared/presentation/notifers/state_notifer.dart';
@@ -12,8 +14,10 @@ import 'package:meiyou/shared/presentation/widgets/navigation_bar/navigation_bar
 class BrowseScreenViewModel {
   BrowseScreenViewModel(
     TickerProvider tickerProvider, {
+    required SourcePreferences preferences,
     required getEnabledSourcesUseCase getEnabledSourcesUseCase,
     required ExtensionManager extensionManger,
+    required Function(InstalledSource source) onSourceSelected,
   }) {
     for (var i = 0; i < _tabCount; i++) {
       _tabControllers[i] =
@@ -21,6 +25,8 @@ class BrowseScreenViewModel {
       _sourcesScreenViewModels[i] = SourcesScreenViewModel(
         getEnabledSourcesUseCase: getEnabledSourcesUseCase,
         category: ExtensionCategory.values[i],
+        onSourceSelected: onSourceSelected,
+        preferences: preferences,
       );
       _extensionsScreenViewModels[i] = ExtensionsScreenViewModel(
         extensionManger: extensionManger,
@@ -55,9 +61,8 @@ class BrowseScreenViewModel {
     ],
   ];
 
-
   final StateNotifier<int> navigatiorStateListenable = StateNotifier(0);
- 
+
   final List<Destination> destinations = [
     const Destination(
       icon: Icon(Icons.explore_outlined),

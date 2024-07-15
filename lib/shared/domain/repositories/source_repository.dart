@@ -1,6 +1,6 @@
 import 'package:meiyou/shared/domain/models/source.dart';
 import 'package:meiyou/shared/domain/models/source_repository_params.dart';
-import 'package:meiyou/shared/utils/stream_utils/state_stream.dart';
+import 'package:meiyou/core/utils/stream_utils/state_stream.dart';
 import 'package:meiyou_extensions_lib/models.dart';
 import 'package:nice_dart/nice_dart.dart';
 

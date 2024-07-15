@@ -22,7 +22,10 @@ Future<void> _getSotragePermissionForDegugMode() async {
     Future<bool> persistPermission() {
       return permission.isDenied.then((isDenied) {
         if (isDenied) {
-          return persistPermission();
+          return permission.request().isDenied.then((isDenied) {
+            if (isDenied) persistPermission();
+            return true;
+          });
         }
         return true;
       });
@@ -58,5 +61,7 @@ class AppModule implements InjectModule {
         manager: getIt(),
       ),
     );
+
+    await (getIt<ExtensionManager>() as ExtensionManagerImpl).init();
   }
 }

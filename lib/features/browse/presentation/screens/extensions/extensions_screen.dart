@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart' hide AlertDialog;
-import 'package:meiyou/core/utils/constants/default_sized_box.dart';
-import 'package:meiyou/features/browse/presentation/view_models/extensions_screen_view_model.dart';
+import 'package:meiyou/core/utils/constants/material_theme.dart';
+import 'package:meiyou/features/browse/presentation/screens/extensions/extensions_screen_view_model.dart';
 import 'package:meiyou/features/browse/presentation/widgets/base_browse_item.dart';
 import 'package:meiyou/features/browse/presentation/widgets/base_browse_list_view.dart';
 import 'package:meiyou/shared/domain/models/install_step.dart';
-import 'package:meiyou/shared/domain/models/source.dart';
 import 'package:meiyou/shared/presentation/widgets/dialogs/alert_dialog.dart';
-import 'package:meiyou/shared/presentation/widgets/grouped_list_view.dart';
 import 'package:meiyou/shared/presentation/widgets/image_holder.dart';
 import 'package:meiyou/shared/presentation/widgets/state_listenable_builder.dart';
 import 'package:meiyou_extensions_lib/models.dart';
+import 'package:nice_dart/nice_dart.dart';
 
 class ExtensionsScreen extends StatelessWidget {
   final ExtensionsScreenViewModel viewModel;
@@ -19,7 +18,13 @@ class ExtensionsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return StateListenableBuilder(
         stateListenable: viewModel.stateListenable,
-        builder: (context, extensions, _) {
+        builder: (context, extensionsState, _) {
+          if (extensionsState is ExtensionsStateLoading) {
+            return const Center(child: CircularProgressIndicator.adaptive());
+          }
+
+          final extensions = extensionsState.extensions;
+
           if (extensions.isEmpty) {
             return const Center(child: CircularProgressIndicator.adaptive());
           }
@@ -38,11 +43,27 @@ class ExtensionsScreen extends StatelessWidget {
                         onPressed: () => _onPressed(installStep, extension),
                         onLongPress: () =>
                             _onLongPressed(context, installStep, extension),
-                        subtitle: Text(extension.versionName),
+                        subtitle: Text(_subtitleString(installStep, extension)),
                       );
                     });
               });
         });
+  }
+
+  String _subtitleString(InstallStep installStep, Extension extension) {
+    var str = extension.versionName;
+    switch (installStep) {
+      case InstallStep.pending:
+      case InstallStep.downloading:
+      case InstallStep.installing:
+      case InstallStep.installed:
+      case InstallStep.error:
+        str += ' \u00b7 ${installStep.name.captialize()}';
+        break;
+      default:
+        break;
+    }
+    return str;
   }
 
   List<Widget> _actions(InstallStep installStep, Extension extension) {
@@ -62,24 +83,24 @@ class ExtensionsScreen extends StatelessWidget {
           if ((extension is InstalledExtension && extension.hasUpdate) ||
               extension is AvailableExtension)
             IconButton(
-                onPressed: () => downloadOrUpdateExtension(extension),
+                onPressed: () => _downloadOrUpdateExtension(extension),
                 icon: const Icon(Icons.download_outlined))
         ];
       default:
         return [
           IconButton(
-              onPressed: () => onPressedCancel(extension), icon: cancelIcon)
+              onPressed: () => _onPressedCancel(extension), icon: cancelIcon)
         ];
     }
   }
 
-  void onPressedCancel(Extension extension) {
+  void _onPressedCancel(Extension extension) {
     if (extension is AvailableExtension) {
       return viewModel.cancelDownload(extension);
     }
   }
 
-  void downloadOrUpdateExtension(Extension extension) {
+  void _downloadOrUpdateExtension(Extension extension) {
     if (extension is AvailableExtension) {
       return viewModel.installExtension(extension);
     } else if (extension is InstalledExtension && extension.hasUpdate) {
@@ -97,14 +118,14 @@ class ExtensionsScreen extends StatelessWidget {
     Widget icon;
     if (extension is InstalledExtension) {
       icon = ImageHolder.memory(
-        height: 24,
-        width: 24,
+        height: MaterialTheme.iconSize,
+        width: MaterialTheme.iconSize,
         bytes: extension.icon,
       );
     } else {
       icon = ImageHolder.network(
-        height: 24,
-        width: 24,
+        height: MaterialTheme.iconSize,
+        width: MaterialTheme.iconSize,
         url: (extension as AvailableExtension).iconUrl,
       );
     }
@@ -113,12 +134,13 @@ class ExtensionsScreen extends StatelessWidget {
       case InstallStep.pending:
       case InstallStep.downloading:
       case InstallStep.installing:
+        const shrinkedIconSize = MaterialTheme.iconButtonSize - 6;
         return Stack(
           children: [
             Center(
               child: SizedBox(
-                height: 42,
-                width: 42,
+                height: shrinkedIconSize,
+                width: shrinkedIconSize,
                 child: icon,
               ),
             ),
@@ -135,13 +157,13 @@ class ExtensionsScreen extends StatelessWidget {
       case InstallStep.pending:
       case InstallStep.downloading:
       case InstallStep.installing:
-        onPressedCancel(extension);
+        _onPressedCancel(extension);
         break;
       case InstallStep.installed:
         break;
       case InstallStep.idle:
       case InstallStep.error:
-        downloadOrUpdateExtension(extension);
+        _downloadOrUpdateExtension(extension);
         break;
     }
   }
@@ -152,7 +174,7 @@ class ExtensionsScreen extends StatelessWidget {
       case InstallStep.pending:
       case InstallStep.downloading:
       case InstallStep.installing:
-        onPressedCancel(extension);
+        _onPressedCancel(extension);
         break;
       case InstallStep.installed:
         break;
@@ -161,7 +183,7 @@ class ExtensionsScreen extends StatelessWidget {
         if (extension is InstalledExtension && !extension.hasUpdate) {
           showUnistallExtensionDialog(context, extension);
         }
-        downloadOrUpdateExtension(extension);
+        _downloadOrUpdateExtension(extension);
         break;
     }
   }

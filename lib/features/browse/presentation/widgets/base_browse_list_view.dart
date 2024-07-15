@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:meiyou/core/helper/locale_helper.dart';
 import 'package:meiyou/core/utils/extensions/context.dart';
 import 'package:meiyou/shared/domain/models/source.dart';
 import 'package:meiyou/shared/presentation/widgets/grouped_list_view.dart';
@@ -26,7 +27,7 @@ class BaseBrowseListView<T> extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 18),
           alignment: Alignment.centerLeft,
           child: Text(
-            key,
+            LocaleHelper.getSourceDisplayName(key),
             style: headerTextStyle,
           ),
         );

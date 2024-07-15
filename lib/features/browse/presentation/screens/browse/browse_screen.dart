@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:meiyou/core/injection/injection.dart';
-import 'package:meiyou/features/browse/presentation/view_models/browse_screen_view_model.dart';
+import 'package:meiyou/core/utils/constants/material_theme.dart';
+import 'package:meiyou/features/browse/presentation/screens/browse/browse_screen_view_model.dart';
+import 'package:meiyou/shared/domain/models/extension_category.dart';
+import 'package:meiyou/shared/domain/models/source.dart';
 import 'package:meiyou/shared/presentation/widgets/navigation_bar/navigation_bar.dart';
 import 'package:meiyou/shared/presentation/widgets/state_listenable_builder.dart';
 
 class BrowseScreen extends StatefulWidget {
-  const BrowseScreen({super.key});
+  final Function(InstalledSource source) onSourceSelected;
+  const BrowseScreen({super.key, required this.onSourceSelected});
 
   @override
   State<BrowseScreen> createState() => _BrowseScreenState();
@@ -18,8 +22,13 @@ class _BrowseScreenState extends State<BrowseScreen>
   @override
   void initState() {
     super.initState();
-    viewModel = BrowseScreenViewModel(this,
-        getEnabledSourcesUseCase: getIt(), extensionManger: getIt());
+    viewModel = BrowseScreenViewModel(
+      this,
+      getEnabledSourcesUseCase: getIt(),
+      extensionManger: getIt(),
+      preferences: getIt(),
+      onSourceSelected: widget.onSourceSelected,
+    );
   }
 
   @override
@@ -57,7 +66,7 @@ class _BrowseScreenState extends State<BrowseScreen>
 
   PreferredSizeWidget _tabBar() {
     return PreferredSize(
-      preferredSize: const Size.fromHeight(46),
+      preferredSize: const Size.fromHeight(MaterialTheme.tabBarHeight),
       child: StateListenableBuilder(
         stateListenable: viewModel.navigatiorStateListenable,
         builder: (context, state, _) {

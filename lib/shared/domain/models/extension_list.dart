@@ -10,4 +10,6 @@ class ExtensionList {
     required this.installed,
     required this.available,
   });
+
+  bool get isEmpty => updates.isEmpty && installed.isEmpty && available.isEmpty;
 }

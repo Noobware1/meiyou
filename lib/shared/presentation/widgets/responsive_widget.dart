@@ -18,13 +18,8 @@ class ResponsiveBuilder extends StatelessWidget {
     return PlatformBuilder(builder: (context, platform) {
       return LayoutBuilder(
         builder: (context, constraints) {
-          if (Platform.isAndroid || Platform.isIOS) {
-            final screenSize = context.screenSize;
-            return builder(context, constraints, screenSize);
-          } else {
-        
-            return builder(context, constraints, ScreenSize.desktop);
-          }
+          final screenSize = context.screenSize;
+          return builder(context, constraints, screenSize);
         },
       );
     });

@@ -51,13 +51,6 @@ extension BuildContextUtils on BuildContext {
   }
 
   ScreenSize get screenSize {
-    final size = MediaQuery.of(this).size.shortestSide;
-    if (size < 600) {
-      return ScreenSize.mobile;
-    } else if (size < 900) {
-      return ScreenSize.tablet;
-    } else {
-      return ScreenSize.desktop;
-    }
+    return ScreenSize.getScreenSize(size);
   }
 }

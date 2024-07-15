@@ -4,10 +4,12 @@ import 'dart:async';
 import 'package:meiyou/shared/domain/models/extension_category.dart';
 import 'package:meiyou/shared/domain/models/extension_list.dart';
 import 'package:meiyou/shared/domain/models/install_step.dart';
-import 'package:meiyou/shared/utils/stream_utils/state_stream.dart';
+import 'package:meiyou/core/utils/stream_utils/state_stream.dart';
 import 'package:meiyou_extensions_lib/models.dart';
 
 abstract class ExtensionManager {
+  bool get isInitialized;
+
   StateStream<ExtensionList> getExtensionList(ExtensionCategory category);
 
   StateStream<List<AvailableExtension>> getAvailableExtensionsStream(

@@ -90,12 +90,12 @@ extension AsyncValueExt<T> on AsyncValue<T> {
     }
   }
 
-  E when<E>(
-    E Function(T value) success,
-    E Function(Object error, StackTrace? stackTrace) error,
-    E Function() loading,
-    E Function() noData,
-  ) {
+  E when<E>({
+    required E Function(T value) success,
+    required E Function(Object error, StackTrace? stackTrace) error,
+    required E Function() loading,
+    required E Function() noData,
+  }) {
     if (hasData) {
       return success(getOrThrow());
     } else if (isError) {

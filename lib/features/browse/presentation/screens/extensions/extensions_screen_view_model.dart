@@ -21,8 +21,11 @@ class ExtensionsScreenViewModel {
         searchController = TextEditingController(text: '') {
     extensionManger.getExtensionList(category).let((it) {
       _extensionList = it.state;
-      stateListenable =
-          StateNotifier(_mapper(searchController.text, _extensionList));
+
+      stateListenable = StateNotifier(_mapper(
+        searchController.text,
+        _extensionList,
+      ));
       _streamSubscription = it.listen((data) {
         _extensionList = data;
         stateListenable
@@ -35,8 +38,6 @@ class ExtensionsScreenViewModel {
     });
   }
 
-  // final Map<String, Stram>
-
   final ExtensionCategory _category;
 
   final ExtensionManager _extensionManager;
@@ -45,7 +46,7 @@ class ExtensionsScreenViewModel {
 
   late ExtensionList _extensionList;
 
-  late final StateNotifier<Map<String, List<Extension>>> stateListenable;
+  late final StateNotifier<ExtensionsState> stateListenable;
 
   late final StreamSubscription<ExtensionList> _streamSubscription;
 
@@ -57,10 +58,9 @@ class ExtensionsScreenViewModel {
         InstallStep.idle;
   }
 
-  Map<String, List<Extension>> _mapper(String query, ExtensionList list) {
+  ExtensionsState _mapper(String query, ExtensionList list) {
     final state = <String, List<Extension>>{};
 
-    
     list.updates.where((e) => _queryfilter(query, e)).toList().let((it) {
       if (it.isNotEmpty) {
         state['Updates pending'] = it;
@@ -73,14 +73,12 @@ class ExtensionsScreenViewModel {
     });
 
     state.addAll(SplayTreeMap<String, List<AvailableExtension>>.from(
-            list.available
-                .where((e) => _queryfilter(query, e))
-                .groupListsBy((ext) => ext.lang),
-            (a, b) => LocaleHelper.comparator(a, b))
-        .map((key, value) =>
-            MapEntry(LocaleHelper.getLocalizedDisplayName(key), value)));
+        list.available
+            .where((e) => _queryfilter(query, e))
+            .groupListsBy((ext) => ext.lang),
+        (a, b) => LocaleHelper.comparator(a, b)));
 
-    return state;
+    return ExtensionsStateData(state);
   }
 
   bool _queryfilter(String query, Extension extension) {
@@ -153,4 +151,24 @@ class ExtensionsScreenViewModel {
     searchController.dispose();
     stateListenable.dispose();
   }
+}
+
+sealed class ExtensionsState {
+  final Map<String, List<Extension>> extensions;
+
+  const ExtensionsState(this.extensions);
+}
+
+class ExtensionsStateData extends ExtensionsState {
+  const ExtensionsStateData(super.extensions);
+}
+
+class ExtensionsStateLoading extends ExtensionsState {
+  const ExtensionsStateLoading() : super(const {});
+}
+
+class ExtensionsStateError extends ExtensionsState {
+  final Object error;
+
+  const ExtensionsStateError(super.extensions, this.error);
 }

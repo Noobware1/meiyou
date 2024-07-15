@@ -32,7 +32,7 @@ class GroupedListElement<Key, Value> extends ComponentElement {
     final itemCount =
         widget.group.values.fold(0, (prev, element) => prev + element.length) +
             widget.group.keys.length;
-    // print(itemCount);
+
     _cacheList = List.filled(itemCount, null, growable: false);
     var i = 0;
     for (final key in widget.group.keys) {

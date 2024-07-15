@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:meiyou/core/injection/injection.dart';
-import 'package:meiyou/features/browse/presentation/screens/browse_screen.dart';
+import 'package:meiyou/core/utils/constants/material_theme.dart';
+import 'package:meiyou/core/utils/extensions/context.dart';
+import 'package:meiyou/features/browse/presentation/screens/browse/browse_screen.dart';
+import 'package:meiyou/features/home/presentation/screens/home/home_screen.dart';
+import 'package:meiyou/shared/extension_manager/extension_manger.dart';
 import 'package:meiyou/shared/presentation/widgets/empty_screen.dart';
 import 'package:meiyou/shared/presentation/widgets/multi_nav_scaffold/multi_nav_scaffold.dart';
 import 'package:meiyou/shared/presentation/widgets/navigation_bar/navigation_bar.dart';
@@ -9,6 +14,7 @@ import 'package:meiyou/shared/presentation/widgets/sheets/adaptive_sheet.dart';
 import 'dart:math' as math;
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await initInjectionModules();
 
   runApp(const MyApp());
@@ -20,29 +26,33 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+    // FloatingActionButton
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        statusBarIconBrightness: context.brightness == Brightness.dark
+            ? Brightness.light
+            : Brightness.dark,
+        statusBarBrightness: context.brightness,
+        statusBarColor: Colors.transparent,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Flutter Demo',
+        // themeMode: ThemeMode.light,
+        theme: ThemeData(
+          brightness: Brightness.light,
+          colorScheme: ColorScheme.fromSeed(
+              seedColor: Colors.deepPurple, brightness: Brightness.light),
+          useMaterial3: true,
+        ),
+        darkTheme: ThemeData(
+          brightness: Brightness.dark,
+          colorScheme: ColorScheme.fromSeed(
+              seedColor: Colors.deepPurple, brightness: Brightness.dark),
+          useMaterial3: true,
+        ),
+        home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      ),
     );
   }
 }
@@ -66,21 +76,29 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
+  int selectedIndex = 0;
 
   @override
   Widget build(BuildContext context) {
+    const List<Destination> destinations = [
+      Destination(
+          icon: Icon(Icons.home_outlined),
+          selectedIcon: Icon(Icons.home),
+          label: 'Home'),
+      Destination(
+          icon: Icon(Icons.person_outlined),
+          selectedIcon: Icon(Icons.person),
+          label: 'Library'),
+      Destination(
+          icon: Icon(Icons.history_outlined),
+          selectedIcon: Icon(Icons.history),
+          label: 'History'),
+      Destination(
+          icon: Icon(Icons.more_horiz_outlined),
+          selectedIcon: Icon(Icons.more_horiz),
+          label: 'More'),
+    ];
+
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
     //
@@ -88,40 +106,27 @@ class _MyHomePageState extends State<MyHomePage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return MultiNavScaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage  that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+      bottomNavigationBar: CustomNavigationBar(
+        destinations: destinations,
+        selectedIndex: selectedIndex,
+        onDestinationSelected: (index) {
+          setState(() {
+            selectedIndex = index;
+          });
+        },
+        type: NavigationBarType.bottom,
       ),
-      body: EmptyScreen(text: 'You have pushed the button this many times:'),
-
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => showBottomSheet(context),
-        tooltip: 'Increment',
-        icon: const Icon(Icons.extension_outlined),
-        label: const Text('Browse'),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      sideNavigatonBar: CustomNavigationBar(
+        destinations: destinations,
+        selectedIndex: selectedIndex,
+        onDestinationSelected: (index) {
+          setState(() {
+            selectedIndex = index;
+          });
+        },
+        type: NavigationBarType.side,
+      ),
+      body: const HomeScreen(),
     );
-  }
-
-  void showBottomSheet(BuildContext context) {
-    showModalAdaptiveSheet(
-        context: context,
-        isScrollControlled: true,
-        clipBehavior: Clip.hardEdge,
-        shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(16))),
-        useSafeArea: true,
-        builder: (context) {
-          return BrowseScreen();
-          // return _buildFloatingBottomSheet(context);
-        });
-    // builder: (context) {
-    //   return BrowseScreen();
-    // });
   }
 }

@@ -10,4 +10,6 @@ Future<void> initInjectionModules() async {
   await PreferenceModule().call(getIt);
   await AppModule().call(getIt);
   await DomainModule().call(getIt);
+
+  
 }

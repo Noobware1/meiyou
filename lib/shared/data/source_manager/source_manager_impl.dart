@@ -3,7 +3,7 @@ import 'package:meiyou/shared/data/extension/extension_manager_impl.dart';
 import 'package:meiyou/shared/domain/models/extension_category.dart';
 import 'package:meiyou/shared/domain/source_manager/source_manager.dart';
 import 'package:meiyou/shared/extension_manager/extension_manger.dart';
-import 'package:meiyou/shared/utils/stream_utils/state_stream.dart';
+import 'package:meiyou/core/utils/stream_utils/state_stream.dart';
 import 'package:meiyou_extensions_lib/models.dart';
 import 'package:collection/collection.dart';
 import 'package:nice_dart/nice_dart.dart';
@@ -36,6 +36,7 @@ class SourceManagerImpl implements SourceManager {
   final List<StateStream<List<CatalogueSource>>?> _catatgogueSources =
       List.filled(3, null);
 
+
   @override
   Source? getSource(int id, ExtensionCategory category) {
     return _sourceStreamMap[category.index]!.state[id];
@@ -49,7 +50,9 @@ class SourceManagerImpl implements SourceManager {
 
 extension on List<InstalledExtension> {
   Map<int, Source> toSourcesMap(ExtensionCategory category) {
-    return Map.fromIterable(map((e) => e.sources.map((e) => e)).flattened,
+    var a = Map<int, Source>.fromIterable(
+        map((e) => e.sources.map((e) => e)).flattened,
         key: (e) => (e as Source).id);
+    return a;
   }
 }

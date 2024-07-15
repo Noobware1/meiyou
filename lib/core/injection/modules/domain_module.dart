@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:get_it/get_it.dart';
 import 'package:meiyou/core/injection/modules/injection_module.dart';
-import 'package:meiyou/shared/data/repositories/source_repository.dart';
+import 'package:meiyou/shared/data/repositories/source_repository_impl.dart';
 import 'package:meiyou/shared/domain/repositories/source_repository.dart';
 import 'package:meiyou/shared/domain/usecases/source_repository_usecases/get_enabled_intalled_sources.dart';
 import 'package:meiyou/shared/domain/usecases/source_repository_usecases/get_full_home_page_usecase.dart';

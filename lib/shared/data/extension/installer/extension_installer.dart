@@ -107,7 +107,7 @@ class ExtensionInstaller {
       String dirPath = dir.path;
 
       dirPath = p.join(dirPath, plugin.metadata.pkgName);
-
+     
       //create Directory
       final extDir = dirPath.toDirectory()..createSync(recursive: true);
 

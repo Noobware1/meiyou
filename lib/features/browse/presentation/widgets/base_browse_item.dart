@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:meiyou/core/utils/constants/material_theme.dart';
 import 'package:meiyou/core/utils/extensions/context.dart';
+import 'package:meiyou/shared/presentation/widgets/responsive_widget.dart';
 
 class BaseBrowseItem extends StatelessWidget {
   const BaseBrowseItem({
@@ -21,8 +23,8 @@ class BaseBrowseItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.theme.colorScheme;
-    final textTheme = context.theme.textTheme;
+    // final colors = context.theme.colorScheme;
+    // final textTheme = context.theme.textTheme;
 
     return ListTile(
       title: Text(
@@ -32,13 +34,20 @@ class BaseBrowseItem extends StatelessWidget {
       ),
       subtitle: subtitle,
       leading: SizedBox(
-        height: 48,
-        width: 48,
+        height: MaterialTheme.iconButtonSize,
+        width: MaterialTheme.iconButtonSize,
         child: icon,
       ),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: actions,
+      trailing: ResponsiveBuilder(
+        builder: (context, constraints, screenSize) {
+          final actions =
+              constraints.maxWidth <= 86 ? [this.actions.first] : this.actions;
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisSize: MainAxisSize.min,
+            children: actions,
+          );
+        },
       ),
       onTap: onPressed,
       onLongPress: onLongPress,

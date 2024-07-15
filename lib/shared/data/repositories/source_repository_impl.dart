@@ -1,25 +1,18 @@
-import 'dart:typed_data';
-
-import 'package:async/async.dart' hide Result;
 import 'package:collection/collection.dart';
-import 'package:meiyou/core/helper/locale_helper.dart';
 import 'package:meiyou/core/utils/extensions/result.dart';
 import 'package:meiyou/core/utils/log/logger.dart';
 import 'package:meiyou/shared/data/data_sources/preferences/source_preferences.dart';
-import 'package:meiyou/shared/data/extension/extension_manager_impl.dart';
 import 'package:meiyou/shared/domain/models/extension_category.dart';
-import 'package:meiyou/shared/domain/models/extension_list.dart';
 import 'package:meiyou/shared/domain/models/source.dart' as m;
 import 'package:meiyou/shared/domain/models/source_repository_params.dart';
 import 'package:meiyou/shared/domain/repositories/source_repository.dart';
 import 'package:meiyou/shared/domain/source_manager/source_manager.dart';
 import 'package:meiyou/shared/extension_manager/extension_manger.dart';
-import 'package:meiyou/shared/utils/comparator/case_insensitive_comparator.dart';
-import 'package:meiyou/shared/utils/stream_utils/comnine_stream.dart';
-import 'package:meiyou/shared/utils/stream_utils/state_stream.dart';
+import 'package:meiyou/core/utils/comparator/case_insensitive_comparator.dart';
+import 'package:meiyou/core/utils/stream_utils/comnine_stream.dart';
+import 'package:meiyou/core/utils/stream_utils/state_stream.dart';
 import 'package:meiyou_extensions_lib/models.dart';
 import 'package:nice_dart/nice_dart.dart';
-import 'package:okhttp/interceptor.dart';
 
 class SourceRepositoryImpl implements SourceRepository {
   final SourcePreferences _preferences;
@@ -138,7 +131,17 @@ class SourceRepositoryImpl implements SourceRepository {
 
       for (final request in requests) {
         try {
-          final result = await source.getHomePage(1, request);
+          final result = await source.getHomePage(1, request).then(
+                (homePage) => homePage.copyWith(
+                    items: homePage.items
+                        .where((e) => e.list.isNotEmpty)
+                        .toList()),
+              );
+          if (result.items.isEmpty ||
+              result.items.every((e) => e.list.isEmpty)) {
+            logger.warning('Empty homepage for ${request.data}');
+            continue;
+          }
           results[request] = result;
         } catch (e, s) {
           logger.warning('Failed to load ${request.data}', e, s);
@@ -234,7 +237,7 @@ extension on Source {
       name: name,
       category: category,
       isUsedLast: false,
-      language: LocaleHelper.getLocalizedDisplayName(lang),
+      language: lang,
       pin: m.Pin.unPinned,
       version: '',
       icon: null,

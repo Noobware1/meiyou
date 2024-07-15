@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:meiyou/core/utils/constants/size_constants.dart';
 
 enum ScreenSize {
@@ -5,14 +6,16 @@ enum ScreenSize {
   tablet,
   desktop;
 
-  static ScreenSize getScreenSize(double size) {
-    if (size < mobileScreenSize) {
+  static ScreenSize getScreenSize(Size size) {
+    final height = size.height;
+    final width = size.width;
+    if (width < 600) {
       return ScreenSize.mobile;
-    } else if (size < tabletScreenSize) {
-      return ScreenSize.tablet;
-    } else {
-      return ScreenSize.desktop;
     }
+    if (width < 840) {
+      return ScreenSize.tablet;
+    }
+    return ScreenSize.desktop;
   }
 
   T when<T>({

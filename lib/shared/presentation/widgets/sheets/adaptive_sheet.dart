@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:meiyou/core/utils/constants/material_theme.dart';
 
 const Duration _adaptiveSheetEnterDuration = Duration(milliseconds: 250);
 const Duration _adaptiveSheetExitDuration = Duration(milliseconds: 200);
@@ -372,18 +373,12 @@ class _BottomSheetState extends State<AdaptiveSheet> {
       ),
     );
     if (constraints != null) {
-      bottomSheet = Padding(
-        padding: const EdgeInsets.only(
-          bottom: 18.0,
-          top: 18.0,
-        ),
-        child: Align(
-          alignment: Alignment.bottomCenter,
-          heightFactor: 1.0,
-          child: ConstrainedBox(
-            constraints: constraints,
-            child: bottomSheet,
-          ),
+      bottomSheet = Align(
+        alignment: Alignment.bottomCenter,
+        heightFactor: 1.0,
+        child: ConstrainedBox(
+          constraints: constraints,
+          child: bottomSheet,
         ),
       );
     }
@@ -1050,7 +1045,7 @@ class ModalAdaptiveSheetRoute<T> extends PopupRoute<T> {
     );
 
     final Widget bottomSheet = useSafeArea
-        ? SafeArea(bottom: false, child: content)
+        ? SafeArea(child: content)
         : MediaQuery.removePadding(
             context: context,
             removeTop: true,
@@ -1176,8 +1171,8 @@ Future<T?> showModalAdaptiveSheet<T>({
   Color? backgroundColor,
   String? barrierLabel,
   double? elevation,
-  ShapeBorder? shape,
-  Clip? clipBehavior,
+  ShapeBorder? shape = MaterialTheme.roundedRectangleShape,
+  Clip? clipBehavior = Clip.hardEdge,
   BoxConstraints? constraints,
   Color? barrierColor,
   bool isScrollControlled = false,
@@ -1187,7 +1182,7 @@ Future<T?> showModalAdaptiveSheet<T>({
   bool isDismissible = true,
   bool enableDrag = true,
   bool? showDragHandle,
-  bool useSafeArea = false,
+  bool useSafeArea = true,
   RouteSettings? routeSettings,
   AnimationController? transitionAnimationController,
   Offset? anchorPoint,

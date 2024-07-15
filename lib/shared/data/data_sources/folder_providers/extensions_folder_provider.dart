@@ -11,7 +11,10 @@ class ExtensionsFolderProvider implements FolderProvider {
   ExtensionsFolderProvider(this._storageFolderProvider);
 
   @override
-  Future<Directory> directory() => path().then((path) => Directory(path));
+  Future<Directory> directory() async {
+    final path = await this.path();
+    return Directory(path);
+  }
 
   @override
   Future<String> path() =>

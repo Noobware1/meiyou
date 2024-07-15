@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:meiyou/core/utils/extensions/context.dart';
-import 'package:meiyou/features/browse/presentation/view_models/sources_screen_view_model.dart';
+import 'package:meiyou/features/browse/presentation/screens/sources/sources_screen_view_model.dart';
 import 'package:meiyou/features/browse/presentation/widgets/base_browse_item.dart';
 import 'package:meiyou/features/browse/presentation/widgets/base_browse_list_view.dart';
 import 'package:meiyou/shared/domain/models/source.dart';
@@ -11,6 +11,7 @@ import 'package:meiyou/shared/presentation/widgets/state_listenable_builder.dart
 
 class SourcesScreen extends StatelessWidget {
   final SourcesScreenViewModel viewModel;
+
   const SourcesScreen({super.key, required this.viewModel});
 
   @override
@@ -19,13 +20,15 @@ class SourcesScreen extends StatelessWidget {
         stateListenable: viewModel.stateListenable,
         builder: (context, state, _) {
           return BaseBrowseListView(
-              group: state,
+              group: state.sources,
               itemBuilder: (context, source) {
                 return BaseBrowseItem(
                   actions: _actions(context, source),
                   name: source.name,
                   icon: _icon(source.icon),
-                  onPressed: () {},
+                  onPressed: () {
+                    viewModel.selectedSource(source);
+                  },
                   onLongPress: () {},
                   subtitle: Text(source.version),
                 );
@@ -48,7 +51,9 @@ class SourcesScreen extends StatelessWidget {
 
     return [
       IconButton(
-        onPressed: () {},
+        onPressed: () {
+          viewModel.togglePin(source);
+        },
         style: ButtonStyle(
           iconColor: WidgetStateProperty.all(color),
         ),
