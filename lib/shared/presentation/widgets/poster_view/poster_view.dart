@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:meiyou/core/utils/extensions/context.dart';
 import 'package:meiyou/core/utils/extensions/target_platform.dart';
+import 'package:meiyou/shared/domain/models/media.dart';
 import 'package:meiyou/shared/presentation/widgets/poster_view/poster_view_theme_data.dart';
 import 'package:meiyou/shared/presentation/widgets/image_holder.dart';
 import 'package:meiyou/shared/presentation/widgets/responsive_widget.dart';
@@ -9,16 +10,16 @@ import 'package:meiyou_extensions_lib/models.dart';
 
 class PosterView extends StatefulWidget {
   final String label;
-  final List<MediaPreview> previews;
+  final List<Media> mediaList;
   final PosterViewThemeData? theme;
-  final void Function(MediaPreview)? onSelected;
-  final void Function(MediaPreview)? onLongPressed;
-  final void Function(TapDownDetails, MediaPreview)? onSecondaryTapDown;
+  final void Function(Media)? onSelected;
+  final void Function(Media)? onLongPressed;
+  final void Function(TapDownDetails, Media)? onSecondaryTapDown;
   final ScrollController? scrollController;
   const PosterView({
     super.key,
     required this.label,
-    required this.previews,
+    required this.mediaList,
     this.theme,
     this.onSelected,
     this.onLongPressed,
@@ -46,7 +47,7 @@ class _PosterViewState extends State<PosterView> {
     isInitialized = true;
   }
 
-  List<MediaPreview> get previews => widget.previews;
+  List<Media> get mediaList => widget.mediaList;
 
   PosterViewThemeData get theme =>
       widget.theme ?? PosterViewThemeData.getDefault(context);
@@ -105,11 +106,12 @@ class _PosterViewState extends State<PosterView> {
                 platform: platform,
                 controller: scrollController,
                 child: ListView.separated(
+                  key: widget.key,
                   controller: scrollController,
                   padding: theme.contentPadding,
                   scrollDirection: Axis.horizontal,
                   itemBuilder: (context, index) {
-                    final preview = previews[index];
+                    final preview = mediaList[index];
                     if (isMobile) {
                       return _Poster(
                         preview: preview,
@@ -140,7 +142,7 @@ class _PosterViewState extends State<PosterView> {
                   separatorBuilder: (context, index) {
                     return HorizontalSpace(theme.spacing);
                   },
-                  itemCount: previews.length,
+                  itemCount: mediaList.length,
                 ),
               ),
             ),
@@ -166,15 +168,15 @@ class _PosterViewState extends State<PosterView> {
 }
 
 class _Poster extends StatelessWidget {
-  final MediaPreview preview;
+  final Media preview;
   final double height;
   final double width;
   final BorderRadius borderRadius;
   final TextStyle titleTextStyle;
   final double titleSpacing;
   final EdgeInsets titlePadding;
-  final void Function(MediaPreview)? onSelected;
-  final void Function(MediaPreview)? onLongPressed;
+  final void Function(Media)? onSelected;
+  final void Function(Media)? onLongPressed;
   const _Poster({
     super.key,
     required this.preview,
@@ -239,13 +241,13 @@ class _Poster extends StatelessWidget {
 }
 
 class _PosterDesktop extends StatefulWidget {
-  final MediaPreview preview;
+  final Media preview;
   final double height;
   final double width;
   final BorderRadius borderRadius;
-  final void Function(MediaPreview)? onSelected;
-  final void Function(MediaPreview)? onLongPressed;
-  final void Function(TapDownDetails, MediaPreview)? onSecondaryTapDown;
+  final void Function(Media)? onSelected;
+  final void Function(Media)? onLongPressed;
+  final void Function(TapDownDetails, Media)? onSecondaryTapDown;
   final TextStyle titleTextStyle;
   final double titleSpacing;
   final EdgeInsets titlePadding;

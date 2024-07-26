@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
@@ -12,12 +13,13 @@ class StateNotifier<State> extends ChangeNotifier with Disposable {
 
   Future<State> get first {
     final completer = Completer<State>();
-    void listener() => completer.complete(state);
-    addListener(listener);
-    return completer.future.then((value) {
+    void listener() {
+      completer.complete(state);
       removeListener(listener);
-      return value;
-    });
+    }
+
+    addListener(listener);
+    return completer.future;
   }
 
   bool _isDisposed = false;
@@ -37,18 +39,6 @@ class StateNotifier<State> extends ChangeNotifier with Disposable {
   }
 
   bool shouldChange(State a, State b) => a != b;
-
-  void addStateListner(void Function(State state) listener) {
-    addListener(() {
-      listener(state);
-    });
-  }
-
-  void removeStateListner(void Function(State state) listener) {
-    removeListener(() {
-      listener(state);
-    });
-  }
 
   @mustCallSuper
   @protected

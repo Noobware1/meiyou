@@ -30,6 +30,8 @@ class StateStream<T> with Disposable implements Stream<T> {
   late final StreamController<T> _controller;
   late final StreamSubscription<T> _subscription;
 
+  bool hasUpdated = false;
+
   Completer _completer = Completer()..complete();
 
   final Queue<Function> _queue = Queue();
@@ -57,7 +59,12 @@ class StateStream<T> with Disposable implements Stream<T> {
     } else {
       _queue.add(() => _controller.add(data));
     }
+    if (!hasUpdated) {
+      hasUpdated = true;
+    }
   }
+
+  bool get isTaskRunning => _completer.isCompleted;
 
   void addStream(Stream<T> stream, {bool cancelOnError = false}) {
     if (_completer.isCompleted) {

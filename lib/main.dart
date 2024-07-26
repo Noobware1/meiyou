@@ -1,17 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:meiyou/core/injection/injection.dart';
-import 'package:meiyou/core/utils/constants/material_theme.dart';
 import 'package:meiyou/core/utils/extensions/context.dart';
-import 'package:meiyou/features/browse/presentation/screens/browse/browse_screen.dart';
+import 'package:meiyou/features/details/presentation/media_details_screen.dart';
 import 'package:meiyou/features/home/presentation/screens/home/home_screen.dart';
-import 'package:meiyou/shared/extension_manager/extension_manger.dart';
-import 'package:meiyou/shared/presentation/widgets/empty_screen.dart';
 import 'package:meiyou/shared/presentation/widgets/multi_nav_scaffold/multi_nav_scaffold.dart';
 import 'package:meiyou/shared/presentation/widgets/navigation_bar/navigation_bar.dart';
-import 'package:meiyou/shared/presentation/widgets/sheets/adaptive_sheet.dart';
-import 'dart:math' as math;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -105,6 +99,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
+
     return MultiNavScaffold(
       bottomNavigationBar: CustomNavigationBar(
         destinations: destinations,
@@ -126,7 +121,9 @@ class _MyHomePageState extends State<MyHomePage> {
         },
         type: NavigationBarType.side,
       ),
-      body: const HomeScreen(),
+      body: const HomeScreen(
+        // mediaDetailsId: 1,
+      ),
     );
   }
 }

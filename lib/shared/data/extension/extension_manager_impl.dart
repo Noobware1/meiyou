@@ -16,7 +16,7 @@ import 'package:meiyou/shared/data/extension/utils/extension_loader.dart';
 import 'package:meiyou/shared/domain/models/extension_category.dart';
 import 'package:meiyou/shared/domain/models/extension_list.dart';
 import 'package:meiyou/shared/domain/models/install_step.dart';
-import 'package:meiyou/shared/extension_manager/extension_manger.dart';
+import 'package:meiyou/shared/domain/extension_manager/extension_manger.dart';
 import 'package:meiyou/core/utils/comparator/case_insensitive_comparator.dart';
 import 'package:meiyou/core/utils/stream_utils/comnine_stream.dart';
 import 'package:meiyou/core/utils/stream_utils/state_stream.dart';
@@ -40,9 +40,11 @@ class ExtensionManagerImpl implements ExtensionManager {
     final availableExtensions = getAvailableExtensionsStream(category);
 
     ExtensionList mapper(
-        List<String> enabledLanguages,
-        List<InstalledExtension> installedExts,
-        List<AvailableExtension> availableExts) {
+      List<String> enabledLanguages,
+      List<InstalledExtension> installedExts,
+      List<AvailableExtension> availableExts,
+      bool isInitialized,
+    ) {
       final (updates, installed) = (installedExts
             ..sort((a, b) => CaseInsensitiveComparator.compare(a.name, b.name)))
           .parition((e) => e.hasUpdate);
@@ -67,6 +69,7 @@ class ExtensionManagerImpl implements ExtensionManager {
         installed: installed,
         available: available,
         updates: updates,
+        isInitialized: isInitialized,
       );
     }
 
@@ -74,24 +77,34 @@ class ExtensionManagerImpl implements ExtensionManager {
       enabledLanguages.changes(),
       installedExtensions,
       availableExtensions,
-      mapper,
+      (enabledLanguages, installedExts, availableExts) => mapper(
+        enabledLanguages,
+        installedExts,
+        availableExts,
+        installedExtensions.isInitialized || availableExtensions.isInitialized,
+      ),
       initalDataA: enabledLanguages.get(),
       initalDataB: installedExtensions.state,
       initalDataC: availableExtensions.state,
     );
 
     return StateStream.fromStream(stream,
-        initialData: mapper(enabledLanguages.get(), installedExtensions.state,
-            availableExtensions.state));
+        initialData: mapper(
+          enabledLanguages.get(),
+          installedExtensions.state,
+          availableExtensions.state,
+          installedExtensions.isInitialized ||
+              availableExtensions.isInitialized,
+        ));
   }
 
   @override
-  StateStream<List<AvailableExtension>> getAvailableExtensionsStream(
+  ExtensionStream<AvailableExtension> getAvailableExtensionsStream(
           ExtensionCategory category) =>
       _getAvailableExtensionsStream(category);
 
   @override
-  StateStream<List<InstalledExtension>> getInstalledExtensionsStream(
+  ExtensionStream<InstalledExtension> getInstalledExtensionsStream(
           ExtensionCategory category) =>
       _getInstalledExtensionsStream(category);
 
@@ -218,7 +231,7 @@ class ExtensionManagerImpl implements ExtensionManager {
   Future<void> init() async {
     try {
       await _findAllInstalledExtensions();
-      // await _findAllAvailableExtensions();
+      _findAllAvailableExtensions();
       _isInitialized = true;
     } catch (_, s) {
       _isInitialized = false;
@@ -263,6 +276,7 @@ class ExtensionManagerImpl implements ExtensionManager {
       success: (exts) => stream.addAll(exts),
       failure: (e) => logger.severe(e),
     );
+    stream.isInitialized = true;
   }
 
   void _updatedInstalledExtensionsStatuses(
@@ -455,8 +469,16 @@ class _Listener implements ExtensionInstallerListener {
   }
 }
 
-class _ExtensionsStream<T extends Extension> extends StateStream<List<T>> {
+class _ExtensionsStream<T extends Extension> extends ExtensionStream<T> {
   _ExtensionsStream() : super(initialData: []);
+
+  @override
+  bool get isInitialized => false;
+
+  @override
+  set isInitialized(bool isInitialized) {
+    isInitialized = isInitialized;
+  }
 
   void addAll(Iterable<T> extensions) {
     update(state..addAll(extensions));

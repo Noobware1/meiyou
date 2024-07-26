@@ -4,12 +4,14 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'package:logging/logging.dart';
+import 'package:meiyou/core/data_base/data_base.dart';
 import 'package:meiyou/core/injection/modules/injection_module.dart';
 import 'package:meiyou/core/utils/log/logger.dart';
+import 'package:meiyou/shared/data/data_sources/folder_providers/database_folder_provider.dart';
 import 'package:meiyou/shared/data/extension/extension_manager_impl.dart';
 import 'package:meiyou/shared/data/source_manager/source_manager_impl.dart';
 import 'package:meiyou/shared/domain/source_manager/source_manager.dart';
-import 'package:meiyou/shared/extension_manager/extension_manger.dart';
+import 'package:meiyou/shared/domain/extension_manager/extension_manger.dart';
 import 'package:meiyou_extensions_lib/extensions_lib.dart';
 import 'package:meiyou_extensions_lib/network.dart';
 import 'package:nice_dart/nice_dart.dart';
@@ -41,6 +43,15 @@ class AppModule implements InjectModule {
     _getSotragePermissionForDegugMode();
 
     initLogger();
+
+    await DataBaseFolderProvider().directory().then((directory) async {
+      if (!directory.existsSync()) {
+        await directory.create(recursive: true);
+      }
+      getIt.registerLazySingleton(
+        () => DataBase.open(directory.path),
+      );
+    });
 
     getIt.registerLazySingleton(
       () => NetworkHelper(getIt()).also((it) {

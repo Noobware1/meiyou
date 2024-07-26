@@ -11,10 +11,10 @@ abstract class PagingSource<Value, Params> {
     required this.params,
   });
 
-  Future<Result<Value>> load(Params parmas);
+  Future<Result<Value>> load(Params params);
 
-  Params loadParams(Params parmas) {
-    return parmas;
+  Params loadParams(Value value, Params params) {
+    return params;
   }
 
   Value map(Value a, Value b);
@@ -31,11 +31,11 @@ mixin PagingSourceStateMixin<Value, Params, Widget extends StatefulWidget>
     super.initState();
     viewModel = createViewModel();
     pageState = viewModel.state;
-    viewModel.addListener(() {
-      setState(() {
-        pageState = viewModel.state;
-      });
-    });
+  // viewModel.addListener(() {
+  //     setState(() {
+  //       pageState = viewModel.state;
+  //     });
+  //   });
   }
 
   PagingSourceViewModel<Value, Params> createViewModel();

@@ -1,50 +1,56 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:meiyou/core/utils/extensions/context.dart';
-import 'package:meiyou/core/utils/extensions/target_platform.dart';
-import 'package:meiyou/features/home/domain/models/home_paging_source.dart';
+import 'package:meiyou/core/utils/stream_utils/state_stream.dart';
 import 'package:meiyou/features/home/presentation/widgets/banner_view/banner_view_model.dart';
 import 'package:meiyou/features/home/presentation/widgets/banner_view/banner_view_theme_data.dart';
+import 'package:meiyou/shared/domain/models/media.dart';
 import 'package:meiyou/shared/domain/models/screen_size.dart';
+import 'package:meiyou/shared/presentation/notifers/state_notifer.dart';
 import 'package:meiyou/shared/presentation/widgets/image_holder.dart';
-import 'package:meiyou/shared/presentation/widgets/paging_source/paging_source.dart';
 import 'package:meiyou/shared/presentation/widgets/responsive_widget.dart';
 import 'package:meiyou/shared/presentation/widgets/spacing.dart';
 import 'package:meiyou/shared/presentation/widgets/state_listenable_builder.dart';
-import 'package:meiyou_extensions_lib/models.dart';
 import 'package:nice_dart/nice_dart.dart';
 
 class BannerView extends StatefulWidget {
-  final HomePagingSource pagingSource;
-  final void Function(MediaPreview) onSelected;
-  final void Function(MediaPreview) onAddToLibrary;
-
+  final StateNotifier<List<Media>> stateListenable;
+  final void Function(Media) onPressed;
+  final void Function(Media) onLongPressed;
+  final void Function() onScrollEnd;
   const BannerView({
     super.key,
-    required this.pagingSource,
-    required this.onSelected,
-    required this.onAddToLibrary,
+    required this.stateListenable,
+    required this.onPressed,
+    required this.onLongPressed,
+    required this.onScrollEnd,
   });
 
   @override
   State<BannerView> createState() => _BannerViewState();
 }
 
-typedef PagingSourceMixin = PagingSourceStateMixin<List<MediaPreview>,
-    LoadHomePageParams, BannerView>;
+class _BannerViewState extends State<BannerView> {
+  late final BannerViewModel viewModel;
 
-class _BannerViewState extends State<BannerView> with PagingSourceMixin {
   @override
-  BannerViewModel get viewModel => super.viewModel as BannerViewModel;
+  void initState() {
+    super.initState();
+    viewModel = BannerViewModel(
+      stateListenable: widget.stateListenable,
+      onPressed: widget.onPressed,
+      onLongPressed: widget.onLongPressed,
+      onScrollEnd: widget.onScrollEnd,
+    );
+  }
 
-  BannerViewThemeData? _theme;
-
-  BannerViewThemeData get theme => _theme!;
+  @override
+  void dispose() {
+    viewModel.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    _theme = BannerViewThemeData.from(context);
+    final theme = BannerViewThemeData.from(context);
 
     return ResponsiveBuilder(builder: (context, constraints, screenSize) {
       final height = theme.getBannerHeightForSize(screenSize);
@@ -53,105 +59,111 @@ class _BannerViewState extends State<BannerView> with PagingSourceMixin {
         duration: Durations.short3,
         height: height,
         width: width,
-        child: Stack(
-          children: [
-            MouseRegion(
-              cursor: SystemMouseCursors.click,
-              child: GestureDetector(
-                onTapDown: (deatils) =>
-                    viewModel.onBannerTapDown(deatils, width),
-                child: PageView(
-                  controller: viewModel.pageController,
-                  children: pageState.map((item) {
-                    return DecoratedBox(
-                      position: DecorationPosition.foreground,
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                            strokeAlign: -0.050,
-                            color: theme.gradientBaseColor),
-                        gradient: screenSize.isDesktop
-                            ? sideGradient()
-                            : bottomGradient(),
-                      ),
-                      child: bannerImage(item, height: height, width: width),
-                    );
-                  }).toList(),
-                ),
-              ),
-            ),
-            Padding(
-              padding: theme.contentPadding,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                crossAxisAlignment: CrossAxisAlignment.start,
+        child: StateListenableBuilder(
+            stateListenable: viewModel.listenable,
+            builder: (context, state, _) {
+              return Stack(
                 children: [
-                  Flexible(
-                    child: IgnorePointer(
-                      child: StateListenableBuilder(
-                          stateListenable: viewModel.pageNotifer,
-                          builder: (context, page, _) {
-                            final item = pageState[page];
-                            return ConstrainedBox(
-                              constraints: theme.contentConstraints,
-                              child: BannerContent(
-                                preview: item,
-                                theme: theme,
-                                screenSize: screenSize,
+                  MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: GestureDetector(
+                      onTapDown: (deatils) =>
+                          viewModel.onBannerTapDown(deatils, width),
+                      child: NotificationListener<ScrollNotification>(
+                        onNotification: viewModel.onScroll,
+                        child: PageView(
+                          controller: viewModel.pageController,
+                          children: state.map((media) {
+                            return DecoratedBox(
+                              position: DecorationPosition.foreground,
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                    strokeAlign: -0.050,
+                                    color: theme.gradientBaseColor),
+                                gradient: screenSize.isDesktop
+                                    ? sideGradient(theme)
+                                    : bottomGradient(theme),
                               ),
+                              child: bannerImage(media,
+                                  height: height, width: width),
                             );
-                          }),
+                          }).toList(),
+                        ),
+                      ),
                     ),
                   ),
-                  Align(
-                    alignment: Alignment.bottomLeft,
-                    child: BannerActionButtons(
-                      theme: theme,
-                      screenSize: screenSize,
-                      onPressed: viewModel.onSelected,
-                      onAddToLibrary: viewModel.onAddToLibrary,
+                  Padding(
+                    padding: theme.contentPadding,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Flexible(
+                          child: IgnorePointer(
+                            child: StateListenableBuilder(
+                                stateListenable: viewModel.pageNotifier,
+                                builder: (context, page, _) {
+                                  final item = state[page];
+                                  return ConstrainedBox(
+                                    constraints: theme.contentConstraints,
+                                    child: BannerContent(
+                                      media: item,
+                                      theme: theme,
+                                      screenSize: screenSize,
+                                    ),
+                                  );
+                                }),
+                          ),
+                        ),
+                        Align(
+                          alignment: Alignment.bottomLeft,
+                          child: BannerActionButtons(
+                            theme: theme,
+                            screenSize: screenSize,
+                            onPressed: viewModel.onPressed,
+                            onAddToLibrary: viewModel.onLongPressed,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
+                  if (screenSize.isDesktop)
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: Padding(
+                        padding: theme.contentPadding,
+                        child: pageNavigationButton(
+                          context,
+                          theme,
+                        ),
+                      ),
+                    ),
                 ],
-              ),
-            ),
-            if (screenSize.isDesktop)
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: Padding(
-                  padding: theme.contentPadding,
-                  child: pageNavigationButton(
-                    context,
-                  ),
-                ),
-              ),
-          ],
-        ),
+              );
+            }),
       );
     });
   }
 
-  LinearGradient sideGradient() => theme.sideGradient;
+  LinearGradient sideGradient(BannerViewThemeData theme) => theme.sideGradient;
 
-  LinearGradient bottomGradient() => theme.bottomGradient;
+  LinearGradient bottomGradient(BannerViewThemeData theme) =>
+      theme.bottomGradient;
 
-  Widget pageNavigationButton(BuildContext context) {
+  Widget pageNavigationButton(BuildContext context, BannerViewThemeData theme) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         IconButton(
           style: theme.navigationButtonStyle,
-          onPressed: () {
-            viewModel.movePrevious();
-          },
+          onPressed: viewModel.movePrevious,
           icon: const Icon(Icons.arrow_back_ios),
         ),
         const HorizontalSpace(8),
         IconButton(
           style: theme.navigationButtonStyle,
-          onPressed: () {
-            viewModel.moveNext();
-          },
+          onPressed: viewModel.moveNext,
           icon: const Icon(Icons.arrow_forward_ios),
         ),
       ],
@@ -159,24 +171,15 @@ class _BannerViewState extends State<BannerView> with PagingSourceMixin {
   }
 
   Widget bannerImage(
-    MediaPreview preview, {
+    Media media, {
     required double height,
     required double width,
   }) {
     return ImageHolder.network(
       height: height,
       width: width,
-      url: preview.poster,
+      url: media.poster,
       fit: BoxFit.cover,
-    );
-  }
-
-  @override
-  BannerViewModel createViewModel() {
-    return BannerViewModel(
-      homePagingSource: widget.pagingSource,
-      onSelected: widget.onSelected,
-      onAddToLibrary: widget.onAddToLibrary,
     );
   }
 }
@@ -227,12 +230,12 @@ class BannerActionButtons extends StatelessWidget {
 }
 
 class BannerContent extends StatelessWidget {
-  final MediaPreview preview;
+  final Media media;
   final BannerViewThemeData theme;
   final ScreenSize screenSize;
   const BannerContent({
     super.key,
-    required this.preview,
+    required this.media,
     required this.theme,
     required this.screenSize,
   });
@@ -261,38 +264,37 @@ class BannerContent extends StatelessWidget {
         Padding(
           padding: deaultPadding,
           child: _title(
-            title: preview.title,
+            title: media.title,
             style: titleTextStyle,
           ),
         ),
-        if (preview.rating != null)
+        if (media.score != null)
           Flexible(
             child: Padding(
               padding: deaultPadding,
-              child: _rating(
-                preview.rating!,
+              child: _score(
+                media.score!,
                 ratingTextStyle,
                 ratingIconColor,
                 ratingIconSize,
               ),
             ),
           ),
-        if (preview.generes.isNotEmptyOrNull)
+        if (media.genres.isNotEmptyOrNull)
           Padding(
             padding: deaultPadding,
             child: _genres(
-              genres: preview.generes!,
+              genres: media.genres!,
               genreStyle: genreTextStyle,
               genreSeparatorTextStyle: genreSeparatorTextStyle,
             ),
           ),
-        if (preview.description.isNotEmptyOrNull)
+        if (media.description.isNotEmptyOrNull)
           Flexible(
             child: Padding(
               padding: deaultPadding,
               child: _description(
-                description:
-                    preview.description!.replaceAll(RegExp(r'\s+'), ' '),
+                description: media.description!.replaceAll(RegExp(r'\s+'), ' '),
                 style: descriptionTextStyle,
               ),
             ),
@@ -301,7 +303,7 @@ class BannerContent extends StatelessWidget {
     );
   }
 
-  Widget _rating(
+  Widget _score(
     double rating,
     TextStyle textStyle,
     Color iconColor,
@@ -315,7 +317,7 @@ class BannerContent extends StatelessWidget {
       ),
       const HorizontalSpace(4),
       Text(
-        preview.rating!.toString(),
+        media.score!.toString(),
         style: textStyle,
       ),
     ]);

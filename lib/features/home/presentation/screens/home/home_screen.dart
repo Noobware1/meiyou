@@ -2,7 +2,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:meiyou/core/injection/injection.dart';
 import 'package:meiyou/core/utils/constants/material_theme.dart';
-import 'package:meiyou/features/home/domain/models/home_paging_source.dart';
 import 'package:meiyou/features/home/presentation/widgets/banner_view/banner_view.dart';
 import 'package:meiyou/features/home/presentation/widgets/home_row/home_row.dart';
 import 'package:meiyou/shared/presentation/widgets/poster_view/poster_view.dart';
@@ -34,6 +33,10 @@ class _HomeScreenState extends State<HomeScreen> {
       sourcePreferences: getIt(),
       sourceManager: getIt(),
       extensionManager: getIt(),
+      expandHomepageUsecase: getIt(),
+      getMediaByUrlAndSourceIdUseCase: getIt(),
+      getMediaDetailsUseCase: getIt(),
+      networkMediaToLocalUseCase: getIt(),
     );
   }
 
@@ -51,7 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   noData: () => whenLoading(),
                   loading: () => whenLoading(),
                   error: (error, s) => whenError(error),
-                  success: (pagingSource) => whenData(pagingSource),
+                  success: (_) => whenData(),
                 );
               },
             ),
@@ -93,25 +96,33 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget whenData(List<HomePagingSource> pagingSource) {
+  Widget whenData() {
     return MediaQuery.removePadding(
       context: context,
       removeTop: true,
       child: ListView(
         children: [
           BannerView(
-            onAddToLibrary: viewModel.onAddToLibrary,
-            onSelected: viewModel.onSelected,
-            pagingSource: pagingSource.first,
+            stateListenable: viewModel.bannerStateListenable,
+            onScrollEnd: viewModel.onBannerScrollEnd,
+            onPressed: viewModel.onSelected,
+            onLongPressed: (_) {},
           ),
-          for (final source in pagingSource.skip(1))
+          for (final rowData in viewModel.expanded)
             HomeRow(
-              homePagingSource: source,
-              onAddToLibrary: viewModel.onAddToLibrary,
-              onSelected: viewModel.onSelected,
+              listenable: rowData,
+              onPressed: viewModel.onSelected,
+              onLongPressed: (_) {},
+              onScrollEnd: (key) => viewModel.onScrollEnd(key),
             ),
         ],
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    viewModel.dispose();
+    super.dispose();
   }
 }

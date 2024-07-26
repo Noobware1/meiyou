@@ -2,7 +2,7 @@ import 'package:meiyou/shared/data/data_sources/preferences/source_preferences.d
 import 'package:meiyou/shared/data/extension/extension_manager_impl.dart';
 import 'package:meiyou/shared/domain/models/extension_category.dart';
 import 'package:meiyou/shared/domain/source_manager/source_manager.dart';
-import 'package:meiyou/shared/extension_manager/extension_manger.dart';
+import 'package:meiyou/shared/domain/extension_manager/extension_manger.dart';
 import 'package:meiyou/core/utils/stream_utils/state_stream.dart';
 import 'package:meiyou_extensions_lib/models.dart';
 import 'package:collection/collection.dart';

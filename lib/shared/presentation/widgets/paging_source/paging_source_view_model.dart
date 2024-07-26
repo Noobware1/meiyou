@@ -13,23 +13,30 @@ abstract class PagingSourceViewModel<Value, Params>
   void onScrollEnd(ScrollController scrollController) {
     if (scrollController.offset == scrollController.position.maxScrollExtent) {
       if (loadMore(state)) {
-        load();
+        _load();
       }
     }
   }
 
   bool loadMore(Value value);
 
-  void load() {
-    pagingSource.load(pagingSource.params).then((result) {
+  late Params _newParams = pagingSource.params;
+
+  void load(Params params) {
+    pagingSource.load(_newParams).then((result) {
       result.when(
         success: (value) {
-          setState(state);
+          setState(value);
         },
         failure: (error) {
           logger.warning('LoadError', error, StackTrace.current);
         },
       );
     });
+  }
+
+  void _load() {
+    _newParams = pagingSource.loadParams(state, _newParams);
+    load(_newParams);
   }
 }

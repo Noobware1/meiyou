@@ -1,13 +1,15 @@
 import 'package:collection/collection.dart';
+import 'package:meiyou/core/utils/exceptions/home_page_not_supported.dart';
 import 'package:meiyou/core/utils/extensions/result.dart';
 import 'package:meiyou/core/utils/log/logger.dart';
 import 'package:meiyou/shared/data/data_sources/preferences/source_preferences.dart';
 import 'package:meiyou/shared/domain/models/extension_category.dart';
+import 'package:meiyou/shared/domain/models/home_page_data.dart';
 import 'package:meiyou/shared/domain/models/source.dart' as m;
-import 'package:meiyou/shared/domain/models/source_repository_params.dart';
+import 'package:meiyou/shared/domain/models/repositories_params/source_repository_params.dart';
 import 'package:meiyou/shared/domain/repositories/source_repository.dart';
 import 'package:meiyou/shared/domain/source_manager/source_manager.dart';
-import 'package:meiyou/shared/extension_manager/extension_manger.dart';
+import 'package:meiyou/shared/domain/extension_manager/extension_manger.dart';
 import 'package:meiyou/core/utils/comparator/case_insensitive_comparator.dart';
 import 'package:meiyou/core/utils/stream_utils/comnine_stream.dart';
 import 'package:meiyou/core/utils/stream_utils/state_stream.dart';
@@ -48,7 +50,7 @@ class SourceRepositoryImpl implements SourceRepository {
 
   @override
   StateStream<List<m.InstalledSource>> getEnabledSourcesUseCase(
-      getEnabledSourcesUseCaseParams params) {
+      GetEnabledSourcesUseCaseParams params) {
     final category = params.category;
     final prefPinnedSources = _preferences.pinnedSourcesForCategory(category);
     final prefDisabledSources =
@@ -120,14 +122,16 @@ class SourceRepositoryImpl implements SourceRepository {
   }
 
   @override
-  Future<Result<FullHomePageData>> getFullHomePage(
+  Future<Result<List<HomePageData>>> getFullHomePage(
       GetFullHomePageParams params) {
     final sourceId = params.sourceId;
     final category = params.category;
     return runAsyncCatching(() async {
       final source = _getSourceOrThrow(sourceId, category);
-      final requests = source.homePageRequests();
-      final FullHomePageData results = {};
+      _checkSourceType(source);
+      source as HttpSource;
+      final requests = source.getHomePageRequestList();
+      final List<HomePageData> results = [];
 
       for (final request in requests) {
         try {
@@ -139,12 +143,16 @@ class SourceRepositoryImpl implements SourceRepository {
               );
           if (result.items.isEmpty ||
               result.items.every((e) => e.list.isEmpty)) {
-            logger.warning('Empty homepage for ${request.data}');
+            logger.warning('Empty homepage for ${request.url}');
             continue;
           }
-          results[request] = result;
+          results.add(HomePageData(
+            request: request,
+            homePage: result,
+            page: 1,
+          ));
         } catch (e, s) {
-          logger.warning('Failed to load ${request.data}', e, s);
+          logger.warning('Failed to load ${request.url}', e, s);
         }
       }
 
@@ -163,6 +171,8 @@ class SourceRepositoryImpl implements SourceRepository {
 
     return runAsyncCatching(() {
       final source = _getSourceOrThrow(sourceId, category);
+      _checkSourceType(source);
+      source as HttpSource;
       return source.getHomePage(page, request);
     });
   }
@@ -174,6 +184,12 @@ class SourceRepositoryImpl implements SourceRepository {
     }
 
     return source;
+  }
+
+  void _checkSourceType(Source source) {
+    if (source is! HttpSource) {
+      throw HomePageNotSupported(source);
+    }
   }
 
   @override
@@ -191,39 +207,14 @@ class SourceRepositoryImpl implements SourceRepository {
   }
 
   @override
-  Future<Result<MediaDetails>> getMediaDetails(GetMediaDetailsParams params) {
+  Future<Result<IMedia>> getMediaDetails(GetMediaDetailsParams params) {
     final sourceId = params.sourceId;
     final category = params.category;
-    final url = params.url;
+    final media = params.media;
 
     return runAsyncCatching(() {
-      final source = _getSourceOrThrow(sourceId, category) as CatalogueSource;
-      return source.getMediaDetails(url);
-    });
-  }
-
-  @override
-  Future<Result<List<MediaLink>>> getMediaLinks(GetMediaLinksParams params) {
-    final sourceId = params.sourceId;
-    final category = params.category;
-    final url = params.url;
-
-    return runAsyncCatching(() {
-      final source = _getSourceOrThrow(sourceId, category) as CatalogueSource;
-      return source.getMediaLinks(url);
-    });
-  }
-
-  @override
-  Future<Result<Media>> getMedia(GetMediaParams params) {
-    final sourceId = params.sourceId;
-    final category = params.category;
-    final link = params.link;
-
-    return runAsyncCatching(() {
-      final source = _getSourceOrThrow(sourceId, category) as CatalogueSource;
-      return source.getMedia(link).then((value) =>
-          value.let((it) => it ?? (throw Exception('No Media found'))));
+      final source = _getSourceOrThrow(sourceId, category);
+      return source.getMediaDetails(media);
     });
   }
 }

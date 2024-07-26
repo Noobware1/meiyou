@@ -1,16 +1,13 @@
 import 'dart:async';
 
-import 'package:async/async.dart' hide Result;
-
+import 'package:meiyou/core/utils/cancelable_operation/cancelable_operation_mixin.dart';
 import 'package:meiyou/shared/presentation/notifers/state_notifer.dart';
 import 'package:meiyou/shared/domain/models/async_value.dart';
-
 import 'package:nice_dart/nice_dart.dart';
 
-class AsyncStateNotifier<State> extends StateNotifier<AsyncValue<State>> {
+class AsyncStateNotifier<State> extends StateNotifier<AsyncValue<State>>
+    with CancelableOperationMixin<State> {
   AsyncStateNotifier(super.state);
-
-  CancelableOperation<State>? _operation;
 
   AsyncStateNotifier.loading() : super(const AsyncValue.loading());
 
@@ -21,24 +18,18 @@ class AsyncStateNotifier<State> extends StateNotifier<AsyncValue<State>> {
 
   AsyncStateNotifier.noData() : super(const AsyncValue.noData());
 
-  void setFuture(Future<State> Function() future) async {
-    setLoading();
-    await _operation?.cancel();
-    _operation = CancelableOperation.fromFuture(future());
-    try {
-      final data = await _operation!.value;
-      setData(data);
-    } catch (err, stack) {
-      setError(err, stack);
-    }
-  }
-
   void setResultFuture(Future<Result<State>> Function() future) async {
     setFuture(() => future().then((value) => value.getOrThrow()));
   }
 
   void setError(Object error, [StackTrace? stackTrace]) {
     setState(AsyncValue.error(error, stackTrace ?? StackTrace.current));
+  }
+
+  @override
+  void setState(AsyncValue<State> state) {
+    cancel();
+    super.setState(state);
   }
 
   void setLoading() {
@@ -50,11 +41,23 @@ class AsyncStateNotifier<State> extends StateNotifier<AsyncValue<State>> {
   }
 
   @override
-  Future<void> dispose() async {
-    await _operation?.cancel().then((value) {
-      super.dispose();
-    }).catchError((err) {
-      super.dispose();
-    });
+  void dispose() {
+    cancel();
+    super.dispose();
+  }
+
+  @override
+  void onData(State data) {
+    setData(data);
+  }
+
+  @override
+  void onError(Object error, [StackTrace? stackTrace]) {
+    setError(error, stackTrace);
+  }
+
+  @override
+  void onLoading() {
+    setLoading();
   }
 }

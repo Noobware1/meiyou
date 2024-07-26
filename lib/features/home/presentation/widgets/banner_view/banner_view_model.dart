@@ -1,53 +1,66 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:meiyou/features/home/domain/models/home_paging_source.dart';
+import 'package:meiyou/core/utils/stream_utils/state_stream.dart';
+import 'package:meiyou/shared/domain/models/media.dart';
 import 'package:meiyou/shared/presentation/notifers/state_notifer.dart';
-import 'package:meiyou/shared/presentation/widgets/paging_source/paging_source.dart';
-import 'package:meiyou/shared/presentation/widgets/paging_source/paging_source_view_model.dart';
-import 'package:meiyou_extensions_lib/models.dart';
-import 'package:nice_dart/src/result.dart';
+import 'package:nice_dart/nice_dart.dart';
 
-class BannerViewModel
-    extends PagingSourceViewModel<List<MediaPreview>, LoadHomePageParams> {
-  @override
-  final HomeBannerPagingSource pagingSource;
-  final PageController pageController;
-  final void Function(MediaPreview) _onSelected;
-  final void Function(MediaPreview) _onAddToLibrary;
-
+class BannerViewModel {
   BannerViewModel({
-    required HomePagingSource homePagingSource,
-    required void Function(MediaPreview) onSelected,
-    required void Function(MediaPreview) onAddToLibrary,
-  })  : pagingSource = HomeBannerPagingSource(pagingSource: homePagingSource),
-        pageController = PageController(),
-        _onSelected = onSelected,
-        _onAddToLibrary = onAddToLibrary,
-        super([]) {
-    setState(pagingSource.value);
-    pageController.addListener(() => onScrollEnd(pageController));
-    pageController.addListener(() {
-      final page = pageController.page?.round() ?? 0;
-      if (pageNotifer.state != page) {
-        pageNotifer.setState(page);
-      }
+    required StateNotifier<List<Media>> stateListenable,
+    required void Function(Media) onPressed,
+    required void Function(Media) onLongPressed,
+    required void Function() onScrollEnd,
+  })  : _stateListenable = stateListenable,
+        _onPressed = onPressed,
+        _onLongPressed = onLongPressed,
+        _pageNotifier = StateNotifier(0),
+        _pageController = PageController(),
+        _onScrollEnd = onScrollEnd {
+    _pageController.addListener(() {
+      _pageNotifier.setState(_pageController.page?.round() ?? 0);
+      // onScrollEnd();
     });
   }
 
-  @override
-  bool loadMore(List<MediaPreview> value) => pagingSource.hasNextPage;
+  final StateNotifier<List<Media>> _stateListenable;
+  final void Function(Media) _onPressed;
+  final void Function(Media) _onLongPressed;
+  final PageController _pageController;
+  final StateNotifier<int> _pageNotifier;
+  final void Function() _onScrollEnd;
 
-  late final StateNotifier<int> pageNotifer = StateNotifier<int>(0);
+  StateNotifier<List<Media>> get listenable => _stateListenable;
+
+  PageController get pageController => _pageController;
+
+  StateNotifier<int> get pageNotifier => _pageNotifier;
+
+  Media get _currentMedia => _stateListenable.state[_pageNotifier.state];
+
+  void onPressed() {
+    _onPressed(_currentMedia);
+  }
+
+  void onLongPressed() {
+    _onLongPressed(_currentMedia);
+  }
+
+  bool onScroll(ScrollNotification notification) {
+    if (notification.metrics.pixels == notification.metrics.maxScrollExtent) {
+      _onScrollEnd();
+    }
+    return false;
+  }
 
   Future<void> moveNext() {
-    return pageController.nextPage(
+    return _pageController.nextPage(
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
     );
   }
 
   Future<void> movePrevious() {
-    return pageController.previousPage(
+    return _pageController.previousPage(
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
     );
@@ -61,56 +74,8 @@ class BannerViewModel
     }
   }
 
-  void onSelected() async {
-    final selected = state[pageNotifer.state];
-    _onSelected(selected);
-  }
-
-  Future<void> onAddToLibrary() async {
-    final selected = state[pageNotifer.state];
-    _onAddToLibrary(selected);
-  }
-}
-
-class HomeBannerPagingSource
-    extends PagingSource<List<MediaPreview>, LoadHomePageParams> {
-  final HomePagingSource pagingSource;
-  bool hasNextPage;
-  HomeBannerPagingSource({
-    required this.pagingSource,
-  })  : hasNextPage = pagingSource.value.hasNextPage,
-        super(
-          value: pagingSource.value.toPreviewList(),
-          params: pagingSource.params,
-        );
-
-  @override
-  Future<Result<List<MediaPreview>>> load(LoadHomePageParams parmas) {
-    return pagingSource.load(parmas).then((result) {
-      hasNextPage = result.getOrNull()?.hasNextPage ?? false;
-      return result.mapCatching(
-        (value) => value.toPreviewList(),
-      );
-    });
-  }
-
-  @override
-  LoadHomePageParams loadParams(LoadHomePageParams parmas) {
-    return LoadHomePageParams(
-      page: parmas.page + 1,
-      request: parmas.request,
-      hasNextPage: parmas.hasNextPage,
-    );
-  }
-
-  @override
-  List<MediaPreview> map(List<MediaPreview> a, List<MediaPreview> b) {
-    return a + b;
-  }
-}
-
-extension on HomePage {
-  List<MediaPreview> toPreviewList() {
-    return items.map((e) => e.list).flattened.toList();
+  void dispose() {
+    _pageController.dispose();
+    _pageNotifier.dispose();
   }
 }

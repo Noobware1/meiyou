@@ -1,52 +1,62 @@
 import 'package:flutter/material.dart';
-import 'package:meiyou/features/home/domain/models/home_paging_source.dart';
+import 'package:meiyou/features/home/domain/models/expanded_home_page_list.dart';
 import 'package:meiyou/features/home/presentation/widgets/home_row/home_row_view_model.dart';
-import 'package:meiyou/shared/presentation/widgets/paging_source/paging_source.dart';
-import 'package:meiyou/shared/presentation/widgets/paging_source/paging_source_view_model.dart';
+import 'package:meiyou/shared/domain/models/media.dart';
+import 'package:meiyou/shared/presentation/notifers/state_notifer.dart';
 import 'package:meiyou/shared/presentation/widgets/poster_view/poster_view.dart';
-import 'package:meiyou_extensions_lib/models.dart';
+import 'package:meiyou/shared/presentation/widgets/state_listenable_builder.dart';
 
 class HomeRow extends StatefulWidget {
-  final HomePagingSource homePagingSource;
-  final void Function(MediaPreview) onSelected;
-  final void Function(MediaPreview) onAddToLibrary;
+  final StateNotifier<ExpandedHomePageList> listenable;
+  final void Function(Media) onPressed;
+  final void Function(Media) onLongPressed;
+  final void Function(String) onScrollEnd;
+
   const HomeRow({
     super.key,
-    required this.homePagingSource,
-    required this.onSelected,
-    required this.onAddToLibrary,
+    required this.listenable,
+    required this.onPressed,
+    required this.onLongPressed,
+    required this.onScrollEnd,
   });
 
   @override
   State<HomeRow> createState() => _HomeRowState();
 }
 
-class _HomeRowState extends State<HomeRow>
-    with PagingSourceStateMixin<HomePage, LoadHomePageParams, HomeRow> {
-  @override
-  HomeRowViewModel get viewModel => super.viewModel as HomeRowViewModel;
+class _HomeRowState extends State<HomeRow> {
+  late final HomeRowViewModel viewModel;
 
   @override
-  Widget build(BuildContext context) {
-    final items = pageState.items;
-    return Column(
-        children: List.generate(items.length, (index) {
-      final item = items[index];
-      final controller = viewModel.getScrollController(index);
-      return PosterView(
-        label: item.title,
-        onSelected: viewModel.onSelected,
-        onLongPressed: viewModel.onAddToLibrary,
-        scrollController: controller,
-        previews: item.list,
-      );
-    }));
+  void initState() {
+    super.initState();
+    viewModel = HomeRowViewModel(
+      listenable: widget.listenable,
+      onPressed: widget.onPressed,
+      onLongPressed: widget.onLongPressed,
+      onScrollEnd: widget.onScrollEnd,
+    );
   }
 
   @override
-  HomeRowViewModel createViewModel() => HomeRowViewModel(
-        homePagingSource: widget.homePagingSource,
-        onSelected: widget.onSelected,
-        onAddToLibrary: widget.onAddToLibrary,
-      );
+  void dispose() {
+    viewModel.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return StateListenableBuilder(
+      stateListenable: viewModel.listenable,
+      builder: (context, state, _) {
+        return PosterView(
+          label: state.title,
+          onSelected: viewModel.onPressed,
+          onLongPressed: viewModel.onLongPressed,
+          scrollController: viewModel.scrollController,
+          mediaList: state.mediaList,
+        );
+      },
+    );
+  }
 }

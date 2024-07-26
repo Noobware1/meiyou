@@ -278,8 +278,8 @@ packages:
     dependency: transitive
     description:
       path: "."
-      ref: fixes
-      resolved-ref: "8f44bca9e6ae0a8f463921f7dbdb8f2d835746a9"
+      ref: test
+      resolved-ref: f87f6457de29438876dd522cbabf7bb455000939
       url: "https://github.com/Noobware1/dart_eval.git"
     source: git
     version: "0.7.9"
@@ -404,10 +404,18 @@ packages:
     dependency: transitive
     description:
       name: flutter_cache_manager
-      sha256: "395d6b7831f21f3b989ebedbb785545932adb9afe2622c1ffacf7f4b53a7e544"
+      sha256: ceff65d74d907b1b772e22cf04daad60fb472461638977d9fae8b00a63e01e3d
       url: "https://pub.dev"
     source: hosted
-    version: "3.3.2"
+    version: "3.3.3"
+  flutter_js:
+    dependency: "direct main"
+    description:
+      name: flutter_js
+      sha256: d19cde4bad2f7c301ff5f69d7b3452ff91f2ca89d153569dd03e544579d8610d
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.8.1"
   flutter_lints:
     dependency: "direct dev"
     description:
@@ -438,10 +446,10 @@ packages:
     dependency: transitive
     description:
       name: freezed_annotation
-      sha256: f9f6597ac43cc262fa7d7f2e65259a6060c23a560525d1f2631be374540f2a9b
+      sha256: c2e2d632dd9b8a2b7751117abcfc2b4888ecfe181bd9fca7170d9ef02e595fe2
       url: "https://pub.dev"
     source: hosted
-    version: "2.4.3"
+    version: "2.4.4"
   frontend_server_client:
     dependency: transitive
     description:
@@ -478,10 +486,10 @@ packages:
     dependency: transitive
     description:
       name: graphs
-      sha256: aedc5a15e78fc65a6e23bcd927f24c64dd995062bcd1ca6eda65a3cff92a4d19
+      sha256: "741bbf84165310a68ff28fe9e727332eef1407342fca52759cb21ad8177bb8d0"
       url: "https://pub.dev"
     source: hosted
-    version: "2.3.1"
+    version: "2.3.2"
   html:
     dependency: transitive
     description:
@@ -494,10 +502,10 @@ packages:
     dependency: transitive
     description:
       name: http
-      sha256: "761a297c042deedc1ffbb156d6e2af13886bb305c2a343a4d972504cd67dd938"
+      sha256: b9c29a161230ee03d3ccf545097fccd9b87a5264228c5d348202e0f0c28f9010
       url: "https://pub.dev"
     source: hosted
-    version: "1.2.1"
+    version: "1.2.2"
   http_multi_server:
     dependency: transitive
     description:
@@ -727,7 +735,7 @@ packages:
     description:
       path: "."
       ref: master
-      resolved-ref: "3096bff788daa55bdd87985e42b1696e969e0392"
+      resolved-ref: ffc25e981756479d5e2bbcd4ed26172c939d0c79
       url: "https://github.com/Noobware1/meiyou_extensions_lib.git"
     source: git
     version: "1.0.0"
@@ -881,10 +889,10 @@ packages:
     dependency: transitive
     description:
       name: permission_handler_html
-      sha256: "54bf176b90f6eddd4ece307e2c06cf977fb3973719c35a93b85cc7093eb6070d"
+      sha256: "6cac773d389e045a8d4f85418d07ad58ef9e42a56e063629ce14c4c26344de24"
       url: "https://pub.dev"
     source: hosted
-    version: "0.1.1"
+    version: "0.1.2"
   permission_handler_platform_interface:
     dependency: transitive
     description:
@@ -1138,6 +1146,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.0"
+  sync_http:
+    dependency: transitive
+    description:
+      name: sync_http
+      sha256: "7f0cd72eca000d2e026bcd6f990b81d0ca06022ef4e32fb257b30d3d1014a961"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.1"
   synchronized:
     dependency: "direct main"
     description:
@@ -1206,10 +1222,10 @@ packages:
     dependency: transitive
     description:
       name: uuid
-      sha256: "814e9e88f21a176ae1359149021870e87f7cddaf633ab678a5d2b0bff7fd1ba8"
+      sha256: "83d37c7ad7aaf9aa8e275490669535c8080377cfa7a7004c24dfac53afffaa90"
       url: "https://pub.dev"
     source: hosted
-    version: "4.4.0"
+    version: "4.4.2"
   vector_math:
     dependency: transitive
     description:
@@ -1270,18 +1286,18 @@ packages:
     dependency: transitive
     description:
       name: web_socket
-      sha256: "24301d8c293ce6fe327ffe6f59d8fd8834735f0ec36e4fd383ec7ff8a64aa078"
+      sha256: "3c12d96c0c9a4eec095246debcea7b86c0324f22df69893d538fcc6f1b8cce83"
       url: "https://pub.dev"
     source: hosted
-    version: "0.1.5"
+    version: "0.1.6"
   web_socket_channel:
     dependency: transitive
     description:
       name: web_socket_channel
-      sha256: a2d56211ee4d35d9b344d9d4ce60f362e4f5d1aafb988302906bd732bc731276
+      sha256: "9f187088ed104edd8662ca07af4b124465893caf063ba29758f97af57e61da8f"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.0"
+    version: "3.0.1"
   win32:
     dependency: transitive
     description:

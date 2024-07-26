@@ -26,7 +26,7 @@ class PreferenceModule implements InjectModule {
     );
 
     getIt.registerLazySingleton(
-      () => NetworkPreferences(getIt(), kDebugMode),
+      () => NetworkPreferences(getIt(), false),
     );
 
     getIt.registerLazySingleton(() => StoragePreferences(getIt()));
