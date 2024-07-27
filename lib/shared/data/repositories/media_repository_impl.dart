@@ -38,11 +38,22 @@ class MediaRepositoryImpl implements MediaRepository {
   }
 
   @override
-  Media? getMediaById(GetMediaByIdParams params) {
+  Media getMediaById(GetMediaByIdParams params) {
     final category = params.category;
     final id = params.id;
 
-    return _dataBase.mediaCollection(category).getSync(id);
+    return _dataBase.mediaCollection(category).getSync(id)!;
+  }
+
+  @override
+  Stream<Media> getMediaByIdAsStream(GetMediaByIdAsStreamParams params) {
+    final category = params.category;
+    final id = params.id;
+
+    return _dataBase
+        .mediaCollection(category)
+        .watchObject(id)
+        .map((media) => media!);
   }
 
   @override
@@ -60,6 +71,10 @@ class MediaRepositoryImpl implements MediaRepository {
   @override
   Future<int> insertMedia(InsertMediaParams params) {
     return _dataBase.insertMedia(params.media);
+  }
+
+  Future<int> updateMedia(UpdateMediaParams params) {
+    return _dataBase.updateMedia(params.media);
   }
 }
 

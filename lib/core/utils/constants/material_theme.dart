@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:meiyou/core/utils/extensions/context.dart';
 
 class MaterialTheme {
   static const tabBarHeight = 46.0;
@@ -11,4 +12,7 @@ class MaterialTheme {
       borderRadius: BorderRadius.all(Radius.circular(16)));
 
   static const spacing = 10.0;
+
+  static Color disabledButtonColor(BuildContext context) =>
+      context.theme.disabledColor;
 }

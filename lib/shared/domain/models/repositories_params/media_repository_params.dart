@@ -19,6 +19,16 @@ class GetMediaByIdParams {
   });
 }
 
+class GetMediaByIdAsStreamParams {
+  final ExtensionCategory category;
+  final int id;
+
+  GetMediaByIdAsStreamParams({
+    required this.category,
+    required this.id,
+  });
+}
+
 class GetMediaByUrlAndSourceIdParams {
   final ExtensionCategory category;
   final int sourceId;
@@ -35,6 +45,14 @@ class InsertMediaParams {
   final Media media;
 
   InsertMediaParams({
+    required this.media,
+  });
+}
+
+class UpdateMediaParams {
+  final Media media;
+
+  UpdateMediaParams({
     required this.media,
   });
 }

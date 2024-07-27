@@ -81,6 +81,8 @@ abstract class Media extends IMedia {
     );
   }
 
+  String? get bannerOrPoster => banner ?? poster;
+
   @ignore
   ExtensionCategory get category => when(
         video: (_) => ExtensionCategory.video,

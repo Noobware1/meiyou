@@ -11,6 +11,7 @@ class _ImageHolderMemory extends ImageHolder {
     required super.width,
     required super.image,
     super.fit,
+    super.alignment,
   });
 
   @override
@@ -22,6 +23,7 @@ class _ImageHolderMemory extends ImageHolder {
       height: height,
       width: width,
       fit: fit,
+      alignment: alignment,
       errorBuilder: (context, error, stackTrace) => _fallbackAssetImage(),
     );
   }
@@ -34,6 +36,7 @@ class _ImageHolderNetwork extends ImageHolder {
     required super.width,
     required super.image,
     super.fit,
+    super.alignment,
   });
 
   @override
@@ -45,6 +48,7 @@ class _ImageHolderNetwork extends ImageHolder {
       height: height,
       width: width,
       fit: fit,
+      alignment: alignment,
       errorWidget: (context, url, error) => _fallbackAssetImage(),
     );
   }
@@ -57,6 +61,7 @@ class _ImageHolderFile extends ImageHolder {
     required super.width,
     required super.image,
     super.fit,
+    super.alignment,
   });
 
   @override
@@ -68,6 +73,7 @@ class _ImageHolderFile extends ImageHolder {
       height: height,
       width: width,
       fit: fit,
+      alignment: alignment,
       errorBuilder: (context, error, stackTrace) => _fallbackAssetImage(),
     );
   }
@@ -76,6 +82,7 @@ class _ImageHolderFile extends ImageHolder {
 abstract class ImageHolder extends StatelessWidget {
   final double height;
   final double width;
+  final Alignment alignment;
   final Object? _image;
   final BoxFit fit;
 
@@ -85,6 +92,7 @@ abstract class ImageHolder extends StatelessWidget {
     required this.width,
     required Object? image,
     this.fit = BoxFit.fill,
+    this.alignment = Alignment.center,
   }) : _image = image;
 
   factory ImageHolder.memory({
@@ -93,6 +101,7 @@ abstract class ImageHolder extends StatelessWidget {
     required double width,
     required Uint8List? bytes,
     BoxFit fit = BoxFit.fill,
+    Alignment alignment = Alignment.center,
   }) =>
       _ImageHolderMemory(
         key: key,
@@ -100,6 +109,7 @@ abstract class ImageHolder extends StatelessWidget {
         width: width,
         image: bytes,
         fit: fit,
+        alignment: alignment,
       );
 
   factory ImageHolder.network({
@@ -108,6 +118,7 @@ abstract class ImageHolder extends StatelessWidget {
     required double width,
     required String? url,
     BoxFit fit = BoxFit.fill,
+    Alignment alignment = Alignment.center,
   }) =>
       _ImageHolderNetwork(
         key: key,
@@ -115,6 +126,7 @@ abstract class ImageHolder extends StatelessWidget {
         width: width,
         image: url,
         fit: fit,
+        alignment: alignment,
       );
 
   factory ImageHolder.file({
@@ -123,6 +135,7 @@ abstract class ImageHolder extends StatelessWidget {
     required double width,
     required File file,
     BoxFit fit = BoxFit.fill,
+    Alignment alignment = Alignment.center,
   }) =>
       _ImageHolderFile(
         key: key,
@@ -130,6 +143,7 @@ abstract class ImageHolder extends StatelessWidget {
         width: width,
         image: file,
         fit: fit,
+        alignment: alignment,
       );
 
   @override

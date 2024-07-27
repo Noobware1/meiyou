@@ -3,8 +3,6 @@ import 'dart:async';
 import 'package:async/async.dart' hide Result;
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:isar/isar.dart';
-import 'package:meiyou/core/utils/cancelable_operation/cancelable_operation_mixin.dart';
 import 'package:meiyou/core/utils/log/logger.dart';
 import 'package:meiyou/features/home/domain/models/expanded_home_page_list.dart';
 import 'package:meiyou/features/home/domain/models/home_screen_state.dart';
@@ -89,9 +87,9 @@ class HomeScreenViewModel {
     assert(stateListenable.state is HomeScreenStateWithSource);
     final state = stateListenable.state as HomeScreenStateWithSource;
 
-    state.copyWith(data: const AsyncValue.loading());
+    await _performCleanup();
 
-    _performCleanup();
+    state.copyWith(data: const AsyncValue.loading());
 
     final source = state.selectedSource;
     final id = source.id;
@@ -174,7 +172,7 @@ class HomeScreenViewModel {
         return media.copyDetails(response.getOrThrow());
       })).then((list) => list.nonNulls);
 
-      _bannerStateListenable!.addAll(results);
+      _bannerStateListenable?.addAll(results);
     } catch (e) {
       logger.warning('Failed to update banner list', e);
     }
@@ -314,14 +312,7 @@ class HomeScreenViewModel {
     return local ?? networkMedia;
   }
 
-  void _performCleanup() {
-    _refreshJob?.cancel().then((_) => _refreshJob = null);
-    _jobs.cancelAll();
-    _bannerJob?.cancel().then((_) {
-      _bannerJob = null;
-      _bannerStateListenable?.dispose();
-      _bannerStateListenable = null;
-    });
+  Future<void> _performCleanup() async {
     for (var notifer in _expanded.values) {
       notifer.dispose();
     }
@@ -329,6 +320,11 @@ class HomeScreenViewModel {
     _lock.clear();
     _expanded.clear();
     currentShuffledList.clear();
+    _bannerStateListenable?.dispose();
+    _bannerStateListenable = null;
+    await _refreshJob?.cancel().thenSafe(() => _refreshJob = null);
+    await _jobs.cancelAll().thenSafe(() => _jobs.clear());
+    await _bannerJob?.cancel().thenSafe(() => _bannerJob = null);
   }
 
   void dispose() {
@@ -377,6 +373,18 @@ extension<T> on Iterable<CancelableOperation<T>> {
   Future<void> cancelAll() async {
     for (var job in this) {
       await job.cancel();
+    }
+  }
+}
+
+extension<T> on Future<T>? {
+  Future<void> thenSafe(void Function() then) async {
+    try {
+      await this;
+    } catch (_) {
+      logger.warning('Failed to await future', _);
+    } finally {
+      then();
     }
   }
 }

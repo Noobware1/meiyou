@@ -121,9 +121,9 @@ class _MyHomePageState extends State<MyHomePage> {
         },
         type: NavigationBarType.side,
       ),
-      body: const HomeScreen(
-        // mediaDetailsId: 1,
-      ),
+      body: const MediaScreen(
+          // mediaDetailsId: 1,
+          ),
     );
   }
 }

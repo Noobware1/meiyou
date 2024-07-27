@@ -231,7 +231,7 @@ class ExtensionManagerImpl implements ExtensionManager {
   Future<void> init() async {
     try {
       await _findAllInstalledExtensions();
-      _findAllAvailableExtensions();
+      // _findAllAvailableExtensions();
       _isInitialized = true;
     } catch (_, s) {
       _isInitialized = false;

@@ -38,6 +38,14 @@ class DataBase {
   }
 
   Future<int> insertMedia(Media media) {
+    return _putMedia(media);
+  }
+
+  Future<int> updateMedia(Media media) {
+    return _putMedia(media);
+  }
+
+  Future<int> _putMedia(Media media) {
     return media.when(
       video: (video) => _isar.videoMedias.put(video),
       manga: (manga) => _isar.mangaMedias.put(manga),
@@ -65,6 +73,14 @@ class DataBase {
   }
 
   Future<int> insertCategory(Category category) {
+    return _putCategory(category);
+  }
+
+  Future<int> updateCategory(Category category) {
+    return _putCategory(category);
+  }
+
+  Future<int> _putCategory(Category category) {
     return category.when(
       video: (video) => _isar.videoCategorys.put(video),
       manga: (manga) => _isar.mangaCategorys.put(manga),
