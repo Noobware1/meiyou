@@ -38,22 +38,23 @@ class MediaRepositoryImpl implements MediaRepository {
   }
 
   @override
-  Media getMediaById(GetMediaByIdParams params) {
+  Media? getMediaById(GetMediaByIdParams params) {
     final category = params.category;
     final id = params.id;
 
-    return _dataBase.mediaCollection(category).getSync(id)!;
+    return _dataBase.mediaCollection(category).when(
+          video: (collection) => collection.getSync(id),
+          manga: (collection) => collection.getSync(id),
+          novel: (collection) => collection.getSync(id),
+        );
   }
 
   @override
-  Stream<Media> getMediaByIdAsStream(GetMediaByIdAsStreamParams params) {
+  Stream<Media?> getMediaByIdAsStream(GetMediaByIdAsStreamParams params) {
     final category = params.category;
     final id = params.id;
 
-    return _dataBase
-        .mediaCollection(category)
-        .watchObject(id)
-        .map((media) => media!);
+    return _dataBase.mediaCollection(category).watchObject(id);
   }
 
   @override
@@ -64,7 +65,13 @@ class MediaRepositoryImpl implements MediaRepository {
 
     return _dataBase
         .mediaCollection(category)
-        .getByUrlAndSourceId(sourceId, url)
+        .when(
+            video: (collection) =>
+                collection.filter().urlEqualTo(url).sourceIdEqualTo(sourceId),
+            manga: (collection) =>
+                collection.filter().urlEqualTo(url).sourceIdEqualTo(sourceId),
+            novel: (collection) =>
+                collection.filter().urlEqualTo(url).sourceIdEqualTo(sourceId))
         .findFirstSync();
   }
 
@@ -73,21 +80,33 @@ class MediaRepositoryImpl implements MediaRepository {
     return _dataBase.insertMedia(params.media);
   }
 
-  Future<int> updateMedia(UpdateMediaParams params) {
-    return _dataBase.updateMedia(params.media);
+  @override
+  Future<int> updateMedia(UpdateMediaParams params) async {
+    final media = params.media;
+    return _dataBase.updateMedia(media);
   }
-}
 
-extension on IsarCollection<Media> {
-  QueryBuilder<Media, Media, QAfterFilterCondition> getByUrlAndSourceId(
-      int sourceId, String url) {
-    return when(
-      video: (collection) =>
-          collection.filter().urlEqualTo(url).sourceIdEqualTo(sourceId),
-      manga: (collection) =>
-          collection.filter().urlEqualTo(url).sourceIdEqualTo(sourceId),
-      novel: (collection) =>
-          collection.filter().urlEqualTo(url).sourceIdEqualTo(sourceId),
-    );
+  @override
+  Future<int> updateMediaFromSource(UpdateMediaFromSourceParams params) {
+    final networkMedia = params.networkMedia;
+    final localMedia = params.localMedia;
+
+    final poster = networkMedia.poster?.takeIf((it) => it.isNotEmptyOrNull) ??
+        localMedia.poster;
+
+    localMedia
+      ..title = networkMedia.title
+      ..poster = poster
+      ..banner = networkMedia.banner
+      ..description = networkMedia.description
+      ..genres = networkMedia.genres
+      ..otherTitles = networkMedia.otherTitles
+      ..score = networkMedia.score
+      ..status = networkMedia.status
+      ..format = networkMedia.format
+      ..url = networkMedia.url
+      ..initalized = true;
+
+    return updateMedia(UpdateMediaParams(media: localMedia));
   }
 }

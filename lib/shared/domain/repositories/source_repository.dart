@@ -17,4 +17,12 @@ abstract class SourceRepository {
   Future<Result<SearchPage>> getSearchPage(GetSearchPageParams params);
 
   Future<Result<IMedia>> getMediaDetails(GetMediaDetailsParams params);
+
+  Future<Result<List<IMediaContent>>> getMediaContentList(
+      GetMediaContentListParams params);
+
+  Future<Result<List<MediaLink>>> getMediaLinkList(
+      GetMediaLinkListParams params);
+
+  Future<Result<MediaAsset?>> getMediaAsset(GetMediaAssetsParams params);
 }

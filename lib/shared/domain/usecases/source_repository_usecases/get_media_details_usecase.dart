@@ -5,7 +5,7 @@ import 'package:meiyou_extensions_lib/models.dart';
 import 'package:nice_dart/nice_dart.dart';
 
 class GetMediaDetailsUseCase
-    extends AsyncUsecase<IMedia, GetMediaDetailsParams> {
+    extends AsyncUseCase<IMedia, GetMediaDetailsParams> {
   final SourceRepository _sourceRepository;
 
   GetMediaDetailsUseCase(this._sourceRepository);

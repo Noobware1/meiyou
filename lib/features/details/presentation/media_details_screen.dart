@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+// import 'package:meiyou/a.dart';
 import 'package:meiyou/core/utils/constants/material_theme.dart';
 import 'package:meiyou/core/utils/constants/size_constants.dart';
 import 'package:meiyou/core/utils/extensions/context.dart';
@@ -10,6 +11,7 @@ import 'package:meiyou/details.dart';
 import 'package:meiyou/features/details/presentation/media_screen_theme_data.dart';
 import 'package:meiyou/shared/domain/models/media.dart';
 import 'package:meiyou/shared/domain/models/screen_size.dart';
+import 'package:meiyou/shared/presentation/widgets/content_holder/content_holder.dart';
 import 'package:meiyou/shared/presentation/widgets/image_holder.dart';
 import 'package:meiyou/shared/presentation/widgets/responsive_widget.dart';
 import 'package:meiyou/shared/presentation/widgets/spacing.dart';
@@ -27,17 +29,26 @@ class MediaScreen extends StatefulWidget {
   State<MediaScreen> createState() => _MediaScreenState();
 }
 
-class _MediaScreenState extends State<MediaScreen> {
+class _MediaScreenState extends State<MediaScreen>
+    with SingleTickerProviderStateMixin {
   late final ScrollController _scrollController;
+  late final AnimationController _animationController;
+  ContentListType type = ContentListType.list;
+
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: Durations.long1,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final details = getDetails();
+    final contentList = getContentList();
     return ResponsiveBuilder(builder: (context, constraints, size) {
       final theme = MediaScreenThemeData.forSize(context, constraints, size);
 
@@ -67,6 +78,8 @@ class _MediaScreenState extends State<MediaScreen> {
         body: SingleChildScrollView(
           controller: _scrollController,
           child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               AnimatedContainer(
                 duration: Durations.short4,
@@ -93,38 +106,99 @@ class _MediaScreenState extends State<MediaScreen> {
                   ],
                 ),
               ),
+              VerticalSpace(theme.spacing),
               Padding(
                 padding: theme.defaultPadding,
                 child: Card(
                   child: Padding(
-                    padding: EdgeInsets.all(18),
+                    padding: EdgeInsets.symmetric(horizontal: theme.spacing),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (!size.isDesktop)
-                          const VerticalSpace(MaterialTheme.spacing),
+                        if (!size.isDesktop) VerticalSpace(theme.spacing),
                         mobileButtons,
-                        const VerticalSpace(MaterialTheme.spacing),
+                        VerticalSpace(theme.spacing),
+                        _MetaData(
+                          media: details,
+                          theme: theme,
+                          size: size,
+                        ),
+                        VerticalSpace(theme.spacing),
                         description(
-                            size: size,
-                            theme: theme,
-                            description:
-                                details.description ?? 'No description'),
+                          size: size,
+                          theme: theme,
+                          description: details.description ?? 'No description',
+                          otherTitles: details.otherTitles,
+                        ),
                         if (details.genres.isNotEmptyOrNull) ...[
-                          const VerticalSpace(MaterialTheme.spacing),
-                          Wrap(
-                            alignment: WrapAlignment.start,
-                            spacing: MaterialTheme.spacing,
-                            runSpacing: MaterialTheme.spacing,
-                            children: details.genres!
-                                .mapList((e) => Chip(label: Text(e))),
+                          VerticalSpace(theme.spacing),
+                          ChipTheme(
+                            data: theme.genreChipTheme,
+                            child: Wrap(
+                              alignment: WrapAlignment.start,
+                              spacing: 10,
+                              runSpacing: 8,
+                              children: details.genres!.mapList(
+                                (e) => FilterChip(
+                                  onSelected: (_) => {},
+                                  visualDensity: theme.genreVisualDensity,
+                                  label: Text(e),
+                                ),
+                              ),
+                            ),
                           ),
-                        ]
+                        ],
+                        VerticalSpace(theme.spacing),
                       ],
                     ),
                   ),
                 ),
-              )
+              ),
+              VerticalSpace(theme.spacing),
+              Padding(
+                padding: theme.defaultPadding,
+                child: Card(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: theme.spacing, vertical: theme.spacing),
+                    child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Episodes',
+                            style: context.theme.textTheme.titleLarge,
+                          ),
+                          IconButton(
+                              icon: AnimatedIcon(
+                                  icon: AnimatedIcons.list_view,
+                                  progress: _animationController),
+                              onPressed: () {
+                                setState(() {
+                                  if (type == ContentListType.list) {
+                                    _animationController.forward();
+                                    type = ContentListType.grid;
+                                  } else {
+                                    _animationController.reverse();
+                                    type = ContentListType.list;
+                                  }
+                                });
+                              }),
+                        ]),
+                  ),
+                ),
+              ),
+              VerticalSpace(theme.spacing),
+              Flexible(
+                child: Padding(
+                  padding: theme.defaultPadding,
+                  child: ContentList(
+                    type: type,
+                    size: size,
+                    media: details,
+                    contentList: contentList,
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -165,30 +239,22 @@ class _MediaScreenState extends State<MediaScreen> {
     required MediaScreenThemeData theme,
     required ScreenSize size,
     required String description,
+    required List<String>? otherTitles,
   }) {
-    final child = ExpandableText(
-      description,
+    return ExpandableText(
+      description.let((it) {
+        if (otherTitles.isNotEmptyOrNull) {
+          return '$it\n\nAlternative names: ${otherTitles!.join(', ')}';
+        } else {
+          return it;
+        }
+      }),
       expandText: 'Read more',
       collapseText: 'Read less',
       style: theme.descriptionTextStyle,
       maxLines: 3,
       animation: true,
     );
-    if (size.isDesktop && theme.descriptionLabelTextStyle != null) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Overview',
-            style: theme.descriptionLabelTextStyle!,
-          ),
-          const VerticalSpace(MaterialTheme.spacing),
-          child,
-        ],
-      );
-    }
-
-    return child;
   }
 
   Widget _posterAndTitle({
@@ -262,7 +328,7 @@ class _MediaScreenState extends State<MediaScreen> {
               ),
               const HorizontalSpace(4),
               Text(
-                '${status.toDisplayString()} · KickAssAnime',
+                status.toDisplayString(),
                 maxLines: 1,
                 style: statusTextStyle,
               )
@@ -316,6 +382,205 @@ class _MediaScreenState extends State<MediaScreen> {
         fit: fit,
       ),
     );
+  }
+}
+
+class ContentList extends StatefulWidget {
+  final ScreenSize size;
+  final Media media;
+  final List<IMediaContent> contentList;
+  final ContentListType type;
+  final bool scrollable;
+  const ContentList({
+    super.key,
+    required this.media,
+    required this.size,
+    required this.contentList,
+    this.scrollable = false,
+    this.type = ContentListType.list,
+  });
+
+  @override
+  State<ContentList> createState() => _ContentListState();
+}
+
+class _ContentListState extends State<ContentList> {
+  Media get media => widget.media;
+
+  List<IMediaContent> get contentList => widget.contentList;
+
+  bool get scrollable => widget.scrollable;
+
+  ContentListType get type => widget.type;
+
+  Key get gridKey => const Key('gridKey');
+
+  Key get listKey => const Key('gridKey');
+
+  @override
+  Widget build(BuildContext context) {
+    return MediaQuery.removePadding(
+      context: context,
+      removeTop: true,
+      child: AnimatedSwitcher(
+        transitionBuilder: (child, animation) {
+          return ScaleTransition(
+            scale: animation,
+            child: child,
+          );
+        },
+        duration: Durations.long1,
+        child: type == ContentListType.list ? _list() : _grid(),
+      ),
+    );
+  }
+
+  Widget _list() {
+    return ListView.builder(
+      key: listKey,
+      physics: !scrollable ? const NeverScrollableScrollPhysics() : null,
+      shrinkWrap: true,
+      itemBuilder: (context, index) {
+        final content = contentList[index];
+        return ContentHolderList(
+          content: content,
+        );
+      },
+      itemCount: contentList.length,
+    );
+  }
+
+  Widget _grid() {
+    return GridView.builder(
+      key: gridKey,
+      physics: !scrollable ? const NeverScrollableScrollPhysics() : null,
+      shrinkWrap: true,
+      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+        maxCrossAxisExtent: 250,
+        mainAxisExtent: widget.size
+            .when(mobile: () => 170, tablet: () => 210, desktop: () => 250),
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+      ),
+      itemBuilder: (context, index) {
+        final content = contentList[index];
+        return ContentHolderGrid(
+          content: content,
+        );
+      },
+      itemCount: contentList.length,
+    );
+  }
+}
+
+enum ContentListType {
+  list,
+  grid,
+}
+
+class _MetaData extends StatelessWidget {
+  final MediaScreenThemeData theme;
+  final Media media;
+  final ScreenSize size;
+
+  const _MetaData({
+    super.key,
+    required this.theme,
+    required this.media,
+    required this.size,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        _metaDataItem(
+          context,
+          icon: media.format.getFormatIcon(),
+          value: media.format.name.captialize().let(
+              (it) => size.whenDesktop(() => 'Format: $it', orElse: () => it)),
+        ),
+        const HorizontalSpace(12),
+        _metaDataItem(
+          context,
+          icon: Icons.star,
+          value: (media.score?.toString() ?? 'N/A').let(
+              (it) => size.whenDesktop(() => 'Score: $it', orElse: () => it)),
+        ),
+      ],
+    );
+  }
+
+  Widget _metaDataItem(
+    BuildContext context, {
+    required IconData icon,
+    required String value,
+  }) {
+    return Row(
+      children: [
+        Icon(
+          icon,
+          color: theme.metaDataIconColor,
+        ),
+        const HorizontalSpace(8),
+        Text(
+          value,
+          style: theme.metaDataTextStyle,
+        )
+      ],
+    );
+  }
+}
+
+extension on MediaFormat {
+  String getContentListTitle() {
+    switch (this) {
+      case MediaFormat.tvSeries:
+      case MediaFormat.movie:
+      case MediaFormat.animeMovie:
+      case MediaFormat.anime:
+      case MediaFormat.asainDrama:
+      case MediaFormat.ova:
+      case MediaFormat.ona:
+      case MediaFormat.cartoon:
+      case MediaFormat.documentary:
+        return 'Watch';
+      case MediaFormat.webNovel:
+      case MediaFormat.novel:
+      case MediaFormat.comic:
+      case MediaFormat.webtoon:
+      case MediaFormat.manga:
+      case MediaFormat.lightNovel:
+        return 'Read';
+      case MediaFormat.others:
+        return 'Content';
+    }
+  }
+}
+
+extension on MediaFormat {
+  IconData getFormatIcon() {
+    switch (this) {
+      case MediaFormat.tvSeries:
+      case MediaFormat.movie:
+      case MediaFormat.animeMovie:
+      case MediaFormat.anime:
+      case MediaFormat.asainDrama:
+      case MediaFormat.ova:
+      case MediaFormat.ona:
+      case MediaFormat.cartoon:
+      case MediaFormat.documentary:
+        return Icons.tv;
+      case MediaFormat.webNovel:
+      case MediaFormat.novel:
+      case MediaFormat.comic:
+      case MediaFormat.webtoon:
+      case MediaFormat.manga:
+      case MediaFormat.lightNovel:
+        return Icons.book;
+      case MediaFormat.others:
+        return Icons.more_horiz;
+    }
   }
 }
 

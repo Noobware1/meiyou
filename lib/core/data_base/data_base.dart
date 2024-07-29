@@ -3,6 +3,8 @@ import 'package:isar/isar.dart';
 import 'package:meiyou/shared/domain/models/category.dart';
 import 'package:meiyou/shared/domain/models/extension_category.dart';
 import 'package:meiyou/shared/domain/models/media.dart';
+import 'package:meiyou/shared/domain/models/media_content.dart';
+import 'package:nice_dart/nice_dart.dart';
 
 class DataBase {
   final Isar _isar;
@@ -26,6 +28,10 @@ class DataBase {
     return DataBase._(isar);
   }
 
+  a() {
+    // wrr
+  }
+
   IsarCollection<Media> mediaCollection(ExtensionCategory category) {
     switch (category) {
       case ExtensionCategory.video:
@@ -45,31 +51,79 @@ class DataBase {
     return _putMedia(media);
   }
 
-  Future<int> _putMedia(Media media) {
-    return media.when(
-      video: (video) => _isar.videoMedias.put(video),
-      manga: (manga) => _isar.mangaMedias.put(manga),
-      novel: (novel) => _isar.novelMedias.put(novel),
+  Future<int> _putMedia(Media media) => media.when(
+        video: (video) => _isar.videoMedias.put(video),
+        manga: (manga) => _isar.mangaMedias.put(manga),
+        novel: (novel) => _isar.novelMedias.put(novel),
+      );
+
+  Future<bool> deleteMedia(Media media) => media.when(
+        video: (video) => _isar.videoMedias.delete(video.id),
+        manga: (manga) => _isar.mangaMedias.delete(manga.id),
+        novel: (novel) => _isar.novelMedias.delete(novel.id),
+      );
+
+  IsarCollection<MediaContent> mediaContentCollection(
+      ExtensionCategory category) {
+    return category.when(
+      video: () => _isar.videoContents,
+      manga: () => _isar.mangaContents,
+      novel: () => _isar.novelContents,
     );
   }
 
-  Future<bool> deleteMedia(Media media) {
-    return media.when(
-      video: (video) => _isar.videoMedias.delete(video.id),
-      manga: (manga) => _isar.mangaMedias.delete(manga.id),
-      novel: (novel) => _isar.novelMedias.delete(novel.id),
-    );
+  Future<int> insertMediaContent(MediaContent mediaContent) {
+    return _putMediaContent(mediaContent);
   }
 
-  IsarCollection<Category> categories(ExtensionCategory category) {
-    switch (category) {
-      case ExtensionCategory.video:
-        return _isar.videoCategorys;
-      case ExtensionCategory.manga:
-        return _isar.mangaCategorys;
-      case ExtensionCategory.novel:
-        return _isar.novelCategorys;
-    }
+  Future<List<int>> insertAllMediaContent(List<MediaContent> mediaContent) {
+    return _putAllMediaContent(mediaContent);
+  }
+
+  Future<int> updateMediaContent(MediaContent mediaContent) {
+    return _putMediaContent(mediaContent);
+  }
+
+  Future<List<int>> updateAllMediaContent(List<MediaContent> mediaContent) {
+    return _putAllMediaContent(mediaContent);
+  }
+
+  Future<int> _putMediaContent(MediaContent mediaContent) => mediaContent.when(
+        video: (video) => _isar.videoContents.put(video),
+        manga: (manga) => _isar.mangaContents.put(manga),
+        novel: (novel) => _isar.novelContents.put(novel),
+      );
+
+  Future<List<int>> _putAllMediaContent(List<MediaContent> mediaContent) =>
+      mediaContent.when(
+        video: (video) => _isar.videoContents.putAll(video),
+        manga: (manga) => _isar.mangaContents.putAll(manga),
+        novel: (novel) => _isar.novelContents.putAll(novel),
+      );
+
+  Future<bool> deleteMediaContent(MediaContent mediaContent) =>
+      mediaContent.when(
+        video: (video) => _isar.videoContents.delete(video.id),
+        manga: (manga) => _isar.mangaContents.delete(manga.id),
+        novel: (novel) => _isar.novelContents.delete(novel.id),
+      );
+
+  Future<int> deleteAllMediaContent(List<MediaContent> mediaContent) =>
+      mediaContent.when(
+        video: (videoContentList) => _isar.videoContents
+            .deleteAll(videoContentList.mapList((e) => e.id)),
+        manga: (mangaContentList) => _isar.mangaContents
+            .deleteAll(mangaContentList.mapList((e) => e.id)),
+        novel: (novelContentList) => _isar.novelContents
+            .deleteAll(novelContentList.mapList((e) => e.id)),
+      );
+
+  IsarCollection<Category> categoryCollection(ExtensionCategory category) {
+    return category.when(
+      video: () => _isar.videoCategorys,
+      manga: () => _isar.mangaCategorys,
+      novel: () => _isar.novelCategorys,
+    );
   }
 
   Future<int> insertCategory(Category category) {
@@ -80,20 +134,22 @@ class DataBase {
     return _putCategory(category);
   }
 
-  Future<int> _putCategory(Category category) {
-    return category.when(
-      video: (video) => _isar.videoCategorys.put(video),
-      manga: (manga) => _isar.mangaCategorys.put(manga),
-      novel: (novel) => _isar.novelCategorys.put(novel),
-    );
-  }
+  Future<int> _putCategory(Category category) => category.when(
+        video: (video) => _isar.videoCategorys.put(video),
+        manga: (manga) => _isar.mangaCategorys.put(manga),
+        novel: (novel) => _isar.novelCategorys.put(novel),
+      );
 
-  Future<bool> deleteCategory(Category category) {
-    return category.when(
-      video: (video) => _isar.videoCategorys.delete(video.id),
-      manga: (manga) => _isar.mangaCategorys.delete(manga.id),
-      novel: (novel) => _isar.novelCategorys.delete(novel.id),
-    );
+  Future<bool> deleteCategory(Category category) => category.when(
+        video: (video) => _isar.videoCategorys.delete(video.id),
+        manga: (manga) => _isar.mangaCategorys.delete(manga.id),
+        novel: (novel) => _isar.novelCategorys.delete(novel.id),
+      );
+
+  Future<T> writeInTransaction<T>(Future<T> Function() callback) {
+    return _isar.writeTxn(() async {
+      return await callback();
+    });
   }
 }
 
@@ -109,6 +165,60 @@ extension WhenIsarCollectionMedia on IsarCollection<Media> {
       return manga(this as IsarCollection<MangaMedia>);
     } else if (this is IsarCollection<NovelMedia>) {
       return novel(this as IsarCollection<NovelMedia>);
+    } else {
+      throw Exception('Invalid type');
+    }
+  }
+}
+
+extension WhenIsarCollectionMediaContent on IsarCollection<MediaContent> {
+  T when<T>({
+    required T Function(IsarCollection<VideoContent>) video,
+    required T Function(IsarCollection<MangaContent>) manga,
+    required T Function(IsarCollection<NovelContent>) novel,
+  }) {
+    if (this is IsarCollection<VideoContent>) {
+      return video(this as IsarCollection<VideoContent>);
+    } else if (this is IsarCollection<MangaContent>) {
+      return manga(this as IsarCollection<MangaContent>);
+    } else if (this is IsarCollection<NovelContent>) {
+      return novel(this as IsarCollection<NovelContent>);
+    } else {
+      throw Exception('Invalid type');
+    }
+  }
+}
+
+extension WhenIsarCollectionCategory on IsarCollection<Category> {
+  T when<T>({
+    required T Function(IsarCollection<VideoCategory>) video,
+    required T Function(IsarCollection<MangaCategory>) manga,
+    required T Function(IsarCollection<NovelCategory>) novel,
+  }) {
+    if (this is IsarCollection<VideoCategory>) {
+      return video(this as IsarCollection<VideoCategory>);
+    } else if (this is IsarCollection<MangaCategory>) {
+      return manga(this as IsarCollection<MangaCategory>);
+    } else if (this is IsarCollection<NovelCategory>) {
+      return novel(this as IsarCollection<NovelCategory>);
+    } else {
+      throw Exception('Invalid type');
+    }
+  }
+}
+
+extension on List<MediaContent> {
+  when<T>({
+    required T Function(List<VideoContent>) video,
+    required T Function(List<MangaContent>) manga,
+    required T Function(List<NovelContent>) novel,
+  }) {
+    if (this is List<VideoContent>) {
+      return video(cast());
+    } else if (this is List<MangaContent>) {
+      return manga(cast());
+    } else if (this is List<NovelContent>) {
+      return novel(cast());
     } else {
       throw Exception('Invalid type');
     }

@@ -4,6 +4,7 @@ import 'package:meiyou/core/injection/injection.dart';
 import 'package:meiyou/core/utils/extensions/context.dart';
 import 'package:meiyou/features/details/presentation/media_details_screen.dart';
 import 'package:meiyou/features/home/presentation/screens/home/home_screen.dart';
+import 'package:meiyou/l.dart';
 import 'package:meiyou/shared/presentation/widgets/multi_nav_scaffold/multi_nav_scaffold.dart';
 import 'package:meiyou/shared/presentation/widgets/navigation_bar/navigation_bar.dart';
 
@@ -99,28 +100,28 @@ class _MyHomePageState extends State<MyHomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
-
-    return MultiNavScaffold(
-      bottomNavigationBar: CustomNavigationBar(
-        destinations: destinations,
-        selectedIndex: selectedIndex,
-        onDestinationSelected: (index) {
-          setState(() {
-            selectedIndex = index;
-          });
-        },
-        type: NavigationBarType.bottom,
-      ),
-      sideNavigatonBar: CustomNavigationBar(
-        destinations: destinations,
-        selectedIndex: selectedIndex,
-        onDestinationSelected: (index) {
-          setState(() {
-            selectedIndex = index;
-          });
-        },
-        type: NavigationBarType.side,
-      ),
+// MultiNav
+    return Scaffold(
+      // bottomNavigationBar: CustomNavigationBar(
+      //   destinations: destinations,
+      //   selectedIndex: selectedIndex,
+      //   onDestinationSelected: (index) {
+      //     setState(() {
+      //       selectedIndex = index;
+      //     });
+      //   },
+      //   type: NavigationBarType.bottom,
+      // ),
+      // sideNavigatonBar: CustomNavigationBar(
+      //   destinations: destinations,
+      //   selectedIndex: selectedIndex,
+      //   onDestinationSelected: (index) {
+      //     setState(() {
+      //       selectedIndex = index;
+      //     });
+      //   },
+      //   type: NavigationBarType.side,
+      // ),
       body: const MediaScreen(
           // mediaDetailsId: 1,
           ),

@@ -22,60 +22,65 @@ const VideoMediaSchema = CollectionSchema(
       name: r'banner',
       type: IsarType.string,
     ),
-    r'description': PropertySchema(
+    r'bannerOrPoster': PropertySchema(
       id: 1,
+      name: r'bannerOrPoster',
+      type: IsarType.string,
+    ),
+    r'description': PropertySchema(
+      id: 2,
       name: r'description',
       type: IsarType.string,
     ),
     r'format': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'format',
       type: IsarType.byte,
       enumMap: _VideoMediaformatEnumValueMap,
     ),
     r'genres': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'genres',
       type: IsarType.stringList,
     ),
     r'initalized': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'initalized',
       type: IsarType.bool,
     ),
     r'otherTitles': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'otherTitles',
       type: IsarType.stringList,
     ),
     r'poster': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'poster',
       type: IsarType.string,
     ),
     r'score': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'score',
       type: IsarType.double,
     ),
     r'sourceId': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'sourceId',
       type: IsarType.long,
     ),
     r'status': PropertySchema(
-      id: 9,
+      id: 10,
       name: r'status',
       type: IsarType.byte,
       enumMap: _VideoMediastatusEnumValueMap,
     ),
     r'title': PropertySchema(
-      id: 10,
+      id: 11,
       name: r'title',
       type: IsarType.string,
     ),
     r'url': PropertySchema(
-      id: 11,
+      id: 12,
       name: r'url',
       type: IsarType.string,
     )
@@ -102,6 +107,12 @@ int _videoMediaEstimateSize(
   var bytesCount = offsets.last;
   {
     final value = object.banner;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.bannerOrPoster;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
     }
@@ -154,17 +165,18 @@ void _videoMediaSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeString(offsets[0], object.banner);
-  writer.writeString(offsets[1], object.description);
-  writer.writeByte(offsets[2], object.format.index);
-  writer.writeStringList(offsets[3], object.genres);
-  writer.writeBool(offsets[4], object.initalized);
-  writer.writeStringList(offsets[5], object.otherTitles);
-  writer.writeString(offsets[6], object.poster);
-  writer.writeDouble(offsets[7], object.score);
-  writer.writeLong(offsets[8], object.sourceId);
-  writer.writeByte(offsets[9], object.status.index);
-  writer.writeString(offsets[10], object.title);
-  writer.writeString(offsets[11], object.url);
+  writer.writeString(offsets[1], object.bannerOrPoster);
+  writer.writeString(offsets[2], object.description);
+  writer.writeByte(offsets[3], object.format.index);
+  writer.writeStringList(offsets[4], object.genres);
+  writer.writeBool(offsets[5], object.initalized);
+  writer.writeStringList(offsets[6], object.otherTitles);
+  writer.writeString(offsets[7], object.poster);
+  writer.writeDouble(offsets[8], object.score);
+  writer.writeLong(offsets[9], object.sourceId);
+  writer.writeByte(offsets[10], object.status.index);
+  writer.writeString(offsets[11], object.title);
+  writer.writeString(offsets[12], object.url);
 }
 
 VideoMedia _videoMediaDeserialize(
@@ -175,21 +187,21 @@ VideoMedia _videoMediaDeserialize(
 ) {
   final object = VideoMedia(
     banner: reader.readStringOrNull(offsets[0]),
-    description: reader.readStringOrNull(offsets[1]),
-    format: _VideoMediaformatValueEnumMap[reader.readByteOrNull(offsets[2])] ??
+    description: reader.readStringOrNull(offsets[2]),
+    format: _VideoMediaformatValueEnumMap[reader.readByteOrNull(offsets[3])] ??
         MediaFormat.others,
-    genres: reader.readStringList(offsets[3]),
+    genres: reader.readStringList(offsets[4]),
     id: id,
-    otherTitles: reader.readStringList(offsets[5]),
-    poster: reader.readStringOrNull(offsets[6]),
-    score: reader.readDoubleOrNull(offsets[7]),
-    sourceId: reader.readLong(offsets[8]),
-    status: _VideoMediastatusValueEnumMap[reader.readByteOrNull(offsets[9])] ??
+    otherTitles: reader.readStringList(offsets[6]),
+    poster: reader.readStringOrNull(offsets[7]),
+    score: reader.readDoubleOrNull(offsets[8]),
+    sourceId: reader.readLong(offsets[9]),
+    status: _VideoMediastatusValueEnumMap[reader.readByteOrNull(offsets[10])] ??
         Status.unknown,
-    title: reader.readStringOrNull(offsets[10]) ?? '',
-    url: reader.readStringOrNull(offsets[11]) ?? '',
+    title: reader.readStringOrNull(offsets[11]) ?? '',
+    url: reader.readStringOrNull(offsets[12]) ?? '',
   );
-  object.initalized = reader.readBool(offsets[4]);
+  object.initalized = reader.readBool(offsets[5]);
   return object;
 }
 
@@ -205,26 +217,28 @@ P _videoMediaDeserializeProp<P>(
     case 1:
       return (reader.readStringOrNull(offset)) as P;
     case 2:
+      return (reader.readStringOrNull(offset)) as P;
+    case 3:
       return (_VideoMediaformatValueEnumMap[reader.readByteOrNull(offset)] ??
           MediaFormat.others) as P;
-    case 3:
-      return (reader.readStringList(offset)) as P;
     case 4:
-      return (reader.readBool(offset)) as P;
-    case 5:
       return (reader.readStringList(offset)) as P;
+    case 5:
+      return (reader.readBool(offset)) as P;
     case 6:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readStringList(offset)) as P;
     case 7:
-      return (reader.readDoubleOrNull(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 8:
-      return (reader.readLong(offset)) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     case 9:
+      return (reader.readLong(offset)) as P;
+    case 10:
       return (_VideoMediastatusValueEnumMap[reader.readByteOrNull(offset)] ??
           Status.unknown) as P;
-    case 10:
-      return (reader.readStringOrNull(offset) ?? '') as P;
     case 11:
+      return (reader.readStringOrNull(offset) ?? '') as P;
+    case 12:
       return (reader.readStringOrNull(offset) ?? '') as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -512,6 +526,160 @@ extension VideoMediaQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'banner',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<VideoMedia, VideoMedia, QAfterFilterCondition>
+      bannerOrPosterIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'bannerOrPoster',
+      ));
+    });
+  }
+
+  QueryBuilder<VideoMedia, VideoMedia, QAfterFilterCondition>
+      bannerOrPosterIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'bannerOrPoster',
+      ));
+    });
+  }
+
+  QueryBuilder<VideoMedia, VideoMedia, QAfterFilterCondition>
+      bannerOrPosterEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'bannerOrPoster',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<VideoMedia, VideoMedia, QAfterFilterCondition>
+      bannerOrPosterGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'bannerOrPoster',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<VideoMedia, VideoMedia, QAfterFilterCondition>
+      bannerOrPosterLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'bannerOrPoster',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<VideoMedia, VideoMedia, QAfterFilterCondition>
+      bannerOrPosterBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'bannerOrPoster',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<VideoMedia, VideoMedia, QAfterFilterCondition>
+      bannerOrPosterStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'bannerOrPoster',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<VideoMedia, VideoMedia, QAfterFilterCondition>
+      bannerOrPosterEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'bannerOrPoster',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<VideoMedia, VideoMedia, QAfterFilterCondition>
+      bannerOrPosterContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'bannerOrPoster',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<VideoMedia, VideoMedia, QAfterFilterCondition>
+      bannerOrPosterMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'bannerOrPoster',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<VideoMedia, VideoMedia, QAfterFilterCondition>
+      bannerOrPosterIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'bannerOrPoster',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<VideoMedia, VideoMedia, QAfterFilterCondition>
+      bannerOrPosterIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'bannerOrPoster',
         value: '',
       ));
     });
@@ -1886,6 +2054,19 @@ extension VideoMediaQuerySortBy
     });
   }
 
+  QueryBuilder<VideoMedia, VideoMedia, QAfterSortBy> sortByBannerOrPoster() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'bannerOrPoster', Sort.asc);
+    });
+  }
+
+  QueryBuilder<VideoMedia, VideoMedia, QAfterSortBy>
+      sortByBannerOrPosterDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'bannerOrPoster', Sort.desc);
+    });
+  }
+
   QueryBuilder<VideoMedia, VideoMedia, QAfterSortBy> sortByDescription() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'description', Sort.asc);
@@ -2006,6 +2187,19 @@ extension VideoMediaQuerySortThenBy
   QueryBuilder<VideoMedia, VideoMedia, QAfterSortBy> thenByBannerDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'banner', Sort.desc);
+    });
+  }
+
+  QueryBuilder<VideoMedia, VideoMedia, QAfterSortBy> thenByBannerOrPoster() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'bannerOrPoster', Sort.asc);
+    });
+  }
+
+  QueryBuilder<VideoMedia, VideoMedia, QAfterSortBy>
+      thenByBannerOrPosterDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'bannerOrPoster', Sort.desc);
     });
   }
 
@@ -2139,6 +2333,14 @@ extension VideoMediaQueryWhereDistinct
     });
   }
 
+  QueryBuilder<VideoMedia, VideoMedia, QDistinct> distinctByBannerOrPoster(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'bannerOrPoster',
+          caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<VideoMedia, VideoMedia, QDistinct> distinctByDescription(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -2221,6 +2423,12 @@ extension VideoMediaQueryProperty
   QueryBuilder<VideoMedia, String?, QQueryOperations> bannerProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'banner');
+    });
+  }
+
+  QueryBuilder<VideoMedia, String?, QQueryOperations> bannerOrPosterProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'bannerOrPoster');
     });
   }
 
@@ -2308,60 +2516,65 @@ const MangaMediaSchema = CollectionSchema(
       name: r'banner',
       type: IsarType.string,
     ),
-    r'description': PropertySchema(
+    r'bannerOrPoster': PropertySchema(
       id: 1,
+      name: r'bannerOrPoster',
+      type: IsarType.string,
+    ),
+    r'description': PropertySchema(
+      id: 2,
       name: r'description',
       type: IsarType.string,
     ),
     r'format': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'format',
       type: IsarType.byte,
       enumMap: _MangaMediaformatEnumValueMap,
     ),
     r'genres': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'genres',
       type: IsarType.stringList,
     ),
     r'initalized': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'initalized',
       type: IsarType.bool,
     ),
     r'otherTitles': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'otherTitles',
       type: IsarType.stringList,
     ),
     r'poster': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'poster',
       type: IsarType.string,
     ),
     r'score': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'score',
       type: IsarType.double,
     ),
     r'sourceId': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'sourceId',
       type: IsarType.long,
     ),
     r'status': PropertySchema(
-      id: 9,
+      id: 10,
       name: r'status',
       type: IsarType.byte,
       enumMap: _MangaMediastatusEnumValueMap,
     ),
     r'title': PropertySchema(
-      id: 10,
+      id: 11,
       name: r'title',
       type: IsarType.string,
     ),
     r'url': PropertySchema(
-      id: 11,
+      id: 12,
       name: r'url',
       type: IsarType.string,
     )
@@ -2388,6 +2601,12 @@ int _mangaMediaEstimateSize(
   var bytesCount = offsets.last;
   {
     final value = object.banner;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.bannerOrPoster;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
     }
@@ -2440,17 +2659,18 @@ void _mangaMediaSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeString(offsets[0], object.banner);
-  writer.writeString(offsets[1], object.description);
-  writer.writeByte(offsets[2], object.format.index);
-  writer.writeStringList(offsets[3], object.genres);
-  writer.writeBool(offsets[4], object.initalized);
-  writer.writeStringList(offsets[5], object.otherTitles);
-  writer.writeString(offsets[6], object.poster);
-  writer.writeDouble(offsets[7], object.score);
-  writer.writeLong(offsets[8], object.sourceId);
-  writer.writeByte(offsets[9], object.status.index);
-  writer.writeString(offsets[10], object.title);
-  writer.writeString(offsets[11], object.url);
+  writer.writeString(offsets[1], object.bannerOrPoster);
+  writer.writeString(offsets[2], object.description);
+  writer.writeByte(offsets[3], object.format.index);
+  writer.writeStringList(offsets[4], object.genres);
+  writer.writeBool(offsets[5], object.initalized);
+  writer.writeStringList(offsets[6], object.otherTitles);
+  writer.writeString(offsets[7], object.poster);
+  writer.writeDouble(offsets[8], object.score);
+  writer.writeLong(offsets[9], object.sourceId);
+  writer.writeByte(offsets[10], object.status.index);
+  writer.writeString(offsets[11], object.title);
+  writer.writeString(offsets[12], object.url);
 }
 
 MangaMedia _mangaMediaDeserialize(
@@ -2461,21 +2681,21 @@ MangaMedia _mangaMediaDeserialize(
 ) {
   final object = MangaMedia(
     banner: reader.readStringOrNull(offsets[0]),
-    description: reader.readStringOrNull(offsets[1]),
-    format: _MangaMediaformatValueEnumMap[reader.readByteOrNull(offsets[2])] ??
+    description: reader.readStringOrNull(offsets[2]),
+    format: _MangaMediaformatValueEnumMap[reader.readByteOrNull(offsets[3])] ??
         MediaFormat.others,
-    genres: reader.readStringList(offsets[3]),
+    genres: reader.readStringList(offsets[4]),
     id: id,
-    otherTitles: reader.readStringList(offsets[5]),
-    poster: reader.readStringOrNull(offsets[6]),
-    score: reader.readDoubleOrNull(offsets[7]),
-    sourceId: reader.readLong(offsets[8]),
-    status: _MangaMediastatusValueEnumMap[reader.readByteOrNull(offsets[9])] ??
+    otherTitles: reader.readStringList(offsets[6]),
+    poster: reader.readStringOrNull(offsets[7]),
+    score: reader.readDoubleOrNull(offsets[8]),
+    sourceId: reader.readLong(offsets[9]),
+    status: _MangaMediastatusValueEnumMap[reader.readByteOrNull(offsets[10])] ??
         Status.unknown,
-    title: reader.readStringOrNull(offsets[10]) ?? '',
-    url: reader.readStringOrNull(offsets[11]) ?? '',
+    title: reader.readStringOrNull(offsets[11]) ?? '',
+    url: reader.readStringOrNull(offsets[12]) ?? '',
   );
-  object.initalized = reader.readBool(offsets[4]);
+  object.initalized = reader.readBool(offsets[5]);
   return object;
 }
 
@@ -2491,26 +2711,28 @@ P _mangaMediaDeserializeProp<P>(
     case 1:
       return (reader.readStringOrNull(offset)) as P;
     case 2:
+      return (reader.readStringOrNull(offset)) as P;
+    case 3:
       return (_MangaMediaformatValueEnumMap[reader.readByteOrNull(offset)] ??
           MediaFormat.others) as P;
-    case 3:
-      return (reader.readStringList(offset)) as P;
     case 4:
-      return (reader.readBool(offset)) as P;
-    case 5:
       return (reader.readStringList(offset)) as P;
+    case 5:
+      return (reader.readBool(offset)) as P;
     case 6:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readStringList(offset)) as P;
     case 7:
-      return (reader.readDoubleOrNull(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 8:
-      return (reader.readLong(offset)) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     case 9:
+      return (reader.readLong(offset)) as P;
+    case 10:
       return (_MangaMediastatusValueEnumMap[reader.readByteOrNull(offset)] ??
           Status.unknown) as P;
-    case 10:
-      return (reader.readStringOrNull(offset) ?? '') as P;
     case 11:
+      return (reader.readStringOrNull(offset) ?? '') as P;
+    case 12:
       return (reader.readStringOrNull(offset) ?? '') as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -2798,6 +3020,160 @@ extension MangaMediaQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'banner',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<MangaMedia, MangaMedia, QAfterFilterCondition>
+      bannerOrPosterIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'bannerOrPoster',
+      ));
+    });
+  }
+
+  QueryBuilder<MangaMedia, MangaMedia, QAfterFilterCondition>
+      bannerOrPosterIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'bannerOrPoster',
+      ));
+    });
+  }
+
+  QueryBuilder<MangaMedia, MangaMedia, QAfterFilterCondition>
+      bannerOrPosterEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'bannerOrPoster',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MangaMedia, MangaMedia, QAfterFilterCondition>
+      bannerOrPosterGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'bannerOrPoster',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MangaMedia, MangaMedia, QAfterFilterCondition>
+      bannerOrPosterLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'bannerOrPoster',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MangaMedia, MangaMedia, QAfterFilterCondition>
+      bannerOrPosterBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'bannerOrPoster',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MangaMedia, MangaMedia, QAfterFilterCondition>
+      bannerOrPosterStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'bannerOrPoster',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MangaMedia, MangaMedia, QAfterFilterCondition>
+      bannerOrPosterEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'bannerOrPoster',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MangaMedia, MangaMedia, QAfterFilterCondition>
+      bannerOrPosterContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'bannerOrPoster',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MangaMedia, MangaMedia, QAfterFilterCondition>
+      bannerOrPosterMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'bannerOrPoster',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MangaMedia, MangaMedia, QAfterFilterCondition>
+      bannerOrPosterIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'bannerOrPoster',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<MangaMedia, MangaMedia, QAfterFilterCondition>
+      bannerOrPosterIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'bannerOrPoster',
         value: '',
       ));
     });
@@ -4172,6 +4548,19 @@ extension MangaMediaQuerySortBy
     });
   }
 
+  QueryBuilder<MangaMedia, MangaMedia, QAfterSortBy> sortByBannerOrPoster() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'bannerOrPoster', Sort.asc);
+    });
+  }
+
+  QueryBuilder<MangaMedia, MangaMedia, QAfterSortBy>
+      sortByBannerOrPosterDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'bannerOrPoster', Sort.desc);
+    });
+  }
+
   QueryBuilder<MangaMedia, MangaMedia, QAfterSortBy> sortByDescription() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'description', Sort.asc);
@@ -4292,6 +4681,19 @@ extension MangaMediaQuerySortThenBy
   QueryBuilder<MangaMedia, MangaMedia, QAfterSortBy> thenByBannerDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'banner', Sort.desc);
+    });
+  }
+
+  QueryBuilder<MangaMedia, MangaMedia, QAfterSortBy> thenByBannerOrPoster() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'bannerOrPoster', Sort.asc);
+    });
+  }
+
+  QueryBuilder<MangaMedia, MangaMedia, QAfterSortBy>
+      thenByBannerOrPosterDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'bannerOrPoster', Sort.desc);
     });
   }
 
@@ -4425,6 +4827,14 @@ extension MangaMediaQueryWhereDistinct
     });
   }
 
+  QueryBuilder<MangaMedia, MangaMedia, QDistinct> distinctByBannerOrPoster(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'bannerOrPoster',
+          caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<MangaMedia, MangaMedia, QDistinct> distinctByDescription(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -4507,6 +4917,12 @@ extension MangaMediaQueryProperty
   QueryBuilder<MangaMedia, String?, QQueryOperations> bannerProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'banner');
+    });
+  }
+
+  QueryBuilder<MangaMedia, String?, QQueryOperations> bannerOrPosterProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'bannerOrPoster');
     });
   }
 
@@ -4594,60 +5010,65 @@ const NovelMediaSchema = CollectionSchema(
       name: r'banner',
       type: IsarType.string,
     ),
-    r'description': PropertySchema(
+    r'bannerOrPoster': PropertySchema(
       id: 1,
+      name: r'bannerOrPoster',
+      type: IsarType.string,
+    ),
+    r'description': PropertySchema(
+      id: 2,
       name: r'description',
       type: IsarType.string,
     ),
     r'format': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'format',
       type: IsarType.byte,
       enumMap: _NovelMediaformatEnumValueMap,
     ),
     r'genres': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'genres',
       type: IsarType.stringList,
     ),
     r'initalized': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'initalized',
       type: IsarType.bool,
     ),
     r'otherTitles': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'otherTitles',
       type: IsarType.stringList,
     ),
     r'poster': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'poster',
       type: IsarType.string,
     ),
     r'score': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'score',
       type: IsarType.double,
     ),
     r'sourceId': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'sourceId',
       type: IsarType.long,
     ),
     r'status': PropertySchema(
-      id: 9,
+      id: 10,
       name: r'status',
       type: IsarType.byte,
       enumMap: _NovelMediastatusEnumValueMap,
     ),
     r'title': PropertySchema(
-      id: 10,
+      id: 11,
       name: r'title',
       type: IsarType.string,
     ),
     r'url': PropertySchema(
-      id: 11,
+      id: 12,
       name: r'url',
       type: IsarType.string,
     )
@@ -4674,6 +5095,12 @@ int _novelMediaEstimateSize(
   var bytesCount = offsets.last;
   {
     final value = object.banner;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.bannerOrPoster;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
     }
@@ -4726,17 +5153,18 @@ void _novelMediaSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeString(offsets[0], object.banner);
-  writer.writeString(offsets[1], object.description);
-  writer.writeByte(offsets[2], object.format.index);
-  writer.writeStringList(offsets[3], object.genres);
-  writer.writeBool(offsets[4], object.initalized);
-  writer.writeStringList(offsets[5], object.otherTitles);
-  writer.writeString(offsets[6], object.poster);
-  writer.writeDouble(offsets[7], object.score);
-  writer.writeLong(offsets[8], object.sourceId);
-  writer.writeByte(offsets[9], object.status.index);
-  writer.writeString(offsets[10], object.title);
-  writer.writeString(offsets[11], object.url);
+  writer.writeString(offsets[1], object.bannerOrPoster);
+  writer.writeString(offsets[2], object.description);
+  writer.writeByte(offsets[3], object.format.index);
+  writer.writeStringList(offsets[4], object.genres);
+  writer.writeBool(offsets[5], object.initalized);
+  writer.writeStringList(offsets[6], object.otherTitles);
+  writer.writeString(offsets[7], object.poster);
+  writer.writeDouble(offsets[8], object.score);
+  writer.writeLong(offsets[9], object.sourceId);
+  writer.writeByte(offsets[10], object.status.index);
+  writer.writeString(offsets[11], object.title);
+  writer.writeString(offsets[12], object.url);
 }
 
 NovelMedia _novelMediaDeserialize(
@@ -4747,21 +5175,21 @@ NovelMedia _novelMediaDeserialize(
 ) {
   final object = NovelMedia(
     banner: reader.readStringOrNull(offsets[0]),
-    description: reader.readStringOrNull(offsets[1]),
-    format: _NovelMediaformatValueEnumMap[reader.readByteOrNull(offsets[2])] ??
+    description: reader.readStringOrNull(offsets[2]),
+    format: _NovelMediaformatValueEnumMap[reader.readByteOrNull(offsets[3])] ??
         MediaFormat.others,
-    genres: reader.readStringList(offsets[3]),
+    genres: reader.readStringList(offsets[4]),
     id: id,
-    otherTitles: reader.readStringList(offsets[5]),
-    poster: reader.readStringOrNull(offsets[6]),
-    score: reader.readDoubleOrNull(offsets[7]),
-    sourceId: reader.readLong(offsets[8]),
-    status: _NovelMediastatusValueEnumMap[reader.readByteOrNull(offsets[9])] ??
+    otherTitles: reader.readStringList(offsets[6]),
+    poster: reader.readStringOrNull(offsets[7]),
+    score: reader.readDoubleOrNull(offsets[8]),
+    sourceId: reader.readLong(offsets[9]),
+    status: _NovelMediastatusValueEnumMap[reader.readByteOrNull(offsets[10])] ??
         Status.unknown,
-    title: reader.readStringOrNull(offsets[10]) ?? '',
-    url: reader.readStringOrNull(offsets[11]) ?? '',
+    title: reader.readStringOrNull(offsets[11]) ?? '',
+    url: reader.readStringOrNull(offsets[12]) ?? '',
   );
-  object.initalized = reader.readBool(offsets[4]);
+  object.initalized = reader.readBool(offsets[5]);
   return object;
 }
 
@@ -4777,26 +5205,28 @@ P _novelMediaDeserializeProp<P>(
     case 1:
       return (reader.readStringOrNull(offset)) as P;
     case 2:
+      return (reader.readStringOrNull(offset)) as P;
+    case 3:
       return (_NovelMediaformatValueEnumMap[reader.readByteOrNull(offset)] ??
           MediaFormat.others) as P;
-    case 3:
-      return (reader.readStringList(offset)) as P;
     case 4:
-      return (reader.readBool(offset)) as P;
-    case 5:
       return (reader.readStringList(offset)) as P;
+    case 5:
+      return (reader.readBool(offset)) as P;
     case 6:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readStringList(offset)) as P;
     case 7:
-      return (reader.readDoubleOrNull(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 8:
-      return (reader.readLong(offset)) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     case 9:
+      return (reader.readLong(offset)) as P;
+    case 10:
       return (_NovelMediastatusValueEnumMap[reader.readByteOrNull(offset)] ??
           Status.unknown) as P;
-    case 10:
-      return (reader.readStringOrNull(offset) ?? '') as P;
     case 11:
+      return (reader.readStringOrNull(offset) ?? '') as P;
+    case 12:
       return (reader.readStringOrNull(offset) ?? '') as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -5084,6 +5514,160 @@ extension NovelMediaQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'banner',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<NovelMedia, NovelMedia, QAfterFilterCondition>
+      bannerOrPosterIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'bannerOrPoster',
+      ));
+    });
+  }
+
+  QueryBuilder<NovelMedia, NovelMedia, QAfterFilterCondition>
+      bannerOrPosterIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'bannerOrPoster',
+      ));
+    });
+  }
+
+  QueryBuilder<NovelMedia, NovelMedia, QAfterFilterCondition>
+      bannerOrPosterEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'bannerOrPoster',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<NovelMedia, NovelMedia, QAfterFilterCondition>
+      bannerOrPosterGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'bannerOrPoster',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<NovelMedia, NovelMedia, QAfterFilterCondition>
+      bannerOrPosterLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'bannerOrPoster',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<NovelMedia, NovelMedia, QAfterFilterCondition>
+      bannerOrPosterBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'bannerOrPoster',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<NovelMedia, NovelMedia, QAfterFilterCondition>
+      bannerOrPosterStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'bannerOrPoster',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<NovelMedia, NovelMedia, QAfterFilterCondition>
+      bannerOrPosterEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'bannerOrPoster',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<NovelMedia, NovelMedia, QAfterFilterCondition>
+      bannerOrPosterContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'bannerOrPoster',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<NovelMedia, NovelMedia, QAfterFilterCondition>
+      bannerOrPosterMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'bannerOrPoster',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<NovelMedia, NovelMedia, QAfterFilterCondition>
+      bannerOrPosterIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'bannerOrPoster',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<NovelMedia, NovelMedia, QAfterFilterCondition>
+      bannerOrPosterIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'bannerOrPoster',
         value: '',
       ));
     });
@@ -6458,6 +7042,19 @@ extension NovelMediaQuerySortBy
     });
   }
 
+  QueryBuilder<NovelMedia, NovelMedia, QAfterSortBy> sortByBannerOrPoster() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'bannerOrPoster', Sort.asc);
+    });
+  }
+
+  QueryBuilder<NovelMedia, NovelMedia, QAfterSortBy>
+      sortByBannerOrPosterDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'bannerOrPoster', Sort.desc);
+    });
+  }
+
   QueryBuilder<NovelMedia, NovelMedia, QAfterSortBy> sortByDescription() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'description', Sort.asc);
@@ -6578,6 +7175,19 @@ extension NovelMediaQuerySortThenBy
   QueryBuilder<NovelMedia, NovelMedia, QAfterSortBy> thenByBannerDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'banner', Sort.desc);
+    });
+  }
+
+  QueryBuilder<NovelMedia, NovelMedia, QAfterSortBy> thenByBannerOrPoster() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'bannerOrPoster', Sort.asc);
+    });
+  }
+
+  QueryBuilder<NovelMedia, NovelMedia, QAfterSortBy>
+      thenByBannerOrPosterDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'bannerOrPoster', Sort.desc);
     });
   }
 
@@ -6711,6 +7321,14 @@ extension NovelMediaQueryWhereDistinct
     });
   }
 
+  QueryBuilder<NovelMedia, NovelMedia, QDistinct> distinctByBannerOrPoster(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'bannerOrPoster',
+          caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<NovelMedia, NovelMedia, QDistinct> distinctByDescription(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -6793,6 +7411,12 @@ extension NovelMediaQueryProperty
   QueryBuilder<NovelMedia, String?, QQueryOperations> bannerProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'banner');
+    });
+  }
+
+  QueryBuilder<NovelMedia, String?, QQueryOperations> bannerOrPosterProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'bannerOrPoster');
     });
   }
 

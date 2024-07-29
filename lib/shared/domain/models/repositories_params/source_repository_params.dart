@@ -1,4 +1,5 @@
 import 'package:meiyou/shared/domain/models/extension_category.dart';
+import 'package:meiyou/shared/domain/models/media_content.dart';
 import 'package:meiyou_extensions_lib/models.dart';
 
 class GetEnabledSourcesUseCaseParams {
@@ -59,5 +60,35 @@ class GetMediaDetailsParams extends _SourceIdAndCategory {
     required super.sourceId,
     required super.category,
     required this.media,
+  });
+}
+
+class GetMediaContentListParams extends _SourceIdAndCategory {
+  final IMedia media;
+
+  GetMediaContentListParams({
+    required super.sourceId,
+    required super.category,
+    required this.media,
+  });
+}
+
+class GetMediaLinkListParams extends _SourceIdAndCategory {
+  final IMediaContent content;
+
+  GetMediaLinkListParams({
+    required super.sourceId,
+    required super.category,
+    required this.content,
+  });
+}
+
+class GetMediaAssetsParams extends _SourceIdAndCategory {
+  final MediaLink link;
+
+  GetMediaAssetsParams({
+    required super.sourceId,
+    required super.category,
+    required this.link,
   });
 }

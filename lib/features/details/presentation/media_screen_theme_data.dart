@@ -30,6 +30,11 @@ abstract class MediaScreenThemeData {
   abstract final double? rowSpacing;
   abstract final TextStyle descriptionTextStyle;
   abstract final TextStyle? descriptionLabelTextStyle;
+  abstract final TextStyle metaDataTextStyle;
+  abstract final Color metaDataIconColor;
+  abstract final VisualDensity genreVisualDensity;
+  abstract final ChipThemeData genreChipTheme;
+  abstract final double spacing;
 
   factory MediaScreenThemeData.forSize(
     BuildContext context,
@@ -92,6 +97,19 @@ abstract mixin class _MediaScreenThemDataCommonMixin
 
   @override
   BoxFit get posterFit => BoxFit.fill;
+
+  @override
+  Color get metaDataIconColor => MaterialTheme.disabledButtonColor(_context);
+
+  TextStyle get genreTextStyle;
+
+  @override
+  ChipThemeData get genreChipTheme => ChipThemeData(
+        labelStyle: genreTextStyle.copyWith(
+          color: _colorScheme.primary,
+        ),
+        side: BorderSide(color: _colorScheme.primary),
+      );
 }
 
 final class MediaScreenThemeDataMobile with _MediaScreenThemDataCommonMixin {
@@ -189,6 +207,19 @@ final class MediaScreenThemeDataMobile with _MediaScreenThemDataCommonMixin {
 
   @override
   TextStyle? get descriptionLabelTextStyle => null;
+
+  @override
+  TextStyle get metaDataTextStyle => descriptionTextStyle;
+
+  @override
+  VisualDensity get genreVisualDensity =>
+      const VisualDensity(horizontal: -4, vertical: -2);
+
+  @override
+  TextStyle get genreTextStyle => _textTheme.bodySmall!;
+
+  @override
+  double get spacing => 8.0;
 }
 
 final class MediaScreenThemeDataDesktop with _MediaScreenThemDataCommonMixin {
@@ -233,7 +264,9 @@ final class MediaScreenThemeDataDesktop with _MediaScreenThemDataCommonMixin {
   MainAxisAlignment get titleMainAxisAlignment => MainAxisAlignment.center;
 
   @override
-  TextStyle get titleTextStyle => _textTheme.headlineMedium!.copyWith();
+  TextStyle get titleTextStyle => _textTheme.headlineMedium!.copyWith(
+        fontWeight: FontWeight.w600,
+      );
 
   @override
   ButtonStyle get buttonStyle => ButtonStyle(
@@ -299,8 +332,20 @@ final class MediaScreenThemeDataDesktop with _MediaScreenThemDataCommonMixin {
   double? get rowSpacing => 15;
 
   @override
-  TextStyle get descriptionTextStyle => _textTheme.bodyMedium!;
+  TextStyle get descriptionTextStyle => _textTheme.bodyLarge!;
 
   @override
   TextStyle get descriptionLabelTextStyle => _textTheme.titleLarge!;
+
+  @override
+  TextStyle get metaDataTextStyle => _textTheme.bodyLarge!;
+
+  @override
+  VisualDensity get genreVisualDensity => VisualDensity.compact;
+
+  @override
+  TextStyle get genreTextStyle => _textTheme.bodyMedium!;
+
+  @override
+  double get spacing => 16.0;
 }

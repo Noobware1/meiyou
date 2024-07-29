@@ -1,5 +1,6 @@
 import 'package:meiyou/shared/domain/models/extension_category.dart';
 import 'package:meiyou/shared/domain/models/media.dart';
+import 'package:meiyou_extensions_lib/models.dart';
 
 class NetworkMediaToLocalParams {
   final Media media;
@@ -54,5 +55,15 @@ class UpdateMediaParams {
 
   UpdateMediaParams({
     required this.media,
+  });
+}
+
+class UpdateMediaFromSourceParams {
+  final IMedia networkMedia;
+  final Media localMedia;
+
+  UpdateMediaFromSourceParams({
+    required this.networkMedia,
+    required this.localMedia,
   });
 }

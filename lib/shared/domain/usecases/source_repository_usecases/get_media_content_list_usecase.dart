@@ -4,13 +4,14 @@ import 'package:meiyou/shared/domain/repositories/source_repository.dart';
 import 'package:meiyou_extensions_lib/models.dart';
 import 'package:nice_dart/nice_dart.dart';
 
-class GetSearchPageUseCase
-    extends AsyncUseCase<SearchPage, GetSearchPageParams> {
-  final SourceRepository _sourceRepository;
+class GetMediaContentListUseCase
+    extends AsyncUseCase<List<IMediaContent>, GetMediaContentListParams> {
+  final SourceRepository _repository;
 
-  GetSearchPageUseCase(this._sourceRepository);
+  GetMediaContentListUseCase(this._repository);
 
   @override
-  Future<Result<SearchPage>> call(GetSearchPageParams params) =>
-      _sourceRepository.getSearchPage(params);
+  Future<Result<List<IMediaContent>>> call(GetMediaContentListParams params) {
+    return _repository.getMediaContentList(params);
+  }
 }

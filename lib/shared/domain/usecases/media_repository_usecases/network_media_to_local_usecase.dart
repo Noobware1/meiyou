@@ -5,7 +5,7 @@ import 'package:meiyou/shared/domain/repositories/media_repository.dart';
 import 'package:nice_dart/nice_dart.dart';
 
 class NetworkMediaToLocalUseCase
-    extends AsyncUsecase<Media, NetworkMediaToLocalParams> {
+    extends AsyncUseCase<Media, NetworkMediaToLocalParams> {
   final MediaRepository _mediaRepository;
 
   NetworkMediaToLocalUseCase(this._mediaRepository);

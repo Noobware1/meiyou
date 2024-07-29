@@ -217,6 +217,44 @@ class SourceRepositoryImpl implements SourceRepository {
       return source.getMediaDetails(media);
     });
   }
+
+  @override
+  Future<Result<List<IMediaContent>>> getMediaContentList(
+      GetMediaContentListParams params) {
+    final sourceId = params.sourceId;
+    final category = params.category;
+    final media = params.media;
+
+    return runAsyncCatching(() {
+      final source = _getSourceOrThrow(sourceId, category);
+      return source.getMediaContentList(media);
+    });
+  }
+
+  @override
+  Future<Result<List<MediaLink>>> getMediaLinkList(
+      GetMediaLinkListParams params) {
+    final sourceId = params.sourceId;
+    final category = params.category;
+    final content = params.content;
+
+    return runAsyncCatching(() {
+      final source = _getSourceOrThrow(sourceId, category);
+      return source.getMediaLinkList(content);
+    });
+  }
+
+  @override
+  Future<Result<MediaAsset?>> getMediaAsset(GetMediaAssetsParams params) {
+    final sourceId = params.sourceId;
+    final category = params.category;
+    final link = params.link;
+
+    return runAsyncCatching(() {
+      final source = _getSourceOrThrow(sourceId, category);
+      return source.getMediaAsset(link);
+    });
+  }
 }
 
 extension on Source {
