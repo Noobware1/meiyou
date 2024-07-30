@@ -22,15 +22,15 @@ const VideoMediaSchema = CollectionSchema(
       name: r'banner',
       type: IsarType.string,
     ),
-    r'bannerOrPoster': PropertySchema(
-      id: 1,
-      name: r'bannerOrPoster',
-      type: IsarType.string,
-    ),
     r'description': PropertySchema(
-      id: 2,
+      id: 1,
       name: r'description',
       type: IsarType.string,
+    ),
+    r'favorite': PropertySchema(
+      id: 2,
+      name: r'favorite',
+      type: IsarType.bool,
     ),
     r'format': PropertySchema(
       id: 3,
@@ -112,12 +112,6 @@ int _videoMediaEstimateSize(
     }
   }
   {
-    final value = object.bannerOrPoster;
-    if (value != null) {
-      bytesCount += 3 + value.length * 3;
-    }
-  }
-  {
     final value = object.description;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
@@ -165,8 +159,8 @@ void _videoMediaSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeString(offsets[0], object.banner);
-  writer.writeString(offsets[1], object.bannerOrPoster);
-  writer.writeString(offsets[2], object.description);
+  writer.writeString(offsets[1], object.description);
+  writer.writeBool(offsets[2], object.favorite);
   writer.writeByte(offsets[3], object.format.index);
   writer.writeStringList(offsets[4], object.genres);
   writer.writeBool(offsets[5], object.initalized);
@@ -187,7 +181,8 @@ VideoMedia _videoMediaDeserialize(
 ) {
   final object = VideoMedia(
     banner: reader.readStringOrNull(offsets[0]),
-    description: reader.readStringOrNull(offsets[2]),
+    description: reader.readStringOrNull(offsets[1]),
+    favorite: reader.readBool(offsets[2]),
     format: _VideoMediaformatValueEnumMap[reader.readByteOrNull(offsets[3])] ??
         MediaFormat.others,
     genres: reader.readStringList(offsets[4]),
@@ -197,7 +192,7 @@ VideoMedia _videoMediaDeserialize(
     score: reader.readDoubleOrNull(offsets[8]),
     sourceId: reader.readLong(offsets[9]),
     status: _VideoMediastatusValueEnumMap[reader.readByteOrNull(offsets[10])] ??
-        Status.unknown,
+        Status.completed,
     title: reader.readStringOrNull(offsets[11]) ?? '',
     url: reader.readStringOrNull(offsets[12]) ?? '',
   );
@@ -217,7 +212,7 @@ P _videoMediaDeserializeProp<P>(
     case 1:
       return (reader.readStringOrNull(offset)) as P;
     case 2:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 3:
       return (_VideoMediaformatValueEnumMap[reader.readByteOrNull(offset)] ??
           MediaFormat.others) as P;
@@ -235,7 +230,7 @@ P _videoMediaDeserializeProp<P>(
       return (reader.readLong(offset)) as P;
     case 10:
       return (_VideoMediastatusValueEnumMap[reader.readByteOrNull(offset)] ??
-          Status.unknown) as P;
+          Status.completed) as P;
     case 11:
       return (reader.readStringOrNull(offset) ?? '') as P;
     case 12:
@@ -532,160 +527,6 @@ extension VideoMediaQueryFilter
   }
 
   QueryBuilder<VideoMedia, VideoMedia, QAfterFilterCondition>
-      bannerOrPosterIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'bannerOrPoster',
-      ));
-    });
-  }
-
-  QueryBuilder<VideoMedia, VideoMedia, QAfterFilterCondition>
-      bannerOrPosterIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'bannerOrPoster',
-      ));
-    });
-  }
-
-  QueryBuilder<VideoMedia, VideoMedia, QAfterFilterCondition>
-      bannerOrPosterEqualTo(
-    String? value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'bannerOrPoster',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<VideoMedia, VideoMedia, QAfterFilterCondition>
-      bannerOrPosterGreaterThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'bannerOrPoster',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<VideoMedia, VideoMedia, QAfterFilterCondition>
-      bannerOrPosterLessThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'bannerOrPoster',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<VideoMedia, VideoMedia, QAfterFilterCondition>
-      bannerOrPosterBetween(
-    String? lower,
-    String? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'bannerOrPoster',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<VideoMedia, VideoMedia, QAfterFilterCondition>
-      bannerOrPosterStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'bannerOrPoster',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<VideoMedia, VideoMedia, QAfterFilterCondition>
-      bannerOrPosterEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'bannerOrPoster',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<VideoMedia, VideoMedia, QAfterFilterCondition>
-      bannerOrPosterContains(String value, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'bannerOrPoster',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<VideoMedia, VideoMedia, QAfterFilterCondition>
-      bannerOrPosterMatches(String pattern, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'bannerOrPoster',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<VideoMedia, VideoMedia, QAfterFilterCondition>
-      bannerOrPosterIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'bannerOrPoster',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<VideoMedia, VideoMedia, QAfterFilterCondition>
-      bannerOrPosterIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'bannerOrPoster',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<VideoMedia, VideoMedia, QAfterFilterCondition>
       descriptionIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -835,6 +676,16 @@ extension VideoMediaQueryFilter
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'description',
         value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<VideoMedia, VideoMedia, QAfterFilterCondition> favoriteEqualTo(
+      bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'favorite',
+        value: value,
       ));
     });
   }
@@ -2054,19 +1905,6 @@ extension VideoMediaQuerySortBy
     });
   }
 
-  QueryBuilder<VideoMedia, VideoMedia, QAfterSortBy> sortByBannerOrPoster() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'bannerOrPoster', Sort.asc);
-    });
-  }
-
-  QueryBuilder<VideoMedia, VideoMedia, QAfterSortBy>
-      sortByBannerOrPosterDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'bannerOrPoster', Sort.desc);
-    });
-  }
-
   QueryBuilder<VideoMedia, VideoMedia, QAfterSortBy> sortByDescription() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'description', Sort.asc);
@@ -2076,6 +1914,18 @@ extension VideoMediaQuerySortBy
   QueryBuilder<VideoMedia, VideoMedia, QAfterSortBy> sortByDescriptionDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'description', Sort.desc);
+    });
+  }
+
+  QueryBuilder<VideoMedia, VideoMedia, QAfterSortBy> sortByFavorite() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'favorite', Sort.asc);
+    });
+  }
+
+  QueryBuilder<VideoMedia, VideoMedia, QAfterSortBy> sortByFavoriteDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'favorite', Sort.desc);
     });
   }
 
@@ -2190,19 +2040,6 @@ extension VideoMediaQuerySortThenBy
     });
   }
 
-  QueryBuilder<VideoMedia, VideoMedia, QAfterSortBy> thenByBannerOrPoster() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'bannerOrPoster', Sort.asc);
-    });
-  }
-
-  QueryBuilder<VideoMedia, VideoMedia, QAfterSortBy>
-      thenByBannerOrPosterDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'bannerOrPoster', Sort.desc);
-    });
-  }
-
   QueryBuilder<VideoMedia, VideoMedia, QAfterSortBy> thenByDescription() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'description', Sort.asc);
@@ -2212,6 +2049,18 @@ extension VideoMediaQuerySortThenBy
   QueryBuilder<VideoMedia, VideoMedia, QAfterSortBy> thenByDescriptionDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'description', Sort.desc);
+    });
+  }
+
+  QueryBuilder<VideoMedia, VideoMedia, QAfterSortBy> thenByFavorite() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'favorite', Sort.asc);
+    });
+  }
+
+  QueryBuilder<VideoMedia, VideoMedia, QAfterSortBy> thenByFavoriteDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'favorite', Sort.desc);
     });
   }
 
@@ -2333,18 +2182,16 @@ extension VideoMediaQueryWhereDistinct
     });
   }
 
-  QueryBuilder<VideoMedia, VideoMedia, QDistinct> distinctByBannerOrPoster(
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'bannerOrPoster',
-          caseSensitive: caseSensitive);
-    });
-  }
-
   QueryBuilder<VideoMedia, VideoMedia, QDistinct> distinctByDescription(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'description', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<VideoMedia, VideoMedia, QDistinct> distinctByFavorite() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'favorite');
     });
   }
 
@@ -2426,15 +2273,15 @@ extension VideoMediaQueryProperty
     });
   }
 
-  QueryBuilder<VideoMedia, String?, QQueryOperations> bannerOrPosterProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'bannerOrPoster');
-    });
-  }
-
   QueryBuilder<VideoMedia, String?, QQueryOperations> descriptionProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'description');
+    });
+  }
+
+  QueryBuilder<VideoMedia, bool, QQueryOperations> favoriteProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'favorite');
     });
   }
 
@@ -2516,15 +2363,15 @@ const MangaMediaSchema = CollectionSchema(
       name: r'banner',
       type: IsarType.string,
     ),
-    r'bannerOrPoster': PropertySchema(
-      id: 1,
-      name: r'bannerOrPoster',
-      type: IsarType.string,
-    ),
     r'description': PropertySchema(
-      id: 2,
+      id: 1,
       name: r'description',
       type: IsarType.string,
+    ),
+    r'favorite': PropertySchema(
+      id: 2,
+      name: r'favorite',
+      type: IsarType.bool,
     ),
     r'format': PropertySchema(
       id: 3,
@@ -2606,12 +2453,6 @@ int _mangaMediaEstimateSize(
     }
   }
   {
-    final value = object.bannerOrPoster;
-    if (value != null) {
-      bytesCount += 3 + value.length * 3;
-    }
-  }
-  {
     final value = object.description;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
@@ -2659,8 +2500,8 @@ void _mangaMediaSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeString(offsets[0], object.banner);
-  writer.writeString(offsets[1], object.bannerOrPoster);
-  writer.writeString(offsets[2], object.description);
+  writer.writeString(offsets[1], object.description);
+  writer.writeBool(offsets[2], object.favorite);
   writer.writeByte(offsets[3], object.format.index);
   writer.writeStringList(offsets[4], object.genres);
   writer.writeBool(offsets[5], object.initalized);
@@ -2681,7 +2522,8 @@ MangaMedia _mangaMediaDeserialize(
 ) {
   final object = MangaMedia(
     banner: reader.readStringOrNull(offsets[0]),
-    description: reader.readStringOrNull(offsets[2]),
+    description: reader.readStringOrNull(offsets[1]),
+    favorite: reader.readBool(offsets[2]),
     format: _MangaMediaformatValueEnumMap[reader.readByteOrNull(offsets[3])] ??
         MediaFormat.others,
     genres: reader.readStringList(offsets[4]),
@@ -2691,7 +2533,7 @@ MangaMedia _mangaMediaDeserialize(
     score: reader.readDoubleOrNull(offsets[8]),
     sourceId: reader.readLong(offsets[9]),
     status: _MangaMediastatusValueEnumMap[reader.readByteOrNull(offsets[10])] ??
-        Status.unknown,
+        Status.completed,
     title: reader.readStringOrNull(offsets[11]) ?? '',
     url: reader.readStringOrNull(offsets[12]) ?? '',
   );
@@ -2711,7 +2553,7 @@ P _mangaMediaDeserializeProp<P>(
     case 1:
       return (reader.readStringOrNull(offset)) as P;
     case 2:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 3:
       return (_MangaMediaformatValueEnumMap[reader.readByteOrNull(offset)] ??
           MediaFormat.others) as P;
@@ -2729,7 +2571,7 @@ P _mangaMediaDeserializeProp<P>(
       return (reader.readLong(offset)) as P;
     case 10:
       return (_MangaMediastatusValueEnumMap[reader.readByteOrNull(offset)] ??
-          Status.unknown) as P;
+          Status.completed) as P;
     case 11:
       return (reader.readStringOrNull(offset) ?? '') as P;
     case 12:
@@ -3026,160 +2868,6 @@ extension MangaMediaQueryFilter
   }
 
   QueryBuilder<MangaMedia, MangaMedia, QAfterFilterCondition>
-      bannerOrPosterIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'bannerOrPoster',
-      ));
-    });
-  }
-
-  QueryBuilder<MangaMedia, MangaMedia, QAfterFilterCondition>
-      bannerOrPosterIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'bannerOrPoster',
-      ));
-    });
-  }
-
-  QueryBuilder<MangaMedia, MangaMedia, QAfterFilterCondition>
-      bannerOrPosterEqualTo(
-    String? value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'bannerOrPoster',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<MangaMedia, MangaMedia, QAfterFilterCondition>
-      bannerOrPosterGreaterThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'bannerOrPoster',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<MangaMedia, MangaMedia, QAfterFilterCondition>
-      bannerOrPosterLessThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'bannerOrPoster',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<MangaMedia, MangaMedia, QAfterFilterCondition>
-      bannerOrPosterBetween(
-    String? lower,
-    String? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'bannerOrPoster',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<MangaMedia, MangaMedia, QAfterFilterCondition>
-      bannerOrPosterStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'bannerOrPoster',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<MangaMedia, MangaMedia, QAfterFilterCondition>
-      bannerOrPosterEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'bannerOrPoster',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<MangaMedia, MangaMedia, QAfterFilterCondition>
-      bannerOrPosterContains(String value, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'bannerOrPoster',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<MangaMedia, MangaMedia, QAfterFilterCondition>
-      bannerOrPosterMatches(String pattern, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'bannerOrPoster',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<MangaMedia, MangaMedia, QAfterFilterCondition>
-      bannerOrPosterIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'bannerOrPoster',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<MangaMedia, MangaMedia, QAfterFilterCondition>
-      bannerOrPosterIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'bannerOrPoster',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<MangaMedia, MangaMedia, QAfterFilterCondition>
       descriptionIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -3329,6 +3017,16 @@ extension MangaMediaQueryFilter
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'description',
         value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<MangaMedia, MangaMedia, QAfterFilterCondition> favoriteEqualTo(
+      bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'favorite',
+        value: value,
       ));
     });
   }
@@ -4548,19 +4246,6 @@ extension MangaMediaQuerySortBy
     });
   }
 
-  QueryBuilder<MangaMedia, MangaMedia, QAfterSortBy> sortByBannerOrPoster() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'bannerOrPoster', Sort.asc);
-    });
-  }
-
-  QueryBuilder<MangaMedia, MangaMedia, QAfterSortBy>
-      sortByBannerOrPosterDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'bannerOrPoster', Sort.desc);
-    });
-  }
-
   QueryBuilder<MangaMedia, MangaMedia, QAfterSortBy> sortByDescription() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'description', Sort.asc);
@@ -4570,6 +4255,18 @@ extension MangaMediaQuerySortBy
   QueryBuilder<MangaMedia, MangaMedia, QAfterSortBy> sortByDescriptionDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'description', Sort.desc);
+    });
+  }
+
+  QueryBuilder<MangaMedia, MangaMedia, QAfterSortBy> sortByFavorite() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'favorite', Sort.asc);
+    });
+  }
+
+  QueryBuilder<MangaMedia, MangaMedia, QAfterSortBy> sortByFavoriteDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'favorite', Sort.desc);
     });
   }
 
@@ -4684,19 +4381,6 @@ extension MangaMediaQuerySortThenBy
     });
   }
 
-  QueryBuilder<MangaMedia, MangaMedia, QAfterSortBy> thenByBannerOrPoster() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'bannerOrPoster', Sort.asc);
-    });
-  }
-
-  QueryBuilder<MangaMedia, MangaMedia, QAfterSortBy>
-      thenByBannerOrPosterDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'bannerOrPoster', Sort.desc);
-    });
-  }
-
   QueryBuilder<MangaMedia, MangaMedia, QAfterSortBy> thenByDescription() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'description', Sort.asc);
@@ -4706,6 +4390,18 @@ extension MangaMediaQuerySortThenBy
   QueryBuilder<MangaMedia, MangaMedia, QAfterSortBy> thenByDescriptionDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'description', Sort.desc);
+    });
+  }
+
+  QueryBuilder<MangaMedia, MangaMedia, QAfterSortBy> thenByFavorite() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'favorite', Sort.asc);
+    });
+  }
+
+  QueryBuilder<MangaMedia, MangaMedia, QAfterSortBy> thenByFavoriteDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'favorite', Sort.desc);
     });
   }
 
@@ -4827,18 +4523,16 @@ extension MangaMediaQueryWhereDistinct
     });
   }
 
-  QueryBuilder<MangaMedia, MangaMedia, QDistinct> distinctByBannerOrPoster(
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'bannerOrPoster',
-          caseSensitive: caseSensitive);
-    });
-  }
-
   QueryBuilder<MangaMedia, MangaMedia, QDistinct> distinctByDescription(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'description', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<MangaMedia, MangaMedia, QDistinct> distinctByFavorite() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'favorite');
     });
   }
 
@@ -4920,15 +4614,15 @@ extension MangaMediaQueryProperty
     });
   }
 
-  QueryBuilder<MangaMedia, String?, QQueryOperations> bannerOrPosterProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'bannerOrPoster');
-    });
-  }
-
   QueryBuilder<MangaMedia, String?, QQueryOperations> descriptionProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'description');
+    });
+  }
+
+  QueryBuilder<MangaMedia, bool, QQueryOperations> favoriteProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'favorite');
     });
   }
 
@@ -5010,15 +4704,15 @@ const NovelMediaSchema = CollectionSchema(
       name: r'banner',
       type: IsarType.string,
     ),
-    r'bannerOrPoster': PropertySchema(
-      id: 1,
-      name: r'bannerOrPoster',
-      type: IsarType.string,
-    ),
     r'description': PropertySchema(
-      id: 2,
+      id: 1,
       name: r'description',
       type: IsarType.string,
+    ),
+    r'favorite': PropertySchema(
+      id: 2,
+      name: r'favorite',
+      type: IsarType.bool,
     ),
     r'format': PropertySchema(
       id: 3,
@@ -5100,12 +4794,6 @@ int _novelMediaEstimateSize(
     }
   }
   {
-    final value = object.bannerOrPoster;
-    if (value != null) {
-      bytesCount += 3 + value.length * 3;
-    }
-  }
-  {
     final value = object.description;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
@@ -5153,8 +4841,8 @@ void _novelMediaSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeString(offsets[0], object.banner);
-  writer.writeString(offsets[1], object.bannerOrPoster);
-  writer.writeString(offsets[2], object.description);
+  writer.writeString(offsets[1], object.description);
+  writer.writeBool(offsets[2], object.favorite);
   writer.writeByte(offsets[3], object.format.index);
   writer.writeStringList(offsets[4], object.genres);
   writer.writeBool(offsets[5], object.initalized);
@@ -5175,7 +4863,8 @@ NovelMedia _novelMediaDeserialize(
 ) {
   final object = NovelMedia(
     banner: reader.readStringOrNull(offsets[0]),
-    description: reader.readStringOrNull(offsets[2]),
+    description: reader.readStringOrNull(offsets[1]),
+    favorite: reader.readBool(offsets[2]),
     format: _NovelMediaformatValueEnumMap[reader.readByteOrNull(offsets[3])] ??
         MediaFormat.others,
     genres: reader.readStringList(offsets[4]),
@@ -5185,7 +4874,7 @@ NovelMedia _novelMediaDeserialize(
     score: reader.readDoubleOrNull(offsets[8]),
     sourceId: reader.readLong(offsets[9]),
     status: _NovelMediastatusValueEnumMap[reader.readByteOrNull(offsets[10])] ??
-        Status.unknown,
+        Status.completed,
     title: reader.readStringOrNull(offsets[11]) ?? '',
     url: reader.readStringOrNull(offsets[12]) ?? '',
   );
@@ -5205,7 +4894,7 @@ P _novelMediaDeserializeProp<P>(
     case 1:
       return (reader.readStringOrNull(offset)) as P;
     case 2:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 3:
       return (_NovelMediaformatValueEnumMap[reader.readByteOrNull(offset)] ??
           MediaFormat.others) as P;
@@ -5223,7 +4912,7 @@ P _novelMediaDeserializeProp<P>(
       return (reader.readLong(offset)) as P;
     case 10:
       return (_NovelMediastatusValueEnumMap[reader.readByteOrNull(offset)] ??
-          Status.unknown) as P;
+          Status.completed) as P;
     case 11:
       return (reader.readStringOrNull(offset) ?? '') as P;
     case 12:
@@ -5520,160 +5209,6 @@ extension NovelMediaQueryFilter
   }
 
   QueryBuilder<NovelMedia, NovelMedia, QAfterFilterCondition>
-      bannerOrPosterIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'bannerOrPoster',
-      ));
-    });
-  }
-
-  QueryBuilder<NovelMedia, NovelMedia, QAfterFilterCondition>
-      bannerOrPosterIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'bannerOrPoster',
-      ));
-    });
-  }
-
-  QueryBuilder<NovelMedia, NovelMedia, QAfterFilterCondition>
-      bannerOrPosterEqualTo(
-    String? value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'bannerOrPoster',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<NovelMedia, NovelMedia, QAfterFilterCondition>
-      bannerOrPosterGreaterThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'bannerOrPoster',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<NovelMedia, NovelMedia, QAfterFilterCondition>
-      bannerOrPosterLessThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'bannerOrPoster',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<NovelMedia, NovelMedia, QAfterFilterCondition>
-      bannerOrPosterBetween(
-    String? lower,
-    String? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'bannerOrPoster',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<NovelMedia, NovelMedia, QAfterFilterCondition>
-      bannerOrPosterStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'bannerOrPoster',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<NovelMedia, NovelMedia, QAfterFilterCondition>
-      bannerOrPosterEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'bannerOrPoster',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<NovelMedia, NovelMedia, QAfterFilterCondition>
-      bannerOrPosterContains(String value, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'bannerOrPoster',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<NovelMedia, NovelMedia, QAfterFilterCondition>
-      bannerOrPosterMatches(String pattern, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'bannerOrPoster',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<NovelMedia, NovelMedia, QAfterFilterCondition>
-      bannerOrPosterIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'bannerOrPoster',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<NovelMedia, NovelMedia, QAfterFilterCondition>
-      bannerOrPosterIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'bannerOrPoster',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<NovelMedia, NovelMedia, QAfterFilterCondition>
       descriptionIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -5823,6 +5358,16 @@ extension NovelMediaQueryFilter
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'description',
         value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<NovelMedia, NovelMedia, QAfterFilterCondition> favoriteEqualTo(
+      bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'favorite',
+        value: value,
       ));
     });
   }
@@ -7042,19 +6587,6 @@ extension NovelMediaQuerySortBy
     });
   }
 
-  QueryBuilder<NovelMedia, NovelMedia, QAfterSortBy> sortByBannerOrPoster() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'bannerOrPoster', Sort.asc);
-    });
-  }
-
-  QueryBuilder<NovelMedia, NovelMedia, QAfterSortBy>
-      sortByBannerOrPosterDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'bannerOrPoster', Sort.desc);
-    });
-  }
-
   QueryBuilder<NovelMedia, NovelMedia, QAfterSortBy> sortByDescription() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'description', Sort.asc);
@@ -7064,6 +6596,18 @@ extension NovelMediaQuerySortBy
   QueryBuilder<NovelMedia, NovelMedia, QAfterSortBy> sortByDescriptionDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'description', Sort.desc);
+    });
+  }
+
+  QueryBuilder<NovelMedia, NovelMedia, QAfterSortBy> sortByFavorite() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'favorite', Sort.asc);
+    });
+  }
+
+  QueryBuilder<NovelMedia, NovelMedia, QAfterSortBy> sortByFavoriteDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'favorite', Sort.desc);
     });
   }
 
@@ -7178,19 +6722,6 @@ extension NovelMediaQuerySortThenBy
     });
   }
 
-  QueryBuilder<NovelMedia, NovelMedia, QAfterSortBy> thenByBannerOrPoster() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'bannerOrPoster', Sort.asc);
-    });
-  }
-
-  QueryBuilder<NovelMedia, NovelMedia, QAfterSortBy>
-      thenByBannerOrPosterDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'bannerOrPoster', Sort.desc);
-    });
-  }
-
   QueryBuilder<NovelMedia, NovelMedia, QAfterSortBy> thenByDescription() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'description', Sort.asc);
@@ -7200,6 +6731,18 @@ extension NovelMediaQuerySortThenBy
   QueryBuilder<NovelMedia, NovelMedia, QAfterSortBy> thenByDescriptionDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'description', Sort.desc);
+    });
+  }
+
+  QueryBuilder<NovelMedia, NovelMedia, QAfterSortBy> thenByFavorite() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'favorite', Sort.asc);
+    });
+  }
+
+  QueryBuilder<NovelMedia, NovelMedia, QAfterSortBy> thenByFavoriteDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'favorite', Sort.desc);
     });
   }
 
@@ -7321,18 +6864,16 @@ extension NovelMediaQueryWhereDistinct
     });
   }
 
-  QueryBuilder<NovelMedia, NovelMedia, QDistinct> distinctByBannerOrPoster(
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'bannerOrPoster',
-          caseSensitive: caseSensitive);
-    });
-  }
-
   QueryBuilder<NovelMedia, NovelMedia, QDistinct> distinctByDescription(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'description', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<NovelMedia, NovelMedia, QDistinct> distinctByFavorite() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'favorite');
     });
   }
 
@@ -7414,15 +6955,15 @@ extension NovelMediaQueryProperty
     });
   }
 
-  QueryBuilder<NovelMedia, String?, QQueryOperations> bannerOrPosterProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'bannerOrPoster');
-    });
-  }
-
   QueryBuilder<NovelMedia, String?, QQueryOperations> descriptionProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'description');
+    });
+  }
+
+  QueryBuilder<NovelMedia, bool, QQueryOperations> favoriteProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'favorite');
     });
   }
 

@@ -1,0 +1,4 @@
+enum ContentListViewType {
+  list,
+  grid;
+}

@@ -43,7 +43,7 @@ class CombineStream<T, R> extends StreamView<R> {
   CombineStream(
     Iterable<Stream<T>> streams,
     R Function(List<T> values) combiner, {
-    Iterable<T>? intialData,
+    required List<T> intialData,
   }) : super(
           _buildController(streams, combiner, initialData: intialData).stream,
         );
@@ -52,10 +52,12 @@ class CombineStream<T, R> extends StreamView<R> {
   /// yields a [List] of all latest events emitted by the provided [Iterable] of [Stream].
   static CombineStream<T, List<T>> list<T>(
     Iterable<Stream<T>> streams,
+    List<T> intialData,
   ) =>
       CombineStream<T, List<T>>(
         streams,
         (List<T> values) => values,
+        intialData: intialData,
       );
 
   /// Constructs a [CombineStream] from a pair of [Stream]s
@@ -65,12 +67,13 @@ class CombineStream<T, R> extends StreamView<R> {
     Stream<A> streamOne,
     Stream<B> streamTwo,
     R Function(A a, B b) combiner, {
-    A? initalDataOne,
-    B? initalDataTwo,
+    required A initalDataOne,
+    required B initalDataTwo,
   }) =>
       CombineStream<dynamic, R>(
         [streamOne, streamTwo],
         (List<dynamic> values) => combiner(values[0] as A, values[1] as B),
+        intialData: [initalDataOne, initalDataTwo],
       );
 
   /// Constructs a [CombineStream] from 3 [Stream]s
@@ -81,9 +84,9 @@ class CombineStream<T, R> extends StreamView<R> {
     Stream<B> streamB,
     Stream<C> streamC,
     R Function(A a, B b, C c) combiner, {
-    A? initalDataA,
-    B? initalDataB,
-    C? initalDataC,
+    required A initalDataA,
+    required B initalDataB,
+    required C initalDataC,
   }) =>
       CombineStream<dynamic, R>(
         [streamA, streamB, streamC],
@@ -106,10 +109,10 @@ class CombineStream<T, R> extends StreamView<R> {
     Stream<C> streamC,
     Stream<D> streamD,
     R Function(A a, B b, C c, D d) combiner, {
-    A? initalDataA,
-    B? initalDataB,
-    C? initalDataC,
-    D? initalDataD,
+    required A initalDataA,
+    required B initalDataB,
+    required C initalDataC,
+    required D initalDataD,
   }) =>
       CombineStream<dynamic, R>(
         [streamA, streamB, streamC, streamD],
@@ -134,11 +137,11 @@ class CombineStream<T, R> extends StreamView<R> {
     Stream<D> streamD,
     Stream<E> streamE,
     R Function(A a, B b, C c, D d, E e) combiner, {
-    A? initalDataA,
-    B? initalDataB,
-    C? initalDataC,
-    D? initalDataD,
-    E? initalDataE,
+    required A initalDataA,
+    required B initalDataB,
+    required C initalDataC,
+    required D initalDataD,
+    required E initalDataE,
   }) =>
       CombineStream<dynamic, R>(
         [streamA, streamB, streamC, streamD, streamE],
@@ -171,12 +174,12 @@ class CombineStream<T, R> extends StreamView<R> {
     Stream<E> streamE,
     Stream<F> streamF,
     R Function(A a, B b, C c, D d, E e, F f) combiner, {
-    A? initalDataA,
-    B? initalDataB,
-    C? initalDataC,
-    D? initalDataD,
-    E? initalDataE,
-    F? initalDataF,
+    required A initalDataA,
+    required B initalDataB,
+    required C initalDataC,
+    required D initalDataD,
+    required E initalDataE,
+    required F initalDataF,
   }) =>
       CombineStream<dynamic, R>(
         [streamA, streamB, streamC, streamD, streamE, streamF],
@@ -212,13 +215,13 @@ class CombineStream<T, R> extends StreamView<R> {
     Stream<F> streamF,
     Stream<G> streamG,
     R Function(A a, B b, C c, D d, E e, F f, G g) combiner, {
-    A? initalDataA,
-    B? initalDataB,
-    C? initalDataC,
-    D? initalDataD,
-    E? initalDataE,
-    F? initalDataF,
-    G? initalDataG,
+    required A initalDataA,
+    required B initalDataB,
+    required C initalDataC,
+    required D initalDataD,
+    required E initalDataE,
+    required F initalDataF,
+    required G initalDataG,
   }) =>
       CombineStream<dynamic, R>(
         [streamA, streamB, streamC, streamD, streamE, streamF, streamG],
@@ -257,14 +260,14 @@ class CombineStream<T, R> extends StreamView<R> {
     Stream<G> streamG,
     Stream<H> streamH,
     R Function(A a, B b, C c, D d, E e, F f, G g, H h) combiner, {
-    A? initalDataA,
-    B? initalDataB,
-    C? initalDataC,
-    D? initalDataD,
-    E? initalDataE,
-    F? initalDataF,
-    G? initalDataG,
-    H? initalDataH,
+    required A initalDataA,
+    required B initalDataB,
+    required C initalDataC,
+    required D initalDataD,
+    required E initalDataE,
+    required F initalDataF,
+    required G initalDataG,
+    required H initalDataH,
   }) =>
       CombineStream<dynamic, R>(
         [
@@ -315,15 +318,15 @@ class CombineStream<T, R> extends StreamView<R> {
     Stream<H> streamH,
     Stream<I> streamI,
     R Function(A a, B b, C c, D d, E e, F f, G g, H h, I i) combiner, {
-    A? initalDataA,
-    B? initalDataB,
-    C? initalDataC,
-    D? initalDataD,
-    E? initalDataE,
-    F? initalDataF,
-    G? initalDataG,
-    H? initalDataH,
-    I? initalDataI,
+    required A initalDataA,
+    required B initalDataB,
+    required C initalDataC,
+    required D initalDataD,
+    required E initalDataE,
+    required F initalDataF,
+    required G initalDataG,
+    required H initalDataH,
+    required I initalDataI,
   }) =>
       CombineStream<dynamic, R>(
         [
@@ -366,8 +369,9 @@ class CombineStream<T, R> extends StreamView<R> {
   static StreamController<R> _buildController<T, R>(
     Iterable<Stream<T>> streams,
     R Function(List<T> values) combiner, {
-    Iterable<T>? initialData,
+    required List<T> initialData,
   }) {
+    assert(streams.length == initialData.length);
     final controller = StreamController<R>(sync: true);
     late List<StreamSubscription<T>> subscriptions;
     List<T?>? values;
@@ -389,6 +393,7 @@ class CombineStream<T, R> extends StreamView<R> {
             }
 
             values![index] = value;
+
             if (values!.contains(null)) {
               return;
             }
@@ -411,10 +416,8 @@ class CombineStream<T, R> extends StreamView<R> {
       } else {
         values = List<T?>.filled(subscriptions.length, null);
 
-        if (initialData != null) {
-          for (var i = 0; i < initialData.length; i++) {
-            values![i] = initialData.get(i);
-          }
+        for (var i = 0; i < initialData.length; i++) {
+          values![i] = initialData[i];
         }
       }
     };

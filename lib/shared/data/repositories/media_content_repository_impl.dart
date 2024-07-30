@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:isar/isar.dart';
 import 'package:meiyou/core/data_base/data_base.dart';
+import 'package:meiyou/core/utils/exceptions/no_content_exception.dart';
 import 'package:meiyou/shared/domain/models/media.dart';
 import 'package:meiyou/shared/domain/models/media_content.dart';
 import 'package:meiyou/shared/domain/models/repositories_params/media_content_repository_params.dart';
@@ -15,38 +16,20 @@ class MediaContentRepositoryImpl implements MediaContentRepository {
 
   MediaContentRepositoryImpl(this._dataBase);
 
-  List<MediaContent> mapContentList(MapContentListParams params) {
-    final contentList = params.contentList;
-    final category = params.category;
-    final mediaId = params.mediaId;
-
-    return contentList.mapListIndexed(
-      (index, content) => MediaContent(
-        category: category,
-        mediaId: mediaId,
-        sourceOrder: index,
-        name: content.name,
-        number: content.number ?? index + 1,
-        description: content.description,
-        season: content.season ?? -1,
-        isFiller: content.isFiller ?? false,
-        image: content.image,
-        url: content.url,
-        seen: false,
-        lastSecondsSeen: 0,
-        totalSeconds: 0,
-      ),
-    );
-  }
-
+  @override
   Future<List<MediaContent>> syncContentListWithSource(
-    Media media,
-    List<IMediaContent> contentList,
+    SyncContentListWithSourceParams params,
   ) async {
+    final media = params.media;
+    final contentList = params.contentList;
+
+    if (contentList.isEmpty) {
+      throw const NoContentException();
+    }
+
     final mediaId = media.id;
     final category = media.category;
-    // final mappedContentList =
-    //     contentList.mapListIndexed((index, content) => );
+
     final contentListDB = getContentListByMediaId(
         GetContentListByMediaIdParams(mediaId: mediaId, category: category));
 
@@ -96,15 +79,19 @@ class MediaContentRepositoryImpl implements MediaContentRepository {
     if (newContentList.isEmpty &&
         updatedContentList.isEmpty &&
         removedContentList.isEmpty) {
-      // await insertAllContent(InsertAllContentParams(content: newContentList));
-
       return [];
     }
 
     return _dataBase.writeInTransaction(() async {
-      await _dataBase.deleteAllMediaContent(removedContentList);
-      await _dataBase.insertAllMediaContent(newContentList);
-      await _dataBase.updateAllMediaContent(updatedContentList);
+      if (removedContentList.isNotEmpty) {
+        await _dataBase.deleteAllMediaContent(removedContentList);
+      }
+      if (updatedContentList.isNotEmpty) {
+        await _dataBase.updateAllMediaContent(updatedContentList);
+      }
+      if (newContentList.isNotEmpty) {
+        await _dataBase.insertAllMediaContent(newContentList);
+      }
       return newContentList + updatedContentList;
     });
   }
@@ -133,11 +120,11 @@ class MediaContentRepositoryImpl implements MediaContentRepository {
 
     return _dataBase.mediaContentCollection(category).when(
           video: (collection) =>
-              collection.filter().mediaIdEqualTo(mediaId).watch(),
+              collection.filter().mediaIdEqualTo(mediaId).build().watch(),
           manga: (collection) =>
-              collection.filter().mediaIdEqualTo(mediaId).watch(),
+              collection.filter().mediaIdEqualTo(mediaId).build().watch(),
           novel: (collection) =>
-              collection.filter().mediaIdEqualTo(mediaId).watch(),
+              collection.filter().mediaIdEqualTo(mediaId).build().watch(),
         );
   }
 
@@ -160,22 +147,26 @@ class MediaContentRepositoryImpl implements MediaContentRepository {
   Future<int> insertContent(InsertContentParams params) {
     final content = params.content;
 
-    return _dataBase.insertMediaContent(content);
+    return _dataBase
+        .writeInTransaction(() => _dataBase.insertMediaContent(content));
   }
 
+  @override
   Future<List<MediaContent>> insertAllContent(InsertAllContentParams params) {
     final content = params.content;
 
-    return content.asyncMap((content) async {
-      final id = await _dataBase.insertMediaContent(content);
-      return content.copyWith(id: id);
-    });
+    return _dataBase
+        .writeInTransaction(() async => await content.asyncMap((content) async {
+              final id = await _dataBase.insertMediaContent(content);
+              return content.copyWith(id: id);
+            }));
   }
 
   @override
   Future<int> updateContent(UpdateContentParams params) {
     final content = params.content;
-    return _dataBase.updateMediaContent(content);
+    return _dataBase
+        .writeInTransaction(() => _dataBase.updateMediaContent(content));
   }
 }
 

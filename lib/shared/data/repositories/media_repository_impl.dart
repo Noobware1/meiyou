@@ -5,6 +5,7 @@ import 'package:meiyou/core/data_base/data_base.dart';
 import 'package:meiyou/core/utils/extensions/result.dart';
 import 'package:meiyou/core/utils/stream_utils/state_stream.dart';
 import 'package:meiyou/shared/domain/models/media.dart';
+import 'package:meiyou/shared/domain/models/media_content.dart';
 import 'package:meiyou/shared/domain/models/repositories_params/media_repository_params.dart';
 import 'package:meiyou/shared/domain/repositories/media_repository.dart';
 import 'package:meiyou_extensions_lib/models.dart';
@@ -77,13 +78,14 @@ class MediaRepositoryImpl implements MediaRepository {
 
   @override
   Future<int> insertMedia(InsertMediaParams params) {
-    return _dataBase.insertMedia(params.media);
+    return _dataBase
+        .writeInTransaction(() => _dataBase.insertMedia(params.media));
   }
 
   @override
   Future<int> updateMedia(UpdateMediaParams params) async {
     final media = params.media;
-    return _dataBase.updateMedia(media);
+    return _dataBase.writeInTransaction(() => _dataBase.updateMedia(media));
   }
 
   @override
@@ -94,17 +96,26 @@ class MediaRepositoryImpl implements MediaRepository {
     final poster = networkMedia.poster?.takeIf((it) => it.isNotEmptyOrNull) ??
         localMedia.poster;
 
+    final url =
+        networkMedia.url.takeIf((it) => it.isNotEmpty) ?? localMedia.url;
+
+    final title =
+        networkMedia.title.takeIf((it) => it.isNotEmpty) ?? localMedia.title;
+
+    final status = networkMedia.status?.takeIf((it) => it != Status.unknown) ??
+        localMedia.status;
+
     localMedia
-      ..title = networkMedia.title
+      ..title = title
       ..poster = poster
       ..banner = networkMedia.banner
       ..description = networkMedia.description
       ..genres = networkMedia.genres
       ..otherTitles = networkMedia.otherTitles
       ..score = networkMedia.score
-      ..status = networkMedia.status
+      ..status = status
       ..format = networkMedia.format
-      ..url = networkMedia.url
+      ..url = url
       ..initalized = true;
 
     return updateMedia(UpdateMediaParams(media: localMedia));

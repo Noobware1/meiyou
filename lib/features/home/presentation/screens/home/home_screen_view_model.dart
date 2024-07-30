@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:async/async.dart' hide Result;
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:meiyou/core/injection/injection.dart';
 import 'package:meiyou/core/utils/log/logger.dart';
 import 'package:meiyou/features/home/domain/models/expanded_home_page_list.dart';
 import 'package:meiyou/features/home/domain/models/home_screen_state.dart';
@@ -30,38 +31,22 @@ import 'package:meiyou_extensions_lib/models.dart';
 import 'package:nice_dart/nice_dart.dart';
 
 class HomeScreenViewModel {
-  final GetFulHomePageUseCase _getFulHomePageUseCase;
-  final GetHomePageUseCase _getHomePageUseCase;
-  final GetMediaDetailsUseCase _getMediaDetailsUseCase;
-  final SourcePreferences _sourcePreferences;
-  final SourceManager _sourceManager;
-  final StateNotifier<HomeScreenState> stateListenable;
-  final ExtensionManager _extensionManager;
-  final NetworkMediaToLocalUseCase _networkMediaToLocalUseCase;
-  final GetMediaByUrlAndSourceIdUseCase _getMediaByUrlAndSourceIdUseCase;
-  final ExpandHomepageUseCase _expandHomepageUsecase;
+  final GetFulHomePageUseCase _getFulHomePageUseCase = getIt.get();
+  final GetHomePageUseCase _getHomePageUseCase = getIt.get();
+  final GetMediaDetailsUseCase _getMediaDetailsUseCase = getIt.get();
+  final SourcePreferences _sourcePreferences = getIt.get();
+  final SourceManager _sourceManager = getIt.get();
+  final ExtensionManager _extensionManager = getIt.get();
+  final NetworkMediaToLocalUseCase _networkMediaToLocalUseCase = getIt.get();
+  final GetMediaByUrlAndSourceIdUseCase _getMediaByUrlAndSourceIdUseCase =
+      getIt.get();
+  final ExpandHomepageUseCase _expandHomepageUsecase = getIt.get();
+  late final StateNotifier<HomeScreenState> stateListenable;
 
-  HomeScreenViewModel({
-    required GetFulHomePageUseCase getFulHomePageUseCase,
-    required GetHomePageUseCase getHomePageUseCase,
-    required GetMediaDetailsUseCase getMediaDetailsUseCase,
-    required SourcePreferences sourcePreferences,
-    required SourceManager sourceManager,
-    required ExtensionManager extensionManager,
-    required NetworkMediaToLocalUseCase networkMediaToLocalUseCase,
-    required GetMediaByUrlAndSourceIdUseCase getMediaByUrlAndSourceIdUseCase,
-    required ExpandHomepageUseCase expandHomepageUsecase,
-  })  : _getFulHomePageUseCase = getFulHomePageUseCase,
-        _getHomePageUseCase = getHomePageUseCase,
-        _getMediaDetailsUseCase = getMediaDetailsUseCase,
-        _sourcePreferences = sourcePreferences,
-        _sourceManager = sourceManager,
-        _extensionManager = extensionManager,
-        _networkMediaToLocalUseCase = networkMediaToLocalUseCase,
-        _getMediaByUrlAndSourceIdUseCase = getMediaByUrlAndSourceIdUseCase,
-        _expandHomepageUsecase = expandHomepageUsecase,
-        stateListenable = StateNotifier(
-            _initalState(sourcePreferences, sourceManager, extensionManager)) {
+  HomeScreenViewModel() {
+    stateListenable = StateNotifier(
+        _initalState(_sourcePreferences, _sourceManager, _extensionManager));
+
     if (stateListenable.state is HomeScreenStateWithSource) {
       _refresh();
     }
@@ -290,8 +275,10 @@ class HomeScreenViewModel {
     _refresh();
   }
 
-  void onSelected(Media preview) {
+  void onSelected(BuildContext context, Media preview) {
     print('Selected: $preview');
+
+    goToDetailsScreen(context, preview);
   }
 
   void onAddToLibrary(Media preview) {
@@ -299,8 +286,17 @@ class HomeScreenViewModel {
   }
 
   Future<void> goToDetailsScreen(BuildContext context, Media preview) async {
-    final local = await _networkMediaToLocalUseCase(
+    final result = await _networkMediaToLocalUseCase(
         NetworkMediaToLocalParams(media: preview));
+
+    if (result.isSuccess) {
+      final local = result.getOrThrow();
+
+      print(local.id);
+    } else {
+      logger.warning(
+          'Failed to convert network media to local', result.exceptionOrNull());
+    }
   }
 
   Media _mapMedia(IMedia media, int sourceId, ExtensionCategory category) {

@@ -16,11 +16,12 @@ import 'package:meiyou/shared/domain/usecases/media_content_repository_usecases/
 import 'package:meiyou/shared/domain/usecases/media_content_repository_usecases/get_content_list_by_media_id_usecase.dart';
 import 'package:meiyou/shared/domain/usecases/media_content_repository_usecases/insert_all_content_usecase.dart';
 import 'package:meiyou/shared/domain/usecases/media_content_repository_usecases/insert_content_usecase.dart';
-import 'package:meiyou/shared/domain/usecases/media_content_repository_usecases/map_conent_list_usecase.dart';
+import 'package:meiyou/shared/domain/usecases/media_content_repository_usecases/sync_content_list_with_source_usecase.dart';
 import 'package:meiyou/shared/domain/usecases/media_content_repository_usecases/update_content_usecase.dart';
 import 'package:meiyou/shared/domain/usecases/media_repository_usecases/get_media_by_id_as_stream_usecase.dart';
 import 'package:meiyou/shared/domain/usecases/media_repository_usecases/get_media_by_id_usecase.dart';
 import 'package:meiyou/shared/domain/usecases/media_repository_usecases/get_media_by_url_and_source_id_usecase.dart';
+import 'package:meiyou/shared/domain/usecases/media_repository_usecases/insert_media_usecase.dart';
 import 'package:meiyou/shared/domain/usecases/media_repository_usecases/network_media_to_local_usecase.dart';
 import 'package:meiyou/shared/domain/usecases/media_repository_usecases/update_media_from_source_usecase.dart';
 import 'package:meiyou/shared/domain/usecases/media_repository_usecases/update_media_usecase.dart';
@@ -60,6 +61,8 @@ class DomainModule extends InjectModule {
 
     getIt.registerFactory(() => NetworkMediaToLocalUseCase(getIt()));
 
+    getIt.registerFactory(() => InsertMediaUseCase(getIt()));
+
     getIt.registerFactory(() => GetMediaByIdUseCase(getIt()));
 
     getIt.registerFactory(() => GetMediaByIdAsStreamUseCase(getIt()));
@@ -80,7 +83,7 @@ class DomainModule extends InjectModule {
 
     getIt.registerFactory(() => GetContentByIdUseCase(getIt()));
 
-    getIt.registerFactory(() => MapContentListUseCase(getIt()));
+    getIt.registerFactory(() => SyncContentListWithSourceUseCase(getIt()));
 
     getIt.registerFactory(() => UpdateContentUseCase(getIt()));
 

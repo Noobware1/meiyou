@@ -1,6 +1,17 @@
 import 'package:meiyou/shared/domain/models/extension_category.dart';
+import 'package:meiyou/shared/domain/models/media.dart';
 import 'package:meiyou/shared/domain/models/media_content.dart';
 import 'package:meiyou_extensions_lib/models.dart';
+
+class SyncContentListWithSourceParams {
+  final Media media;
+  final List<IMediaContent> contentList;
+
+  SyncContentListWithSourceParams({
+    required this.media,
+    required this.contentList,
+  });
+}
 
 class GetContentListByMediaIdParams {
   final int mediaId;

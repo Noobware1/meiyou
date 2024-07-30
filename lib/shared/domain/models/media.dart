@@ -6,19 +6,20 @@ part 'media.g.dart';
 
 abstract class Media extends IMedia {
   Media._({
-    this.id = Isar.autoIncrement,
+    required this.id,
     required this.sourceId,
-    super.format,
-    super.title,
-    super.url,
-    super.otherTitles,
-    Status status = Status.unknown,
-    super.banner,
-    super.poster,
-    super.score,
-    super.description,
-    super.genres,
-  }) : super(status: status);
+    required super.format,
+    required super.title,
+    required super.url,
+    required super.otherTitles,
+    required Status super.status,
+    required super.banner,
+    required super.poster,
+    required super.score,
+    required super.description,
+    required super.genres,
+    required this.favorite,
+  });
 
   factory Media({
     Id id = Isar.autoIncrement,
@@ -27,6 +28,7 @@ abstract class Media extends IMedia {
     MediaFormat format = MediaFormat.others,
     String title = '',
     String url = '',
+    bool favorite = false,
     List<String>? otherTitles,
     Status status = Status.unknown,
     String? banner,
@@ -42,6 +44,7 @@ abstract class Media extends IMedia {
         format: format,
         title: title,
         url: url,
+        favorite: favorite,
         otherTitles: otherTitles,
         status: status,
         banner: banner,
@@ -56,6 +59,7 @@ abstract class Media extends IMedia {
         format: format,
         title: title,
         url: url,
+        favorite: favorite,
         otherTitles: otherTitles,
         status: status,
         banner: banner,
@@ -70,6 +74,7 @@ abstract class Media extends IMedia {
         format: format,
         title: title,
         url: url,
+        favorite: favorite,
         otherTitles: otherTitles,
         status: status,
         banner: banner,
@@ -81,6 +86,19 @@ abstract class Media extends IMedia {
     );
   }
 
+  Id id;
+  int sourceId;
+  bool favorite;
+
+  @override
+  Status get status => super.status!;
+
+  @override
+  set status(Status? status) {
+    super.status = status ?? Status.unknown;
+  }
+
+  @ignore
   String? get bannerOrPoster => banner ?? poster;
 
   @ignore
@@ -90,22 +108,11 @@ abstract class Media extends IMedia {
         novel: (_) => ExtensionCategory.novel,
       );
 
-  Id id;
-  int sourceId;
-
   R when<R>({
     required R Function(VideoMedia) video,
     required R Function(MangaMedia) manga,
     required R Function(NovelMedia) novel,
   });
-
-  @override
-  Status get status => super.status!;
-
-  @override
-  set status(Status? status) {
-    super.status = status ?? Status.unknown;
-  }
 
   factory Media.formIMedia(
       IMedia media, int sourceId, ExtensionCategory category) {
@@ -131,7 +138,7 @@ abstract class Media extends IMedia {
       it.description = media.description ?? it.description;
       it.genres = media.genres ?? it.genres;
       it.otherTitles = media.otherTitles ?? it.otherTitles;
-      it.poster = media.poster ?? it.poster;
+      it.poster = media.poster.isNotEmptyOrNull ? media.poster : it.poster;
       it.score = media.score ?? it.score;
       it.status = media.status ?? it.status;
       it.title = media.title.isNotEmpty ? media.title : it.title;
@@ -147,18 +154,19 @@ abstract class Media extends IMedia {
 @collection
 class VideoMedia extends Media {
   VideoMedia({
-    super.id,
+    required super.id,
     required super.sourceId,
-    super.format,
-    super.title,
-    super.url,
-    super.otherTitles,
-    super.status,
-    super.banner,
-    super.poster,
-    super.score,
-    super.description,
-    super.genres,
+    required super.format,
+    required super.title,
+    required super.url,
+    required super.favorite,
+    required super.otherTitles,
+    required super.status,
+    required super.banner,
+    required super.poster,
+    required super.score,
+    required super.description,
+    required super.genres,
   }) : super._();
 
   @override
@@ -182,18 +190,19 @@ class VideoMedia extends Media {
 @collection
 class MangaMedia extends Media {
   MangaMedia({
-    super.id,
+    required super.id,
     required super.sourceId,
-    super.format,
-    super.title,
-    super.url,
-    super.otherTitles,
-    super.status,
-    super.banner,
-    super.poster,
-    super.score,
-    super.description,
-    super.genres,
+    required super.format,
+    required super.title,
+    required super.url,
+    required super.favorite,
+    required super.otherTitles,
+    required super.status,
+    required super.banner,
+    required super.poster,
+    required super.score,
+    required super.description,
+    required super.genres,
   }) : super._();
 
   @override
@@ -217,18 +226,19 @@ class MangaMedia extends Media {
 @collection
 class NovelMedia extends Media {
   NovelMedia({
-    super.id,
+    required super.id,
     required super.sourceId,
-    super.format,
-    super.title,
-    super.url,
-    super.otherTitles,
-    super.status,
-    super.banner,
-    super.poster,
-    super.score,
-    super.description,
-    super.genres,
+    required super.format,
+    required super.title,
+    required super.url,
+    required super.favorite,
+    required super.otherTitles,
+    required super.status,
+    required super.banner,
+    required super.poster,
+    required super.score,
+    required super.description,
+    required super.genres,
   }) : super._();
 
   @override

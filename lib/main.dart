@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:meiyou/core/injection/injection.dart';
 import 'package:meiyou/core/utils/extensions/context.dart';
-import 'package:meiyou/features/details/presentation/media_details_screen.dart';
+import 'package:meiyou/features/details/presentation/media_screen.dart';
 import 'package:meiyou/features/home/presentation/screens/home/home_screen.dart';
 import 'package:meiyou/l.dart';
+import 'package:meiyou/shared/domain/models/extension_category.dart';
 import 'package:meiyou/shared/presentation/widgets/multi_nav_scaffold/multi_nav_scaffold.dart';
 import 'package:meiyou/shared/presentation/widgets/navigation_bar/navigation_bar.dart';
 
@@ -122,9 +123,11 @@ class _MyHomePageState extends State<MyHomePage> {
       //   },
       //   type: NavigationBarType.side,
       // ),
+      // body: const HomeScreen(),
       body: const MediaScreen(
-          // mediaDetailsId: 1,
-          ),
+        mediaId: 3,
+        category: ExtensionCategory.video,
+      ),
     );
   }
 }

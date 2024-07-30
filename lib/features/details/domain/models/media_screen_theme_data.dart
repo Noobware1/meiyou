@@ -325,7 +325,7 @@ final class MediaScreenThemeDataDesktop with _MediaScreenThemDataCommonMixin {
 
   @override
   BoxConstraints get buttonRowConstraints => const BoxConstraints(
-        maxWidth: 270,
+        maxWidth: 301,
       );
 
   @override

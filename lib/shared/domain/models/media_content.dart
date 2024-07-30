@@ -28,25 +28,18 @@ abstract class MediaContent extends IMediaContent {
   MediaContent._({
     this.id = Isar.autoIncrement,
     required this.mediaId,
-    required int number,
+    required int super.number,
     required this.sourceOrder,
     required this.lastSecondsSeen,
     required this.totalSeconds,
-    required String? name,
-    required String? description,
-    required String url,
-    required bool isFiller,
-    required int season,
-    required String? image,
+    required super.name,
+    required super.description,
+    required super.url,
+    required bool super.isFiller,
+    required int super.season,
+    required super.image,
     required this.seen,
-  }) : super(
-          url: url,
-          description: description,
-          image: image,
-          isFiller: isFiller,
-          name: name,
-          season: season,
-        );
+  });
 
   factory MediaContent({
     Id id = Isar.autoIncrement,
@@ -141,8 +134,6 @@ abstract class MediaContent extends IMediaContent {
     bool? seen,
     String? image,
   });
-
-
 }
 
 @collection

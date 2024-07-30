@@ -20,16 +20,15 @@ class DataBase {
         VideoMediaSchema,
         MangaMediaSchema,
         NovelMediaSchema,
+        VideoContentSchema,
+        MangaContentSchema,
+        NovelContentSchema,
       ],
       directory: directory,
       inspector: kDebugMode,
     );
 
     return DataBase._(isar);
-  }
-
-  a() {
-    // wrr
   }
 
   IsarCollection<Media> mediaCollection(ExtensionCategory category) {
@@ -213,11 +212,11 @@ extension on List<MediaContent> {
     required T Function(List<MangaContent>) manga,
     required T Function(List<NovelContent>) novel,
   }) {
-    if (this is List<VideoContent>) {
+    if (every((element) => element is VideoContent)) {
       return video(cast());
-    } else if (this is List<MangaContent>) {
+    } else if (every((element) => element is MangaContent)) {
       return manga(cast());
-    } else if (this is List<NovelContent>) {
+    } else if (every((element) => element is NovelContent)) {
       return novel(cast());
     } else {
       throw Exception('Invalid type');

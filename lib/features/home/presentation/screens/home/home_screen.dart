@@ -27,17 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    viewModel = HomeScreenViewModel(
-      getFulHomePageUseCase: getIt(),
-      getHomePageUseCase: getIt(),
-      sourcePreferences: getIt(),
-      sourceManager: getIt(),
-      extensionManager: getIt(),
-      expandHomepageUsecase: getIt(),
-      getMediaByUrlAndSourceIdUseCase: getIt(),
-      getMediaDetailsUseCase: getIt(),
-      networkMediaToLocalUseCase: getIt(),
-    );
+    viewModel = HomeScreenViewModel();
   }
 
   @override
@@ -105,13 +95,13 @@ class _HomeScreenState extends State<HomeScreen> {
           BannerView(
             stateListenable: viewModel.bannerStateListenable,
             onScrollEnd: viewModel.onBannerScrollEnd,
-            onPressed: viewModel.onSelected,
+            onPressed: (preview) => viewModel.onSelected(context, preview),
             onLongPressed: (_) {},
           ),
           for (final rowData in viewModel.expanded)
             HomeRow(
               listenable: rowData,
-              onPressed: viewModel.onSelected,
+              onPressed: (preview) => viewModel.onSelected(context, preview),
               onLongPressed: (_) {},
               onScrollEnd: (key) => viewModel.onScrollEnd(key),
             ),

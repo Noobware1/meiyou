@@ -2,7 +2,8 @@ import 'package:meiyou/shared/domain/models/media_content.dart';
 import 'package:meiyou/shared/domain/models/repositories_params/media_content_repository_params.dart';
 
 abstract class MediaContentRepository {
-  List<MediaContent> mapContentList(MapContentListParams params);
+  Future<List<MediaContent>> syncContentListWithSource(
+      SyncContentListWithSourceParams params);
 
   List<MediaContent> getContentListByMediaId(
       GetContentListByMediaIdParams params);
