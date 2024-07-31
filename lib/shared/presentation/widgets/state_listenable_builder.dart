@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:meiyou/shared/presentation/notifers/state_notifer.dart';
 
-///    a [ValueListenable] for more advanced use cases.
+
 class StateListenableBuilder<T> extends StatefulWidget {
   /// Creates a [StateListenableBuilder].
   ///
@@ -14,9 +14,9 @@ class StateListenableBuilder<T> extends StatefulWidget {
     this.child,
   });
 
-  /// The [ValueListenable] whose state you depend on in order to build.
+  /// The [StateListenable] whose state you depend on in order to build.
   ///
-  /// This widget does not ensure that the [ValueListenable]'s state is not
+  /// This widget does not ensure that the [StateListenable]'s state is not
   /// null, therefore your [builder] may need to handle null values.
   final StateNotifier<T> stateListenable;
 

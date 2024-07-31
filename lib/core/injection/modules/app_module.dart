@@ -6,6 +6,7 @@ import 'package:get_it/get_it.dart';
 import 'package:logging/logging.dart';
 import 'package:meiyou/core/data_base/data_base.dart';
 import 'package:meiyou/core/injection/modules/injection_module.dart';
+import 'package:meiyou/core/router/router.dart';
 import 'package:meiyou/core/utils/log/logger.dart';
 import 'package:meiyou/shared/data/data_sources/folder_providers/database_folder_provider.dart';
 import 'package:meiyou/shared/data/extension/extension_manager_impl.dart';
@@ -43,6 +44,8 @@ class AppModule implements InjectModule {
     _getSotragePermissionForDegugMode();
 
     initLogger();
+
+    getIt.registerSingleton(RouterProvider());
 
     await DataBaseFolderProvider().directory().then((directory) async {
       if (!directory.existsSync()) {

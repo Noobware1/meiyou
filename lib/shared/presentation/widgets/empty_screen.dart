@@ -12,6 +12,7 @@ extension<T> on List<T> {
   }
 }
 
+/// A widget that displays a message when there is no data to show.
 class EmptyScreen extends StatelessWidget {
   final String text;
 
@@ -42,13 +43,7 @@ class EmptyScreen extends StatelessWidget {
       final (iconTextStyle, textStyle) = context.theme.textTheme.let((it) {
         return (
           it.titleLarge,
-          it.bodyMedium ,
-          // screenSize.isMobile || screenSize.isTablet
-          //     ? it.titleMedium
-          //     : it.titleLarge,
-          // screenSize.isMobile || screenSize.isTablet
-          //     ? it.bodyMedium
-          //     : it.bodyLarge,
+          it.bodyMedium,
         );
       });
 

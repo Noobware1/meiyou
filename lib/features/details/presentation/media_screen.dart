@@ -34,8 +34,6 @@ class MediaScreen extends StatefulWidget {
   State<MediaScreen> createState() => _MediaScreenState();
 }
 
-// typedef MediaScreenStateWidget = _MediaScreenState;
-
 class _MediaScreenState extends State<MediaScreen>
     with SingleTickerProviderStateMixin {
   late final MediaScreenViewModel viewModel;
@@ -65,6 +63,10 @@ class _MediaScreenState extends State<MediaScreen>
         mobileData: themeDataMobile,
         screenSize: size,
         child: Scaffold(
+          appBar: AppBar(
+            forceMaterialTransparency: true,
+          ),
+          extendBodyBehindAppBar: true,
           body: RefreshIndicator(
             key: viewModel.refreshIndicatorKey,
             displacement: 80.0,

@@ -4,6 +4,7 @@ import 'package:async/async.dart' hide Result;
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:meiyou/core/injection/injection.dart';
+import 'package:meiyou/core/router/routes.dart';
 import 'package:meiyou/core/utils/log/logger.dart';
 import 'package:meiyou/features/home/domain/models/expanded_home_page_list.dart';
 import 'package:meiyou/features/home/domain/models/home_screen_state.dart';
@@ -275,28 +276,27 @@ class HomeScreenViewModel {
     _refresh();
   }
 
-  void onSelected(BuildContext context, Media preview) {
-    print('Selected: $preview');
-
-    goToDetailsScreen(context, preview);
-  }
-
-  void onAddToLibrary(Media preview) {
-    print('Add to library: $preview');
-  }
-
-  Future<void> goToDetailsScreen(BuildContext context, Media preview) async {
+  Future<void> onSelected(BuildContext context, Media preview) async {
     final result = await _networkMediaToLocalUseCase(
         NetworkMediaToLocalParams(media: preview));
 
     if (result.isSuccess) {
       final local = result.getOrThrow();
 
-      print(local.id);
+      if (!context.mounted) return;
+      _goToDetailsScreen(context, local);
     } else {
       logger.warning(
           'Failed to convert network media to local', result.exceptionOrNull());
     }
+  }
+
+  void onAddToLibrary(Media preview) {
+    logger.info('Add to library: ${preview.title}');
+  }
+
+  void _goToDetailsScreen(BuildContext context, Media media) {
+    context.pushToMediaScreen(media);
   }
 
   Media _mapMedia(IMedia media, int sourceId, ExtensionCategory category) {

@@ -19,6 +19,7 @@ abstract class Media extends IMedia {
     required super.description,
     required super.genres,
     required this.favorite,
+    // required super.initalized,
   });
 
   factory Media({
@@ -36,6 +37,7 @@ abstract class Media extends IMedia {
     double? score,
     String? description,
     List<String>? genres,
+     
   }) {
     return category.when<Media>(
       video: () => VideoMedia(

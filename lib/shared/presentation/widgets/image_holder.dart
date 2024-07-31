@@ -48,6 +48,7 @@ class _ImageHolderNetwork extends ImageHolder {
       height: height,
       width: width,
       fit: fit,
+      
       alignment: alignment,
       errorWidget: (context, url, error) => _fallbackAssetImage(),
     );

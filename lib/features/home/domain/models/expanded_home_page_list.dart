@@ -1,5 +1,4 @@
 import 'package:meiyou/shared/domain/models/media.dart';
-import 'package:meiyou/shared/presentation/widgets/paging_source/paging_source.dart';
 import 'package:meiyou_extensions_lib/models.dart';
 import 'package:nice_dart/src/result.dart';
 
