@@ -5,6 +5,7 @@ import 'package:meiyou/features/home/presentation/widgets/base_browse_item.dart'
 import 'package:meiyou/features/home/presentation/widgets/base_browse_list_view.dart';
 import 'package:meiyou/shared/domain/models/install_step.dart';
 import 'package:meiyou/shared/presentation/widgets/dialogs/alert_dialog.dart';
+import 'package:meiyou/shared/presentation/widgets/empty_screen.dart';
 import 'package:meiyou/shared/presentation/widgets/image_holder.dart';
 import 'package:meiyou/shared/presentation/widgets/state_listenable_builder.dart';
 import 'package:meiyou_extensions_lib/models.dart';
@@ -19,14 +20,15 @@ class ExtensionsScreen extends StatelessWidget {
     return StateListenableBuilder(
         stateListenable: viewModel.stateListenable,
         builder: (context, extensionsState, _) {
+       
           if (extensionsState is ExtensionsStateLoading) {
             return const Center(child: CircularProgressIndicator.adaptive());
           }
 
           final extensions = extensionsState.extensions;
 
-          if (extensions.isEmpty) {
-            return const Center(child: CircularProgressIndicator.adaptive());
+          if (extensionsState is ExtensionsStateEmpty) {
+            return const EmptyScreen(text: 'No extensions found');
           }
           return StateListenableBuilder(
               stateListenable: viewModel.downloadsStateListenable,

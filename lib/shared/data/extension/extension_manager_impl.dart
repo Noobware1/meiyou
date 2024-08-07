@@ -231,7 +231,7 @@ class ExtensionManagerImpl implements ExtensionManager {
   Future<void> init() async {
     try {
       await _findAllInstalledExtensions();
-      // _findAllAvailableExtensions();
+      _findAllAvailableExtensions();
       _isInitialized = true;
     } catch (_, s) {
       _isInitialized = false;
@@ -472,12 +472,14 @@ class _Listener implements ExtensionInstallerListener {
 class _ExtensionsStream<T extends Extension> extends ExtensionStream<T> {
   _ExtensionsStream() : super(initialData: []);
 
+  bool _isInitialized = false;
+
   @override
-  bool get isInitialized => false;
+  bool get isInitialized => _isInitialized;
 
   @override
   set isInitialized(bool isInitialized) {
-    isInitialized = isInitialized;
+    _isInitialized = isInitialized;
   }
 
   void addAll(Iterable<T> extensions) {

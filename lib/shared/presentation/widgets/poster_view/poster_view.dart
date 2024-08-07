@@ -11,6 +11,7 @@ import 'package:meiyou_extensions_lib/models.dart';
 class PosterView extends StatefulWidget {
   final String label;
   final List<Media> mediaList;
+  final PosterViewType type;
   final PosterViewThemeData? theme;
   final void Function(Media)? onSelected;
   final void Function(Media)? onLongPressed;
@@ -25,11 +26,14 @@ class PosterView extends StatefulWidget {
     this.onLongPressed,
     this.onSecondaryTapDown,
     this.scrollController,
+    this.type = PosterViewType.list,
   });
 
   @override
   State<PosterView> createState() => _PosterViewState();
 }
+
+enum PosterViewType { list, grid }
 
 class _PosterViewState extends State<PosterView> {
   bool isInitialized = false;
@@ -68,18 +72,81 @@ class _PosterViewState extends State<PosterView> {
       final labelTextStyle = theme.getLabelTextStyleForSize(screenSize);
       final titleBoxHeight =
           titleTextStyle.fontSize! * titleTextStyle.height! * 2.2;
-      var listViewHeight =
-          posterSize.height + titleBoxHeight + theme.titleSpacing;
+      var viewHeight = posterSize.height + titleBoxHeight + theme.titleSpacing;
 
       final increaseValue = theme.sizeIncreaseValue;
 
       if (!platform.isMobile) {
-        listViewHeight += increaseValue;
+        viewHeight += increaseValue;
       }
 
-      final boxHeight = listViewHeight + labelBoxHeight;
       final titleSpacing = theme.titleSpacing;
       final titlePadding = theme.titlePadding;
+
+      Widget itemBuilder(BuildContext context, int index) {
+        final preview = mediaList[index];
+        if (isMobile) {
+          return _Poster(
+            preview: preview,
+            height: posterSize.height,
+            width: posterSize.width,
+            borderRadius: borderRadius,
+            titleTextStyle: titleTextStyle,
+            titleSpacing: titleSpacing,
+            titlePadding: titlePadding,
+            onSelected: widget.onSelected,
+            onLongPressed: widget.onLongPressed,
+          );
+        }
+        return _PosterDesktop(
+          preview: preview,
+          height: posterSize.height,
+          width: posterSize.width,
+          borderRadius: borderRadius,
+          titleTextStyle: titleTextStyle,
+          titleSpacing: titleSpacing,
+          titlePadding: titlePadding,
+          increaseValue: increaseValue,
+          onSelected: widget.onSelected,
+          onLongPressed: widget.onLongPressed,
+          onSecondaryTapDown: widget.onSecondaryTapDown,
+        );
+      }
+
+      if (widget.type == PosterViewType.grid) {
+        return SingleChildScrollView(
+          controller: scrollController,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                height: labelBoxHeight,
+                padding: theme.contentPadding,
+                alignment: Alignment.centerLeft,
+                child: Text(widget.label, style: labelTextStyle),
+              ),
+              MediaQuery.removePadding(
+                context: context,
+                removeTop: true,
+                child: GridView.builder(
+                  physics: const NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  itemCount: mediaList.length,
+                  gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: posterSize.width,
+                    mainAxisExtent: viewHeight,
+                    crossAxisSpacing: theme.spacing,
+                    mainAxisSpacing: theme.spacing,
+                  ),
+                  itemBuilder: itemBuilder,
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+
+      final boxHeight = viewHeight + labelBoxHeight;
 
       return AnimatedContainer(
         duration: Durations.short3,
@@ -99,7 +166,7 @@ class _PosterViewState extends State<PosterView> {
               ),
             ),
             AnimatedContainer(
-              height: listViewHeight,
+              height: viewHeight,
               width: width,
               duration: Durations.short3,
               child: _wrapWithSCrollBar(
@@ -111,33 +178,7 @@ class _PosterViewState extends State<PosterView> {
                   padding: theme.contentPadding,
                   scrollDirection: Axis.horizontal,
                   itemBuilder: (context, index) {
-                    final preview = mediaList[index];
-                    if (isMobile) {
-                      return _Poster(
-                        preview: preview,
-                        height: posterSize.height,
-                        width: posterSize.width,
-                        borderRadius: borderRadius,
-                        titleTextStyle: titleTextStyle,
-                        titleSpacing: titleSpacing,
-                        titlePadding: titlePadding,
-                        onSelected: widget.onSelected,
-                        onLongPressed: widget.onLongPressed,
-                      );
-                    }
-                    return _PosterDesktop(
-                      preview: preview,
-                      height: posterSize.height,
-                      width: posterSize.width,
-                      borderRadius: borderRadius,
-                      titleTextStyle: titleTextStyle,
-                      titleSpacing: titleSpacing,
-                      titlePadding: titlePadding,
-                      increaseValue: increaseValue,
-                      onSelected: widget.onSelected,
-                      onLongPressed: widget.onLongPressed,
-                      onSecondaryTapDown: widget.onSecondaryTapDown,
-                    );
+                    return itemBuilder(context, index);
                   },
                   separatorBuilder: (context, index) {
                     return HorizontalSpace(theme.spacing);
@@ -198,6 +239,7 @@ class _Poster extends StatelessWidget {
           ClipRRect(
               borderRadius: borderRadius,
               child: ImageHolder.network(
+                key: key,
                 url: preview.poster,
                 fit: BoxFit.fill,
                 height: height,

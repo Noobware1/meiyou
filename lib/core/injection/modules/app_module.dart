@@ -19,7 +19,7 @@ import 'package:nice_dart/nice_dart.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 Future<void> _getSotragePermissionForDegugMode() async {
-  if (kDebugMode && Platform.isAndroid) {
+  if (Platform.isAndroid) {
     const permission = Permission.manageExternalStorage;
 
     Future<bool> persistPermission() {

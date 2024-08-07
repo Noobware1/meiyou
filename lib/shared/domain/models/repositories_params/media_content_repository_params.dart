@@ -17,8 +17,10 @@ class GetContentListByMediaIdParams {
   final int mediaId;
   final ExtensionCategory category;
 
-  GetContentListByMediaIdParams(
-      {required this.mediaId, required this.category});
+  GetContentListByMediaIdParams({
+    required this.mediaId,
+    required this.category,
+  });
 }
 
 class GetContentListByMediaIdAsStreamParams {
@@ -33,7 +35,10 @@ class GetContentByIdParams {
   final int id;
   final ExtensionCategory category;
 
-  GetContentByIdParams({required this.id, required this.category});
+  GetContentByIdParams({
+    required this.id,
+    required this.category,
+  });
 }
 
 class InsertContentParams {

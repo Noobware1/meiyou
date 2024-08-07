@@ -129,7 +129,7 @@ class CustomNavigationBar extends StatelessWidget {
       case NavigationBarType.side:
         return NavigationRail(
           minWidth: theme.minWidth,
-          labelType: labelBehavior.toNavigationRailLabelType(),
+          labelType: theme.labelBehavior.toNavigationRailLabelType(),
           destinations:
               destinations.map((e) => e.toNavigationRailDestination()).toList(),
           selectedIndex: selectedIndex,

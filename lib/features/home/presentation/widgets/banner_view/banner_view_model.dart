@@ -14,10 +14,11 @@ class BannerViewModel {
         _onPressed = onPressed,
         _onLongPressed = onLongPressed,
         _pageNotifier = StateNotifier(0),
-        _pageController = PageController(),
+        _pageController = PageController(viewportFraction: 0.9),
         _onScrollEnd = onScrollEnd {
     _pageController.addListener(() {
       _pageNotifier.setState(_pageController.page?.round() ?? 0);
+
       // onScrollEnd();
     });
   }
@@ -66,11 +67,14 @@ class BannerViewModel {
     );
   }
 
-  Future<void> onBannerTapDown(TapDownDetails details, double width) {
-    if (details.globalPosition.dx < width / 2) {
-      return movePrevious();
-    } else {
-      return moveNext();
+  Future<void> onBannerTapDown(
+      TapDownDetails details, double width, double height) async {
+    if (details.globalPosition.dy > 150 && details.globalPosition.dy < 450) {
+      if (details.globalPosition.dx < width / 2) {
+        return movePrevious();
+      } else {
+        return moveNext();
+      }
     }
   }
 

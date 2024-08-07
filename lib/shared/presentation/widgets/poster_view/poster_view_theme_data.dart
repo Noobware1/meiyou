@@ -40,7 +40,7 @@ class PosterViewThemeData {
     this.spacing = 10.0,
     this.contentPadding = const EdgeInsets.only(left: 10),
     this.borderRadius = const BorderRadius.all(Radius.circular(8)),
-    this.labelBoxHeight = 52.0,
+    this.labelBoxHeight = 62.0,
     this.titleSpacing = 6.0,
     this.titlePadding = const EdgeInsets.symmetric(horizontal: 10.0),
     this.sizeIncreaseValue = 20.0,

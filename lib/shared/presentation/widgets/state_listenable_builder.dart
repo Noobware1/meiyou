@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:meiyou/shared/presentation/notifers/state_notifer.dart';
-
+import 'package:nice_dart/nice_dart.dart';
 
 class StateListenableBuilder<T> extends StatefulWidget {
   /// Creates a [StateListenableBuilder].

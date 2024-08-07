@@ -4,13 +4,13 @@ import 'package:meiyou/shared/domain/models/repositories_params/media_repository
 import 'package:meiyou/shared/domain/repositories/media_repository.dart';
 
 class GetMediaByUrlAndSourceIdUseCase
-    extends UseCase<Media?, GetMediaByUrlAndSourceIdParams> {
+    extends UseCase<Future<Media?>, GetMediaByUrlAndSourceIdParams> {
   final MediaRepository _mediaRepository;
 
   GetMediaByUrlAndSourceIdUseCase(this._mediaRepository);
 
   @override
-  Media? call(GetMediaByUrlAndSourceIdParams params) {
+  Future<Media?> call(GetMediaByUrlAndSourceIdParams params) {
     return _mediaRepository.getMediaByUrlAndSourceId(params);
   }
 }

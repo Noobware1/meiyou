@@ -23,11 +23,14 @@ class ContentHolderList extends StatelessWidget {
   final MediaContent content;
   final String? fallackImage;
   final String Function(MediaContent) getDefaultNameCallback;
+  final void Function(MediaContent) onPressed;
+
   const ContentHolderList({
     super.key,
     required this.content,
     this.fallackImage,
     required this.getDefaultNameCallback,
+    required this.onPressed,
   });
 
   @override
@@ -39,7 +42,9 @@ class ContentHolderList extends StatelessWidget {
         color: content.isFiller == true ? theme.fillerColor : null,
         // borderRadius: ContentHolderThemeData._holderBorderRadius,
         child: InkWell(
-          onTap: () {},
+          onTap: () {
+            onPressed(content);
+          },
           child: Row(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -54,7 +59,7 @@ class ContentHolderList extends StatelessWidget {
                       height: theme.listImageHeight,
                       width: theme.listImageWidth,
                       url: content.image ?? fallackImage,
-                      fit: BoxFit.fitWidth,
+                      fit: content.image == null ? BoxFit.cover : BoxFit.fill,
                     ),
                     Positioned(
                       top: 0,
@@ -126,11 +131,13 @@ class ContentHolderGrid extends StatelessWidget {
   final MediaContent content;
   final String? fallackImage;
   final String Function(MediaContent) getDefaultNameCallback;
+  final void Function(MediaContent) onPressed;
   const ContentHolderGrid({
     super.key,
     required this.content,
     this.fallackImage,
     required this.getDefaultNameCallback,
+    required this.onPressed,
   });
 
   @override
@@ -143,7 +150,9 @@ class ContentHolderGrid extends StatelessWidget {
         color: content.isFiller == true ? theme.fillerColor : null,
         // borderRadius: ContentHolderThemeData._holderBorderRadius,
         child: InkWell(
-          onTap: () {},
+          onTap: () {
+            onPressed(content);
+          },
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -158,7 +167,7 @@ class ContentHolderGrid extends StatelessWidget {
                       height: theme.gridImageHeight,
                       width: constraints.maxWidth,
                       url: content.image ?? fallackImage,
-                      fit: BoxFit.fitWidth,
+                      fit: content.image == null ? BoxFit.cover : BoxFit.fill,
                     ),
                     Positioned(
                       top: 0,

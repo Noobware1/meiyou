@@ -1,12 +1,12 @@
 part of 'player_play_pause_button.dart';
 
 class _PlayerPlayPauseButtonMobile extends StatefulWidget {
-  final StateStream<bool> stateStream;
+  final StateNotifier<bool> stateListenable;
   final VoidCallback onPressed;
 
   const _PlayerPlayPauseButtonMobile({
     super.key,
-    required this.stateStream,
+    required this.stateListenable,
     required this.onPressed,
   });
 
@@ -19,7 +19,8 @@ class __PlayerPlayPauseButtonMobileState
     extends State<_PlayerPlayPauseButtonMobile>
     with SingleTickerProviderStateMixin {
   late final AnimationController _animationController;
-  late final StreamSubscription<bool> _subscription;
+
+  StateNotifier<bool> get stateListenable => widget.stateListenable;
 
   @override
   void initState() {
@@ -30,18 +31,20 @@ class __PlayerPlayPauseButtonMobileState
         duration: Durations.medium2,
         reverseDuration: Durations.medium2); // ..forward();
 
-    widget.stateStream.let((it) {
+    stateListenable.let((it) {
       _moveAnimation(it.state);
-      _subscription = it.listen((playing) {
-        _moveAnimation(playing);
-      });
+      it.addListener(listener);
     });
+  }
+
+  void listener() {
+    _moveAnimation(stateListenable.state);
   }
 
   @override
   void dispose() {
     _animationController.dispose();
-    _subscription.cancel();
+    stateListenable.removeListener(listener);
     super.dispose();
   }
 

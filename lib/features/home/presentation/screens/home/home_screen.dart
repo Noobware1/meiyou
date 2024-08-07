@@ -1,17 +1,26 @@
+import 'dart:math';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:meiyou/core/injection/injection.dart';
 import 'package:meiyou/core/utils/constants/material_theme.dart';
+import 'package:meiyou/core/utils/extensions/context.dart';
+import 'package:meiyou/features/home/domain/models/home_screen_state.dart';
 import 'package:meiyou/features/home/presentation/widgets/banner_view/banner_view.dart';
 import 'package:meiyou/features/home/presentation/widgets/home_row/home_row.dart';
+import 'package:meiyou/shared/domain/models/extension_category.dart';
+import 'package:meiyou/shared/domain/models/media.dart';
 import 'package:meiyou/shared/presentation/widgets/poster_view/poster_view.dart';
 import 'package:meiyou/shared/presentation/widgets/poster_view/poster_view_theme_data.dart';
 import 'package:meiyou/shared/domain/models/async_value.dart';
 import 'package:meiyou/shared/domain/models/source.dart';
 import 'package:meiyou/shared/presentation/widgets/empty_screen.dart';
 import 'package:meiyou/shared/presentation/widgets/image_holder.dart';
+import 'package:meiyou/shared/presentation/widgets/responsive_widget.dart';
+import 'package:meiyou/shared/presentation/widgets/spacing.dart';
 import 'package:meiyou/shared/presentation/widgets/state_listenable_builder.dart';
 import 'package:meiyou/features/home/presentation/screens/home/home_screen_view_model.dart';
+import 'package:meiyou_extensions_lib/models.dart';
 import 'package:nice_dart/nice_dart.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -19,6 +28,16 @@ class HomeScreen extends StatefulWidget {
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
+}
+
+extension on HomeScreenState {
+  T whenData<T>(
+      {required T Function() whenData, required T Function() orElse}) {
+    if (data.hasData) {
+      return whenData();
+    }
+    return orElse();
+  }
 }
 
 class _HomeScreenState extends State<HomeScreen> {
@@ -36,6 +55,32 @@ class _HomeScreenState extends State<HomeScreen> {
         stateListenable: viewModel.stateListenable,
         builder: (context, state, _) {
           return Scaffold(
+            appBar: state.whenData(
+              whenData: () => PreferredSize(
+                preferredSize: const Size.fromHeight(kToolbarHeight),
+                child: ResponsiveBuilder(
+                  builder: (context, constraints, screenSize) {
+                    return AppBar(
+                      backgroundColor: Colors.transparent,
+                      title: Text(
+                        'Home',
+                        style: PosterViewThemeData.getDefault(context)
+                            .getLabelTextStyleForSize(screenSize),
+                      ),
+                      actions: [
+                        IconButton(
+                          icon: const Icon(Icons.search),
+                          onPressed: () {
+                            viewModel.onPressedSearch(context);
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+              orElse: () => null,
+            ),
             floatingActionButton: sourceSelectorButton(state.selectedSource),
             body: state.when(
               noSource: () => whenNoSource(),
@@ -90,22 +135,25 @@ class _HomeScreenState extends State<HomeScreen> {
     return MediaQuery.removePadding(
       context: context,
       removeTop: true,
-      child: ListView(
-        children: [
-          BannerView(
-            stateListenable: viewModel.bannerStateListenable,
-            onScrollEnd: viewModel.onBannerScrollEnd,
-            onPressed: (preview) => viewModel.onSelected(context, preview),
-            onLongPressed: (_) {},
-          ),
-          for (final rowData in viewModel.expanded)
-            HomeRow(
-              listenable: rowData,
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            const VerticalSpace(MaterialTheme.spacing),
+            BannerView(
+              stateListenable: viewModel.bannerStateListenable,
+              onScrollEnd: viewModel.onBannerScrollEnd,
               onPressed: (preview) => viewModel.onSelected(context, preview),
               onLongPressed: (_) {},
-              onScrollEnd: (key) => viewModel.onScrollEnd(key),
             ),
-        ],
+            for (final rowData in viewModel.expanded)
+              HomeRow(
+                listenable: rowData,
+                onPressed: (preview) => viewModel.onSelected(context, preview),
+                onLongPressed: (_) {},
+                onScrollEnd: (key) => viewModel.onScrollEnd(key),
+              ),
+          ],
+        ),
       ),
     );
   }

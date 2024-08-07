@@ -6,6 +6,7 @@ import 'package:meiyou/features/home/presentation/screens/sources/sources_screen
 import 'package:meiyou/features/home/presentation/widgets/base_browse_item.dart';
 import 'package:meiyou/features/home/presentation/widgets/base_browse_list_view.dart';
 import 'package:meiyou/shared/domain/models/source.dart';
+import 'package:meiyou/shared/presentation/widgets/empty_screen.dart';
 import 'package:meiyou/shared/presentation/widgets/image_holder.dart';
 import 'package:meiyou/shared/presentation/widgets/state_listenable_builder.dart';
 
@@ -19,6 +20,11 @@ class SourcesScreen extends StatelessWidget {
     return StateListenableBuilder(
         stateListenable: viewModel.stateListenable,
         builder: (context, state, _) {
+          if (state.sources.isEmpty) {
+            return const EmptyScreen(
+              text: 'No sources found',
+            );
+          }
           return BaseBrowseListView(
               group: state.sources,
               itemBuilder: (context, source) {

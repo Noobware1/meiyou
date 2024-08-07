@@ -1,3 +1,5 @@
+import 'package:nice_dart/nice_dart.dart';
+
 extension ListExtensions<T extends R, R> on List<T> {
   List<R> insertSeparators(R Function(T?, T?) generator) {
     if (isEmpty) return <R>[];
@@ -16,3 +18,38 @@ extension ListExtensions<T extends R, R> on List<T> {
     return newList;
   }
 }
+
+extension ListAsyncMap<E> on List<E> {
+  Future<List<R>> asyncMap<R>(Future<R> Function(E) f,
+      {void Function(R)? cleanUp}) async {
+    return Future.wait(map(f), cleanUp: cleanUp);
+  }
+
+  Future<List<R>> asyncMapNotNull<R>(Future<R?> Function(E) f,
+      {void Function(R)? cleanUp}) async {
+    return Future.wait(map(f),
+            cleanUp: cleanUp == null
+                ? null
+                : (R? val) {
+                    if (val != null) {
+                      cleanUp(val);
+                    }
+                  })
+        .then((values) => values.whereType<R>().toList());
+  }
+}
+
+// extension ListAsyncMapNotNull<E> on List<E?> {
+//   Future<List<R>> asyncMapNotNull<R>(Future<R?> Function(E?) f,
+//       {void Function(R)? cleanUp}) async {
+//     return Future.wait(map(f),
+//             cleanUp: cleanUp == null
+//                 ? null
+//                 : (R? val) {
+//                     if (val != null) {
+//                       cleanUp(val);
+//                     }
+//                   })
+//         .then((values) => values.whereType<R>().toList());
+//   }
+// }

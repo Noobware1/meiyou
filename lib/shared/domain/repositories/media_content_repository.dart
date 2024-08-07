@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:meiyou/shared/domain/models/media_content.dart';
 import 'package:meiyou/shared/domain/models/repositories_params/media_content_repository_params.dart';
 
@@ -5,13 +7,13 @@ abstract class MediaContentRepository {
   Future<List<MediaContent>> syncContentListWithSource(
       SyncContentListWithSourceParams params);
 
-  List<MediaContent> getContentListByMediaId(
+  Future<List<MediaContent>> getContentListByMediaId(
       GetContentListByMediaIdParams params);
 
   Stream<List<MediaContent>> getContentListByMediaIdAsStream(
       GetContentListByMediaIdAsStreamParams params);
 
-  MediaContent? getContentById(GetContentByIdParams params);
+  Future<MediaContent?> getContentById(GetContentByIdParams params);
 
   Future<int> insertContent(InsertContentParams params);
 

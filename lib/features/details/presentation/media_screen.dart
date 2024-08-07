@@ -1,5 +1,6 @@
 import 'package:expandable_text/expandable_text.dart';
 import 'package:flutter/material.dart';
+import 'package:meiyou/core/router/route_params.dart';
 import 'package:meiyou/core/utils/constants/material_theme.dart';
 import 'package:meiyou/core/utils/extensions/context.dart';
 import 'package:meiyou/features/details/domain/models/media_screen_state.dart';
@@ -24,32 +25,50 @@ import 'package:nice_dart/nice_dart.dart';
 class MediaScreen extends StatefulWidget {
   final int mediaId;
   final ExtensionCategory category;
+
   const MediaScreen({
     super.key,
     required this.mediaId,
     required this.category,
   });
 
+  MediaScreen.fromRouteParams({
+    super.key,
+    required MediaScreenRouteParams params,
+  })  : mediaId = params.mediaId,
+        category = params.category;
+
   @override
   State<MediaScreen> createState() => _MediaScreenState();
 }
 
-class _MediaScreenState extends State<MediaScreen>
-    with SingleTickerProviderStateMixin {
+class _MediaScreenState extends State<MediaScreen> {
   late final MediaScreenViewModel viewModel;
+  bool initialized = false;
   @override
   void initState() {
     super.initState();
     viewModel = MediaScreenViewModel(
       mediaId: widget.mediaId,
       category: widget.category,
-      tickerProvider: this,
     );
-    ;
+    viewModel.stateListenable.first.then((_) {
+      _checkInitialized();
+    });
+  }
+
+  _checkInitialized() {
+    if (!initialized) {
+      setState(() {
+        initialized = true;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (!initialized) return const SizedBox();
+
     return ResponsiveBuilder(builder: (context, constraints, size) {
       final themeDataDesktop =
           MediaScreenThemeDataDesktop(context, constraints);
@@ -62,136 +81,142 @@ class _MediaScreenState extends State<MediaScreen>
         desktopData: themeDataDesktop,
         mobileData: themeDataMobile,
         screenSize: size,
-        child: Scaffold(
-          appBar: AppBar(
-            forceMaterialTransparency: true,
-          ),
-          extendBodyBehindAppBar: true,
-          body: RefreshIndicator(
-            key: viewModel.refreshIndicatorKey,
-            displacement: 80.0,
-            onRefresh: viewModel.refresh,
-            notificationPredicate: (notification) {
-              return notification.depth == 0;
-            },
-            child: SingleChildScrollView(
-              controller: viewModel.scrollController,
-              child: StateListenableBuilder(
-                stateListenable: viewModel.stateListenable,
-                builder: (context, state, _) {
-                  final media = state.media;
+        child: SafeArea(
+          top: false,
+          child: Scaffold(
+            appBar: AppBar(
+              forceMaterialTransparency: true,
+            ),
+            extendBodyBehindAppBar: true,
+            body: RefreshIndicator(
+              key: viewModel.refreshIndicatorKey,
+              displacement: 80.0,
+              onRefresh: viewModel.refresh,
+              notificationPredicate: (notification) {
+                return notification.depth == 0;
+              },
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                controller: viewModel.scrollController,
+                child: StateListenableBuilder(
+                  stateListenable: viewModel.stateListenable,
+                  builder: (context, state, _) {
+                    final media = state.media;
 
-                  return Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      AnimatedContainer(
-                        duration: Durations.short4,
-                        height: currentTheme.stackHeight,
-                        child: Stack(
-                          children: [
-                            VerticalSpace(currentTheme.stackHeight),
-                            _banner(
-                              height: currentTheme.bannerHeight,
-                              width: currentTheme.bannerWidth,
-                              fit: currentTheme.bannerFit,
-                              gradient: currentTheme.bannerGradient,
-                              url: media.bannerOrPoster,
-                            ),
-                            Positioned(
-                              bottom: currentTheme.posterPosition,
-                              child: _posterAndTitle(
-                                media: media,
-                                theme: currentTheme,
-                                size: size,
-                                buttons: disapperingButtonsDesktop(
-                                    size: size, state: state),
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AnimatedContainer(
+                          duration: Durations.short4,
+                          height: currentTheme.stackHeight,
+                          child: Stack(
+                            children: [
+                              VerticalSpace(currentTheme.stackHeight),
+                              _banner(
+                                height: currentTheme.bannerHeight,
+                                width: currentTheme.bannerWidth,
+                                fit: currentTheme.bannerFit,
+                                gradient: currentTheme.bannerGradient,
+                                url: media.bannerOrPoster,
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      VerticalSpace(currentTheme.spacing),
-                      Padding(
-                        padding: currentTheme.defaultPadding,
-                        child: Card(
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: currentTheme.spacing),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                if (!size.isDesktop)
-                                  VerticalSpace(currentTheme.spacing),
-                                disapperingButtonsMobile(
-                                    size: size, state: state),
-                                VerticalSpace(currentTheme.spacing),
-                                _MetaData(
+                              Positioned(
+                                bottom: currentTheme.posterPosition,
+                                child: _posterAndTitle(
                                   media: media,
-                                  size: size,
-                                ),
-                                VerticalSpace(currentTheme.spacing),
-                                description(
-                                  size: size,
                                   theme: currentTheme,
-                                  description:
-                                      media.description.isNotEmptyOrNull
-                                          ? media.description!
-                                          : 'No description',
-                                  otherTitles: media.otherTitles,
+                                  size: size,
+                                  buttons: disapperingButtonsDesktop(
+                                      size: size, state: state),
                                 ),
-                                if (media.genres.isNotEmptyOrNull) ...[
+                              ),
+                            ],
+                          ),
+                        ),
+                        VerticalSpace(currentTheme.spacing),
+                        Padding(
+                          padding: currentTheme.defaultPadding,
+                          child: Card(
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: currentTheme.spacing),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (!size.isDesktop)
+                                    VerticalSpace(currentTheme.spacing),
+                                  disapperingButtonsMobile(
+                                      size: size, state: state),
                                   VerticalSpace(currentTheme.spacing),
-                                  ChipTheme(
-                                    data: currentTheme.genreChipTheme,
-                                    child: Wrap(
-                                      alignment: WrapAlignment.start,
-                                      spacing: 10,
-                                      children: media.genres!.mapList(
-                                        (e) => FilterChip(
-                                          onSelected: (_) => {},
-                                          visualDensity:
-                                              currentTheme.genreVisualDensity,
-                                          label: Text(e),
+                                  _MetaData(
+                                    media: media,
+                                    size: size,
+                                  ),
+                                  VerticalSpace(currentTheme.spacing),
+                                  description(
+                                    size: size,
+                                    theme: currentTheme,
+                                    description:
+                                        media.description.isNotEmptyOrNull
+                                            ? media.description!
+                                            : 'No description',
+                                    otherTitles: media.otherTitles,
+                                  ),
+                                  if (media.genres.isNotEmptyOrNull) ...[
+                                    VerticalSpace(currentTheme.spacing),
+                                    ChipTheme(
+                                      data: currentTheme.genreChipTheme,
+                                      child: Wrap(
+                                        alignment: WrapAlignment.start,
+                                        spacing: 10,
+                                        children: media.genres!.mapList(
+                                          (e) => FilterChip(
+                                            onSelected: (_) => {},
+                                            visualDensity:
+                                                currentTheme.genreVisualDensity,
+                                            label: Text(e),
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  ),
+                                  ],
+                                  VerticalSpace(currentTheme.spacing),
                                 ],
-                                VerticalSpace(currentTheme.spacing),
-                              ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      VerticalSpace(currentTheme.spacing),
-                      ContentListViewTheme(
-                        screenSize: size,
-                        desktopData: ContentListViewThemeDataDesktop(context),
-                        mobileData: ContentListViewThemeDataMobile(context),
-                        tabletData: ContentListViewThemeDataTablet(context),
-                        child: ContentHolderTheme(
+                        VerticalSpace(currentTheme.spacing),
+                        ContentListViewTheme(
                           screenSize: size,
-                          desktopData: ContentHolderThemeDataDesktop(context),
-                          mobileData: ContentHolderThemeDataMobile(context),
-                          tabletData: ContentHolderThemeDataTablet(context),
-                          child: ContentListView(
-                            type: state.contentListViewType,
-                            size: size,
-                            media: media,
-                            contentList: state.contentList,
-                            scrollable: false,
-                            onViewTypeChange: viewModel.toggleViewType,
-                            padding: currentTheme.defaultPadding,
-                            spacing: currentTheme.spacing,
-                            progress: viewModel.progressContoller,
-                            isRefreshing: state.isRefreshing,
+                          desktopData: ContentListViewThemeDataDesktop(context),
+                          mobileData: ContentListViewThemeDataMobile(context),
+                          tabletData: ContentListViewThemeDataTablet(context),
+                          child: ContentHolderTheme(
+                            screenSize: size,
+                            desktopData: ContentHolderThemeDataDesktop(context),
+                            mobileData: ContentHolderThemeDataMobile(context),
+                            tabletData: ContentHolderThemeDataTablet(context),
+                            child: ContentListView(
+                              type: state.contentListViewType,
+                              size: size,
+                              media: media,
+                              groupedContent: state.contentList,
+                              scrollable: false,
+                              onViewTypeChange: viewModel.toggleViewType,
+                              padding: currentTheme.defaultPadding,
+                              spacing: currentTheme.spacing,
+                              // progress: viewModel.progressContoller,
+                              isRefreshing: state.isRefreshing,
+                              onContentSelected: (content) =>
+                                  viewModel.onContentSelected(context, content),
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  );
-                },
+                      ],
+                    );
+                  },
+                ),
               ),
             ),
           ),

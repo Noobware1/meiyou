@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:meiyou/core/utils/extensions/context.dart';
 
 abstract class ContentListViewThemeData {
-  ContentListViewThemeData(context) : _context = context;
+  ContentListViewThemeData(BuildContext context) : _context = context;
 
   final BuildContext _context;
 

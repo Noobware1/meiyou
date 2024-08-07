@@ -17,6 +17,15 @@ class ContentHolderTheme extends InheritedResposiveTheme {
     required super.child,
   });
 
+  ContentHolderTheme.fromContext({
+    super.key,
+    required super.child,
+    required super.screenSize,
+    required BuildContext context,
+  })  : mobileData = ContentHolderThemeDataMobile(context),
+        tabletData = ContentHolderThemeDataTablet(context),
+        desktopData = ContentHolderThemeDataDesktop(context);
+
   @override
   Widget wrap(BuildContext context, Widget child) {
     return ContentHolderTheme(

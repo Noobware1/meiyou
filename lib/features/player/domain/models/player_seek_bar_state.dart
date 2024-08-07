@@ -1,10 +1,10 @@
 class PlayerSeekBarState {
-  final Duration current;
+  final Duration position;
   final Duration buffered;
   final Duration total;
 
   PlayerSeekBarState({
-    required this.current,
+    required this.position,
     required this.buffered,
     required this.total,
   });

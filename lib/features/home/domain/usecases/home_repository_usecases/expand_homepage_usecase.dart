@@ -4,13 +4,13 @@ import 'package:meiyou/features/home/domain/models/repository_params/home_page_r
 import 'package:meiyou/features/home/domain/repositories/home_repository.dart';
 
 class ExpandHomepageUseCase
-    extends UseCase<List<ExpandedHomePageList>, ExpandHomePageParams> {
+    extends UseCase<Future<List<ExpandedHomePageList>>, ExpandHomePageParams> {
   final HomeRepository _homeRepository;
 
   ExpandHomepageUseCase(this._homeRepository);
 
   @override
-  List<ExpandedHomePageList> call(ExpandHomePageParams params) {
+  Future<List<ExpandedHomePageList>> call(ExpandHomePageParams params) {
     return _homeRepository.expandHomePage(params);
   }
 }

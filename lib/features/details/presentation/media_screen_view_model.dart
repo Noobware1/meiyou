@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:async/async.dart' hide Result;
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:meiyou/core/helper/media_content_helper.dart';
 import 'package:meiyou/core/injection/injection.dart';
+import 'package:meiyou/core/router/routes.dart';
 import 'package:meiyou/core/utils/log/logger.dart';
 import 'package:meiyou/core/utils/stream_utils/comnine_stream.dart';
 import 'package:meiyou/features/details/domain/models/content_list_view_type.dart';
@@ -48,36 +50,38 @@ class MediaScreenViewModel {
   final SyncContentListWithSourceUseCase _syncContentListWithSourceUseCase =
       getIt.get();
   final GlobalKey<RefreshIndicatorState> refreshIndicatorKey;
-  final AnimationController progressContoller;
   final ScrollController scrollController;
   bool isFirstRefresh = false;
 
   MediaScreenViewModel({
     required int mediaId,
     required ExtensionCategory category,
-    required TickerProvider tickerProvider,
     // required State<MediaScreen> stateWidget,
   })  : refreshIndicatorKey = GlobalKey<RefreshIndicatorState>(),
-        progressContoller = AnimationController(
-          vsync: tickerProvider,
-          duration: Durations.long1,
-        ),
         scrollController = ScrollController() {
     _init(mediaId, category);
   }
 
-  void _init(
+  Future<void> _init(
     int mediaId,
     ExtensionCategory category,
-  ) {
-    final media = _getMediaByIdUseCase(
+  ) async {
+    final media = await _getMediaByIdUseCase(
         GetMediaByIdParams(category: category, id: mediaId));
 
     if (media == null) {
       throw Exception('Media not found');
     }
 
-    final contentList = _getContentListByMediaIdUseCase(
+    stateListenable.setState(
+      MediaScreenState(
+        media: media,
+        contentList: {},
+        isRefreshing: media.initalized,
+      ),
+    );
+
+    final contentList = await _getContentListByMediaIdUseCase(
         GetContentListByMediaIdParams(
             category: media.category, mediaId: mediaId));
 
@@ -92,7 +96,7 @@ class MediaScreenViewModel {
 
     _initStateListenable(
       media: media,
-      contentList: contentList,
+      contentList: MediaContentHelper.groupBySeasonAndSplit(contentList),
       needRefreshInfo: needRefreshInfo,
       needRefreshContent: needRefreshContent,
     );
@@ -111,11 +115,11 @@ class MediaScreenViewModel {
 
   void _initStateListenable({
     required Media media,
-    required List<MediaContent> contentList,
+    required SeasonGroupedContent contentList,
     required bool needRefreshInfo,
     required bool needRefreshContent,
   }) {
-    stateListenable = StateNotifier(
+    stateListenable.setState(
       MediaScreenState(
         media: media,
         contentList: contentList,
@@ -150,7 +154,9 @@ class MediaScreenViewModel {
           GetContentListByMediaIdAsStreamParams(
               category: media.category, mediaId: mediaId)),
       (media, contentList) {
-        return _state.copyWith(media: media, contentList: contentList);
+        return _state.copyWith(
+            media: media,
+            contentList: MediaContentHelper.groupBySeasonAndSplit(contentList));
       },
       initalDataOne: media,
       initalDataTwo: contentList,
@@ -167,7 +173,9 @@ class MediaScreenViewModel {
       });
   }
 
-  late final StateNotifier<MediaScreenState> stateListenable;
+  final StateNotifier<MediaScreenState> stateListenable = StateNotifier(
+      MediaScreenState(
+          media: Media.empty(), contentList: {}, isRefreshing: false));
 
   MediaScreenState get _state => stateListenable.state;
 
@@ -234,7 +242,12 @@ class MediaScreenViewModel {
   void dispose() {
     _sourceOperations?.cancel();
     _subscription.cancel();
+    scrollController.dispose();
     stateListenable.dispose();
+  }
+
+  void onContentSelected(BuildContext context, MediaContent content) {
+    context.pushToPlayerScreen(stateListenable.state.media, content);
   }
 
   Future<void> toggleFavorite() async {
@@ -255,15 +268,7 @@ class MediaScreenViewModel {
     }
   }
 
-  void toggleViewType() {
-    final ContentListViewType type;
-    if (_state.contentListViewType == ContentListViewType.list) {
-      progressContoller.forward();
-      type = ContentListViewType.grid;
-    } else {
-      progressContoller.reverse();
-      type = ContentListViewType.list;
-    }
+  void toggleViewType(ContentListViewType type) {
     stateListenable.setState(_state.copyWith(contentListViewType: type));
   }
 }

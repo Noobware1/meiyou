@@ -145,8 +145,14 @@ class DataBase {
         novel: (novel) => _isar.novelCategorys.delete(novel.id),
       );
 
-  Future<T> writeInTransaction<T>(Future<T> Function() callback) {
-    return _isar.writeTxn(() async {
+  Future<T> writeInTransaction<T>(Future<T> Function() callback) async {
+    return await _isar.writeTxn(() async {
+      return await callback();
+    });
+  }
+
+  Future<T> readInTransaction<T>(Future<T> Function() callback) async {
+    return await _isar.txn(() async {
       return await callback();
     });
   }
@@ -212,11 +218,11 @@ extension on List<MediaContent> {
     required T Function(List<MangaContent>) manga,
     required T Function(List<NovelContent>) novel,
   }) {
-    if (every((element) => element is VideoContent)) {
+    if (first is VideoContent) {
       return video(cast());
-    } else if (every((element) => element is MangaContent)) {
+    } else if (first is MangaContent) {
       return manga(cast());
-    } else if (every((element) => element is NovelContent)) {
+    } else if (first is NovelContent) {
       return novel(cast());
     } else {
       throw Exception('Invalid type');

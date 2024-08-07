@@ -8,11 +8,11 @@ import 'package:nice_dart/nice_dart.dart';
 abstract class MediaRepository {
   Future<Result<Media>> networkMediaToLocal(NetworkMediaToLocalParams params);
 
-  Media? getMediaById(GetMediaByIdParams params);
+  Future<Media?> getMediaById(GetMediaByIdParams params);
 
   Stream<Media?> getMediaByIdAsStream(GetMediaByIdAsStreamParams params);
 
-  Media? getMediaByUrlAndSourceId(GetMediaByUrlAndSourceIdParams params);
+  Future<Media?> getMediaByUrlAndSourceId(GetMediaByUrlAndSourceIdParams params);
 
   Future<int> insertMedia(InsertMediaParams params);
 

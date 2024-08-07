@@ -4,7 +4,42 @@ import 'package:meiyou_extensions_lib/models.dart';
 import 'package:nice_dart/nice_dart.dart';
 part 'media.g.dart';
 
+class _EmptyMedia extends Media {
+  _EmptyMedia()
+      : super._(
+          id: Isar.autoIncrement,
+          sourceId: 0,
+          format: MediaFormat.others,
+          title: '',
+          url: '',
+          favorite: false,
+          otherTitles: [],
+          status: Status.unknown,
+          banner: '',
+          poster: '',
+          score: 0,
+          description: '',
+          genres: [],
+        );
+  @override
+  R when<R>(
+      {required R Function(VideoMedia p1) video,
+      required R Function(MangaMedia p1) manga,
+      required R Function(NovelMedia p1) novel}) {
+    throw UnsupportedError('Empty media');
+  }
+
+  @override
+  bool get isEmpty => true;
+}
+
 abstract class Media extends IMedia {
+  bool get isEmpty => false;
+
+  factory Media.empty() {
+    return _EmptyMedia();
+  }
+
   Media._({
     required this.id,
     required this.sourceId,
@@ -37,7 +72,6 @@ abstract class Media extends IMedia {
     double? score,
     String? description,
     List<String>? genres,
-     
   }) {
     return category.when<Media>(
       video: () => VideoMedia(

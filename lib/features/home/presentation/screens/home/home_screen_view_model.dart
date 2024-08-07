@@ -95,7 +95,7 @@ class HomeScreenViewModel {
       final fullHomePage = result.getOrThrow();
 
       for (final data in fullHomePage) {
-        final expandedData = _expandHomepageUsecase(ExpandHomePageParams(
+        final expandedData = await _expandHomepageUsecase(ExpandHomePageParams(
             homePage: data.homePage,
             mapper: (media) {
               return _mapMedia(media, id, category);
@@ -237,14 +237,15 @@ class HomeScreenViewModel {
       for (var item in homePage.items) {
         final key = item.title;
 
+        final mapped = await item.list.mapList((e) {
+          return _mapMedia(e, sourceId, category);
+        }).wait;
+
         _expanded[key]?.let((notifer) {
           notifer.setState(notifer.state.copyWith(
             currentPage: nextPage,
             hasNext: homePage.hasNextPage,
-            mediaList: notifer.state.mediaList +
-                item.list.mapList((e) {
-                  return _mapMedia(e, sourceId, category);
-                }),
+            mediaList: notifer.state.mediaList + mapped,
           ));
         });
       }
@@ -257,6 +258,7 @@ class HomeScreenViewModel {
     return showModalAdaptiveSheet(
         context: context,
         isScrollControlled: true,
+        useRootNavigator: true,
         builder: (context) {
           return BrowseScreen(onSourceSelected: (source) {
             _onNewSourceSelected(source);
@@ -299,9 +301,14 @@ class HomeScreenViewModel {
     context.pushToMediaScreen(media);
   }
 
-  Media _mapMedia(IMedia media, int sourceId, ExtensionCategory category) {
+  void onPressedSearch(BuildContext context) {
+    context.pushToSearchScreen(stateListenable.state.selectedSource!);
+  }
+
+  Future<Media> _mapMedia(
+      IMedia media, int sourceId, ExtensionCategory category) async {
     final networkMedia = Media.formIMedia(media, sourceId, category);
-    final local = _getMediaByUrlAndSourceIdUseCase(
+    final local = await _getMediaByUrlAndSourceIdUseCase(
         GetMediaByUrlAndSourceIdParams(
             url: networkMedia.url, sourceId: sourceId, category: category));
 

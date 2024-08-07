@@ -18,6 +18,8 @@ class BrowseScreen extends StatefulWidget {
 class _BrowseScreenState extends State<BrowseScreen>
     with TickerProviderStateMixin {
   late final BrowseScreenViewModel viewModel;
+  late int currentIndex;
+  late final List<ValueKey<int>> keys;
 
   @override
   void initState() {
@@ -29,6 +31,17 @@ class _BrowseScreenState extends State<BrowseScreen>
       preferences: getIt(),
       onSourceSelected: widget.onSourceSelected,
     );
+
+    currentIndex = viewModel.navigatiorStateListenable.state;
+    keys = List.generate(viewModel.tabCount, (index) => ValueKey(index));
+
+    viewModel.navigatiorStateListenable.addListener(listener);
+  }
+
+  void listener() {
+    setState(() {
+      currentIndex = viewModel.navigatiorStateListenable.state;
+    });
   }
 
   @override
@@ -48,51 +61,50 @@ class _BrowseScreenState extends State<BrowseScreen>
         bottom: _tabBar(),
       ),
       bottomNavigationBar: _bottomNavigationBar(),
-      body: _tabBarView(),
+      body: AnimatedSwitcher(
+        transitionBuilder: (child, animation) {
+          return SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(1, 0),
+              end: Offset.zero,
+            ).animate(animation),
+            child: child,
+          );
+        },
+        duration: Durations.short4,
+        child: _tabBarView(),
+      ),
     );
   }
 
   Widget _tabBarView() {
-    return StateListenableBuilder(
-      stateListenable: viewModel.navigatiorStateListenable,
-      builder: (context, state, _) {
-        return TabBarView(
-          controller: viewModel.tabController(state),
-          children: viewModel.tabViews(state),
-        );
-      },
+    return TabBarView(
+      key: keys[currentIndex],
+      controller: viewModel.tabController(currentIndex),
+      children: viewModel.tabViews(currentIndex),
     );
   }
 
   PreferredSizeWidget _tabBar() {
     return PreferredSize(
       preferredSize: const Size.fromHeight(MaterialTheme.tabBarHeight),
-      child: StateListenableBuilder(
-        stateListenable: viewModel.navigatiorStateListenable,
-        builder: (context, state, _) {
-          return TabBar(
-            tabAlignment: TabAlignment.start,
-            indicatorSize: TabBarIndicatorSize.tab,
-            isScrollable: true,
-            controller: viewModel.tabController(state),
-            tabs: viewModel.tabs(state),
-          );
-        },
+      child: TabBar(
+        tabAlignment: TabAlignment.start,
+        indicatorSize: TabBarIndicatorSize.tab,
+        isScrollable: true,
+        controller: viewModel.tabController(currentIndex),
+        tabs: viewModel.tabs(currentIndex),
       ),
     );
   }
 
   Widget _bottomNavigationBar() {
-    return StateListenableBuilder(
-        stateListenable: viewModel.navigatiorStateListenable,
-        builder: (_, state, __) {
-          return CustomNavigationBar(
-            type: NavigationBarType.bottom,
-            destinations: viewModel.destinations,
-            selectedIndex: state,
-            onDestinationSelected: viewModel.navigateTo,
-          );
-        });
+    return CustomNavigationBar(
+      type: NavigationBarType.bottom,
+      destinations: viewModel.destinations,
+      selectedIndex: currentIndex,
+      onDestinationSelected: viewModel.navigateTo,
+    );
   }
 
   @override

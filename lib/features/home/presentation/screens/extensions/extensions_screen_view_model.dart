@@ -21,14 +21,17 @@ class ExtensionsScreenViewModel {
         searchController = TextEditingController(text: '') {
     extensionManger.getExtensionList(category).let((it) {
       _extensionList = it.state;
-
-      stateListenable =
-          StateNotifier(!_extensionList.isInitialized && _extensionList.isEmpty
-              ? const ExtensionsStateLoading()
-              : _mapper(
-                  searchController.text,
-                  _extensionList,
-                ));
+      // print(_extensionList.isInitialized);
+      stateListenable = StateNotifier(
+        !_extensionList.isInitialized
+            ? const ExtensionsStateLoading()
+            : (_extensionList.isEmpty
+                ? const ExtensionsStateEmpty()
+                : _mapper(
+                    searchController.text,
+                    _extensionList,
+                  )),
+      );
       _streamSubscription = it.listen((data) {
         _extensionList = data;
 
@@ -165,6 +168,10 @@ sealed class ExtensionsState {
 
 class ExtensionsStateData extends ExtensionsState {
   const ExtensionsStateData(super.extensions);
+}
+
+class ExtensionsStateEmpty extends ExtensionsState {
+  const ExtensionsStateEmpty() : super(const {});
 }
 
 class ExtensionsStateLoading extends ExtensionsState {

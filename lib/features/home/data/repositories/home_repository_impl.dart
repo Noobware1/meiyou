@@ -5,19 +5,19 @@ import 'package:nice_dart/nice_dart.dart';
 
 class HomeRepositoryImpl implements HomeRepository {
   @override
-  List<ExpandedHomePageList> expandHomePage(ExpandHomePageParams params) {
+  Future<List<ExpandedHomePageList>> expandHomePage(
+      ExpandHomePageParams params) async {
     final homePage = params.homePage;
     final mapper = params.mapper;
-    return homePage.items.mapList(
-      (e) => ExpandedHomePageList(
-        title: e.title,
-        mediaList: e.list.mapList(mapper),
-        horizontalImages: e.horizontalImages,
-        hasNext: homePage.hasNextPage,
-        currentPage: 1,
-      ),
-    );
-  }
 
-  
+    return homePage.items
+        .mapList((e) async => ExpandedHomePageList(
+              title: e.title,
+              mediaList: await e.list.mapList(mapper).wait,
+              horizontalImages: e.horizontalImages,
+              hasNext: homePage.hasNextPage,
+              currentPage: 1,
+            ))
+        .wait;
+  }
 }

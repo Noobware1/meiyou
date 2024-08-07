@@ -1,11 +1,38 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:meiyou/shared/presentation/notifers/state_notifer.dart';
+
+class _StateStreamFromListenable<T> extends StateStream<T> {
+  final StateNotifier<T> stateListenable;
+
+  _StateStreamFromListenable(this.stateListenable, {super.isBroadcast})
+      : super(initialData: stateListenable.state) {
+    stateListenable.addListener(_valueChanged);
+  }
+
+  @override
+  FutureOr onDispose() {
+    stateListenable.removeListener(_valueChanged);
+    return super.onDispose();
+  }
+
+  void _valueChanged() {
+    update(stateListenable.state);
+  }
+}
 
 class StateStream<T> with Disposable implements Stream<T> {
   StateStream({required T initialData, bool isBroadcast = true}) {
     _init(this, initialData, isBroadcast);
+  }
+
+  factory StateStream.fromListenable(StateNotifier<T> stateListenable,
+      {bool isBroadcast = true}) {
+    return _StateStreamFromListenable(stateListenable,
+        isBroadcast: isBroadcast);
   }
 
   static void _init<T>(

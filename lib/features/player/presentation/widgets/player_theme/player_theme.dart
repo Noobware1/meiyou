@@ -20,4 +20,6 @@ class PlayerTheme extends InheritedTheme {
         context.dependOnInheritedWidgetOfExactType<PlayerTheme>();
     return playerTheme?.data ?? PlayerThemeData(context);
   }
+
+  
 }

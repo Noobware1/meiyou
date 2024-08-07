@@ -4,6 +4,8 @@ import 'package:meiyou/core/router/route_params.dart';
 import 'package:meiyou/core/router/routes.dart';
 import 'package:meiyou/features/details/presentation/media_screen.dart';
 import 'package:meiyou/features/home/presentation/screens/home/home_screen.dart';
+import 'package:meiyou/features/home/presentation/screens/search/search_srceen.dart';
+import 'package:meiyou/features/player/presentation/screens/player_screen.dart';
 import 'package:meiyou/shared/presentation/widgets/multi_nav_scaffold/multi_nav_scaffold.dart';
 import 'package:meiyou/shared/presentation/widgets/navigation_bar/navigation_bar.dart';
 
@@ -19,10 +21,18 @@ class RouterProvider {
     initialLocation: Route.home.path,
     routes: [
       _mainScreenRoutes,
+      Route.search.toGoRoute((context, state) {
+        final params = SearchScreenRouteParams.fromExtra(state.extra);
+        return SearchScreen.fromRouteParams(params: params);
+      }),
       Route.media.toGoRoute((context, state) {
         final params = MediaScreenRouteParams.fromExtra(state.extra);
-        return MediaScreen(mediaId: params.mediaId, category: params.category);
-      })
+        return MediaScreen.fromRouteParams(params: params);
+      }),
+      Route.player.toGoRoute((context, state) {
+        final params = PlayerScreenRouteParams.fromExtra(state.extra);
+        return PlayerScreen.fromRouteParams(params: params);
+      }),
     ],
   );
 

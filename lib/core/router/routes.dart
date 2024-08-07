@@ -3,6 +3,8 @@ import 'package:meiyou/core/router/route_params.dart';
 import 'package:meiyou/core/utils/extensions/context.dart';
 import 'package:meiyou/shared/domain/models/extension_category.dart';
 import 'package:meiyou/shared/domain/models/media.dart';
+import 'package:meiyou/shared/domain/models/media_content.dart';
+import 'package:meiyou/shared/domain/models/source.dart';
 import 'package:meiyou_extensions_lib/models.dart';
 
 class Route {
@@ -41,12 +43,33 @@ class Route {
 }
 
 extension RoutesExtensions on BuildContext {
+  void pushToSearchScreen(InstalledSource source) {
+    Route.search._push(
+      this,
+      params: SearchScreenRouteParams(
+        sourceId: source.id,
+        category: source.category,
+      ),
+    );
+  }
+
   void pushToMediaScreen(Media media) {
     Route.media._push(
       this,
       params: MediaScreenRouteParams(
         mediaId: media.id,
         category: media.category,
+      ),
+    );
+  }
+
+  void pushToPlayerScreen(Media media, MediaContent content) {
+    Route.player._push(
+      this,
+      params: PlayerScreenRouteParams(
+        mediaId: media.id,
+        category: media.category,
+        contentId: content.id,
       ),
     );
   }

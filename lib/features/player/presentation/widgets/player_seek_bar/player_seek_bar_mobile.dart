@@ -1,11 +1,11 @@
 part of 'player_seek_bar.dart';
 
 class _PlayerSeekBarMobile extends StatelessWidget {
-  final StateStream<PlayerSeekBarState> stateStream;
+  final StateNotifier<PlayerSeekBarState> stateListenable;
   final void Function(Duration) onSeek;
   const _PlayerSeekBarMobile({
     super.key,
-    required this.stateStream,
+    required this.stateListenable,
     required this.onSeek,
   });
 
@@ -29,17 +29,15 @@ class _PlayerSeekBarMobile extends StatelessWidget {
 
     final timeLabelLocation = theme.timeLabelLocation;
 
-    return StreamBuilder<PlayerSeekBarState>(
-        initialData: stateStream.state,
-        stream: stateStream,
-        builder: (context, snapshot) {
-          final state = snapshot.data!;
+    return StateListenableBuilder(
+        stateListenable: stateListenable,
+        builder: (context, state, _) {
 
           return ProgressBar(
             barHeight: barHeight,
             thumbGlowColor: thumbGlowColor,
             timeLabelLocation: timeLabelLocation,
-            progress: state.current,
+            progress: state.position,
             buffered: state.buffered,
             timeLabelTextStyle: timeLabelTextStyle,
             bufferedBarColor: bufferedBarColor,

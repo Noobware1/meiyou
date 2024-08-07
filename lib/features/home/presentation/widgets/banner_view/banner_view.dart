@@ -1,4 +1,6 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:meiyou/core/utils/extensions/context.dart';
 import 'package:meiyou/core/utils/stream_utils/state_stream.dart';
 import 'package:meiyou/features/home/presentation/widgets/banner_view/banner_view_model.dart';
 import 'package:meiyou/features/home/presentation/widgets/banner_view/banner_view_theme_data.dart';
@@ -30,7 +32,7 @@ class BannerView extends StatefulWidget {
 
 class _BannerViewState extends State<BannerView> {
   late final BannerViewModel viewModel;
-
+  var currentPage = 0;
   @override
   void initState() {
     super.initState();
@@ -40,6 +42,12 @@ class _BannerViewState extends State<BannerView> {
       onLongPressed: widget.onLongPressed,
       onScrollEnd: widget.onScrollEnd,
     );
+
+    viewModel.pageNotifier.addListener(() {
+      setState(() {
+        currentPage = viewModel.pageNotifier.state;
+      });
+    });
   }
 
   @override
@@ -54,6 +62,7 @@ class _BannerViewState extends State<BannerView> {
 
     return ResponsiveBuilder(builder: (context, constraints, screenSize) {
       final height = theme.getBannerHeightForSize(screenSize);
+
       final width = constraints.maxWidth;
       return AnimatedContainer(
         duration: Durations.short3,
@@ -67,70 +76,114 @@ class _BannerViewState extends State<BannerView> {
                   MouseRegion(
                     cursor: SystemMouseCursors.click,
                     child: GestureDetector(
-                      onTapDown: (deatils) =>
-                          viewModel.onBannerTapDown(deatils, width),
+                      behavior: HitTestBehavior.opaque,
+                      onTapDown: (details) =>
+                          viewModel.onBannerTapDown(details, width, height),
                       child: NotificationListener<ScrollNotification>(
                         onNotification: viewModel.onScroll,
-                        child: PageView(
-                          controller: viewModel.pageController,
-                          children: state.map((media) {
-                            return DecoratedBox(
-                              position: DecorationPosition.foreground,
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                    strokeAlign: -0.050,
-                                    color: theme.gradientBaseColor),
-                                gradient: screenSize.isDesktop
-                                    ? sideGradient(theme)
-                                    : bottomGradient(theme),
-                              ),
-                              child: bannerImage(media,
-                                  height: height, width: width),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: theme.contentPadding,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Flexible(
-                          child: IgnorePointer(
-                            child: StateListenableBuilder(
-                                stateListenable: viewModel.pageNotifier,
-                                builder: (context, page, _) {
-                                  final item = state[page];
-                                  return ConstrainedBox(
-                                    constraints: theme.contentConstraints,
-                                    child: BannerContent(
-                                      media: item,
-                                      theme: theme,
-                                      screenSize: screenSize,
+                        child: PageView.builder(
+                            controller: viewModel.pageController,
+                            itemCount: state.length,
+                            itemBuilder: (context, index) {
+                              final media = state[index];
+                              final active =
+                                  index == viewModel.pageNotifier.state;
+                              final top = active ? 0.0 : 80.0;
+                              final leftAndRight =
+                                  screenSize.isDesktop ? 18.0 : 7.0;
+
+                              return AnimatedContainer(
+                                duration: Durations.long1,
+                                curve: Curves.easeOutQuint,
+                                margin: EdgeInsets.fromLTRB(
+                                    leftAndRight, top, leftAndRight, 0),
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: theme.bannerBorderColor,
+                                    width: 0.5,
+                                  ),
+                                  borderRadius: theme.bannerBorderRadius,
+                                ),
+                                clipBehavior: Clip.hardEdge,
+                                child: Stack(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: theme.bannerBorderRadius,
+                                      child: DecoratedBox(
+                                        position: DecorationPosition.foreground,
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                              strokeAlign: -0.050,
+                                              color: theme.gradientBaseColor),
+                                          gradient: screenSize.isDesktop
+                                              ? theme.sideGradient
+                                              : theme.bottomGradient,
+                                        ),
+                                        child: bannerImage(media,
+                                            screenSize: screenSize,
+                                            height: height,
+                                            width: width),
+                                      ),
                                     ),
-                                  );
-                                }),
-                          ),
-                        ),
-                        Align(
-                          alignment: Alignment.bottomLeft,
-                          child: BannerActionButtons(
-                            theme: theme,
-                            screenSize: screenSize,
-                            onPressed: viewModel.onPressed,
-                            onAddToLibrary: viewModel.onLongPressed,
-                          ),
-                        ),
-                      ],
+                                    Padding(
+                                      padding: const EdgeInsets.all(10),
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Flexible(
+                                            child: IgnorePointer(
+                                              child: ConstrainedBox(
+                                                constraints:
+                                                    theme.contentConstraints,
+                                                child: BannerContent(
+                                                  media: media,
+                                                  theme: theme,
+                                                  screenSize: screenSize,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          Align(
+                                            alignment: Alignment.bottomLeft,
+                                            child: BannerActionButton(
+                                              theme: theme,
+                                              screenSize: screenSize,
+                                              onPressed: viewModel.onPressed,
+                                              onAddToLibrary:
+                                                  viewModel.onLongPressed,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    if (screenSize.isMobile)
+                                      Positioned(
+                                        top: 0,
+                                        right: 0,
+                                        child: Padding(
+                                          padding: theme.contentPadding,
+                                          child: IconButton(
+                                            style: theme
+                                                .addToLibraryButtonStyleSmall,
+                                            onPressed: viewModel.onLongPressed,
+                                            icon: const Icon(Icons.add),
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              );
+                            }),
+                      ),
                     ),
                   ),
                   if (screenSize.isDesktop)
                     Positioned(
                       bottom: 0,
-                      right: 0,
+                      right: 90,
                       child: Padding(
                         padding: theme.contentPadding,
                         child: pageNavigationButton(
@@ -145,11 +198,6 @@ class _BannerViewState extends State<BannerView> {
       );
     });
   }
-
-  LinearGradient sideGradient(BannerViewThemeData theme) => theme.sideGradient;
-
-  LinearGradient bottomGradient(BannerViewThemeData theme) =>
-      theme.bottomGradient;
 
   Widget pageNavigationButton(BuildContext context, BannerViewThemeData theme) {
     return Row(
@@ -172,24 +220,32 @@ class _BannerViewState extends State<BannerView> {
 
   Widget bannerImage(
     Media media, {
+    required ScreenSize screenSize,
     required double height,
     required double width,
   }) {
+    final image = screenSize
+        .whenMobile(
+          () => media.poster,
+          orElse: () => media.bannerOrPoster,
+        )
+        .orEmpty();
+
     return ImageHolder.network(
       height: height,
       width: width,
-      url: media.poster,
+      url: image,
       fit: BoxFit.cover,
     );
   }
 }
 
-class BannerActionButtons extends StatelessWidget {
+class BannerActionButton extends StatelessWidget {
   final BannerViewThemeData theme;
   final VoidCallback onPressed;
   final VoidCallback onAddToLibrary;
   final ScreenSize screenSize;
-  const BannerActionButtons({
+  const BannerActionButton({
     super.key,
     required this.theme,
     required this.screenSize,
@@ -200,13 +256,17 @@ class BannerActionButtons extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final actionButtonStyle = theme.getActionButtonStyleForSize(screenSize);
-    final addToLibraryButtonStyle =
-        theme.getAddToLibraryButtonStyleForSize(screenSize);
     final padding = theme.getContentPaddingForSize(screenSize);
-
-    return Padding(
-      padding: padding,
-      child: SingleChildScrollView(
+    final Widget child;
+    if (screenSize.isMobile) {
+      child = OutlinedButton.icon(
+        style: actionButtonStyle,
+        onPressed: onPressed,
+        label: const Text('Watch Now'),
+        icon: const Icon(Icons.play_arrow),
+      );
+    } else {
+      child = SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         physics: const NeverScrollableScrollPhysics(),
         child: Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
@@ -218,13 +278,18 @@ class BannerActionButtons extends StatelessWidget {
           ),
           const HorizontalSpace(8),
           OutlinedButton.icon(
-            style: addToLibraryButtonStyle,
+            style: theme.getAddToLibraryButtonStyleForSize(screenSize),
             onPressed: onAddToLibrary,
             label: const Text('Library'),
             icon: const Icon(Icons.add),
           ),
         ]),
-      ),
+      );
+    }
+
+    return Padding(
+      padding: padding,
+      child: child,
     );
   }
 }

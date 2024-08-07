@@ -32,6 +32,9 @@ final class BannerViewThemeData {
   final ButtonStyle addToLibraryButtonStyle;
   final ButtonStyle addToLibraryButtonStyleSmall;
 
+  final Color bannerBorderColor;
+  final BorderRadius bannerBorderRadius;
+
   double getBannerHeightForSize(ScreenSize screenSize) {
     return screenSize == ScreenSize.desktop ? bannerHeight : bannerHeightSmall;
   }
@@ -91,8 +94,11 @@ final class BannerViewThemeData {
     required this.titleTextStyleSmall,
     required this.ratingIconSize,
     required this.ratingIconColor,
-  })  : bannerHeight = 400,
-        bannerHeightSmall = 360,
+    required this.bannerBorderColor,
+    required this.addToLibraryButtonStyleSmall,
+  })  : bannerHeight = 480,
+        bannerHeightSmall = 420,
+        bannerBorderRadius = BorderRadius.circular(18),
         contentConstraints = const BoxConstraints(maxWidth: 780),
         contentPadding = const EdgeInsets.all(8),
         contentPaddingSmall = const EdgeInsets.fromLTRB(8, 6, 8, 6),
@@ -106,13 +112,32 @@ final class BannerViewThemeData {
           padding: WidgetStatePropertyAll(
               EdgeInsets.symmetric(vertical: 18, horizontal: 28)),
         ),
-        addToLibraryButtonStyleSmall = const ButtonStyle(),
         genreSeparatorTextStyle = genreTextStyle.copyWith(
           color: genreTextStyle.color!.withOpacity(0.38),
         );
 
   factory BannerViewThemeData.from(BuildContext context) {
     final colors = context.theme.colorScheme;
+
+    final addToLibraryButtonStyleSmall = ButtonStyle(
+      backgroundColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.disabled)) {
+          return colors.surface.withOpacity(0.38);
+        }
+        if (states.contains(WidgetState.pressed) ||
+            states.contains(WidgetState.hovered)) {
+          return colors.surface;
+        }
+        return context.theme.colorScheme.let((it) {
+          return ElevationOverlay.applySurfaceTint(
+            it.surface,
+            it.surfaceTint,
+            3.0,
+          );
+        });
+      }),
+    );
+
     final buttonStyle = ButtonStyle(
       padding: WidgetStateProperty.resolveWith((states) {
         return states.contains(WidgetState.hovered) ||
@@ -195,6 +220,8 @@ final class BannerViewThemeData {
     const ratingIconSize = 24.0;
     final ratingIconColor = colors.primary;
 
+    final bannerBorderColor = colors.onSurfaceVariant.withOpacity(0.38);
+
     return BannerViewThemeData._(
       titleTextStyle: titleTextStyle,
       titleTextStyleSmall: titleTextStyleSmall,
@@ -208,6 +235,8 @@ final class BannerViewThemeData {
       sideGradient: sideGradient,
       ratingIconSize: ratingIconSize,
       ratingIconColor: ratingIconColor,
+      bannerBorderColor: bannerBorderColor,
+      addToLibraryButtonStyleSmall: addToLibraryButtonStyleSmall,
     );
   }
 }

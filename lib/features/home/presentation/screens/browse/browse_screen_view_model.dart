@@ -63,6 +63,8 @@ class BrowseScreenViewModel {
 
   final StateNotifier<int> navigatiorStateListenable = StateNotifier(0);
 
+ int get tabCount => _tabCount;
+
   final List<Destination> destinations = [
     const Destination(
       icon: Icon(Icons.explore_outlined),

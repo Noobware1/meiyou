@@ -1,10 +1,11 @@
+import 'package:meiyou/core/helper/media_content_helper.dart';
 import 'package:meiyou/features/details/domain/models/content_list_view_type.dart';
 import 'package:meiyou/shared/domain/models/media.dart';
 import 'package:meiyou/shared/domain/models/media_content.dart';
 
 class MediaScreenState {
   final Media media;
-  final List<MediaContent> contentList;
+  final SeasonGroupedContent contentList;
   final bool isRefreshing;
   final ContentListViewType contentListViewType;
 
@@ -17,7 +18,7 @@ class MediaScreenState {
 
   MediaScreenState copyWith({
     Media? media,
-    List<MediaContent>? contentList,
+    SeasonGroupedContent? contentList,
     bool? isRefreshing,
     ContentListViewType? contentListViewType,
   }) {

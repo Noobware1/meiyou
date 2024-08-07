@@ -30,59 +30,59 @@ class MediaContentRepositoryImpl implements MediaContentRepository {
     final mediaId = media.id;
     final category = media.category;
 
-    final contentListDB = getContentListByMediaId(
-        GetContentListByMediaIdParams(mediaId: mediaId, category: category));
-
-    final List<MediaContent> newContentList = [];
-    final List<MediaContent> updatedContentList = [];
-    final List<MediaContent> removedContentList = contentListDB
-        .whereNot((content) => contentList
-            .any((sourceContent) => sourceContent.url == content.url))
-        .toList();
-
-    for (var i = 0; i < contentList.length; i++) {
-      var sourceContent = contentList[i];
-      var content = MediaContent(
-        mediaId: mediaId,
-        category: category,
-        number: sourceContent.number ?? i + 1,
-        sourceOrder: i,
-        name: sourceContent.name,
-        url: sourceContent.url,
-        image: sourceContent.image,
-        description: sourceContent.description,
-        season: sourceContent.season ?? -1,
-        isFiller: sourceContent.isFiller ?? false,
-        totalSeconds: 0,
-        lastSecondsSeen: 0,
-        seen: false,
-      );
-
-      final contentDB = contentListDB
-          .firstWhereOrNull((element) => element.url == content.url);
-
-      if (contentDB == null) {
-        newContentList.add(content);
-      } else {
-        updatedContentList.add(contentDB.copyWith(
-          number: content.number,
-          description: content.description,
-          name: content.name,
-          image: content.image,
-          season: content.season,
-          isFiller: content.isFiller,
-          sourceOrder: content.sourceOrder,
-        ));
-      }
-    }
-
-    if (newContentList.isEmpty &&
-        updatedContentList.isEmpty &&
-        removedContentList.isEmpty) {
-      return [];
-    }
-
     return _dataBase.writeInTransaction(() async {
+      final contentListDB = await getContentListByMediaId(
+          GetContentListByMediaIdParams(mediaId: mediaId, category: category));
+
+      final List<MediaContent> newContentList = [];
+      final List<MediaContent> updatedContentList = [];
+      final List<MediaContent> removedContentList = contentListDB
+          .whereNot((content) => contentList
+              .any((sourceContent) => sourceContent.url == content.url))
+          .toList();
+
+      for (var i = 0; i < contentList.length; i++) {
+        var sourceContent = contentList[i];
+        var content = MediaContent(
+          mediaId: mediaId,
+          category: category,
+          number: sourceContent.number ?? i + 1,
+          sourceOrder: i,
+          name: sourceContent.name,
+          url: sourceContent.url,
+          image: sourceContent.image,
+          description: sourceContent.description,
+          season: sourceContent.season ?? -1,
+          isFiller: sourceContent.isFiller ?? false,
+          totalSeconds: 0,
+          lastSecondsSeen: 0,
+          seen: false,
+        );
+
+        final contentDB = contentListDB
+            .firstWhereOrNull((element) => element.url == content.url);
+
+        if (contentDB == null) {
+          newContentList.add(content);
+        } else {
+          updatedContentList.add(contentDB.copyWith(
+            number: content.number,
+            description: content.description,
+            name: content.name,
+            image: content.image,
+            season: content.season,
+            isFiller: content.isFiller,
+            sourceOrder: content.sourceOrder,
+          ));
+        }
+      }
+
+      if (newContentList.isEmpty &&
+          updatedContentList.isEmpty &&
+          removedContentList.isEmpty) {
+        return [];
+      }
+
       if (removedContentList.isNotEmpty) {
         await _dataBase.deleteAllMediaContent(removedContentList);
       }
@@ -97,19 +97,19 @@ class MediaContentRepositoryImpl implements MediaContentRepository {
   }
 
   @override
-  List<MediaContent> getContentListByMediaId(
+  Future<List<MediaContent>> getContentListByMediaId(
       GetContentListByMediaIdParams params) {
     final mediaId = params.mediaId;
     final category = params.category;
 
-    return _dataBase.mediaContentCollection(category).when(
-          video: (collection) =>
-              collection.filter().mediaIdEqualTo(mediaId).findAllSync(),
-          manga: (collection) =>
-              collection.filter().mediaIdEqualTo(mediaId).findAllSync(),
-          novel: (collection) =>
-              collection.filter().mediaIdEqualTo(mediaId).findAllSync(),
-        );
+    return _dataBase
+        .mediaContentCollection(category)
+        .when(
+          video: (collection) => collection.filter().mediaIdEqualTo(mediaId),
+          manga: (collection) => collection.filter().mediaIdEqualTo(mediaId),
+          novel: (collection) => collection.filter().mediaIdEqualTo(mediaId),
+        )
+        .findAll();
   }
 
   @override
@@ -129,18 +129,18 @@ class MediaContentRepositoryImpl implements MediaContentRepository {
   }
 
   @override
-  MediaContent? getContentById(GetContentByIdParams params) {
-    final mediaId = params.id;
+  Future<MediaContent?> getContentById(GetContentByIdParams params) {
+    final id = params.id;
     final category = params.category;
 
-    return _dataBase.mediaContentCollection(category).when(
-          video: (collection) =>
-              collection.filter().mediaIdEqualTo(mediaId).findFirstSync(),
-          manga: (collection) =>
-              collection.filter().mediaIdEqualTo(mediaId).findFirstSync(),
-          novel: (collection) =>
-              collection.filter().mediaIdEqualTo(mediaId).findFirstSync(),
-        );
+    return _dataBase
+        .mediaContentCollection(category)
+        .when(
+          video: (collection) => collection.filter().idEqualTo(id),
+          manga: (collection) => collection.filter().idEqualTo(id),
+          novel: (collection) => collection.filter().idEqualTo(id),
+        )
+        .findFirst();
   }
 
   @override
@@ -171,7 +171,7 @@ class MediaContentRepositoryImpl implements MediaContentRepository {
 }
 
 extension<T> on List<T> {
-  Future<List<R>> asyncMap<R>(FutureOr<R> Function(T) f) async {
+  Future<List<R>> asyncMap<R>(Future<R> Function(T) f) async {
     return [for (var element in this) await f(element)];
   }
 }

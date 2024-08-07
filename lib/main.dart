@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:media_kit/media_kit.dart';
 import 'package:meiyou/core/injection/injection.dart';
 import 'package:meiyou/core/router/router.dart';
 import 'package:meiyou/core/utils/extensions/context.dart';
@@ -8,6 +9,7 @@ import 'package:meiyou/shared/presentation/widgets/navigation_bar/navigation_bar
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  MediaKit.ensureInitialized();
   await initInjectionModules();
 
   runApp(const MyApp());

@@ -21,7 +21,7 @@ class MediaRepositoryImpl implements MediaRepository {
     return runAsyncCatching(() async {
       final networkMedia = params.media;
 
-      final local = getMediaByUrlAndSourceId(
+      final local = await getMediaByUrlAndSourceId(
         GetMediaByUrlAndSourceIdParams(
           category: networkMedia.category,
           sourceId: networkMedia.sourceId,
@@ -39,14 +39,14 @@ class MediaRepositoryImpl implements MediaRepository {
   }
 
   @override
-  Media? getMediaById(GetMediaByIdParams params) {
+  Future<Media?> getMediaById(GetMediaByIdParams params) {
     final category = params.category;
     final id = params.id;
 
     return _dataBase.mediaCollection(category).when(
-          video: (collection) => collection.getSync(id),
-          manga: (collection) => collection.getSync(id),
-          novel: (collection) => collection.getSync(id),
+          video: (collection) => collection.get(id),
+          manga: (collection) => collection.get(id),
+          novel: (collection) => collection.get(id),
         );
   }
 
@@ -59,7 +59,8 @@ class MediaRepositoryImpl implements MediaRepository {
   }
 
   @override
-  Media? getMediaByUrlAndSourceId(GetMediaByUrlAndSourceIdParams params) {
+  Future<Media?> getMediaByUrlAndSourceId(
+      GetMediaByUrlAndSourceIdParams params) {
     final category = params.category;
     final url = params.url;
     final sourceId = params.sourceId;
@@ -73,7 +74,7 @@ class MediaRepositoryImpl implements MediaRepository {
                 collection.filter().urlEqualTo(url).sourceIdEqualTo(sourceId),
             novel: (collection) =>
                 collection.filter().urlEqualTo(url).sourceIdEqualTo(sourceId))
-        .findFirstSync();
+        .findFirst();
   }
 
   @override
